@@ -121,7 +121,7 @@
             <form id="formRegister" onsubmit="handleRegister(event)" class="space-y-3 hidden">
                 <div class="space-y-0.5 text-left">
                     <h2 class="text-xs font-black text-white tracking-wide uppercase">Pendaftaran Akun Baru</h2>
-                    <p class="text-[10px] text-slate-400">Ketentuan sistem: Batas maksimal 1 IP = 1 Akun.</p>
+                    <p class="text-[10px] text-slate-400"></p>
                 </div>
 
                 <div class="space-y-2.5 pt-0.5">
@@ -166,7 +166,7 @@
 
         <!-- Footer Help & Copyright -->
         <div class="text-center space-y-1 pt-1">
-            <a href="https://wa.me/6281260512743?text=Halo%20Admin,%20saya%20butuh%20bantuan%20terkait%20akun%20ReyCloudSHP." target="_blank" class="text-[11px] text-cyan-400 hover:underline font-medium inline-flex items-center space-x-1.5">
+            <a href="https://wa.me/6281260512743?text=Halo%20Admin,%20saya%20butuh%20bantuan%20terkait%20akun%20GaBisalogin." target="_blank" class="text-[11px] text-cyan-400 hover:underline font-medium inline-flex items-center space-x-1.5">
                 <span>💬 Bantuan WhatsApp Admin</span>
             </a>
             <div class="text-[9px] font-semibold text-slate-500 tracking-wider">
@@ -293,7 +293,7 @@
 
                 if (data.status) {
                     showModalWithAction('Login Berhasil!', `Selamat datang kembali, ${data.user.username} (${data.user.role.toUpperCase()})`, 'success', () => {
-                        window.location.href = '/dashboard';
+                        window.location.href = `/dashboard?user=${encodeURIComponent(data.user.username)}`;
                     });
                 } else {
                     showModal('Login Gagal', data.message, 'error');

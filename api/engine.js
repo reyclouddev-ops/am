@@ -1415,9 +1415,9 @@ app.post('/api/auth/login', async (req, res) => {
         
         // 1. Cek apakah yang login adalah Creator/Admin Utama dari .env
         const creatorUsername = (process.env.CREATOR_USERNAME || '').toLowerCase();
-        const creatorPassword = process.env.CREATOR_PASSWORD || ''; // Sesuaikan password env kamu di sini
+        const creatorPassword = process.env.CREATOR_PASSWORD || '';
 
-        if (inputUser === creatorUsername) {
+        if (creatorUsername && inputUser === creatorUsername) {
             if (password !== creatorPassword) {
                 return res.status(401).json({ status: false, message: 'Password creator salah!' });
             }
@@ -1462,7 +1462,48 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
+// --- Endpoint Cek Sesi (Auth Check) ---
+app.get('/api/auth/session', async (req, res) => {
+    try {
+        const usernameQuery = req.query.username;
+        if (!usernameQuery) {
+            return res.status(401).json({ status: false, message: 'Belum login!' });
+        }
 
+        const inputUser = usernameQuery.toLowerCase();
+        const creatorUsername = (process.env.CREATOR_USERNAME || '').toLowerCase();
+
+        // Jika yang dicek adalah Creator dari .env
+        if (creatorUsername && inputUser === creatorUsername) {
+            return res.status(200).json({
+                status: true,
+                user: {
+                    username: creatorUsername,
+                    email: `${creatorUsername}@reycloudshp.my.id`,
+                    role: 'creator'
+                }
+            });
+        }
+
+        // Jika user biasa, cek ke MongoDB
+        await connectDB();
+        const user = await User.findOne({ username: inputUser });
+        if (!user) {
+            return res.status(404).json({ status: false, message: 'Sesi tidak valid / Akun tidak ditemukan!' });
+        }
+
+        return res.status(200).json({
+            status: true,
+            user: {
+                username: user.username,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (err) {
+        return res.status(500).json({ status: false, message: err.message });
+    }
+});
 
 // --- Endpoint Ganti Password ---
 app.post('/api/auth/change-password', async (req, res) => {
