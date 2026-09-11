@@ -1707,6 +1707,191 @@ app.all('/api/admin/list-users', async (req, res) => {
     }
 });
 
+const multer = require('multer');
+const upload = multer({ dest: os.tmpdir() });
+const AdmZip = require('adm-zip');
+
+const VERCEL_API_URL = 'https://api.vercel.com';
+
+function getVercelToken() {
+    return process.env.API_TOKEN || global.vercel?.token || '';
+}
+function readJsonSafe(file) {
+    try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; }
+}
+
+function detectFramework(siteDir) {
+    const indexPath = findFileRecursive(siteDir, "index.html");
+    const vercelPath = findFileRecursive(siteDir, "vercel.json");
+    const packagePath = findFileRecursive(siteDir, "package.json");
+
+    let html = "";
+    if (indexPath) {
+        try { html = fs.readFileSync(indexPath, "utf8").toLowerCase(); } catch {}
+    }
+
+    const vercelConfig = vercelPath ? readJsonSafe(vercelPath) : null;
+    const packageJson = packagePath ? readJsonSafe(packagePath) : null;
+    const dependencies = {
+        ...(packageJson?.dependencies || {}),
+        ...(packageJson?.devDependencies || {})
+    };
+
+    if (dependencies.next || html.includes("__next") || html.includes("_next/")) {
+        return { name: "Next.js", type: "node", vercel: "nextjs" };
+    }
+    if (dependencies.react || html.includes("react")) {
+        return { name: "React", type: "node", vercel: "create-react-app" };
+    }
+    if (dependencies.vue || html.includes("vue")) {
+        return { name: "Vue", type: "node", vercel: "vue" };
+    }
+    if (dependencies.svelte || html.includes("svelte")) {
+        return { name: "Svelte", type: "node", vercel: "svelte" };
+    }
+    if (dependencies["@angular/core"] || html.includes("ng-version")) {
+        return { name: "Angular", type: "node", vercel: "angular" };
+    }
+    if (dependencies.astro || String(vercelConfig?.buildCommand || "").toLowerCase().includes("astro")) {
+        return { name: "Astro", type: "node", vercel: "astro" };
+    }
+    if (dependencies.tailwindcss || html.includes("tailwind")) {
+        return { name: "HTML + Tailwind", type: "static", vercel: null };
+    }
+    if (indexPath) {
+        return { name: "HTML Static", type: "static", vercel: null };
+    }
+    if (packagePath) {
+        return { name: "Node.js", type: "node", vercel: null };
+    }
+    return { name: "Other", type: "static", vercel: null };
+}
+
+app.post('/api/deploy', upload.single('file'), async (req, res) => {
+    let workDir = null;
+    try {
+        const projectName = cleanProjectName(req.body.name);
+        
+        // 1. Validasi 3 Domain Resmi
+        const allowedDomains = ['legionteknologi.my.id', 'reycode.my.id', 'reycode.web.id'];
+        let selectedDomain = (req.body.domain || '').trim().toLowerCase();
+        if (!allowedDomains.includes(selectedDomain)) {
+            selectedDomain = 'reycode.my.id'; 
+        }
+
+        const uploadedFile = req.file;
+        if (!projectName || !uploadedFile) {
+            return res.status(400).json({ status: false, error: 'Nama project dan file wajib diisi!' });
+        }
+
+        const token = getVercelToken();
+        if (!token) return res.status(500).json({ status: false, error: 'Token Vercel belum dikonfigurasi di server.' });
+
+        workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rey-webdep-'));
+        const targetPath = path.join(workDir, uploadedFile.originalname);
+        fs.renameSync(uploadedFile.path, targetPath);
+
+        let siteDir = workDir;
+        const filename = uploadedFile.originalname.toLowerCase();
+
+        // 2. Ekstraksi file ZIP atau penanganan file HTML tunggal
+        if (filename.endsWith('.zip')) {
+            const extractDir = path.join(workDir, 'site');
+            fs.mkdirSync(extractDir, { recursive: true });
+            const zip = new AdmZip(targetPath);
+            zip.extractAllTo(extractDir, true);
+            
+            // Normalisasi struktur root direktori jika index.html berada di dalam subfolder
+            const indexPath = findFileRecursive(extractDir, "index.html");
+            if (indexPath) {
+                const indexDir = path.dirname(indexPath);
+                if (indexDir !== extractDir) {
+                    const normalizedRoot = path.join(workDir, "site-root");
+                    fs.mkdirSync(normalizedRoot, { recursive: true });
+                    fs.cpSync(indexDir, normalizedRoot, { recursive: true });
+                    siteDir = normalizedRoot;
+                } else {
+                    siteDir = extractDir;
+                }
+            } else {
+                siteDir = extractDir;
+            }
+        } else if (filename.endsWith('.html') || filename.endsWith('.htm')) {
+            const htmlDir = path.join(workDir, 'site');
+            fs.mkdirSync(htmlDir, { recursive: true });
+            fs.copyFileSync(targetPath, path.join(htmlDir, 'index.html'));
+            siteDir = htmlDir;
+        }
+
+        const files = collectFiles(siteDir);
+        if (!files.length) throw new Error('Tidak ada file ditemukan dalam arsip.');
+
+        // 3. Deteksi Framework Project secara Otomatis
+        const framework = detectFramework(siteDir);
+
+        const payloadFiles = files.map(file => ({
+            file: file.fileName,
+            data: fs.readFileSync(file.filePath).toString('base64'),
+            encoding: 'base64'
+        }));
+
+        // 4. Buat Project di Vercel
+        await axios.post(`${VERCEL_API_URL}/v9/projects`, { name: projectName }, {
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            validateStatus: () => true
+        });
+
+        // 5. Deploy File ke Vercel dengan Pengaturan Framework Terdeteksi
+        const deployPayload = {
+            name: projectName,
+            project: projectName,
+            files: payloadFiles
+        };
+
+        if (framework.vercel) {
+            deployPayload.projectSettings = { framework: framework.vercel };
+        }
+
+        const deployRes = await axios.post(`${VERCEL_API_URL}/v13/deployments`, deployPayload, {
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            maxContentLength: 50 * 1024 * 1024,
+            maxBodyLength: 50 * 1024 * 1024
+        });
+
+        const deploymentId = deployRes.data.id;
+        const vercelUrl = deployRes.data.url ? `https://${deployRes.data.url}` : `https://${projectName}.vercel.app`;
+        
+        // 6. Integrasi Custom Domain ke salah satu dari 3 Domain Pilihan
+        const customDomain = `${projectName}.${selectedDomain}`;
+
+        await axios.post(`${VERCEL_API_URL}/v10/projects/${encodeURIComponent(projectName)}/domains`, {
+            name: customDomain
+        }, {
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            validateStatus: () => true
+        });
+
+        return res.status(200).json({
+            status: true,
+            creator: CREATOR,
+            deploymentId,
+            framework: framework.name,
+            totalFiles: files.length,
+            vercelUrl,
+            customDomain,
+            domainUsed: selectedDomain
+        });
+
+    } catch (err) {
+        console.error('[WEB DEPLOY ERROR]', err.response?.data || err);
+        return res.status(500).json({ status: false, error: err.response?.data?.error?.message || err.message });
+    } finally {
+        if (workDir && fs.existsSync(workDir)) {
+            try { fs.rmSync(workDir, { recursive: true, force: true }); } catch {}
+        }
+    }
+});
+
 // Fallback 404
 app.use((req, res) => {
     res.status(404).json({ status: false, error: 'Endpoint API tidak ditemukan' });

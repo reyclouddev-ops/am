@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReyCloud - AI Tools, Enhancer & React</title>
+    <title>ReyCloud - AI Tools, Enhancer & Deployer</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body { background-color: #0d0f12; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
@@ -40,8 +40,8 @@
         </div>
 
         <div class="space-y-1 px-1">
-            <div class="text-[11px] text-slate-400">ReyCloud <span class="text-cyan-400 font-bold tracking-wide">AI TOOLS, ENHANCER, IMAGEN & REACT</span></div>
-            <p id="subTitleText" class="text-[11px] text-slate-400 leading-relaxed">Tingkatkan gambar, enhance video, hapus background, generate AI image, atau kirim WA reaction.</p>
+            <div class="text-[11px] text-slate-400">ReyCloud <span class="text-cyan-400 font-bold tracking-wide">AI TOOLS, ENHANCER, IMAGEN & DEPLOY</span></div>
+            <p id="subTitleText" class="text-[11px] text-slate-400 leading-relaxed">Tingkatkan gambar, enhance video, hapus background, generate AI image, atau deploy website instan.</p>
         </div>
 
         <!-- GRID 5 MENU -->
@@ -62,9 +62,9 @@
                 class="flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                 <span>🎨 Imagen</span>
             </button>
-            <button id="btnTabReact" onclick="switchToolTab('react')" 
+            <button id="btnTabDeploy" onclick="switchToolTab('deploy')" 
                 class="flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-                <span>⚡ React</span>
+                <span>🚀 Deploy</span>
             </button>
         </div>
 
@@ -197,7 +197,7 @@
             </div>
         </div>
 
-        <!-- TAB 4: IMAGEN (AI Image Generator) -->
+        <!-- TAB 4: IMAGEN (AI Image Generator / Editor) -->
         <div id="sectionImagen" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-4 hidden">
             <div class="flex items-start space-x-3.5">
                 <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-purple-400 shrink-0">
@@ -207,19 +207,35 @@
                 </div>
                 <div>
                     <h2 class="text-sm font-bold text-white tracking-tight">AI Image Generator (Imagen)</h2>
-                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Buat gambar kreatif dengan Flux AI, pilih style & rasio sesuai keinginan.</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Buat gambar kreatif dengan Flux AI atau edit gambar via NanoBanana.</p>
                 </div>
             </div>
 
             <div class="space-y-3">
+                <!-- PILIHAN MODE: GENERATE ATAU UPLOAD/EDIT -->
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">MODE IMAGEN</label>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button type="button" onclick="switchImagenMode('generate')" id="imagenModeGen" class="py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer">✨ Text to Image</button>
+                        <button type="button" onclick="switchImagenMode('edit')" id="imagenModeEdit" class="py-2 rounded-xl text-xs font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">🖼️ Image to Image</button>
+                    </div>
+                </div>
+
+                <!-- UPLOAD GAMBAR UNTUK MODE EDIT (NANO BANANA) -->
+                <div id="imagenEditBox" class="hidden space-y-2">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">UPLOAD GAMBAR REFERENSI</label>
+                    <input type="file" id="imagenFileInput" accept="image/*" 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3 py-2 text-xs text-slate-300 file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-500/10 file:text-purple-400 hover:file:bg-purple-500/20 cursor-pointer">
+                </div>
+
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PROMPT GAMBAR</label>
                     <textarea id="imagenPrompt" rows="2" placeholder="Contoh: a cute cat wearing cyberpunk sunglasses..." 
                         class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-colors resize-none"></textarea>
                 </div>
 
-                <!-- STYLE PILIHAN CUSTOM GRID -->
-                <div>
+                <!-- STYLE PILIHAN CUSTOM GRID (Hanya untuk mode Generate) -->
+                <div id="imagenStyleContainer">
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PILIH STYLE</label>
                     <div class="grid grid-cols-3 gap-1.5">
                         <button type="button" onclick="selectImagenStyle('Realistic')" id="styleBtn_Realistic" class="py-2 px-2 rounded-xl text-[10px] font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer">Realistic</button>
@@ -232,8 +248,8 @@
                     <input type="hidden" id="selectedImagenStyle" value="Realistic">
                 </div>
 
-                <!-- RATIO PILIHAN CUSTOM GRID -->
-                <div>
+                <!-- RATIO PILIHAN CUSTOM GRID (Hanya untuk mode Generate) -->
+                <div id="imagenRatioContainer">
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PILIH RASIO (RATIO)</label>
                     <div class="grid grid-cols-3 gap-1.5">
                         <button type="button" onclick="selectImagenRatio('1:1')" id="ratioBtn_1:1" class="py-2 px-1 rounded-xl text-[10px] font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer">1:1 Square</button>
@@ -247,19 +263,19 @@
 
                 <button onclick="processImagen()" id="btnProcessImagen"
                     class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl text-xs transition-all shadow cursor-pointer mt-2">
-                    Generate AI Image
+                    Generate / Edit AI Image
                 </button>
             </div>
 
             <div id="imagenLoading" class="hidden text-center py-4 space-y-2">
                 <div class="inline-block w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
-                <p class="text-[11px] text-purple-400 animate-pulse font-medium">Sedang merender gambar AI & Upload ke ImgBB...</p>
+                <p id="imagenLoadingText" class="text-[11px] text-purple-400 animate-pulse font-medium">Sedang merender gambar AI...</p>
             </div>
 
             <div id="imagenResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-purple-500/30 rounded-2xl p-3 text-center">
                 <div class="flex items-center justify-center space-x-1.5 text-purple-400 font-bold text-xs">
                     <span>🎨</span>
-                    <span>Generate Berhasil!</span>
+                    <span>Proses Berhasil!</span>
                 </div>
                 <img id="imagenResultImg" src="" alt="Imagen Result" class="w-full rounded-xl border border-[#232936] max-h-52 object-contain mx-auto">
                 <a id="imagenDownloadBtn" href="" target="_blank" class="inline-block w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl text-xs transition-all">
@@ -268,93 +284,100 @@
             </div>
         </div>
 
-        <!-- TAB 5: REACT (MAX 4 EMOJI LOCKED & CLEAN CARD) -->
-        <div id="sectionReact" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-5 hidden">
+        <!-- TAB 5: DEPLOY (WEB DEPLOYER SYSTEM DENGAN 3 DOMAIN & LIVE PREVIEW) -->
+        <div id="sectionDeploy" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-5 hidden">
             <div class="flex items-start space-x-3.5">
-                <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-emerald-400 shrink-0">
+                <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-amber-400 shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-sm font-bold text-white tracking-tight">WhatsApp Reaction Sender</h2>
-                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Kirim reaksi otomatis ke link/pesan WhatsApp target (Maksimal 4 Emoji).</p>
+                    <h2 class="text-sm font-bold text-white tracking-tight">ReyCloud Web Deployer</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Upload file ZIP atau HTML untuk deploy instan ke Vercel dengan pilihan domain.</p>
                 </div>
             </div>
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">URL TARGET WHATSAPP</label>
-                    <input type="text" id="waUrlInput" placeholder="https://whatsapp.com/channel/... atau link pesan" 
-                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">NAMA PROJECT (SUBDOMAIN)</label>
+                    <input type="text" id="deployProjectName" placeholder="Contoh: reyshop" oninput="updateDomainPreview()"
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 font-mono transition-colors">
                 </div>
 
-                <!-- PILIHAN CEPAT (PRESET EMOJI) -->
+                <!-- CUSTOM MODERN DOMAIN SELECTOR DENGAN .MY.ID -->
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PILIHAN CEPAT (PRESET)</label>
-                    <div class="grid grid-cols-4 gap-1.5">
-                        <button type="button" onclick="setPresetEmoji('😂')" class="py-2 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-xl text-xs text-slate-200 transition-all cursor-pointer font-medium">😂 Haha</button>
-                        <button type="button" onclick="setPresetEmoji('❤️')" class="py-2 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-xl text-xs text-slate-200 transition-all cursor-pointer font-medium">❤️ Love</button>
-                        <button type="button" onclick="setPresetEmoji('👍')" class="py-2 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-xl text-xs text-slate-200 transition-all cursor-pointer font-medium">👍 Jempol</button>
-                        <button type="button" onclick="setPresetEmoji('🔥')" class="py-2 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-xl text-xs text-slate-200 transition-all cursor-pointer font-medium">🔥 Api</button>
-                        <button type="button" onclick="setPresetEmoji('😂,❤️,👍,🔥')" class="py-2 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-xl text-xs text-emerald-400 transition-all cursor-pointer font-bold col-span-2">⚡ Combo All (4)</button>
-                        <button type="button" onclick="setPresetEmoji('🎉,✨')" class="py-2 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-xl text-xs text-slate-200 transition-all cursor-pointer font-medium col-span-2">🎉 Party Combo</button>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PILIH DOMAIN TUJUAN</label>
+                    <div class="grid grid-cols-1 gap-1.5">
+                        <button type="button" onclick="selectDeployDomain('reycode.my.id')" id="domainBtn_reycode.my.id" class="py-2.5 px-3 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/40 flex items-center justify-between transition-all cursor-local">
+                            <span class="font-mono">reycode.my.id</span>
+                            <span class="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-md">Primary</span>
+                        </button>
+                        <button type="button" onclick="selectDeployDomain('legionteknologi.my.id')" id="domainBtn_legionteknologi.my.id" class="py-2.5 px-3 rounded-xl text-xs font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-amber-500/40 flex items-center justify-between transition-all cursor-local">
+                            <span class="font-mono">legionteknologi.my.id</span>
+                            <span class="text-[10px] text-slate-500">Engine</span>
+                        </button>
+                        <button type="button" onclick="selectDeployDomain('reycode.web.id')" id="domainBtn_reycode.web.id" class="py-2.5 px-3 rounded-xl text-xs font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-amber-500/40 flex items-center justify-between transition-all cursor-local">
+                            <span class="font-mono">reycode.web.id</span>
+                            <span class="text-[10px] text-slate-500">Hosting</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="selectedDeployDomain" value="reycode.my.id">
+                    
+                    <!-- LIVE DOMAIN PREVIEW BOX -->
+                    <div class="mt-2 bg-[#0d0f12] border border-[#232936] rounded-xl px-3 py-2 flex items-center justify-between text-[11px]">
+                        <span class="text-slate-500">Live Preview:</span>
+                        <span id="liveDomainPreview" class="text-cyan-400 font-mono font-bold">https://yourproject.reycode.my.id</span>
                     </div>
                 </div>
 
-                <!-- CUSTOM EMOJI INPUT -->
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">CUSTOM EMOJI (Maksimal 4 Biji)</label>
-                    <div class="grid grid-cols-8 gap-1 mb-2">
-                        <button type="button" onclick="appendCustomEmoji('😂')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">😂</button>
-                        <button type="button" onclick="appendCustomEmoji('❤️')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">❤️</button>
-                        <button type="button" onclick="appendCustomEmoji('👍')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">👍</button>
-                        <button type="button" onclick="appendCustomEmoji('🔥')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">🔥</button>
-                        <button type="button" onclick="appendCustomEmoji('😭')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">😭</button>
-                        <button type="button" onclick="appendCustomEmoji('🎉')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">🎉</button>
-                        <button type="button" onclick="appendCustomEmoji('🙏')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">🙏</button>
-                        <button type="button" onclick="appendCustomEmoji('✨')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">✨</button>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PILIH FILE PROJECT (.ZIP / .HTML)</label>
+                    <div class="border-2 border-dashed border-[#232936] hover:border-amber-400/50 rounded-2xl p-5 text-center cursor-pointer transition-colors bg-[#0d0f12]" onclick="document.getElementById('deployFileInput').click()">
+                        <input type="file" id="deployFileInput" accept=".zip,.html,.htm" class="hidden" onchange="updateDeployFileName(this)">
+                        <div id="deployFileLabel" class="text-xs text-slate-400 space-y-1">
+                            <span class="text-xl block">📦</span>
+                            <strong class="text-white">Klik untuk pilih file</strong> atau seret ke sini
+                        </div>
                     </div>
-                    <input type="text" id="waEmojisInput" placeholder="Contoh: 😂,❤️" value="😂" readonly
-                        class="w-full bg-[#0d0f12] border border-emerald-500/50 rounded-xl px-4 py-3 text-xs text-emerald-400 font-bold text-center tracking-widest focus:outline-none">
                 </div>
 
-                <button onclick="processReact()" id="btnProcessReact"
-                    class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
-                    Kirim WhatsApp Reaction
+                <button onclick="processDeploy()" id="btnProcessDeploy"
+                    class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                    🚀 Mulai Deploy Sekarang
                 </button>
             </div>
 
-            <div id="reactLoading" class="hidden text-center py-6 space-y-3">
-                <div class="inline-block w-7 h-7 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
-                <p class="text-xs text-emerald-400 animate-pulse font-medium">Mengirim reaction ke target WhatsApp...</p>
+            <div id="deployLoading" class="hidden text-center py-4 space-y-2">
+                <div class="inline-block w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                <p id="deployLoadingText" class="text-[11px] text-amber-400 animate-pulse font-medium">Memulai proses deployment ke Vercel...</p>
             </div>
 
-            <!-- CLEAN RESULT CARD -->
-            <div id="reactResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-emerald-500/30 rounded-2xl p-4">
-                <div class="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
-                    <span>⚡</span>
-                    <span>WhatsApp Reaction Berhasil Terkirim!</span>
+            <!-- RESULT CARD -->
+            <div id="deployResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-amber-500/30 rounded-2xl p-4">
+                <div class="flex items-center space-x-2 text-amber-400 font-bold text-xs">
+                    <span>🎉</span>
+                    <span>Deployment Berhasil!</span>
                 </div>
                 <div class="bg-[#151922] border border-[#232936] rounded-xl p-3 space-y-2 text-xs font-mono">
                     <div class="flex justify-between border-b border-[#232936] pb-1.5">
-                        <span class="text-slate-400 font-sans">Status:</span>
-                        <span class="text-emerald-400 font-bold">SUCCESS</span>
+                        <span class="text-slate-400 font-sans">Framework:</span>
+                        <span id="resFramework" class="text-cyan-400 font-bold">Static</span>
                     </div>
                     <div class="flex justify-between border-b border-[#232936] pb-1.5">
-                        <span class="text-slate-400 font-sans">Emoji Terkirim:</span>
-                        <span id="resReactEmojis" class="text-amber-300 font-bold"></span>
+                        <span class="text-slate-400 font-sans">Vercel URL:</span>
+                        <a id="resVercelUrl" href="#" target="_blank" class="text-cyan-400 underline truncate max-w-[180px]"></a>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-slate-400 font-sans">Creator API:</span>
-                        <span id="resReactCreator" class="text-cyan-400">ReyCode</span>
+                        <span class="text-slate-400 font-sans">Custom Domain:</span>
+                        <a id="resCustomDomain" href="#" target="_blank" class="text-amber-400 underline font-bold truncate max-w-[180px]"></a>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="pt-2 text-center text-[11px] text-slate-400">
-            <span>ReyCloudSHP AI Tools Engine</span>
+            <span>ReyCloudSHP AI Tools & Deployer Engine</span>
         </div>
 
     </div>
@@ -388,32 +411,35 @@
             }, 3000);
         }
 
-        function appendCustomEmoji(emoji) {
-            const input = document.getElementById('waEmojisInput');
-            let currentVal = input.value.trim();
-            let list = currentVal ? currentVal.split(',').map(e => e.trim()).filter(Boolean) : [];
-            
-            const index = list.indexOf(emoji);
-            if (index > -1) {
-                list.splice(index, 1);
-            } else {
-                if (list.length >= 4) {
-                    showToast('Maksimal hanya dapat memilih 4 emoji!', 'warning');
-                    return;
-                }
-                list.push(emoji);
+        function updateDeployFileName(input) {
+            const label = document.getElementById('deployFileLabel');
+            if (input.files && input.files[0]) {
+                label.innerHTML = `<strong class="text-amber-400">File dipilih:</strong> ${input.files[0].name}`;
             }
-
-            input.value = list.length > 0 ? list.join(',') : '😂';
         }
 
-        function setPresetEmoji(emojis) {
-            const list = emojis.split(',').map(e => e.trim()).filter(Boolean);
-            if (list.length > 4) {
-                showToast('Pilihan preset melebihi batas maksimal 4 emoji!', 'warning');
-                return;
-            }
-            document.getElementById('waEmojisInput').value = emojis;
+        function selectDeployDomain(domain) {
+            document.getElementById('selectedDeployDomain').value = domain;
+            const domains = ['reycode.my.id', 'legionteknologi.my.id', 'reycode.web.id'];
+            
+            domains.forEach(d => {
+                const btn = document.getElementById(`domainBtn_${d}`);
+                if (btn) {
+                    if (d === domain) {
+                        btn.className = "py-2.5 px-3 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/40 flex items-center justify-between transition-all cursor-local";
+                    } else {
+                        btn.className = "py-2.5 px-3 rounded-xl text-xs font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-amber-500/40 flex items-center justify-between transition-all cursor-local";
+                    }
+                }
+            });
+            updateDomainPreview();
+        }
+
+        function updateDomainPreview() {
+            const nameInput = document.getElementById('deployProjectName').value.trim().toLowerCase() || 'yourproject';
+            const domain = document.getElementById('selectedDeployDomain').value;
+            const cleanName = nameInput.replace(/[^a-z0-9-]/g, '');
+            document.getElementById('liveDomainPreview').textContent = `https://${cleanName || 'yourproject'}.${domain}`;
         }
 
         function selectImagenStyle(style) {
@@ -442,25 +468,49 @@
             });
         }
 
+        function switchImagenMode(mode) {
+            const genBtn = document.getElementById('imagenModeGen');
+            const editBtn = document.getElementById('imagenModeEdit');
+            const editBox = document.getElementById('imagenEditBox');
+            const styleContainer = document.getElementById('imagenStyleContainer');
+            const ratioContainer = document.getElementById('imagenRatioContainer');
+
+            if (mode === 'edit') {
+                editBtn.className = "py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer";
+                genBtn.className = "py-2 rounded-xl text-xs font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer";
+                editBox.classList.remove('hidden');
+                styleContainer.classList.add('hidden');
+                ratioContainer.classList.add('hidden');
+                document.getElementById('imagenPrompt').placeholder = "Contoh: enhance image, change background to cyberpunk...";
+            } else {
+                genBtn.className = "py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer";
+                editBtn.className = "py-2 rounded-xl text-xs font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer";
+                editBox.classList.add('hidden');
+                styleContainer.classList.remove('hidden');
+                ratioContainer.classList.remove('hidden');
+                document.getElementById('imagenPrompt').placeholder = "Contoh: a cute cat wearing cyberpunk sunglasses...";
+            }
+        }
+
         function switchToolTab(tab) {
             const btnUpscale = document.getElementById('btnTabUpscale');
             const btnWink = document.getElementById('btnTabWink');
             const btnRemoveBg = document.getElementById('btnTabRemoveBg');
             const btnImagen = document.getElementById('btnTabImagen');
-            const btnReact = document.getElementById('btnTabReact');
+            const btnDeploy = document.getElementById('btnTabDeploy');
             
             const sectionUpscale = document.getElementById('sectionUpscale');
             const sectionWink = document.getElementById('sectionWink');
             const sectionRemoveBg = document.getElementById('sectionRemoveBg');
             const sectionImagen = document.getElementById('sectionImagen');
-            const sectionReact = document.getElementById('sectionReact');
+            const sectionDeploy = document.getElementById('sectionDeploy');
             const subTitleText = document.getElementById('subTitleText');
 
-            [btnUpscale, btnWink, btnRemoveBg, btnImagen, btnReact].forEach(b => {
+            [btnUpscale, btnWink, btnRemoveBg, btnImagen, btnDeploy].forEach(b => {
                 b.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
             });
 
-            [sectionUpscale, sectionWink, sectionRemoveBg, sectionImagen, sectionReact].forEach(s => {
+            [sectionUpscale, sectionWink, sectionRemoveBg, sectionImagen, sectionDeploy].forEach(s => {
                 s.classList.add('hidden');
             });
 
@@ -479,11 +529,11 @@
             } else if (tab === 'imagen') {
                 btnImagen.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
                 sectionImagen.classList.remove('hidden');
-                subTitleText.textContent = "Buat gambar kreatif dengan Flux AI, pilih style & rasio sesuai keinginan.";
-            } else if (tab === 'react') {
-                btnReact.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
-                sectionReact.classList.remove('hidden');
-                subTitleText.textContent = "Kirim reaksi otomatis ke link/pesan WhatsApp target (Maksimal 4 Emoji).";
+                subTitleText.textContent = "Buat gambar kreatif dengan Flux AI atau edit gambar via NanoBanana.";
+            } else if (tab === 'deploy') {
+                btnDeploy.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
+                sectionDeploy.classList.remove('hidden');
+                subTitleText.textContent = "Upload file ZIP atau HTML untuk deploy instan ke Vercel dengan pilihan domain.";
             }
         }
 
@@ -627,79 +677,141 @@
 
         async function processImagen() {
             const prompt = document.getElementById('imagenPrompt').value.trim();
-            const style = document.getElementById('selectedImagenStyle').value;
-            const ratio = document.getElementById('selectedImagenRatio').value;
+            const isEditMode = !document.getElementById('imagenEditBox').classList.contains('hidden');
             const btnProcess = document.getElementById('btnProcessImagen');
             const loading = document.getElementById('imagenLoading');
+            const loadingText = document.getElementById('imagenLoadingText');
             const resultBox = document.getElementById('imagenResultBox');
 
             if (!prompt) {
-                return showToast('Masukkan prompt gambar terlebih dahulu!', 'warning');
+                return showToast('Masukkan prompt terlebih dahulu!', 'warning');
             }
 
             btnProcess.classList.add('hidden');
             loading.classList.remove('hidden');
             resultBox.classList.add('hidden');
 
-            try {
-                const res = await fetch('/api/imagen', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt, style, ratio })
-                });
-                const json = await res.json();
-
-                if (!json.status || !json.result) {
-                    throw new Error(json.error || 'Gagal merender gambar AI.');
+            if (isEditMode) {
+                const fileInput = document.getElementById('imagenFileInput');
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    btnProcess.classList.remove('hidden');
+                    loading.classList.add('hidden');
+                    return showToast('Pilih gambar referensi untuk mode edit terlebih dahulu!', 'warning');
                 }
 
-                document.getElementById('imagenResultImg').src = json.result;
-                document.getElementById('imagenDownloadBtn').href = json.result;
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = async function () {
+                    try {
+                        loadingText.textContent = "Memproses edit gambar via NanoBanana AI...";
+                        const base64Image = reader.result;
+                        const res = await fetch('/api/nanobanana', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ base64Image, prompt })
+                        });
+                        const json = await res.json();
 
-                loading.classList.add('hidden');
-                btnProcess.classList.remove('hidden');
-                resultBox.classList.remove('hidden');
+                        if (!json.status || !json.result) {
+                            throw new Error(json.error || 'Gagal memproses edit gambar.');
+                        }
 
-            } catch (err) {
-                showToast('Error: ' + err.message, 'error');
-                loading.classList.add('hidden');
-                btnProcess.classList.remove('hidden');
+                        document.getElementById('imagenResultImg').src = json.result;
+                        document.getElementById('imagenDownloadBtn').href = json.result;
+
+                        loading.classList.add('hidden');
+                        btnProcess.classList.remove('hidden');
+                        resultBox.classList.remove('hidden');
+                        showToast('Edit gambar berhasil!', 'success');
+
+                    } catch (err) {
+                        showToast('Error: ' + err.message, 'error');
+                        loading.classList.add('hidden');
+                        btnProcess.classList.remove('hidden');
+                    }
+                };
+            } else {
+                const style = document.getElementById('selectedImagenStyle').value;
+                const ratio = document.getElementById('selectedImagenRatio').value;
+
+                try {
+                    loadingText.textContent = "Sedang merender gambar AI & Upload ke ImgBB...";
+                    const res = await fetch('/api/imagen', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt, style, ratio })
+                    });
+                    const json = await res.json();
+
+                    if (!json.status || !json.result) {
+                        throw new Error(json.error || 'Gagal merender gambar AI.');
+                    }
+
+                    document.getElementById('imagenResultImg').src = json.result;
+                    document.getElementById('imagenDownloadBtn').href = json.result;
+
+                    loading.classList.add('hidden');
+                    btnProcess.classList.remove('hidden');
+                    resultBox.classList.remove('hidden');
+                    showToast('Generate gambar berhasil!', 'success');
+
+                } catch (err) {
+                    showToast('Error: ' + err.message, 'error');
+                    loading.classList.add('hidden');
+                    btnProcess.classList.remove('hidden');
+                }
             }
         }
 
-        async function processReact() {
-            const waUrl = document.getElementById('waUrlInput').value.trim();
-            const emojis = document.getElementById('waEmojisInput').value.trim();
-            const btnProcess = document.getElementById('btnProcessReact');
-            const loading = document.getElementById('reactLoading');
-            const resultBox = document.getElementById('reactResultBox');
+        async function processDeploy() {
+            const name = document.getElementById('deployProjectName').value.trim();
+            const domain = document.getElementById('selectedDeployDomain').value;
+            const fileInput = document.getElementById('deployFileInput');
+            const btnProcess = document.getElementById('btnProcessDeploy');
+            const loading = document.getElementById('deployLoading');
+            const loadingText = document.getElementById('deployLoadingText');
+            const resultBox = document.getElementById('deployResultBox');
 
-            if (!waUrl) {
-                return showToast('Masukkan URL target WhatsApp terlebih dahulu!', 'warning');
+            if (!name) {
+                return showToast('Masukkan nama project terlebih dahulu!', 'warning');
             }
+            if (!fileInput.files || fileInput.files.length === 0) {
+                return showToast('Pilih file ZIP atau HTML terlebih dahulu!', 'warning');
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('domain', domain);
+            formData.append('file', file);
 
             btnProcess.classList.add('hidden');
             loading.classList.remove('hidden');
             resultBox.classList.add('hidden');
+            loadingText.textContent = "Mengunggah & mendeteksi framework project...";
 
             try {
-                const res = await fetch('/api/react', {
+                const res = await fetch('/api/deploy', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: waUrl, emojis: emojis, count: 1 })
+                    body: formData
                 });
                 const json = await res.json();
 
                 if (!json.status) {
-                    throw new Error(json.message || json.error || 'Gagal mengirim reaksi WhatsApp.');
+                    throw new Error(json.error || 'Gagal melakukan deployment.');
                 }
 
-                document.getElementById('resReactEmojis').textContent = emojis;
-                document.getElementById('resReactCreator').textContent = json.creator || 'ReyCode';
+                document.getElementById('resFramework').textContent = json.framework || 'Static';
+                document.getElementById('resVercelUrl').href = json.vercelUrl;
+                document.getElementById('resVercelUrl').textContent = json.vercelUrl;
+                document.getElementById('resCustomDomain').href = `https://${json.customDomain}`;
+                document.getElementById('resCustomDomain').textContent = `https://${json.customDomain}`;
 
                 loading.classList.add('hidden');
                 btnProcess.classList.remove('hidden');
                 resultBox.classList.remove('hidden');
+                showToast('Deployment berhasil!', 'success');
 
             } catch (err) {
                 showToast('Error: ' + err.message, 'error');
