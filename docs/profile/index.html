@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReyCloudSHP - Profil & Creator Control Panel</title>
+    <title>ReyCloudSHP - Profil & Control Panel</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         .glass-panel {
@@ -60,11 +60,11 @@
                 </div>
             </div>
 
-            <!-- STATUS API KEY BULK -->
-            <div class="pt-3 border-t border-[#232936] space-y-2 text-left">
-                <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest block">API Key Bulk Status</span>
+            <!-- STATUS API KEY BULK (Tampil untuk User Biasa) -->
+            <div id="userApiKeySection" class="pt-3 border-t border-[#232936] space-y-2 text-left">
+                <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest block">API Key & Masa Aktif Anda</span>
                 
-                <div class="bg-[#0d0f12] border border-[#232936] p-3.5 rounded-2xl space-y-2">
+                <div class="bg-[#0d0f12] border border-[#232936] p-3.5 rounded-2xl space-y-2.5">
                     <div class="flex items-center justify-between">
                         <span id="apiKeyStatusBadge" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/30">
                             No Active
@@ -78,6 +78,10 @@
                         <input type="text" id="apiKeyDisplay" readonly value="Belum berlangganan API Key Bulk" 
                             class="w-full bg-[#151922] border border-[#232936] rounded-xl px-3 py-2 text-xs text-slate-400 font-mono cursor-not-allowed select-all">
                     </div>
+
+                    <div id="keyDurationInfo" class="text-[10px] text-slate-400 font-mono hidden">
+                        ⏳ Berakhir pada: <span id="keyExpiredDate" class="text-amber-400 font-bold">-</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -87,8 +91,8 @@
             <div class="flex items-center space-x-2.5 border-b border-[#232936] pb-3">
                 <span class="text-xl">🛡️</span>
                 <div>
-                    <h3 class="text-xs font-black text-amber-400 tracking-wide uppercase">Creator Management Panel</h3>
-                    <p class="text-[10px] text-slate-400">Statistik sistem & generator API Key eksklusif.</p>
+                    <h3 class="text-xs font-black text-amber-400 tracking-wide uppercase">Creator Control Panel</h3>
+                    <p class="text-[10px] text-slate-400">Pilih user dari database & buat API Key / Premium.</p>
                 </div>
             </div>
 
@@ -96,7 +100,7 @@
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-[#0d0f12] border border-[#232936] rounded-2xl p-3.5 text-center space-y-1">
                     <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest block">Total User</span>
-                    <p id="statTotalUser" class="text-base font-black text-cyan-400 font-mono">1</p>
+                    <p id="statTotalUser" class="text-base font-black text-cyan-400 font-mono">...</p>
                 </div>
                 <div class="bg-[#0d0f12] border border-[#232936] rounded-2xl p-3.5 text-center space-y-1">
                     <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest block">Total API Key</span>
@@ -104,22 +108,39 @@
                 </div>
             </div>
 
-            <!-- Buat API Key Baru / Admin Key -->
+            <!-- Buat API Key / Pilih Username dari MongoDB -->
             <div class="space-y-2.5 pt-1">
-                <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Generator API Key Baru</label>
-                <div class="space-y-2">
-                    <input type="text" id="newKeyName" placeholder="Nama Pemilik / Client..." 
-                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 font-mono">
+                <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Generator API Key / Premium</label>
+                <div class="space-y-2.5">
                     
+                    <!-- Dropdown Pilihan Username dari Database -->
+                    <div class="space-y-1 text-left">
+                        <label class="block text-[8px] font-bold text-slate-400 uppercase">Pilih Username Terdaftar</label>
+                        <select id="selectTargetUser" class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-400 font-mono">
+                            <option value="">-- Pilih Username dari MongoDB --</option>
+                        </select>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-2">
-                        <select id="newKeyType" class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-400">
+                        <select id="newKeyType" class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3 py-2.5 text-xs text-slate-300 focus:outline-none focus:border-amber-400 font-mono">
                             <option value="user">User (30 Hari)</option>
                             <option value="admin">Master Admin (100 Tahun)</option>
                         </select>
-                        <button onclick="generateNewApiKey()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition-all shadow cursor-pointer">
+                        <button onclick="generateNewApiKey()" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs transition-all shadow-md shadow-amber-500/20 cursor-pointer">
                             ⚡ Buat Key
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- List API Key yang Telah Dibuat -->
+            <div class="space-y-2 pt-2 border-t border-[#232936]">
+                <div class="flex items-center justify-between">
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Daftar API Key Aktif</span>
+                    <button onclick="fetchCreatorStats()" class="text-[9px] text-amber-400 hover:underline">🔄 Refresh</button>
+                </div>
+                <div id="keyListContainer" class="max-h-40 overflow-y-auto space-y-1.5 pr-1 font-mono text-[10px]">
+                    <p class="text-slate-500 text-center py-2">Memuat daftar key...</p>
                 </div>
             </div>
         </div>
@@ -185,6 +206,8 @@
     </div>
 
     <script>
+        let loggedInUsername = '';
+
         function showModal(title, message, type = 'success') {
             const modal = document.getElementById('customModal');
             document.getElementById('modalTitle').textContent = title;
@@ -205,7 +228,7 @@
             document.getElementById('customModal').classList.add('hidden');
         }
 
-        // Verifikasi sesi langsung ke MongoDB / .env via Backend API (Tanpa LocalStorage)
+        // Verifikasi sesi langsung ke Backend API (MongoDB / .env)
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const usernameParam = urlParams.get('user');
@@ -214,6 +237,8 @@
                 window.location.href = '/index.html';
                 return;
             }
+
+            loggedInUsername = usernameParam;
 
             try {
                 const res = await fetch(`/api/auth/session?username=${encodeURIComponent(usernameParam)}`);
@@ -229,65 +254,148 @@
                 document.getElementById('profileEmail').textContent = user.email;
                 document.getElementById('changeUser').value = user.username;
 
-                // Set link dashboard agar tetap membawa parameter user yang aktif
                 document.getElementById('dashboardLink').href = `/dashboard?user=${encodeURIComponent(user.username)}`;
                 
                 const roleBadge = document.getElementById('profileRoleBadge');
                 roleBadge.textContent = user.role.toUpperCase();
                 
+                // Pembagian 2 Kubu: Creator vs User Biasa
                 if (user.role.toLowerCase() === 'creator' || user.role.toLowerCase() === 'admin') {
                     roleBadge.className = "inline-block px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30";
                     
-                    // Tampilkan Creator Panel & Ambil Statistik dari backend
+                    // Sembunyikan bagian API Key personal user, tampilkan Creator Panel
+                    document.getElementById('userApiKeySection').classList.add('hidden');
                     document.getElementById('creatorPanel').classList.remove('hidden');
+                    
                     fetchCreatorStats();
+                    loadMongodbUsersForDropdown();
                 } else {
                     roleBadge.className = "inline-block px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
+                    
+                    // Tampilkan status API key personal user biasa
+                    document.getElementById('creatorPanel').classList.add('hidden');
+                    document.getElementById('userApiKeySection').classList.remove('hidden');
+                    fetchUserApiKeyStatus(user.username);
                 }
-
-                // Status API Key Bulk (bisa disesuaikan jika user punya key tersimpan di DB)
-                const apiKeyDisplay = document.getElementById('apiKeyDisplay');
-                const apiKeyStatusBadge = document.getElementById('apiKeyStatusBadge');
-                const btnCopyKey = document.getElementById('btnCopyKey');
-
-                apiKeyDisplay.value = "Belum berlangganan API Key Bulk";
-                apiKeyStatusBadge.textContent = "NO ACTIVE";
-                apiKeyStatusBadge.className = "px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/30";
-                btnCopyKey.classList.add('hidden');
 
             } catch (err) {
                 window.location.href = '/index.html';
             }
         });
 
+        // Ambil daftar user dari MongoDB untuk opsi dropdown creator
+        async function loadMongodbUsersForDropdown() {
+            try {
+                const res = await fetch(`/api/admin/list-users`, {
+                    headers: { 'x-username': loggedInUsername }
+                });
+                const data = await res.json();
+                const selectEl = document.getElementById('selectTargetUser');
+                selectEl.innerHTML = '<option value="">-- Pilih Username dari MongoDB --</option>';
+                
+                if (data.status && Array.isArray(data.users)) {
+                    document.getElementById('statTotalUser').textContent = data.users.length;
+                    data.users.forEach(u => {
+                        const opt = document.createElement('option');
+                        opt.value = u.username;
+                        opt.textContent = `${u.username} (${u.email})`;
+                        selectEl.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.error('Gagal memuat user MongoDB:', err);
+            }
+        }
+
+        // Ambil statistik dan list API Key untuk creator
         async function fetchCreatorStats() {
             try {
-                const resKeys = await fetch('/api/admin/list-keys');
+                const resKeys = await fetch('/api/admin/list-keys', {
+                    headers: { 'x-username': loggedInUsername }
+                });
                 const dataKeys = await resKeys.json();
+                const container = document.getElementById('keyListContainer');
+                
                 if (dataKeys.status) {
                     document.getElementById('statTotalApiKey').textContent = dataKeys.total;
+                    if (dataKeys.keys.length > 0) {
+                        container.innerHTML = '';
+                        dataKeys.keys.forEach(k => {
+                            const expiredStr = new Date(k.expired_at).toLocaleDateString('id-ID');
+                            const div = document.createElement('div');
+                            div.className = "bg-[#0d0f12] border border-[#232936] p-2 rounded-xl flex items-center justify-between";
+                            div.innerHTML = `
+                                <div>
+                                    <span class="text-amber-400 font-bold">${k.apikey}</span>
+                                    <div class="text-[9px] text-slate-400">Owner: ${k.owner} | Exp: ${expiredStr}</div>
+                                </div>
+                                <span class="px-1.5 py-0.5 rounded text-[8px] uppercase font-bold ${k.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400'}">${k.status}</span>
+                            `;
+                            container.appendChild(div);
+                        });
+                    } else {
+                        container.innerHTML = '<p class="text-slate-500 text-center py-2">Belum ada API Key dibuat.</p>';
+                    }
                 }
             } catch (err) {
                 console.error('Gagal mengambil statistik:', err);
             }
         }
 
+        // Cek status API Key untuk User Biasa
+        async function fetchUserApiKeyStatus(username) {
+            try {
+                const res = await fetch(`/api/admin/list-keys`, {
+                    headers: { 'x-username': loggedInUsername }
+                });
+                const data = await res.json();
+                const apiKeyDisplay = document.getElementById('apiKeyDisplay');
+                const apiKeyStatusBadge = document.getElementById('apiKeyStatusBadge');
+                const btnCopyKey = document.getElementById('btnCopyKey');
+                const keyDurationInfo = document.getElementById('keyDurationInfo');
+                const keyExpiredDate = document.getElementById('keyExpiredDate');
+
+                if (data.status && Array.isArray(data.keys)) {
+                    // Cari key yang dimiliki oleh username user tersebut
+                    const myKey = data.keys.find(k => k.owner.toLowerCase() === username.toLowerCase() && k.status === 'active');
+                    
+                    if (myKey) {
+                        apiKeyDisplay.value = myKey.apikey;
+                        apiKeyDisplay.className = "w-full bg-[#151922] border border-amber-500/30 rounded-xl px-3 py-2 text-xs text-amber-400 font-mono select-all font-bold";
+                        apiKeyStatusBadge.textContent = "ACTIVE";
+                        apiKeyStatusBadge.className = "px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+                        btnCopyKey.classList.remove('hidden');
+                        
+                        keyDurationInfo.classList.remove('hidden');
+                        keyExpiredDate.textContent = new Date(myKey.expired_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                    }
+                }
+            } catch (err) {
+                console.error('Gagal memuat status key user:', err);
+            }
+        }
+
+        // Creator membuat API key baru berdasarkan pilihan dropdown username MongoDB
         async function generateNewApiKey() {
-            const name = document.getElementById('newKeyName').value.trim();
+            const selectEl = document.getElementById('selectTargetUser');
+            const selectedUsername = selectEl.value;
             const type = document.getElementById('newKeyType').value;
 
-            if (!name) return showModal('Peringatan', 'Masukkan nama pemilik API Key terlebih dahulu!', 'error');
+            if (!selectedUsername) return showModal('Peringatan', 'Silakan pilih username dari database MongoDB terlebih dahulu!', 'error');
 
             try {
                 const res = await fetch('/api/admin/create-key', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: name, type: type })
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'x-username': loggedInUsername
+                    },
+                    body: JSON.stringify({ name: selectedUsername, type: type })
                 });
                 const data = await res.json();
                 if (data.status) {
-                    showModal('Berhasil!', `API Key ${type.toUpperCase()} berhasil dibuat: ${data.data.apikey}`, 'success');
-                    document.getElementById('newKeyName').value = '';
+                    showModal('Berhasil!', `API Key ${type.toUpperCase()} untuk [${selectedUsername}] berhasil dibuat: ${data.data.apikey}`, 'success');
+                    selectEl.value = '';
                     fetchCreatorStats();
                 } else {
                     showModal('Gagal', data.error || data.message, 'error');

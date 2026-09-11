@@ -1017,21 +1017,6 @@ async function generateFreeFireGuest() {
     };
 }
 
-
-// ==========================================
-// 5. ADMIN & USER VERIFICATION HELPERS
-// ==========================================
-function verifyAdmin(req) {
-    const body = req.method === 'GET' ? req.query : (req.body || {});
-    const adminToken = req.headers['x-admin-token'] || body.admintoken;
-    const ADMIN_SECRET = process.env.ADMIN_GENERATOR_PASSWORD || '';
-    if (!adminToken || adminToken !== ADMIN_SECRET) {
-        return { authorized: false, response: { status: false, creator: CREATOR, error: 'Akses ditolak! Token atau password admin tidak valid.' } };
-    }
-    return { authorized: true };
-}
-
-
 // ==========================================
 // 6. EXPRESS ROUTER & API ENDPOINT MAPPING
 // ==========================================
@@ -1537,9 +1522,47 @@ app.post('/api/auth/change-password', async (req, res) => {
     }
 });
 
+// ==========================================
+// 5. ADMIN & USER VERIFICATION HELPERS
+// ==========================================
+async function verifyAdmin(req) {
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    const adminToken = req.headers['x-admin-token'] || body.admintoken;
+    const usernameQuery = req.headers['x-username'] || body.username;
+    const ADMIN_SECRET = process.env.ADMIN_GENERATOR_PASSWORD || '';
+    const creatorUsername = (process.env.CREATOR_USERNAME || '').toLowerCase();
+
+    // 1. Cek apakah yang merequest adalah Creator Utama dari .env
+    if (usernameQuery && usernameQuery.toLowerCase() === creatorUsername) {
+        return { authorized: true };
+    }
+
+    // 2. Jika ada username, cek role-nya di database MongoDB
+    if (usernameQuery) {
+        try {
+            await connectDB();
+            const user = await User.findOne({ username: usernameQuery.toLowerCase() });
+            if (user && user.role === 'creator') {
+                return { authorized: true };
+            }
+        } catch {}
+    }
+
+    // 3. Fallback jika tidak lolos role creator, wajib pakai adminToken/password .env
+    if (!adminToken || adminToken !== ADMIN_SECRET) {
+        return { authorized: false, response: { status: false, creator: CREATOR, error: 'Akses ditolak! Token atau password admin tidak valid.' } };
+    }
+    return { authorized: true };
+}
+
+
+// ==========================================
+// 6. EXPRESS ROUTER & API ENDPOINT MAPPING
+// ==========================================
+
 // --- Endpoint Admin Key Manager ---
 app.all('/api/admin/create-key', async (req, res) => {
-    const auth = verifyAdmin(req, res);
+    const auth = await verifyAdmin(req);
     if (!auth.authorized) return res.status(403).json(auth.response);
 
     const body = req.method === 'GET' ? req.query : (req.body || {});
@@ -1577,7 +1600,7 @@ app.all('/api/admin/create-key', async (req, res) => {
 });
 
 app.all('/api/admin/list-keys', async (req, res) => {
-    const auth = verifyAdmin(req);
+    const auth = await verifyAdmin(req);
     if (!auth.authorized) return res.status(403).json(auth.response);
 
     try {
@@ -1589,18 +1612,15 @@ app.all('/api/admin/list-keys', async (req, res) => {
     }
 });
 
-app.all('/api/apikey/check', async (req, res) => {
-    const body = req.method === 'GET' ? req.query : (req.body || {});
-    const inputKey = req.headers['x-apikey'] || body.apikey;
-    if (!inputKey) return res.status(400).json({ status: false, creator: CREATOR, error: 'Silakan masukkan API Key Anda.' });
-
+app.all('/api/admin/list-users', async (req, res) => {
+    const auth = await verifyAdmin(req);
+    if (!auth.authorized) return res.status(403).json(auth.response);
     try {
         await connectDB();
-        const keyData = await ApiKey.findOne({ apikey: inputKey });
-        if (!keyData) return res.status(404).json({ status: false, creator: CREATOR, error: 'API Key tidak ditemukan!' });
-        return res.status(200).json({ status: true, creator: CREATOR, data: keyData });
+        const users = await User.find({}, 'username email role created_at').sort({ created_at: -1 });
+        return res.status(200).json({ status: true, total: users.length, users });
     } catch (err) {
-        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+        return res.status(500).json({ status: false, error: err.message });
     }
 });
 
