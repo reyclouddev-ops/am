@@ -183,7 +183,7 @@
 
         </div>
 
-        <!-- SECTION: AM BULK (CUSTOM JUMLAH & DOWNLOAD .TXT) -->
+        <!-- SECTION: AM BULK (CUSTOM JUMLAH & DOWNLOAD .TXT) DENGAN SISTEM KUNCI PREMIUM -->
         <div id="sectionBulk" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-4 hidden">
             <div class="flex items-start space-x-3.5">
                 <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
@@ -191,17 +191,27 @@
                 </div>
                 <div>
                     <h2 class="text-sm font-bold text-white tracking-tight">AM Bulk Activation Engine</h2>
-                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Masukkan API Key berbayar kamu (format <code class="text-purple-300">reycoder_XXXXXX</code>) dan tentukan jumlah akun Pro yang ingin dibuat.</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Masukkan API Key berbayar kamu (format <code class="text-purple-300">reycoder_XXXXXX</code>) untuk membuka akses fitur Bulk.</p>
                 </div>
             </div>
 
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">API KEY BULK ANDA</label>
-                    <input type="text" id="bulkApiKeyInput" placeholder="reycoder_XXXXXX" 
-                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-400 transition-colors font-mono">
+            <!-- INPUT API KEY & CEK STATUS -->
+            <div class="space-y-3 bg-[#0d0f12] border border-[#232936] rounded-2xl p-4">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">VERIFIKASI API KEY BULK</label>
+                <div class="flex space-x-2">
+                    <input type="text" id="bulkApiKeyInput" placeholder="reycoder_XXXXXX" oninput="checkApiKeyLive()"
+                        class="w-full bg-[#151922] border border-[#232936] rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-400 font-mono">
+                    <button onclick="verifyApiKeyBtn()" class="bg-[#212838] hover:bg-[#2b3344] text-purple-300 border border-purple-500/30 font-bold px-4 py-2.5 rounded-xl text-xs transition-all shrink-0 cursor-pointer">
+                        Cek Key 🔍
+                    </button>
                 </div>
+                <div id="keyStatusNotice" class="text-[11px] font-medium text-amber-400 flex items-center space-x-1.5 pt-1">
+                    <span>⚠️</span><span>Fitur terkunci. Masukkan API Key aktif untuk membuka akses.</span>
+                </div>
+            </div>
 
+            <!-- KONTROL GENERATOR (TERKUNCI SECARA DEFAULT) -->
+            <div id="bulkControlPanel" class="space-y-3 opacity-40 pointer-events-none transition-all duration-300">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">JUMLAH AKUN (MAKSIMAL 10)</label>
                     <input type="number" id="bulkCountInput" value="10" min="1" max="10" 
@@ -211,6 +221,19 @@
                 <button onclick="runBulkActivation()" id="btnBulkRun"
                     class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
                     📦 Generate Akun Pro Sekarang
+                </button>
+            </div>
+
+            <!-- TAMPILAN JIKA BELUM PREMIUM / TERKUNCI -->
+            <div id="bulkLockedMessage" class="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4 text-center space-y-3">
+                <div class="text-xl">🔒</div>
+                <div class="space-y-1">
+                    <h3 class="text-xs font-black text-rose-400 uppercase tracking-wider">Fitur Bulk Terkunci</h3>
+                    <p class="text-[11px] text-slate-300">Anda memerlukan API Key Bulk aktif untuk menggunakan fitur generator massal ini.</p>
+                </div>
+                <button onclick="showQrisModal('Akses Bulk memerlukan API Key Pro aktif. Silakan lakukan pembayaran QRIS untuk mendapatkan akses instan.')" 
+                    class="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-black py-3 rounded-xl text-xs transition-all shadow-lg cursor-pointer">
+                    💎 Upgrade & Beli API Key Bulk (Rp 5.000)
                 </button>
             </div>
 
@@ -240,7 +263,7 @@
 
     </div>
 
-    <!-- MODAL POPUP QRIS (TERHUBUNG KE api/qris.js) -->
+    <!-- MODAL POPUP QRIS -->
     <div id="qrisModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-[#151922] border border-[#232936] rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl relative">
             <div class="flex items-center justify-between border-b border-[#232936] pb-3">
@@ -256,14 +279,16 @@
                 <p class="text-[11px] text-slate-400">Silakan scan QRIS di bawah ini untuk berlangganan sebesar <b class="text-white">Rp 5.000/bulan</b>:</p>
                 
                 <div class="bg-white p-3 rounded-xl inline-block shadow-inner">
-                    <!-- Gambar QRIS otomatis memanggil endpoint api/qris.js -->
                     <img id="qrisImage" src="" alt="QRIS Payment" class="w-48 h-48 mx-auto object-contain rounded-lg">
                 </div>
                 
                 <div class="text-[10px] text-slate-400 font-mono">Jika Qris Ga Muncul Silahkan Pakai Jalur Donasi</div>
             </div>
 
-            <div class="pt-2">
+            <div class="pt-2 space-y-2">
+                <a href="https://mustikapayment.com/l/apikey-bulk" target="_blank" class="block bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl text-xs text-center transition-all shadow">
+                    🔗 Buka Link Pembayaran Resmi Mustika
+                </a>
                 <a href="https://wa.me/6281260512743?text=Halo%20Admin,%20saya%20sudah%20melakukan%20pembayaran%20untuk%20pembelian%20API%20Key%20Bulk.%20Berikut%20saya%20lampirkan%20bukti%20pembayarannya.%20Mohon%20bantuannya,%20terima%20kasih." 
                    target="_blank" 
                    style="display: block; background-color: #25d366; color: white; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 12px; text-align: center; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);">
@@ -305,33 +330,77 @@
             }
         }
 
-               // Fungsi Show Modal QRIS dengan Fetch /api/qris
         async function showQrisModal(errorMessage) {
             document.getElementById('qrisErrorMsg').textContent = errorMessage || 'API Key Anda tidak valid atau belum aktif.';
-            
             const qrisImg = document.getElementById('qrisImage');
             qrisImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="12" fill="%2364748b">Memuat QRIS...</text></svg>';
-            
             document.getElementById('qrisModal').classList.remove('hidden');
 
             try {
                 const res = await fetch('/api/qris');
                 const data = await res.json();
-                
                 if (data.status) {
                     const imageUrl = data.result?.qris_url || data.qris_url || data.result || data.image || data.url || data.qr_image;
-                    if (imageUrl) {
-                        qrisImg.src = imageUrl;
-                    }
+                    if (imageUrl) qrisImg.src = imageUrl;
                 }
             } catch (err) {
                 console.error('Gagal mengambil data QRIS:', err);
             }
         }
 
-
         function closeQrisModal() {
             document.getElementById('qrisModal').classList.add('hidden');
+        }
+
+        // --- Cek Status API Key Secara Real-time ---
+        async function checkApiKeyLive() {
+            const apikey = document.getElementById('bulkApiKeyInput').value.trim();
+            const statusNotice = document.getElementById('keyStatusNotice');
+            const controlPanel = document.getElementById('bulkControlPanel');
+            const lockedMsg = document.getElementById('bulkLockedMessage');
+
+            if (!apikey) {
+                statusNotice.innerHTML = '<span>⚠️</span><span>Fitur terkunci. Masukkan API Key aktif untuk membuka akses.</span>';
+                statusNotice.className = 'text-[11px] font-medium text-amber-400 flex items-center space-x-1.5 pt-1';
+                controlPanel.classList.add('opacity-40', 'pointer-events-none');
+                lockedMsg.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/apikey/check?apikey=${encodeURIComponent(apikey)}`);
+                const data = await res.json();
+
+                if (data.status && data.data?.status === 'active') {
+                    statusNotice.innerHTML = `<span>🎉</span><span class="text-emerald-400">API Key Aktif! Owner: <b>${data.data.owner}</b> (Sisa: ${data.data.remaining_days})</span>`;
+                    statusNotice.className = 'text-[11px] font-medium text-emerald-400 flex items-center space-x-1.5 pt-1';
+                    
+                    // Buka kunci fitur bulk
+                    controlPanel.classList.remove('opacity-40', 'pointer-events-none');
+                    lockedMsg.classList.add('hidden');
+                } else {
+                    statusNotice.innerHTML = `<span>❌</span><span class="text-rose-400">API Key tidak valid atau sudah kadaluarsa.</span>`;
+                    statusNotice.className = 'text-[11px] font-medium text-rose-400 flex items-center space-x-1.5 pt-1';
+                    
+                    controlPanel.classList.add('opacity-40', 'pointer-events-none');
+                    lockedMsg.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function verifyApiKeyBtn() {
+            const apikey = document.getElementById('bulkApiKeyInput').value.trim();
+            if (!apikey) {
+                showQrisModal('Silakan masukkan API Key Bulk Anda terlebih dahulu.');
+                return;
+            }
+            await checkApiKeyLive();
+            const controlPanel = document.getElementById('bulkControlPanel');
+            if (controlPanel.classList.contains('pointer-events-none')) {
+                showQrisModal('API Key yang Anda masukkan tidak aktif atau kedaluarsa.');
+            }
         }
 
         async function sendLink() {
@@ -446,12 +515,11 @@
             }
         }
 
-                  async function runBulkActivation() {
+        async function runBulkActivation() {
             const apikey = document.getElementById('bulkApiKeyInput').value.trim();
 
-            // Jika user tidak mengisi API Key, langsung arahkan ke link pembayaran Mustika Payment
             if (!apikey) {
-                window.open('https://mustikapayment.com/l/apikey-bulk', '_blank');
+                showQrisModal('Masukkan API Key Bulk yang valid untuk menjalankan generator.');
                 return;
             }
 
@@ -511,8 +579,7 @@
                         bulkResultsList.appendChild(itemDiv);
                     });
                 } else {
-                    // Jika API Key salah atau kadaluarsa, langsung arahkan juga ke link pembayaran
-                    window.open('https://mustikapayment.com/l/apikey-bulk', '_blank');
+                    showQrisModal(data.error || 'API Key Bulk tidak valid atau sudah kadaluarsa.');
                 }
             } catch (err) {
                 alert('Kesalahan koneksi: ' + err.message);
@@ -522,8 +589,6 @@
                 bulkLoading.classList.add('hidden');
             }
         }
-
-
 
         function downloadBulkResults() {
             const resultsList = document.querySelectorAll('#bulkResultsList > div');

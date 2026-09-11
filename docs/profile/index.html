@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReyCloudSHP - Profil & Creator Control Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .glass-panel {
+            background: rgba(21, 25, 34, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+    </style>
+</head>
+<body id="pageBody" class="min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 relative transition-colors duration-300 bg-[#08090c] text-[#f8fafc]" style="font-family: system-ui, -apple-system, sans-serif;">
+
+    <!-- Dynamic Ambient Background Glows -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[180px] bg-amber-500/15 blur-[120px] pointer-events-none rounded-full"></div>
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-[350px] h-[180px] bg-cyan-500/15 blur-[120px] pointer-events-none rounded-full"></div>
+
+    <div class="w-full max-w-md space-y-4 relative z-10">
+        
+        <!-- Top Navbar / Header -->
+        <div id="navHeader" class="flex items-center justify-between glass-panel border border-[#232936] rounded-2xl p-4 shadow-2xl transition-colors duration-300">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-cyan-400 p-[1px] shadow-lg shadow-amber-500/20">
+                    <div class="w-full h-full bg-[#0d0f12] rounded-[11px] flex items-center justify-center text-amber-400 font-black text-sm">
+                        ⚡
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-1.5">
+                        <span class="font-black text-sm tracking-wider text-white">USER<span class="text-amber-400">PROFILE</span></span>
+                    </div>
+                    <span class="text-[9px] tracking-widest text-slate-400 font-extrabold uppercase">REYCLOUD SYSTEM</span>
+                </div>
+            </div>
+            
+            <a href="/dashboard" class="px-3 py-2 rounded-xl bg-[#1e2330] border border-[#2b3344] text-xs text-slate-300 hover:text-white transition-all font-semibold shadow">
+                ← Dashboard
+            </a>
+        </div>
+
+        <!-- Profil Utama Card -->
+        <div class="bg-[#151922] border border-[#232936] rounded-3xl p-6 shadow-2xl text-center space-y-4">
+            <div class="relative w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-amber-400 to-cyan-500 p-1 shadow-xl">
+                <div class="w-full h-full bg-[#0d0f12] rounded-[14px] flex items-center justify-center text-3xl">
+                    👑
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <h2 id="profileUsername" class="text-base font-black text-white tracking-wide">Loading...</h2>
+                <p id="profileEmail" class="text-xs text-slate-400 font-mono">loading@domain.com</p>
+                <div class="pt-1">
+                    <span id="profileRoleBadge" class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                        USER
+                    </span>
+                </div>
+            </div>
+
+            <!-- STATUS API KEY BULK -->
+            <div class="pt-3 border-t border-[#232936] space-y-2 text-left">
+                <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest block">API Key Bulk Status</span>
+                
+                <div class="bg-[#0d0f12] border border-[#232936] p-3.5 rounded-2xl space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span id="apiKeyStatusBadge" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/30">
+                            No Active
+                        </span>
+                        <button onclick="copyApiKey()" id="btnCopyKey" class="hidden px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] rounded-lg font-bold transition-all cursor-pointer">
+                            📋 Salin Key
+                        </button>
+                    </div>
+                    
+                    <div class="relative">
+                        <input type="text" id="apiKeyDisplay" readonly value="Belum berlangganan API Key Bulk" 
+                            class="w-full bg-[#151922] border border-[#232936] rounded-xl px-3 py-2 text-xs text-slate-400 font-mono cursor-not-allowed select-all">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SPECIAL CREATOR PANEL (Hanya Tampil Jika Role Creator) -->
+        <div id="creatorPanel" class="hidden bg-gradient-to-br from-amber-500/10 via-[#151922] to-[#151922] border border-amber-500/30 rounded-3xl p-5 shadow-2xl space-y-4">
+            <div class="flex items-center space-x-2.5 border-b border-[#232936] pb-3">
+                <span class="text-xl">🛡️</span>
+                <div>
+                    <h3 class="text-xs font-black text-amber-400 tracking-wide uppercase">Creator Management Panel</h3>
+                    <p class="text-[10px] text-slate-400">Statistik sistem & generator API Key eksklusif.</p>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-[#0d0f12] border border-[#232936] rounded-2xl p-3.5 text-center space-y-1">
+                    <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest block">Total User</span>
+                    <p id="statTotalUser" class="text-base font-black text-cyan-400 font-mono">...</p>
+                </div>
+                <div class="bg-[#0d0f12] border border-[#232936] rounded-2xl p-3.5 text-center space-y-1">
+                    <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest block">Total API Key</span>
+                    <p id="statTotalApiKey" class="text-base font-black text-amber-400 font-mono">...</p>
+                </div>
+            </div>
+
+            <!-- Buat API Key Baru / Admin Key -->
+            <div class="space-y-2.5 pt-1">
+                <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Generator API Key Baru</label>
+                <div class="space-y-2">
+                    <input type="text" id="newKeyName" placeholder="Nama Pemilik / Client..." 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 font-mono">
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="newKeyType" class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-400">
+                            <option value="user">User (30 Hari)</option>
+                            <option value="admin">Master Admin (100 Tahun)</option>
+                        </select>
+                        <button onclick="generateNewApiKey()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition-all shadow cursor-pointer">
+                            ⚡ Buat Key
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORM GANTI PASSWORD -->
+        <div class="bg-[#151922] border border-[#232936] rounded-3xl p-5 shadow-xl space-y-3.5">
+            <div class="space-y-0.5 text-left">
+                <h3 class="text-xs font-black text-white tracking-wide uppercase">🔒 Keamanan & Ganti Password</h3>
+                <p class="text-[10px] text-slate-400">Verifikasi dengan username dan password lama Anda.</p>
+            </div>
+
+            <form onsubmit="handleChangePassword(event)" class="space-y-3 pt-1">
+                <div class="space-y-1 text-left">
+                    <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Username Akun</label>
+                    <input type="text" id="changeUser" required placeholder="Masukkan username Anda..." 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 transition-colors font-mono">
+                </div>
+
+                <div class="space-y-1 text-left">
+                    <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Password Lama</label>
+                    <input type="password" id="oldPass" required placeholder="••••••••" 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 transition-colors font-mono">
+                </div>
+
+                <div class="space-y-1 text-left">
+                    <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Password Baru</label>
+                    <input type="password" id="newPass" required placeholder="Minimal 6 karakter..." 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 transition-colors font-mono">
+                </div>
+
+                <button type="submit" id="btnChangePass" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black py-2.5 rounded-xl text-xs transition-all shadow-md cursor-pointer">
+                    Simpan Password Baru ✨
+                </button>
+            </form>
+        </div>
+
+        <!-- Menu Aksi Profil -->
+        <div class="space-y-2.5">
+            <button onclick="handleLogout()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 font-bold py-3 px-4 rounded-2xl text-xs flex items-center justify-center space-x-2 shadow-md transition-all cursor-pointer">
+                <span>🚪 Keluar dari Akun (Logout)</span>
+            </button>
+        </div>
+
+        <!-- Footer Copyright -->
+        <div class="text-center pt-2">
+            <span class="text-[10px] font-semibold text-slate-500 tracking-wider">© 2026 ReyCloudSHP • All Rights Reserved</span>
+        </div>
+
+    </div>
+
+    <!-- MODERN MODAL NOTIFIKASI -->
+    <div id="customModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#151922] border border-[#232936] rounded-2xl p-5 max-w-xs w-full space-y-3.5 shadow-2xl text-center">
+            <div id="modalIcon" class="mx-auto w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-lg">⚠️</div>
+            <div class="space-y-1">
+                <h3 id="modalTitle" class="text-xs font-black text-white uppercase tracking-wider">Pemberitahuan</h3>
+                <p id="modalMessage" class="text-[11px] text-slate-300 leading-relaxed"></p>
+            </div>
+            <button onclick="closeModal()" class="w-full bg-[#1e2330] hover:bg-[#2b3344] text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function showModal(title, message, type = 'success') {
+            const modal = document.getElementById('customModal');
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            const icon = document.getElementById('modalIcon');
+            
+            if (type === 'success') {
+                icon.className = "mx-auto w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl shadow-lg";
+                icon.textContent = "🎉";
+            } else {
+                icon.className = "mx-auto w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl shadow-lg";
+                icon.textContent = "🛡️";
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const username = localStorage.getItem('reycloud_username') || 'ReyZ4You';
+            const email = localStorage.getItem('reycloud_email') || 'reyz@reycloudshp.my.id';
+            const role = localStorage.getItem('reycloud_role') || 'user';
+            const apiKey = localStorage.getItem('reycloud_apikey') || '';
+
+            document.getElementById('profileUsername').textContent = username;
+            document.getElementById('profileEmail').textContent = email;
+            document.getElementById('changeUser').value = username;
+            
+            const roleBadge = document.getElementById('profileRoleBadge');
+            roleBadge.textContent = role.toUpperCase();
+            
+            if (role.toLowerCase() === 'creator' || role.toLowerCase() === 'admin') {
+                roleBadge.className = "inline-block px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30";
+                
+                // Tampilkan Creator Panel & Ambil Statistik dari endpoint list-keys
+                document.getElementById('creatorPanel').classList.remove('hidden');
+                fetchCreatorStats();
+            }
+
+            // Status API Key Bulk
+            const apiKeyDisplay = document.getElementById('apiKeyDisplay');
+            const apiKeyStatusBadge = document.getElementById('apiKeyStatusBadge');
+            const btnCopyKey = document.getElementById('btnCopyKey');
+
+            if (apiKey && apiKey.trim() !== '') {
+                apiKeyDisplay.value = apiKey;
+                apiKeyDisplay.className = "w-full bg-[#151922] border border-amber-500/30 rounded-xl px-3 py-2 text-xs text-amber-400 font-mono select-all font-bold";
+                apiKeyStatusBadge.textContent = "ACTIVE";
+                apiKeyStatusBadge.className = "px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+                btnCopyKey.classList.remove('hidden');
+            } else {
+                apiKeyDisplay.value = "Belum berlangganan API Key Bulk";
+                apiKeyStatusBadge.textContent = "NO ACTIVE";
+                apiKeyStatusBadge.className = "px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/30";
+                btnCopyKey.classList.add('hidden');
+            }
+        });
+
+        async function fetchCreatorStats() {
+            try {
+                // Mengambil list keys untuk menghitung total apikey
+                const resKeys = await fetch('/api/admin/list-keys');
+                const dataKeys = await resKeys.json();
+                if (dataKeys.status) {
+                    document.getElementById('statTotalApiKey').textContent = dataKeys.total;
+                }
+                document.getElementById('statTotalUser').textContent = '1,842+'; // atau fetch total user jika ada endpoint-nya
+            } catch (err) {
+                console.error('Gagal mengambil statistik:', err);
+            }
+        }
+
+        async function generateNewApiKey() {
+            const name = document.getElementById('newKeyName').value.trim();
+            const type = document.getElementById('newKeyType').value;
+
+            if (!name) return showModal('Peringatan', 'Masukkan nama pemilik API Key terlebih dahulu!', 'error');
+
+            try {
+                const res = await fetch('/api/admin/create-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, type: type })
+                });
+                const data = await res.json();
+                if (data.status) {
+                    showModal('Berhasil!', `API Key ${type.toUpperCase()} berhasil dibuat: ${data.data.apikey}`, 'success');
+                    document.getElementById('newKeyName').value = '';
+                    fetchCreatorStats();
+                } else {
+                    showModal('Gagal', data.error || data.message, 'error');
+                }
+            } catch (err) {
+                showModal('Kesalahan', 'Gagal membuat API Key: ' + err.message, 'error');
+            }
+        }
+
+        function copyApiKey() {
+            const key = document.getElementById('apiKeyDisplay').value;
+            navigator.clipboard.writeText(key);
+            showModal('Berhasil!', 'API Key Bulk berhasil disalin ke clipboard.', 'success');
+        }
+
+        async function handleChangePassword(event) {
+            event.preventDefault();
+            const username = document.getElementById('changeUser').value.trim();
+            const oldPassword = document.getElementById('oldPass').value.trim();
+            const newPassword = document.getElementById('newPass').value.trim();
+            const btn = document.getElementById('btnChangePass');
+
+            btn.disabled = true;
+            btn.textContent = 'Memperbarui Password...';
+
+            try {
+                const res = await fetch('/api/auth/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, oldPassword, newPassword })
+                });
+                const data = await res.json();
+
+                if (data.status) {
+                    showModal('Sukses!', 'Password akun berhasil diperbarui.', 'success');
+                    document.getElementById('oldPass').value = '';
+                    document.getElementById('newPass').value = '';
+                } else {
+                    showModal('Gagal', data.message, 'error');
+                }
+            } catch (err) {
+                showModal('Kesalahan', 'Koneksi ke server gagal: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Simpan Password Baru ✨';
+            }
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

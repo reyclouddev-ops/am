@@ -61,6 +61,11 @@
 
                 <!-- Dropdown Menu Navigasi Eksklusif -->
                 <div id="navDropdown" class="hidden absolute right-0 top-14 w-52 glass-panel border border-[#2b3344] rounded-2xl shadow-2xl py-2.5 space-y-1">
+                    <a href="/docs/profile/" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-amber-400 transition-colors font-semibold">
+                        <span class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 text-sm">👤</span>
+                        <span>Profil & Panel Akun</span>
+                    </a>
+                    <div class="h-px bg-white/10 my-1 mx-3"></div>
                     <a href="/docs/amgen/" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-amber-400 transition-colors font-semibold">
                         <span class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 text-sm">🚀</span>
                         <span>Generator Amgen</span>
@@ -72,14 +77,6 @@
                     <a href="/docs/viudrama/" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-orange-400 transition-colors font-semibold">
                         <span class="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 text-sm">🍿</span>
                         <span>Viu Drama Streaming</span>
-                    </a>
-                    <a href="/docs/usercek" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-cyan-400 transition-colors font-semibold">
-                        <span class="w-7 h-7 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-sm">🔍</span>
-                        <span>Cek Masa Aktif Key</span>
-                    </a>
-                    <a href="/docs/admins" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-purple-400 transition-colors font-semibold">
-                        <span class="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 text-sm">🛡️</span>
-                        <span>Admin Control Panel</span>
                     </a>
                     <a href="/docs/tools/" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-cyan-400 transition-colors font-semibold">
                         <span class="w-7 h-7 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-sm">✨</span>
@@ -106,9 +103,33 @@
                         <span class="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-sm">💬</span>
                         <span>Kontak WhatsApp</span>
                     </a>
+                    <div class="h-px bg-white/10 my-1.5 mx-3"></div>
+                    <button onclick="handleLogout()" class="w-full flex items-center space-x-3 px-4 py-2.5 text-xs text-rose-400 hover:bg-rose-500/10 transition-colors font-semibold text-left cursor-pointer">
+                        <span class="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 text-sm">🚪</span>
+                        <span>Keluar (Logout)</span>
+                    </button>
                 </div>
             </div>
         </div>
+
+        <!-- Dynamic User Greeting Banner (Klik untuk ke Profil) -->
+        <a href="/docs/profile/" class="block bg-card-theme hover:border-amber-500/50 border border-theme rounded-2xl p-3.5 flex items-center justify-between shadow-md transition-all duration-300 group">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-xs group-hover:scale-105 transition-transform">
+                    👤
+                </div>
+                <div>
+                    <div class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Selamat Datang,</div>
+                    <div id="displayUsername" class="text-xs font-black text-white tracking-wide">Loading...</div>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span id="displayRole" class="px-2.5 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-wider">
+                    USER
+                </span>
+                <span class="text-slate-500 text-xs">→</span>
+            </div>
+        </a>
 
         <!-- Info Subheader -->
         <div class="space-y-1 px-1">
@@ -231,6 +252,28 @@
     </div>
 
     <script>
+        // Ambil data user dari localStorage
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('reycloud_username') || 'ReyZ4You';
+            const savedRole = localStorage.getItem('reycloud_role') || 'creator';
+
+            document.getElementById('displayUsername').textContent = savedUser;
+            
+            const roleBadge = document.getElementById('displayRole');
+            roleBadge.textContent = savedRole.toUpperCase();
+            
+            if (savedRole.toLowerCase() === 'creator' || savedRole.toLowerCase() === 'admin') {
+                roleBadge.className = "px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider shadow-sm";
+            } else {
+                roleBadge.className = "px-2.5 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-wider shadow-sm";
+            }
+        });
+
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = '/index.html';
+        }
+
         function toggleMenu(event) {
             event.stopPropagation();
             const menu = document.getElementById('navDropdown');

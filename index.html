@@ -3,94 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReyCloudSHP - Initializing Portal...</title>
+    <title>ReyCloudSHP - Secure Portal Authentication</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { background-color: #08090c; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: #050608; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        .glass-card {
+            background: rgba(14, 18, 27, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .tab-active {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(249, 115, 22, 0.2));
+            border-color: rgba(245, 158, 11, 0.5);
+            color: #fbbf24;
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden transition-opacity duration-700 opacity-100" id="landingBody">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-x-hidden">
 
-    <!-- Dynamic Ambient Background Glows -->
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-amber-500/10 blur-[150px] pointer-events-none rounded-full"></div>
-    <div class="absolute top-1/4 right-10 w-[250px] h-[250px] bg-cyan-500/10 blur-[140px] pointer-events-none rounded-full"></div>
+    <!-- Ambient Glow Backgrounds -->
+    <div class="absolute top-10 left-1/2 -translate-x-1/2 w-[280px] h-[140px] bg-amber-500/10 blur-[130px] pointer-events-none rounded-full"></div>
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-[280px] h-[140px] bg-cyan-500/10 blur-[130px] pointer-events-none rounded-full"></div>
 
-    <div class="w-full max-w-sm text-center space-y-6 relative z-10">
+    <div class="w-full max-w-sm space-y-3.5 relative z-10">
         
-        <!-- Logo Icon with Pulse Animation -->
-        <div class="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-tr from-amber-500 to-cyan-400 p-[2px] shadow-2xl shadow-amber-500/20 animate-pulse">
-            <div class="w-full h-full bg-[#0d0f12] rounded-[14px] flex items-center justify-center text-amber-400 font-black text-2xl">
-                ⚡
+        <!-- Header Brand Minimalist Clean -->
+        <div class="flex items-center space-x-3 bg-gradient-to-r from-white/[0.04] to-transparent p-3 rounded-2xl border border-white/5">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-cyan-400 p-[1.5px] shadow-md shadow-amber-500/20 flex items-center justify-center shrink-0">
+                <div class="w-full h-full bg-[#0d0f12] rounded-[10px] flex items-center justify-center text-amber-400 font-black text-base">
+                    ⚡
+                </div>
+            </div>
+            <div>
+                <h1 class="text-xs font-black tracking-widest text-white uppercase">
+                    REYCLOUD<span class="text-amber-400">SHP</span>
+                </h1>
+                <p class="text-[9px] font-mono text-slate-400 tracking-wider">SECURE AUTHENTICATION GATEWAY</p>
             </div>
         </div>
 
-        <div class="space-y-2">
-            <h1 class="text-lg font-black tracking-widest uppercase text-white">
-                REYCLOUD<span class="text-amber-400">SHP</span>
-            </h1>
-            <p id="loadingStatusText" class="text-xs font-mono text-slate-400 tracking-wider">Memuat Engine & Menghubungkan Sistem...</p>
+        <!-- Banner Video Player -->
+        <div class="relative w-full rounded-2xl overflow-hidden border border-white/10 bg-black aspect-[16/9] flex items-center justify-center shadow-xl group">
+            <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-85 transition-transform duration-700 group-hover:scale-105">
+                <source src="https://files.catbox.moe/zq1irh.mp4" type="video/mp4">
+            </video>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
+            <div class="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[9px] font-mono text-amber-300 font-bold">
+                <span class="flex items-center space-x-1.5 drop-shadow">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span>SECURE ACCESS GATEWAY</span>
+                </span>
+            </div>
         </div>
 
-        <!-- Progress Bar & Spinner -->
-        <div class="space-y-3 px-6">
-            <div class="w-full bg-[#151922] border border-[#232936] h-2 rounded-full overflow-hidden p-0.5 shadow-inner">
-                <div id="progressBar" class="bg-gradient-to-r from-amber-400 to-cyan-400 h-full rounded-full transition-all duration-300 w-[10%]"></div>
+        <!-- Security Notice Badge (Roronoa Zoro) -->
+        <div class="glass-card rounded-2xl p-2.5 flex items-center space-x-2.5 border-l-4 border-l-emerald-500 shadow-md">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs shrink-0">
+                🛡️
             </div>
-            <div class="flex justify-between text-[10px] font-mono text-slate-500">
-                <span>SECURE_BOOT</span>
-                <span id="progressPercentage">10%</span>
+            <div class="text-left">
+                <div class="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">System Shield Active</div>
+                <p class="text-[10px] text-slate-300 font-medium leading-tight">System Ini Di Jaga Ketat Oleh RoronoaZoro</p>
+            </div>
+        </div>
+
+        <!-- Glass Panel Wrapper untuk Tab & Form -->
+        <div class="glass-card rounded-3xl p-4.5 shadow-2xl space-y-3.5">
+            
+            <!-- Segmented Modern Tabs -->
+            <div class="grid grid-cols-2 gap-1.5 bg-[#0b0e14] p-1 rounded-xl border border-white/5">
+                <button id="tabLoginBtn" onclick="switchMode('login')" class="py-2 rounded-lg text-xs font-bold tab-active transition-all cursor-pointer flex items-center justify-center space-x-1.5 shadow-sm">
+                    <span>🔐</span><span>Masuk</span>
+                </button>
+                <button id="tabRegisterBtn" onclick="switchMode('register')" class="py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center justify-center space-x-1.5">
+                    <span>✨</span><span>Daftar</span>
+                </button>
+            </div>
+
+            <!-- FORM LOGIN -->
+            <form id="formLogin" onsubmit="handleLogin(event)" class="space-y-3">
+                <div class="space-y-0.5 text-left">
+                    <h2 class="text-xs font-black text-white tracking-wide uppercase">Autentikasi Pengguna</h2>
+                    <p class="text-[10px] text-slate-400">Masukkan kredensial akun terdaftar Anda.</p>
+                </div>
+
+                <div class="space-y-2.5 pt-0.5">
+                    <div class="space-y-1 text-left">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Username / Email</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 text-xs">👤</span>
+                            <input type="text" id="loginUser" required placeholder="Masukkan username..." 
+                                class="w-full bg-[#050608] border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors font-mono">
+                        </div>
+                    </div>
+
+                    <div class="space-y-1 text-left">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Password</label>
+                            <a href="https://wa.me/6281260512743?text=Halo%20Admin,%20saya%20lupa%20password%20akun%20ReyCloudSHP%20saya.%20Mohon%20bantuannya." target="_blank" class="text-[10px] text-amber-400 hover:underline">Lupa?</a>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 text-xs">🔑</span>
+                            <input type="password" id="loginPass" required placeholder="••••••••" 
+                                class="w-full bg-[#050608] border border-white/10 rounded-xl pl-9 pr-9 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors font-mono">
+                            <button type="button" onclick="togglePassword('loginPass', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white text-xs cursor-pointer">👁️</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnLoginSubmit" class="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 cursor-pointer transform hover:-translate-y-0.5 mt-1">
+                        Masuk ke Portal Utama 🚀
+                    </button>
+                </div>
+            </form>
+
+            <!-- FORM REGISTER -->
+            <form id="formRegister" onsubmit="handleRegister(event)" class="space-y-3 hidden">
+                <div class="space-y-0.5 text-left">
+                    <h2 class="text-xs font-black text-white tracking-wide uppercase">Pendaftaran Akun Baru</h2>
+                    <p class="text-[10px] text-slate-400">Ketentuan sistem: Batas maksimal 1 IP = 1 Akun.</p>
+                </div>
+
+                <div class="space-y-2.5 pt-0.5">
+                    <div class="space-y-1 text-left">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Username</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 text-xs">🪪</span>
+                            <input type="text" id="regUser" required placeholder="Contoh: reyz4you" 
+                                class="w-full bg-[#050608] border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 transition-colors font-mono">
+                        </div>
+                    </div>
+
+                    <div class="space-y-1 text-left">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Email</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 text-xs">✉️</span>
+                            <input type="email" id="regEmail" required placeholder="nama@domain.com" 
+                                class="w-full bg-[#050608] border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 transition-colors font-mono">
+                        </div>
+                    </div>
+
+                    <div class="space-y-1 text-left">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Password</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 text-xs">🔒</span>
+                            <input type="password" id="regPass" required placeholder="Minimal 6 karakter..." oninput="checkPasswordStrength(this.value)"
+                                class="w-full bg-[#050608] border border-white/10 rounded-xl pl-9 pr-9 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 transition-colors font-mono">
+                            <button type="button" onclick="togglePassword('regPass', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white text-xs cursor-pointer">👁️</button>
+                        </div>
+                        <div class="w-full bg-[#050608] h-1 rounded-full overflow-hidden mt-1.5">
+                            <div id="strengthBar" class="bg-rose-500 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnRegSubmit" class="w-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-cyan-500/20 cursor-pointer transform hover:-translate-y-0.5 mt-1">
+                        Daftar Akun Baru ✨
+                    </button>
+                </div>
+            </form>
+
+        </div>
+
+        <!-- Footer Help & Copyright -->
+        <div class="text-center space-y-1 pt-1">
+            <a href="https://wa.me/6281260512743?text=Halo%20Admin,%20saya%20butuh%20bantuan%20terkait%20akun%20ReyCloudSHP." target="_blank" class="text-[11px] text-cyan-400 hover:underline font-medium inline-flex items-center space-x-1.5">
+                <span>💬 Bantuan WhatsApp Admin</span>
+            </a>
+            <div class="text-[9px] font-semibold text-slate-500 tracking-wider">
+                © 2026 ReyCloudSHP • All Rights Reserved
             </div>
         </div>
 
     </div>
 
+    <!-- MODERN CUSTOM MODAL POPUP (Ganti Alert Bawaan Browser) -->
+    <div id="customModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card border border-white/10 rounded-2xl p-5 max-w-xs w-full space-y-3.5 shadow-2xl text-center">
+            <div id="modalIcon" class="mx-auto w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-lg">
+                ⚠️
+            </div>
+            <div class="space-y-1">
+                <h3 id="modalTitle" class="text-xs font-black text-white uppercase tracking-wider">Pemberitahuan Sistem</h3>
+                <p id="modalMessage" class="text-[11px] text-slate-300 leading-relaxed"></p>
+            </div>
+            <button onclick="closeModal()" class="w-full bg-[#1e2535] hover:bg-[#2f3b52] text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
     <script>
-        // Simulasi proses loading sistem sebelum masuk ke dashboard
-        let progress = 10;
-        const progressBar = document.getElementById('progressBar');
-        const progressPercentage = document.getElementById('progressPercentage');
-        const statusText = document.getElementById('loadingStatusText');
-        const landingBody = document.getElementById('landingBody');
+        function showModal(title, message, type = 'error') {
+            const modal = document.getElementById('customModal');
+            const titleEl = document.getElementById('modalTitle');
+            const msgEl = document.getElementById('modalMessage');
+            const iconEl = document.getElementById('modalIcon');
 
-        const loadingSteps = [
-            { at: 30, text: "Memuat Database & Konfigurasi API..." },
-            { at: 60, text: "Sinkronisasi Rute Folder Docs & Server..." },
-            { at: 85, text: "Mempersiapkan Dashboard Eksklusif..." },
-            { at: 100, text: "Berhasil! Membuka Portal Utama..." }
-        ];
+            titleEl.textContent = title;
+            msgEl.textContent = message;
 
-        const interval = setInterval(() => {
-            progress += Math.floor(Math.random() * 15) + 5;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(interval);
-                
-                // Update teks terakhir
-                progressBar.style.width = '100%';
-                progressPercentage.textContent = '100%';
-                statusText.textContent = "Berhasil! Membuka Portal Utama...";
-
-                // Efek Fade-Out lalu Redirect ke /dashboard (atau index dashboard utama)
-                setTimeout(() => {
-                    landingBody.classList.remove('opacity-100');
-                    landingBody.classList.add('opacity-0');
-                    
-                    setTimeout(() => {
-                        // Arahkan ke halaman dashboard utama (ubah '/dashboard' jika file dashboard lu namanya berbeda, misal '/dashboard.html')
-                        window.location.href = '/dashboard'; 
-                    }, 700);
-                }, 500);
+            if (type === 'success') {
+                iconEl.className = "mx-auto w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl shadow-lg";
+                iconEl.textContent = "🎉";
             } else {
-                progressBar.style.width = progress + '%';
-                progressPercentage.textContent = progress + '%';
-
-                // Ubah teks status berdasarkan persentase
-                const currentStep = loadingSteps.reverse().find(s => progress >= s.at);
-                if (currentStep) {
-                    statusText.textContent = currentStep.text;
-                }
+                iconEl.className = "mx-auto w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl shadow-lg";
+                iconEl.textContent = "🛡️";
             }
-        }, 180);
+
+            modal.classList.remove('hidden');
+        }
+
+        let modalCallback = null;
+        function showModalWithAction(title, message, type = 'error', callback) {
+            showModal(title, message, type);
+            modalCallback = callback;
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+            if (modalCallback) {
+                modalCallback();
+                modalCallback = null;
+            }
+        }
+
+        function switchMode(mode) {
+            const btnLogin = document.getElementById('tabLoginBtn');
+            const btnRegister = document.getElementById('tabRegisterBtn');
+            const formLogin = document.getElementById('formLogin');
+            const formRegister = document.getElementById('formRegister');
+
+            if (mode === 'login') {
+                btnLogin.className = "py-2 rounded-lg text-xs font-bold tab-active transition-all cursor-pointer flex items-center justify-center space-x-1.5 shadow-sm";
+                btnRegister.className = "py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+                formLogin.classList.remove('hidden');
+                formRegister.classList.add('hidden');
+            } else {
+                btnRegister.className = "py-2 rounded-lg text-xs font-bold tab-active transition-all cursor-pointer flex items-center justify-center space-x-1.5 shadow-sm";
+                btnLogin.className = "py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+                formRegister.classList.remove('hidden');
+                formLogin.classList.add('hidden');
+            }
+        }
+
+        function togglePassword(fieldId, btn) {
+            const input = document.getElementById(fieldId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+
+        function checkPasswordStrength(val) {
+            const bar = document.getElementById('strengthBar');
+            if (val.length === 0) {
+                bar.style.width = '0%';
+                bar.className = 'bg-rose-500 h-full w-0 transition-all duration-300';
+            } else if (val.length < 6) {
+                bar.style.width = '35%';
+                bar.className = 'bg-rose-500 h-full transition-all duration-300';
+            } else if (val.length < 10) {
+                bar.style.width = '70%';
+                bar.className = 'bg-amber-400 h-full transition-all duration-300';
+            } else {
+                bar.style.width = '100%';
+                bar.className = 'bg-emerald-400 h-full transition-all duration-300';
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const identifier = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPass').value.trim();
+            const btn = document.getElementById('btnLoginSubmit');
+
+            btn.disabled = true;
+            btn.textContent = 'Memproses Autentikasi...';
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: identifier, password })
+                });
+                const data = await res.json();
+
+                if (data.status) {
+                    showModalWithAction('Login Berhasil!', `Selamat datang kembali, ${data.user.username} (${data.user.role.toUpperCase()})`, 'success', () => {
+                        window.location.href = '/dashboard';
+                    });
+                } else {
+                    showModal('Login Gagal', data.message, 'error');
+                }
+            } catch (err) {
+                showModal('Kesalahan Sistem', 'Koneksi ke server gagal: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Masuk ke Portal Utama 🚀';
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const username = document.getElementById('regUser').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPass').value.trim();
+            const btn = document.getElementById('btnRegSubmit');
+
+            btn.disabled = true;
+            btn.textContent = 'Memeriksa IP & Mendaftar...';
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+                const data = await res.json();
+
+                if (data.status) {
+                    showModalWithAction('Registrasi Sukses!', data.message, 'success', () => {
+                        switchMode('login');
+                    });
+                } else {
+                    showModal('Akses Pendaftaran Ditolak', data.message, 'error');
+                }
+            } catch (err) {
+                showModal('Kesalahan Sistem', 'Koneksi ke server gagal: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Daftar Akun Baru ✨';
+            }
+        }
     </script>
 </body>
 </html>

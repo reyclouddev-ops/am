@@ -1,7 +1,7 @@
 /**
- * Name: Alight Motion Master Engine (The Ultimate Unified Edition)
- * Description: Seluruh endpoint API dipetakan secara bersih menggunakan prefix /api/ 
- *              lengkap dengan handler auto-activation, bulk, generator key admin/user, serta NanoBanana AI Image Editor.
+ * Name: Alight Motion Master Engine (The Ultimate Monolith Edition with Auth)
+ * Description: Seluruh endpoint API, scraper, downloader, QRIS Mustika, AI Tools, 
+ *              serta sistem Auth IP & Akun digabung utuh dalam satu file.
  */
 
 const express = require('express');
@@ -45,6 +45,16 @@ async function connectDB() {
     }
 }
 
+const userSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    ip_address: { type: String, required: true },
+    role: { type: String, default: 'user' },
+    created_at: { type: Date, default: Date.now }
+});
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
 const apiKeySchema = new mongoose.Schema({
     apikey: { type: String, required: true, unique: true },
     owner: { type: String, default: 'Client' },
@@ -54,16 +64,233 @@ const apiKeySchema = new mongoose.Schema({
     expired_at: { type: Date, required: true },
     status: { type: String, default: 'active' }
 });
-
 const ApiKey = mongoose.models.ApiKey || mongoose.model('ApiKey', apiKeySchema);
 
 
 // ==========================================
-// 2. CORE ALIGHT MOTION & AKUNLAMA SCRAPER
+// 2. INLINED AI HELPERS & SCRAPERS
 // ==========================================
-const AM_KEY = 'AIzaSyDtG1AU22ErnQD60AzBAcaknySiz9_CEq0';
-const IDT = 'https://www.googleapis.com/identitytoolkit/v3/relyingparty';
-const VFY = 'https://us-central1-alight-creative.cloudfunctions.net/verifyPurchase';
+
+// --- A. Cloudinary Upscale Helper ---
+const CLOUDINARY_URL = process.env.CLOUDINARY_URL || '';
+const SIGN_URL = process.env.CLOUDINARY_SIGN_URL || '';
+const CLOUD_API_KEY = process.env.CLOUDINARY_API_KEY || '';
+const UPLOAD_PRESET = process.env.CLOUDINARY_UPLOAD_PRESET || '';
+
+async function getCloudinarySignature() {
+    const timestamp = Math.floor(Date.now() / 1000);
+    const { data } = await axios.post(SIGN_URL, {
+        paramsToSign: { timestamp, upload_preset: UPLOAD_PRESET, source: 'ml' }
+    }, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Origin': 'https://cloudinary-tools.netlify.app',
+            'Referer': 'https://cloudinary-tools.netlify.app/',
+            'User-Agent': 'Mozilla/5.0'
+        }
+    });
+    return { signature: data.signature, timestamp };
+}
+
+async function upscaleImage(fileInput, filename = 'image.jpg') {
+    let fileStreamOrBuffer = fileInput;
+    if (typeof fileInput === 'string' && (fileInput.startsWith('http://') || fileInput.startsWith('https://'))) {
+        const response = await axios.get(fileInput, { responseType: 'arraybuffer' });
+        fileStreamOrBuffer = Buffer.from(response.data);
+    }
+    let safeFilename = filename;
+    if (safeFilename.endsWith('.jpg')) safeFilename = safeFilename.replace('.jpg', '.jpeg');
+    else if (!safeFilename.includes('.')) safeFilename = 'image.jpeg';
+
+    const sig = await getCloudinarySignature();
+    const form = new FormData();
+    form.append('file', fileStreamOrBuffer, { filename: safeFilename });
+    form.append('upload_preset', UPLOAD_PRESET);
+    form.append('source', 'ml');
+    form.append('api_key', CLOUD_API_KEY);
+    form.append('signature', sig.signature);
+    form.append('timestamp', sig.timestamp);
+
+    const { data } = await axios.post(CLOUDINARY_URL, form, {
+        headers: {
+            ...form.getHeaders(),
+            'Origin': 'https://upload-widget.cloudinary.com',
+            'Referer': 'https://upload-widget.cloudinary.com/',
+            'User-Agent': 'Mozilla/5.0'
+        }
+    });
+    const publicId = data.public_id;
+    return {
+        status: true,
+        creator: CREATOR,
+        public_id: publicId,
+        original_url: data.secure_url,
+        url: `https://res.cloudinary.com/dtz0urit6/image/upload/f_jpg,e_upscale,q_auto/${publicId}.jpg`
+    };
+}
+
+
+// --- B. Wink Video Enhancer Helper ---
+const WINK_BASE_URL = "https://wink.ai";
+const WINK_STRATEGY_URL = "https://strategy.app.meitudata.com";
+const WINK_UA = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36";
+let _winkApi = null;
+
+async function getWinkApi() {
+    if (_winkApi) return _winkApi;
+    const gnum = crypto.randomUUID();
+    const jar = new CookieJar();
+    await jar.setCookie(`_sm=${gnum}; Path=/; Domain=wink.ai`, WINK_BASE_URL);
+    _winkApi = {
+        client: wrapper(axios.create({
+            baseURL: WINK_BASE_URL, jar, withCredentials: true, validateStatus: () => true,
+            headers: { accept: '*/*', origin: WINK_BASE_URL, referer: `${WINK_BASE_URL}/video-enhancer/upload`, 'user-agent': WINK_UA }
+        })),
+        gnum
+    };
+    return _winkApi;
+}
+
+async function winkEnhance(video, { filename } = {}) {
+    const safeName = filename || `wink-${crypto.randomUUID()}.mp4`;
+    const filePath = Buffer.isBuffer(video) ? path.join(os.tmpdir(), safeName) : video;
+    if (Buffer.isBuffer(video)) await fsp.writeFile(filePath, video);
+
+    try {
+        const { client: api, gnum } = await getWinkApi();
+        const baseParams = new URLSearchParams({ client_id: "1189857605", version: "5.1.2", country_code: "ID", gnum, client_language: "en_US", client_timezone: "Asia/Jakarta" });
+        
+        const signRes = await api.get(`/api/file/get_maat_sign.json?${baseParams}&suffix=.mp4&type=temp&count=1`);
+        const sign = signRes.data.data;
+
+        const policyRes = await axios.get(`${WINK_STRATEGY_URL}/upload/policy?app=${sign.app}&count=${sign.count}&sig=${sign.sig}&sigTime=${sign.sig_time}&sigVersion=${sign.sig_version}&suffix=${sign.suffix}&type=${sign.type}`);
+        const policy = policyRes.data[0].qiniu;
+
+        const form = new FormData();
+        form.append("file", fs.createReadStream(filePath), { filename: path.basename(filePath) });
+        form.append("token", policy.token);
+        form.append("key", policy.key);
+        form.append("fname", path.basename(filePath));
+        const qiniuRes = await axios.post(policy.url, form, { headers: form.getHeaders(), maxBodyLength: Infinity, maxContentLength: Infinity });
+
+        const fileKey = policy.key;
+        const sourceUrl = qiniuRes.data.url || qiniuRes.data.data || policy.data;
+
+        await api.post("/api/file/video_cover_and_display_info_ext.json", new URLSearchParams({ ...Object.fromEntries(baseParams), file_key: fileKey }));
+        const transStart = await api.post("/api/file/video_trans_start.json", new URLSearchParams({ ...Object.fromEntries(baseParams), file_key: fileKey }));
+        const transId = transStart.data.data.id;
+
+        let transcodedUrl = sourceUrl;
+        for (let i = 0; i < 40; i++) {
+            await new Promise(r => setTimeout(r, 3000));
+            const q = await api.get(`/api/file/video_trans_query.json?${baseParams}&id=${transId}`);
+            if (q.data.data?.video_transcoded) {
+                transcodedUrl = q.data.data.video_transcoded;
+                break;
+            }
+        }
+
+        const deliveryRes = await api.post("/api/meitu_ai/delivery.json", new URLSearchParams({
+            ...Object.fromEntries(baseParams), type: "11", content_type: "2", source_url: sourceUrl,
+            type_params: JSON.stringify({ is_mirror: 0, orientation_tag: 1, j_420_trans: "1", return_ext: "2" }),
+            right_detail: JSON.stringify({ source: "1", touch_type: "4", function_id: "630", material_id: "63011", url: "https://wink.ai/video-enhancer/upload" }),
+            ext_params: JSON.stringify({ task_name: "Enhancer", records: "11", video_transcoded: transcodedUrl }),
+            with_prepare: "1"
+        }));
+        let msgId = deliveryRes.data.data.msg_id || deliveryRes.data.data.prepare_msg_id;
+
+        for (let i = 0; i < 60; i++) {
+            await new Promise(r => setTimeout(r, 4000));
+            const batch = await api.get(`/api/meitu_ai/query_batch.json?${baseParams}&msg_ids=${msgId}`);
+            const item = batch.data.data?.item_list?.[0];
+            const resUrl = item?.result?.media_info_list?.[0]?.media_data || item?.result?.result_url;
+            if (resUrl && resUrl.startsWith("http")) return { resultUrl: resUrl };
+        }
+        throw new Error("Wink timeout processing video.");
+    } finally {
+        if (Buffer.isBuffer(video)) try { await fsp.unlink(filePath); } catch {}
+    }
+}
+
+// --- C. Imagen AI Scraper ---
+class ImagenScraper {
+    constructor() {
+        this.accountId = process.env.CF_ACCOUNT_ID || '';
+        this.apiToken = process.env.CF_API_TOKEN || '';
+        this.imgbbKey = process.env.IMGBB_KEY || '';
+        this.styles = {
+            "Realistic": { prompt: "realistic photo {prompt}. highly detailed", negative: "anime, cartoon" },
+            "Anime": { prompt: "anime style {prompt}, vibrant colors", negative: "blurry, realistic" }
+        };
+    }
+    async generateImage({ prompt, style = "Realistic", ratio = "1:1", upload = true }) {
+        const width = ratio === "16:9" ? 1344 : 1024;
+        const height = ratio === "16:9" ? 768 : 1024;
+        const styleObj = this.styles[style] || this.styles["Realistic"];
+        const finalPrompt = styleObj.prompt.replace("{prompt}", prompt);
+
+        const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${this.accountId}/ai/run/@cf/black-forest-labs/flux-1-schnell`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${this.apiToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: finalPrompt, width, height, steps: 4 })
+        });
+        const json = await res.json();
+        const buffer = Buffer.from(json.result.image, 'base64');
+
+        let uploadUrl = null;
+        if (upload) {
+            const fd = new URLSearchParams();
+            fd.append('image', buffer.toString('base64'));
+            const upRes = await fetch(`https://api.imgbb.com/1/upload?key=${this.imgbbKey}`, { method: 'POST', body: fd });
+            const upJson = await upRes.json();
+            if (upJson.success) uploadUrl = upJson.data.url;
+        }
+        return { buffer, upload: { url: uploadUrl } };
+    }
+}
+const imagenInstance = new ImagenScraper();
+
+// --- D. DeepAI & Rayleigh Chat Scrapers ---
+class DeepAIChatScraper {
+    async chat(messages, options = {}) {
+        const model = options.model || 'standard';
+        const fd = new FormData();
+        fd.append('chat_style', 'chat');
+        fd.append('model', model);
+        fd.append('chatHistory', JSON.stringify(messages));
+        const res = await fetch("https://api.deepai.org/hacking_is_a_serious_crime", {
+            method: "POST",
+            headers: { "api-key": process.env.DEEP_AI_KEY || "tryit-123456", "origin": "https://deepai.org" },
+            body: fd
+        });
+        return await res.text();
+    }
+}
+const deepAiChat = new DeepAIChatScraper();
+
+async function rayleighScrape(text) {
+    try {
+        const res = await axios.post("https://tabitoken.com/v1/messages", {
+            model: "claude-opus-5-thinking",
+            max_tokens: 4096,
+            messages: [{ role: "user", content: text }]
+        }, {
+            headers: { "Content-Type": "application/json", "x-api-key": process.env.RAYLEIGH_API_KEY || '' }
+        });
+        return { status: true, data: res.data.content[0].text };
+    } catch (err) {
+        return { status: false, error: err.message };
+    }
+}
+
+
+
+// ==========================================
+// 3. CORE ALIGHT MOTION & AKUNLAMA SCRAPER
+// ==========================================
+const AM_KEY = process.env.AM_KEY || '';
+const IDT = process.env.IDT || '';
+const VFY = process.env.VFY || '';
 
 const BASE_URL = 'https://akunlama.com/api';
 const DOMAIN = 'akunlama.com';
@@ -298,6 +525,7 @@ async function processSingleAccount(customUsername = null) {
         pro_response: proRes.data
     };
 }
+
 
 // --- Viu Drama Scraper Engine ---
 class Viu {
@@ -587,7 +815,7 @@ class Viu {
 const viuInstance = new Viu();
 
 // ==========================================
-// 3. DOWNLOADERS & TOOLS
+// 4. DOWNLOADERS & TOOLS
 // ==========================================
 async function indown(url) {
     try {
@@ -746,10 +974,10 @@ async function nanoBananaEdit(imageBuffer, promptText = 'enhance image') {
 
 // --- Free Fire Guest Account Generator Module & API (/api/genfreefiree) ---
 async function generateFreeFireGuest() {
-    const app_id = 100067;
-    const secret = '2ee44819e9b4598845141067b281621874d0d5d7af9d8f7e00c1e54715b7d1e3';
-    const host = 'https://100067.connect.garena.com';
-    const ua = 'GarenaMSDK/4.0.42(NEO G12 ;Android 17;in;ID;app 1.130.1 2019121040;)';
+    const app_id = parseInt(process.env.FF_APP_ID || '', 10);
+    const secret = process.env.FF_SECRET || '';
+    const host = process.env.FF_HOST || '';
+    const ua = process.env.FF_UA || '';
 
     const password = crypto.randomBytes(32).toString('hex').toUpperCase();
     const regBody = { app_id, client_type: 2, password, source: 2 };
@@ -789,8 +1017,9 @@ async function generateFreeFireGuest() {
     };
 }
 
+
 // ==========================================
-// 4. ADMIN & USER VERIFICATION HELPERS
+// 5. ADMIN & USER VERIFICATION HELPERS
 // ==========================================
 function verifyAdmin(req) {
     const body = req.method === 'GET' ? req.query : (req.body || {});
@@ -804,7 +1033,7 @@ function verifyAdmin(req) {
 
 
 // ==========================================
-// 5. EXPRESS ROUTER & API ENDPOINT MAPPING
+// 6. EXPRESS ROUTER & API ENDPOINT MAPPING
 // ==========================================
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -932,7 +1161,7 @@ app.all('/api/genfreefiree', async (req, res) => {
     try {
         const body = req.method === 'GET' ? req.query : (req.body || {});
         const count = parseInt(body.count || body.jumlah || 1, 10);
-        const maxCount = Math.min(Math.max(count, 1), 5); // Batasi maksimal 5 akun per request agar tidak timeout
+        const maxCount = Math.min(Math.max(count, 1), 5);
 
         const results = [];
         for (let i = 0; i < maxCount; i++) {
@@ -998,64 +1227,285 @@ app.all('/api/viu/stream', async (req, res) => {
     }
 });
 
-app.all('/api/qris', async (req, res) => {
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
+
+
+// --- Chat AI Endpoint (/api/chat) ---
+app.post('/api/chat', async (req, res) => {
     try {
-        const body = req.method === 'GET' ? req.query : (req.body || {});
-        
-        const amount = body.amount || '5000';
-        const productName = body.product_name || 'Apikey Premium Bulk';
-        const customerName = body.customer_name || 'Client ReyCloud';
-        const expiry = body.expiry || '30';
-        const redirectUrl = body.redirect_url || 'https://reycloudshp.my.id/dashboard';
+        const { prompt, engine, model, history } = req.body || {};
+        if (!prompt) {
+            return res.status(400).json({ status: false, error: 'Prompt atau pesan wajib diisi!' });
+        }
 
-        const MUSTIKA_APIKEY = process.env.MUSTIKA_APIKEY || '';
+        let resultText = '';
+        if (engine === 'deepai') {
+            const selectedModel = model || 'standard';
+            try {
+                const messages = history && Array.isArray(history) && history.length > 0 
+                    ? history 
+                    : [{ role: 'user', content: prompt }];
+                resultText = await deepAiChat.chat(messages, { model: selectedModel });
+            } catch (apiErr) {
+                resultText = `DeepAI Error (${selectedModel}): ` + apiErr.message;
+            }
+        } else {
+            const rayleighResult = await rayleighScrape(prompt);
+            if (rayleighResult.status) {
+                resultText = rayleighResult.data;
+            } else {
+                throw new Error(rayleighResult.error || 'Gagal mendapatkan respons dari Rayleigh AI.');
+            }
+        }
 
-        const params = new URLSearchParams();
-        params.append('amount', amount);
-        params.append('product_name', productName);
-        params.append('customer_name', customerName);
-        params.append('expiry', expiry);
-        params.append('redirect_url', redirectUrl);
-
-        const response = await axios.post('https://mustikapayment.com/api/v1/create/qris', params.toString(), {
-            headers: {
-                'X-Api-Key': MUSTIKA_APIKEY,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            validateStatus: () => true
+        return res.status(200).json({
+            status: true,
+            creator: CREATOR,
+            engine: engine || 'rayleigh',
+            model: model || 'standard',
+            result: resultText
         });
-
-        // Debug response asli dari Mustika di console server
-        console.log("Mustika Response:", response.data);
-
-        return res.status(200).json(response.data);
     } catch (err) {
-        console.error("QRIS Error Details:", err.message);
-        return res.status(500).json({ 
-            status: 'error', 
-            message: err.response?.data ? JSON.stringify(err.response.data) : err.message 
+        return res.status(500).json({ status: false, error: err.message });
+    }
+});
+
+// --- AI Tools Endpoints (Upscale, Wink, Imagen) ---
+app.post('/api/upscale', async (req, res) => {
+    try {
+        const { base64Image, imageUrl, filename } = req.body || {};
+        let inputTarget = null;
+        let safeFilename = filename || 'image.jpg';
+
+        if (base64Image) {
+            inputTarget = Buffer.from(base64Image.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+        } else if (imageUrl) {
+            inputTarget = imageUrl;
+        }
+
+        if (!inputTarget) {
+            return res.status(400).json({ status: false, error: 'File gambar (base64) atau URL gambar wajib disertakan!' });
+        }
+
+        const result = await upscaleImage(inputTarget, safeFilename);
+        return res.status(200).json(result);
+    } catch (err) {
+        return res.status(500).json({ status: false, error: err.message });
+    }
+});
+
+app.post('/api/wink', async (req, res) => {
+    try {
+        const { base64Video, videoUrl, filename } = req.body || {};
+        let inputTarget = null;
+        let safeFilename = filename || `wink-${Date.now()}.mp4`;
+
+        if (base64Video) {
+            inputTarget = Buffer.from(base64Video.replace(/^data:video\/\w+;base64,/, ''), 'base64');
+        } else if (videoUrl) {
+            const response = await axios.get(videoUrl, { responseType: 'arraybuffer', timeout: 120000 });
+            inputTarget = Buffer.from(response.data);
+        }
+
+        if (!inputTarget) {
+            return res.status(400).json({ status: false, error: 'File video (base64) atau URL video wajib disertakan!' });
+        }
+
+        const result = await winkEnhance(inputTarget, { filename: safeFilename });
+        return res.status(200).json({
+            status: true,
+            creator: CREATOR,
+            resultUrl: result.resultUrl
         });
+    } catch (err) {
+        return res.status(500).json({ status: false, error: err.message });
+    }
+});
+
+app.post('/api/imagen', async (req, res) => {
+    try {
+        const { prompt, style, ratio, steps } = req.body || {};
+        if (!prompt) {
+            return res.status(400).json({ status: false, error: 'Prompt gambar wajib diisi!' });
+        }
+
+        const result = await imagenInstance.generateImage({
+            prompt,
+            style: style || 'Realistic',
+            ratio: ratio || '1:1',
+            steps: steps || 4,
+            upload: true 
+        });
+
+        let imageUrl = result.upload && result.upload.url ? result.upload.url : `data:image/jpeg;base64,${result.buffer.toString('base64')}`;
+
+        return res.status(200).json({
+            status: true,
+            creator: CREATOR,
+            result: imageUrl
+        });
+    } catch (err) {
+        return res.status(500).json({ status: false, error: err.message });
     }
 });
 
 // ==========================================
-// 6. API KEY CREATOR (ADMIN & USER TYPES)
+// 7. AUTH & API KEY MANAGEMENT ENDPOINTS
 // ==========================================
-app.all('/api/admin/create-key', async (req, res) => {
-    const auth = verifyAdmin(req, res);
-    if (!auth.authorized) {
-        return res.status(403).json(auth.response);
-    }
 
-    const body = req.method === 'GET' ? req.query : (req.body || {});
-
+// --- Endpoint Register (Proteksi 1 IP = 1 Akun) ---
+app.post('/api/auth/register', async (req, res) => {
     try {
         await connectDB();
+        const { username, email, password } = req.body;
 
+        if (!username || !email || !password) {
+            return res.status(400).json({ status: false, message: 'Semua kolom wajib diisi!' });
+        }
+
+        const clientIp = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket.remoteAddress || '127.0.0.1';
+        const cleanIp = Array.isArray(clientIp) ? clientIp[0] : clientIp.split(',')[0].trim();
+
+        const existingIp = await User.findOne({ ip_address: cleanIp });
+        if (existingIp) {
+            return res.status(403).json({ 
+                status: false, 
+                message: `Akses Ditolak! Alamat IP Anda (${cleanIp}) sudah digunakan untuk mendaftar akun (${existingIp.username}). Batas maksimal 1 IP = 1 Akun.` 
+            });
+        }
+
+        const existingUser = await User.findOne({ $or: [{ username: username.toLowerCase() }, { email: email.toLowerCase() }] });
+        if (existingUser) {
+            return res.status(400).json({ status: false, message: 'Username atau email sudah digunakan!' });
+        }
+
+        const creatorUser = process.env.CREATOR_USERNAME || '';
+        let role = username.toLowerCase() === creatorUser.toLowerCase() ? 'creator' : 'user';
+
+        const newUser = new User({
+            username: username.toLowerCase(),
+            email: email.toLowerCase(),
+            password,
+            ip_address: cleanIp,
+            role
+        });
+
+        await newUser.save();
+
+        return res.status(200).json({
+            status: true,
+            message: role === 'creator' ? 'Registrasi Berhasil! Selamat datang Creator Utama.' : 'Registrasi Berhasil! IP Anda telah terverifikasi.',
+            role: role
+        });
+    } catch (err) {
+        return res.status(500).json({ status: false, message: err.message });
+    }
+});
+
+// --- Endpoint Login ---
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        await connectDB();
+        const { username, password } = req.body;
+
+        if (!username || !password) {
+            return res.status(400).json({ status: false, message: 'Username dan password wajib diisi!' });
+        }
+
+        const inputUser = username.toLowerCase();
+        
+        // 1. Cek apakah yang login adalah Creator/Admin Utama dari .env
+        const creatorUsername = (process.env.CREATOR_USERNAME || '').toLowerCase();
+        const creatorPassword = process.env.CREATOR_PASSWORD || ''; // Sesuaikan password env kamu di sini
+
+        if (inputUser === creatorUsername) {
+            if (password !== creatorPassword) {
+                return res.status(401).json({ status: false, message: 'Password creator salah!' });
+            }
+
+            return res.status(200).json({
+                status: true,
+                creator: process.env.CREATOR || CREATOR,
+                message: 'Login Berhasil sebagai Creator Utama!',
+                user: {
+                    username: creatorUsername,
+                    email: `${creatorUsername}@admin.dev`,
+                    role: 'creator'
+                }
+            });
+        }
+
+        // 2. Jika bukan creator, cek login untuk User biasa di database MongoDB
+        const user = await User.findOne({ 
+            $or: [{ username: inputUser }, { email: inputUser }] 
+        });
+
+        if (!user) {
+            return res.status(404).json({ status: false, message: 'Akun tidak ditemukan!' });
+        }
+
+        if (user.password !== password) {
+            return res.status(401).json({ status: false, message: 'Password salah!' });
+        }
+
+        return res.status(200).json({
+            status: true,
+            creator: process.env.CREATOR || CREATOR,
+            message: 'Login Berhasil!',
+            user: {
+                username: user.username,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (err) {
+        return res.status(500).json({ status: false, message: err.message });
+    }
+});
+
+
+
+// --- Endpoint Ganti Password ---
+app.post('/api/auth/change-password', async (req, res) => {
+    try {
+        await connectDB();
+        const { username, oldPassword, newPassword } = req.body;
+
+        if (!username || !oldPassword || !newPassword) {
+            return res.status(400).json({ status: false, message: 'Semua kolom wajib diisi!' });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({ status: false, message: 'Password baru minimal harus 6 karakter!' });
+        }
+
+        const user = await User.findOne({ username: username.toLowerCase() });
+        if (!user) {
+            return res.status(404).json({ status: false, message: 'Pengguna tidak ditemukan!' });
+        }
+
+        if (user.password !== oldPassword) {
+            return res.status(401).json({ status: false, message: 'Password lama salah!' });
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        return res.status(200).json({ status: true, message: 'Password berhasil diperbarui!' });
+    } catch (err) {
+        return res.status(500).json({ status: false, message: err.message });
+    }
+});
+
+// --- Endpoint Admin Key Manager ---
+app.all('/api/admin/create-key', async (req, res) => {
+    const auth = verifyAdmin(req, res);
+    if (!auth.authorized) return res.status(403).json(auth.response);
+
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    try {
+        await connectDB();
         const ownerName = body.name || body.username || 'Client User';
         const keyType = body.type || 'user';
-
         let durationDays = 30;
         let packageName = 'Bulk Alight Motion Pro (User)';
 
@@ -1066,36 +1516,19 @@ app.all('/api/admin/create-key', async (req, res) => {
 
         const randomSixDigits = crypto.randomInt(100000, 999999);
         const newApiKey = `reycoder_${randomSixDigits}`;
-
         const issuedAt = new Date();
         const expiredAt = new Date();
         expiredAt.setDate(issuedAt.getDate() + durationDays);
 
         const newKeyDoc = new ApiKey({
-            apikey: newApiKey,
-            owner: ownerName,
-            package: packageName,
-            duration_days: durationDays,
-            created_at: issuedAt,
-            expired_at: expiredAt,
-            status: 'active'
+            apikey: newApiKey, owner: ownerName, package: packageName,
+            duration_days: durationDays, created_at: issuedAt, expired_at: expiredAt, status: 'active'
         });
 
         await newKeyDoc.save();
-
         return res.status(200).json({
-            status: true,
-            creator: CREATOR,
-            message: `API Key ${keyType.toUpperCase()} berhasil dibuat dan disimpan ke MongoDB!`,
-            data: {
-                apikey: newApiKey,
-                owner: ownerName,
-                type: keyType,
-                package: packageName,
-                duration_days: keyType === 'admin' ? 'Unlimited (100 Tahun)' : `${durationDays} Hari`,
-                created_at: issuedAt,
-                expired_at: expiredAt
-            }
+            status: true, creator: CREATOR, message: `API Key ${keyType.toUpperCase()} berhasil dibuat!`,
+            data: { apikey: newApiKey, owner: ownerName, type: keyType, package: packageName, expired_at: expiredAt }
         });
     } catch (err) {
         return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
@@ -1109,22 +1542,7 @@ app.all('/api/admin/list-keys', async (req, res) => {
     try {
         await connectDB();
         const keys = await ApiKey.find({}).sort({ created_at: -1 });
-        const now = new Date();
-
-        const formattedKeys = keys.map(k => {
-            const diffTime = new Date(k.expired_at) - now;
-            let remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            let statusText = 'active';
-            if (k.duration_days >= 30000) remainingDays = 'Unlimited';
-            else if (remainingDays <= 0) { remainingDays = 'Expired'; statusText = 'expired'; }
-
-            return {
-                id: k._id, apikey: k.apikey, owner: k.owner, package: k.package,
-                created_at: k.created_at, expired_at: k.expired_at, remaining_days: remainingDays, status: statusText
-            };
-        });
-
-        return res.status(200).json({ status: true, creator: CREATOR, total: formattedKeys.length, keys: formattedKeys });
+        return res.status(200).json({ status: true, creator: CREATOR, total: keys.length, keys });
     } catch (err) {
         return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
     }
@@ -1133,29 +1551,13 @@ app.all('/api/admin/list-keys', async (req, res) => {
 app.all('/api/apikey/check', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const inputKey = req.headers['x-apikey'] || body.apikey;
-
     if (!inputKey) return res.status(400).json({ status: false, creator: CREATOR, error: 'Silakan masukkan API Key Anda.' });
 
     try {
         await connectDB();
         const keyData = await ApiKey.findOne({ apikey: inputKey });
         if (!keyData) return res.status(404).json({ status: false, creator: CREATOR, error: 'API Key tidak ditemukan!' });
-
-        const now = new Date();
-        const diffTime = new Date(keyData.expired_at) - now;
-        let remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        let statusText = 'active';
-        if (keyData.duration_days >= 30000) remainingDays = 'Unlimited';
-        else if (remainingDays <= 0) { remainingDays = 'Expired'; statusText = 'expired'; }
-
-        return res.status(200).json({
-            status: true, creator: CREATOR,
-            data: {
-                apikey: keyData.apikey, owner: keyData.owner, package: keyData.package,
-                created_at: keyData.created_at, expired_at: keyData.expired_at,
-                remaining_days: remainingDays, status: statusText
-            }
-        });
+        return res.status(200).json({ status: true, creator: CREATOR, data: keyData });
     } catch (err) {
         return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
     }
