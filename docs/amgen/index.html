@@ -260,7 +260,7 @@
                     <img id="qrisImage" src="" alt="QRIS Payment" class="w-48 h-48 mx-auto object-contain rounded-lg">
                 </div>
                 
-                <div class="text-[10px] text-slate-400 font-mono">NMID: ID10283949582 - ReyCloudSHP</div>
+                <div class="text-[10px] text-slate-400 font-mono">Jika Qris Ga Muncul Silahkan Pakai Jalur Donasi</div>
             </div>
 
             <div class="pt-2">
@@ -305,7 +305,7 @@
             }
         }
 
-        // Fungsi Show Modal QRIS dengan Fetch /api/qris (Sudah diperbaiki mapping propertinya)
+               // Fungsi Show Modal QRIS dengan Fetch /api/qris
         async function showQrisModal(errorMessage) {
             document.getElementById('qrisErrorMsg').textContent = errorMessage || 'API Key Anda tidak valid atau belum aktif.';
             
@@ -328,6 +328,7 @@
                 console.error('Gagal mengambil data QRIS:', err);
             }
         }
+
 
         function closeQrisModal() {
             document.getElementById('qrisModal').classList.add('hidden');

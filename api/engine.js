@@ -1044,34 +1044,31 @@ app.all('/api/qris', async (req, res) => {
  * ?type=admin&name=Reyz4YouXGod
  * ?type=user&name=Budi&days=30&package=Bulk Pro
  */
-app.all('/api/apikey/create', async (req, res) => {
-    const body = req.method === 'GET' ? req.query : (req.body || {});
-    const type = (body.type || 'user').toLowerCase(); // 'admin' atau 'user'
-    const nameInput = body.name || body.username || (type === 'admin' ? 'Master Admin' : 'Valued Client');
-    
-    // Jika type == admin, wajib verifikasi Admin Token
-    if (type === 'admin') {
-        const auth = verifyAdmin(req);
-        if (!auth.authorized) return res.status(403).json(auth.response);
+// --- ADMIN API KEY MANAGEMENT ENDPOINTS (/api/admin/create-key) ---
+app.all('/api/admin/create-key', async (req, res) => {
+    const auth = verifyAdmin(req, res);
+    if (!auth.authorized) {
+        return res.status(403).json(auth.response);
     }
+
+    const body = req.method === 'GET' ? req.query : (req.body || {});
 
     try {
         await connectDB();
 
-        let durationDays = parseInt(body.days || body.duration || 0, 10);
-        let packageName = body.package || '';
+        const ownerName = body.name || body.username || 'Client User';
+        const keyType = body.type || 'user'; // Pilihannya: 'admin' atau 'user'
 
-        if (type === 'admin') {
+        let durationDays = 30; // Default User: 30 Hari
+        let packageName = 'Bulk Alight Motion Pro (User)';
+
+        if (keyType === 'admin') {
             durationDays = 36500; // 100 Tahun (Unlimited)
-            packageName = packageName || 'Unlimited Master Admin Key';
-        } else {
-            if (!durationDays || isNaN(durationDays)) durationDays = 30; // Default user 30 hari
-            packageName = packageName || 'Bulk Alight Motion Pro (User)';
+            packageName = 'Unlimited Master Admin Key';
         }
 
         const randomSixDigits = crypto.randomInt(100000, 999999);
-        const prefixKey = type === 'admin' ? 'reyadmin' : 'reycoder';
-        const newApiKey = `${prefixKey}_${randomSixDigits}`;
+        const newApiKey = `reycoder_${randomSixDigits}`;
 
         const issuedAt = new Date();
         const expiredAt = new Date();
@@ -1079,7 +1076,7 @@ app.all('/api/apikey/create', async (req, res) => {
 
         const newKeyDoc = new ApiKey({
             apikey: newApiKey,
-            owner: nameInput,
+            owner: ownerName,
             package: packageName,
             duration_days: durationDays,
             created_at: issuedAt,
@@ -1092,13 +1089,13 @@ app.all('/api/apikey/create', async (req, res) => {
         return res.status(200).json({
             status: true,
             creator: CREATOR,
-            message: `API Key tipe ${type.toUpperCase()} berhasil dibuat!`,
+            message: `API Key ${keyType.toUpperCase()} berhasil dibuat dan disimpan ke MongoDB!`,
             data: {
                 apikey: newApiKey,
-                type: type,
-                name: nameInput,
+                owner: ownerName,
+                type: keyType,
                 package: packageName,
-                duration_days: durationDays >= 30000 ? 'Unlimited (100 Tahun)' : `${durationDays} Hari`,
+                duration_days: keyType === 'admin' ? 'Unlimited (100 Tahun)' : `${durationDays} Hari`,
                 created_at: issuedAt,
                 expired_at: expiredAt
             }
@@ -1107,6 +1104,7 @@ app.all('/api/apikey/create', async (req, res) => {
         return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
     }
 });
+
 
 // Alias Admin Create Key lama
 app.all('/api/admin/create-key', async (req, res) => {
