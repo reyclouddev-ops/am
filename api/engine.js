@@ -1648,6 +1648,53 @@ app.all('/api/admin/list-keys', async (req, res) => {
     }
 });
 
+app.all('/api/apikey/check', async (req, res) => {
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    const inputKey = req.headers['x-apikey'] || body.apikey;
+    
+    if (!inputKey) return res.status(400).json({ status: false, creator: CREATOR, error: 'Silakan masukkan API Key Anda.' });
+
+    try {
+        await connectDB();
+        const keyData = await ApiKey.findOne({ apikey: inputKey });
+        
+        if (!keyData) {
+            return res.status(404).json({ status: false, creator: CREATOR, error: 'API Key tidak ditemukan!' });
+        }
+
+        // Cek apakah key aktif dan belum melewati tanggal kadaluarsa
+        const now = new Date();
+        const expiredDate = new Date(keyData.expired_at);
+        const isActive = keyData.status === 'active' && now <= expiredDate;
+
+        if (!isActive) {
+            return res.status(200).json({ 
+                status: true, 
+                creator: CREATOR, 
+                data: { status: 'expired', owner: keyData.owner } 
+            });
+        }
+
+        // Hitung sisa hari aktif secara dinamis
+        const diffTime = Math.abs(expiredDate - now);
+        const remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        return res.status(200).json({ 
+            status: true, 
+            creator: CREATOR, 
+            data: { 
+                apikey: keyData.apikey,
+                owner: keyData.owner,
+                package: keyData.package,
+                status: 'active',
+                remaining_days: `${remainingDays} Hari`
+            } 
+        });
+    } catch (err) {
+        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+    }
+});
+
 app.all('/api/admin/list-users', async (req, res) => {
     const auth = await verifyAdmin(req);
     if (!auth.authorized) return res.status(403).json(auth.response);
