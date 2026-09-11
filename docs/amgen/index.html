@@ -446,12 +446,12 @@
             }
         }
 
-                async function runBulkActivation() {
+                  async function runBulkActivation() {
             const apikey = document.getElementById('bulkApiKeyInput').value.trim();
 
-            // Jika user tidak mengisi API Key, langsung arahkan/buka halaman qris/index.html
+            // Jika user tidak mengisi API Key, langsung arahkan ke link pembayaran Mustika Payment
             if (!apikey) {
-                window.location.href = '/docs/qris/';
+                window.open('https://mustikapayment.com/l/apikey-bulk', '_blank');
                 return;
             }
 
@@ -511,8 +511,8 @@
                         bulkResultsList.appendChild(itemDiv);
                     });
                 } else {
-                    // Jika API Key salah atau kadaluarsa, langsung arahkan juga ke halaman qris/index.html
-                    window.location.href = '/docs/qris/';
+                    // Jika API Key salah atau kadaluarsa, langsung arahkan juga ke link pembayaran
+                    window.open('https://mustikapayment.com/l/apikey-bulk', '_blank');
                 }
             } catch (err) {
                 alert('Kesalahan koneksi: ' + err.message);
@@ -522,6 +522,7 @@
                 bulkLoading.classList.add('hidden');
             }
         }
+
 
 
         function downloadBulkResults() {

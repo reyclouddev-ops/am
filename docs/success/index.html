@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReyCloudSHP - Pembayaran Berhasil</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #0d0f12; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+
+    <!-- Ambient Glow Background -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-emerald-500/10 blur-[150px] pointer-events-none rounded-full"></div>
+
+    <div class="w-full max-w-sm bg-[#151922] border border-[#232936] rounded-2xl p-6 shadow-2xl space-y-5 text-center relative z-10">
+        
+        <!-- Success Icon Animation -->
+        <div class="mx-auto w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-3xl shadow-lg animate-bounce">
+            🎉
+        </div>
+
+        <div class="space-y-1.5">
+            <h1 class="text-base font-black tracking-wide text-white uppercase">
+                Pembayaran <span class="text-emerald-400">Berhasil!</span>
+            </h1>
+            <p class="text-xs text-slate-400 leading-relaxed">
+                Terima kasih telah melakukan pembayaran melalui Mustika Payment. Langkah terakhir, silakan konfirmasi ke admin untuk klaim API Key Bulk kamu.
+            </p>
+        </div>
+
+        <!-- Instruksi Cepat -->
+        <div class="bg-[#0d0f12] border border-[#232936] rounded-xl p-3.5 text-left space-y-2">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Langkah Selanjutnya:</div>
+            <ul class="text-[11px] text-slate-300 space-y-1.5 list-disc list-inside">
+                <li>Klik tombol WhatsApp di bawah.</li>
+                <li>Kirimkan bukti transfer / riwayat pembayaran.</li>
+                <li>Admin akan memproses & mengirim API Key Bulk dalam beberapa saat.</li>
+            </ul>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="space-y-2.5 pt-1">
+            <a id="waConfirmBtn" href="#" target="_blank" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow-lg text-center text-white flex items-center justify-center space-x-2">
+                <span>💬 Konfirmasi ke WhatsApp Admin</span>
+            </a>
+
+            <a href="/dashboard" class="block w-full bg-[#1e2330] hover:bg-[#2b3344] text-slate-300 font-bold py-3 rounded-xl text-xs transition-all text-center">
+                🏠 Kembali ke Beranda Dashboard
+            </a>
+        </div>
+
+        <div class="text-[10px] text-slate-500 font-mono pt-1">
+            ReyCloudSHP Secure Transaction
+        </div>
+
+    </div>
+
+    <script>
+        // Otomatis buat format pesan WhatsApp dengan menyertakan sapaan dan waktu lokal
+        const now = new Date().toLocaleString('id-ID');
+        const waMessage = `Halo admin, saya sudah menyelesaikan pembayaran untuk pembelian Apikey Premium Bulk via Mustika Payment pada (${now}). Mohon bantuannya untuk mengirimkan API Key saya ya min. Terima kasih!`;
+        
+        // Ganti dengan nomor WhatsApp kamu
+        const whatsappNumber = "6281260512743"; 
+        
+        document.getElementById('waConfirmBtn').href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waMessage)}`;
+    </script>
+</body>
+</html>
