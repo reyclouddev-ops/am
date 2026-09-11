@@ -1716,6 +1716,50 @@ const VERCEL_API_URL = 'https://api.vercel.com';
 function getVercelToken() {
     return process.env.API_TOKEN || global.vercel?.token || '';
 }
+
+function cleanProjectName(name) {
+    return String(name || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\.zip$/i, "")
+        .replace(/\.html?$/i, "")
+        .replace(/[^a-z0-9-]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+}
+
+function findFileRecursive(directory, filename) {
+    const entries = fs.readdirSync(directory, { withFileTypes: true });
+    for (const entry of entries) {
+        const fullPath = path.join(directory, entry.name);
+        if (entry.isFile() && entry.name.toLowerCase() === filename.toLowerCase()) {
+            return fullPath;
+        }
+        if (entry.isDirectory()) {
+            const found = findFileRecursive(fullPath, filename);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
+function collectFiles(directory, base = directory) {
+    const result = [];
+    const entries = fs.readdirSync(directory, { withFileTypes: true });
+    for (const entry of entries) {
+        const fullPath = path.join(directory, entry.name);
+        if (entry.isDirectory()) {
+            result.push(...collectFiles(fullPath, base));
+        } else {
+            result.push({
+                filePath: fullPath,
+                fileName: path.relative(base, fullPath).replace(/\\/g, "/")
+            });
+        }
+    }
+    return result;
+}
+
 function readJsonSafe(file) {
     try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; }
 }
