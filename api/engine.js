@@ -299,6 +299,292 @@ async function processSingleAccount(customUsername = null) {
     };
 }
 
+// --- Viu Drama Scraper Engine ---
+class Viu {
+    constructor(options = {}) {
+        this.baseUrl = options.baseUrl || "https://api-gateway-global.viu.com";
+        this.deviceId = options.deviceId || crypto.randomUUID();
+        this.jwtToken = null;
+        this.countryCode = options.countryCode || "ID";
+        this.language = options.language || "8";
+        this.areaId = options.areaId || "1000";
+    }
+
+    async init() {
+        if (this.jwtToken) return;
+
+        const authUrl = `${this.baseUrl}/api/auth/token`;
+        const bodyData = new URLSearchParams({
+            countryCode: this.countryCode,
+            platform: "android",
+            platformFlagLabel: "phone",
+            language: this.language,
+            deviceId: this.deviceId,
+            dataTrackingDeviceId: "null",
+            osVersion: "34",
+            appVersion: "2.27.1",
+            buildVersion: "840",
+            carrierId: "7",
+            carrierName: "Axis",
+            appBundleId: "com.vuclip.viu",
+            vuclipUserId: "",
+            deviceBrand: "Neo G11",
+            deviceModel: "Neo G11",
+            flavour: "all"
+        });
+
+        const res = await fetch(authUrl, {
+            method: "POST",
+            headers: {
+                "User-Agent": "Neo/10",
+                "Content-Type": "application/x-www-form-urlencoded",
+                "platform": "android"
+            },
+            body: bodyData.toString()
+        });
+
+        if (!res.ok) throw new Error(`Viu Auth failed with status ${res.status}`);
+        const data = await res.json();
+
+        if (data.status === 1 && data.token) {
+            this.jwtToken = data.token;
+        } else {
+            throw new Error(`Viu Token fetch failed: ${JSON.stringify(data)}`);
+        }
+    }
+
+    getHeaders() {
+        return {
+            "authorization": `Bearer ${this.jwtToken}`,
+            "platform": "android",
+            "user-agent": "Neo/1.0",
+            "content-type": "application/json",
+            "accept": "application/json"
+        };
+    }
+
+    getCommonParams(extra = {}) {
+        return new URLSearchParams({
+            platform_flag_label: "phone",
+            language_flag_id: this.language,
+            ut: "0",
+            area_id: this.areaId,
+            os_flag_id: "2",
+            countryCode: this.countryCode,
+            ...extra
+        });
+    }
+
+    async homepage() {
+        await this.init();
+        try {
+            const params = this.getCommonParams({ r: '/home/index' });
+            const url = `${this.baseUrl}/api/mobile?${params.toString()}`;
+            const response = await fetch(url, { headers: this.getHeaders() });
+            
+            let modules = [];
+            let seenIds = new Set();
+
+            if (response.ok) {
+                const res = await response.json();
+                if (res.data) {
+                    if (res.data.banner && Array.isArray(res.data.banner) && res.data.banner.length > 0) {
+                        let bannerItems = [];
+                        res.data.banner.forEach(b => {
+                            const itemId = b.series_id || b.product_id;
+                            const title = b.series_name || b.title;
+                            if (itemId && title && !seenIds.has(itemId)) {
+                                seenIds.add(itemId);
+                                bannerItems.push({ id: itemId, series_id: b.series_id, title: title });
+                            }
+                        });
+                        if (bannerItems.length > 0) {
+                            modules.push({ module_name: "Featured Banner", items: bannerItems });
+                        }
+                    }
+
+                    if (res.data.grid && Array.isArray(res.data.grid) && res.data.grid.length > 0) {
+                        res.data.grid.forEach(sec => {
+                            const rawItems = sec.items || sec.product_list || sec.series || [];
+                            let moduleItems = [];
+                            rawItems.forEach(item => {
+                                const itemId = item.series_id || item.product_id || item.id;
+                                const title = item.series_name || item.synopsis || item.title || item.name;
+                                if (itemId && title && !seenIds.has(itemId)) {
+                                    seenIds.add(itemId);
+                                    moduleItems.push({ id: itemId, series_id: item.series_id, title: title });
+                                }
+                            });
+                            if (moduleItems.length > 0) {
+                                modules.push({ module_name: sec.title || sec.name || "Trending Grid", items: moduleItems });
+                            }
+                        });
+                    }
+                }
+            }
+            return { status: true, creator: CREATOR, data: { items: modules } };
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+
+    async search(query) {
+        await this.init();
+        try {
+            if (!query) throw new Error('Query is required.');
+            const params = this.getCommonParams({
+                r: '/search/video',
+                limit: '18',
+                page: '1',
+                has_micro_drama: '1'
+            });
+            const url = `${this.baseUrl}/api/mobile?${params.toString()}&keyword%5B%5D=${encodeURIComponent(query)}`;
+            const response = await fetch(url, { headers: this.getHeaders() });
+            
+            let items = [];
+            if (response.ok) {
+                const res = await response.json();
+                const rawList = res.data?.series || res.data?.product_list || res.data?.items || [];
+                rawList.forEach(show => {
+                    items.push({
+                        id: show.series_id || show.product_id || show.id,
+                        series_id: show.series_id,
+                        title: show.name || show.title || show.synopsis
+                    });
+                });
+            }
+            return { status: true, creator: CREATOR, data: { items } };
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+
+    async detail(id) {
+        await this.init();
+        try {
+            if (!id) throw new Error('Drama ID / Product ID is required.');
+            
+            let showTitle = "Viu Drama";
+            let seriesId = id;
+            
+            try {
+                const detailParams = this.getCommonParams({ r: '/vod/detail', product_id: String(id) });
+                const detailUrl = `${this.baseUrl}/api/mobile?${detailParams.toString()}`;
+                const response = await fetch(detailUrl, { headers: this.getHeaders() });
+                const res = await response.json();
+                if (res.data?.current_product) {
+                    showTitle = res.data.current_product.synopsis || res.data.current_product.series_name || showTitle;
+                    if (res.data.current_product.series_id) {
+                        seriesId = res.data.current_product.series_id;
+                    }
+                }
+            } catch(e) {}
+
+            let episodes = [];
+            const epParams = this.getCommonParams({
+                r: '/vod/product-list',
+                product_id: String(id),
+                series_id: String(seriesId),
+                size: '1000'
+            });
+            const epUrl = `${this.baseUrl}/api/mobile?${epParams.toString()}`;
+            const epRes = await fetch(epUrl, { headers: this.getHeaders() });
+
+            if (epRes.ok) {
+                const epData = await epRes.json();
+                const rawEps = epData.data?.product_list || [];
+                rawEps.forEach((item, i) => {
+                    episodes.push({
+                        id: item.product_id || item.id,
+                        ccs_product_id: item.ccs_product_id,
+                        index: item.number || (i + 1),
+                        name: item.synopsis || item.title || `Episode ${item.number || (i + 1)}`
+                    });
+                });
+            }
+
+            return { status: true, creator: CREATOR, data: { info: { name: showTitle, series_id: seriesId, episode_list: episodes } } };
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+
+    async stream(id, epsid, quality = '1080p') {
+        await this.init();
+        try {
+            if (!id || !epsid) throw new Error('Drama id & episode id is required.');
+
+            let ccsProductId = epsid;
+
+            if (!isNaN(epsid) || String(epsid).length < 20) {
+                const detailRes = await this.detail(id);
+                const episodes = detailRes?.data?.info?.episode_list || [];
+                const targetEp = episodes.find(e => e.id == epsid || e.index == epsid);
+                if (targetEp && targetEp.ccs_product_id) {
+                    ccsProductId = targetEp.ccs_product_id;
+                }
+            }
+
+            const pbParams = this.getCommonParams({
+                ccs_product_id: String(ccsProductId),
+                duration_start: '0',
+                duration: '180'
+            });
+            const pbUrl = `${this.baseUrl}/api/playback/distribute?${pbParams.toString()}`;
+            const pbRes = await fetch(pbUrl, { headers: this.getHeaders() });
+
+            if (!pbRes.ok) throw new Error(`Playback API error! status: ${pbRes.status}`);
+            const pbData = await pbRes.json();
+
+            const streamData = pbData.data?.stream;
+            let streamUrl = null;
+            let availableResolutions = {};
+
+            if (streamData && streamData.airplayurl) {
+                const ap = streamData.airplayurl;
+                if (ap.s1080p) availableResolutions["1080p"] = ap.s1080p;
+                if (ap.s720p) availableResolutions["720p"] = ap.s720p;
+                if (ap.s480p) availableResolutions["480p"] = ap.s480p;
+                if (ap.s240p) availableResolutions["240p"] = ap.s240p;
+
+                const qKey = String(quality).toLowerCase().replace('s', '');
+                if (qKey.includes('1080') && ap.s1080p) streamUrl = ap.s1080p;
+                else if (qKey.includes('720') && ap.s720p) streamUrl = ap.s720p;
+                else if (qKey.includes('480') && ap.s480p) streamUrl = ap.s480p;
+                else if (qKey.includes('240') && ap.s240p) streamUrl = ap.s240p;
+
+                if (!streamUrl) {
+                    streamUrl = ap.s1080p || ap.s720p || ap.s480p || ap.s240p || ap.url;
+                }
+            }
+
+            if (!streamUrl) throw new Error('Stream URL tidak ditemukan.');
+
+            let subtitles = [];
+            if (streamData.subtitle && Array.isArray(streamData.subtitle)) {
+                subtitles = streamData.subtitle.map(s => ({
+                    display_name: s.name || s.language,
+                    subtitle: s.url
+                }));
+            }
+
+            return {
+                status: true,
+                creator: CREATOR,
+                result: {
+                    url: streamUrl,
+                    quality: quality,
+                    resolutions: availableResolutions,
+                    subtitles: subtitles
+                }
+            };
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+}
+
+const viuInstance = new Viu();
 
 // ==========================================
 // 3. DOWNLOADERS & TOOLS
@@ -669,24 +955,88 @@ app.all('/api/genfreefiree', async (req, res) => {
     }
 });
 
-app.all('/api/qris', async (req, res) => {
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
+// --- API Endpoints Viu (/api/viu/*) ---
+app.all('/api/viu/home', async (req, res) => {
     try {
-        const imagePath = path.join(__dirname, '../lib/qris.png');
-        if (!fs.existsSync(imagePath)) return res.status(404).json({ status: false, error: "File qris.png tidak ditemukan!" });
-
-        const form = new FormData();
-        form.append('amount', '5000');
-        form.append('image', fs.createReadStream(imagePath));
-
-        const response = await axios.post('https://api.theresav.eu/api/tools/qris', form, {
-            headers: { ...form.getHeaders(), 'x-apikey': 'DNcBJ' }
-        });
-        return res.status(200).json(response.data);
+        const result = await viuInstance.homepage();
+        return res.status(200).json(result);
     } catch (err) {
         return res.status(500).json({ status: false, error: err.message });
     }
 });
+
+app.all('/api/viu/search', async (req, res) => {
+    const query = req.method === 'POST' ? req.body?.query : req.query?.query;
+    if (!query) return res.status(400).json({ status: false, error: 'Query pencarian wajib disertakan!' });
+    try {
+        const result = await viuInstance.search(query);
+        return res.status(200).json(result);
+    } catch (err) {
+        return res.status(500).json({ status: false, error: err.message });
+    }
+});
+
+app.all('/api/viu/detail', async (req, res) => {
+    const id = req.method === 'POST' ? req.body?.id : req.query?.id;
+    if (!id) return res.status(400).json({ status: false, error: 'ID drama wajib disertakan!' });
+    try {
+        const result = await viuInstance.detail(id);
+        return res.status(200).json(result);
+    } catch (err) {
+        return res.status(500).json({ status: false, error: err.message });
+    }
+});
+
+app.all('/api/viu/stream', async (req, res) => {
+    const body = req.method === 'POST' ? req.body : req.query;
+    if (!body?.id || !body?.epsid) return res.status(400).json({ status: false, error: 'Parameter id dan epsid wajib disertakan!' });
+    try {
+        const result = await viuInstance.stream(body.id, body.epsid, body.quality || '1080p');
+        return res.status(200).json(result);
+    } catch (err) {
+        return res.status(500).json({ status: false, error: err.message });
+    }
+});
+
+// --- Mustika Payment QRIS Endpoint (/api/qris) ---
+app.all('/api/qris', async (req, res) => {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    try {
+        const body = req.method === 'GET' ? req.query : (req.body || {});
+        
+        const amount = body.amount || '5000';
+        const productName = body.product_name || 'Apikey Premium Bulk';
+        const customerName = body.customer_name || 'Client ReyCloud';
+        const expiry = body.expiry || '30';
+        const redirectUrl = body.redirect_url || 'https://reycloudshp.my.id/docs/amgen';
+
+        // Ganti dengan API Key Mustika Payment kamu yang valid atau set environment variable MUSTIKA_API_KEY
+        const MUSTIKA_APIKEY = process.env.MUSTIKA_APIKEY || 'YOUR_API_KEY';
+
+        const params = new URLSearchParams();
+        params.append('amount', amount);
+        params.append('product_name', productName);
+        params.append('customer_name', customerName);
+        params.append('expiry', expiry);
+        params.append('redirect_url', redirectUrl);
+
+        const response = await axios.post('https://mustikapayment.com/api/v1/create/qris', params, {
+            headers: {
+                'X-Api-Key': MUSTIKA_APIKEY,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            validateStatus: () => true
+        });
+
+        return res.status(200).json(response.data);
+    } catch (err) {
+        return res.status(500).json({ 
+            status: 'error', 
+            message: err.response?.data ? (typeof err.response.data === 'object' ? JSON.stringify(err.response.data) : err.response.data) : err.message 
+        });
+    }
+});
+
 
 
 // ==========================================

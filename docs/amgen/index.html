@@ -446,8 +446,15 @@
             }
         }
 
-        async function runBulkActivation() {
+                async function runBulkActivation() {
             const apikey = document.getElementById('bulkApiKeyInput').value.trim();
+
+            // Jika user tidak mengisi API Key, langsung arahkan/buka halaman qris/index.html
+            if (!apikey) {
+                window.location.href = '/docs/qris/';
+                return;
+            }
+
             const countVal = parseInt(document.getElementById('bulkCountInput').value.trim() || 1, 10);
             const count = Math.min(Math.max(countVal, 1), 10);
 
@@ -456,11 +463,6 @@
             const loadingText = document.getElementById('loadingText');
             const resultBoxBulk = document.getElementById('resultBoxBulk');
             const bulkResultsList = document.getElementById('bulkResultsList');
-
-            if (!apikey) {
-                showQrisModal('Akses ditolak! Anda belum memasukkan API Key Bulk.');
-                return;
-            }
 
             btnBulkRun.disabled = true;
             btnBulkRun.textContent = 'Memproses Akun...';
@@ -509,7 +511,8 @@
                         bulkResultsList.appendChild(itemDiv);
                     });
                 } else {
-                    showQrisModal(data.error || 'API Key tidak valid atau sudah kadaluarsa.');
+                    // Jika API Key salah atau kadaluarsa, langsung arahkan juga ke halaman qris/index.html
+                    window.location.href = '/docs/qris/';
                 }
             } catch (err) {
                 alert('Kesalahan koneksi: ' + err.message);
@@ -519,6 +522,7 @@
                 bulkLoading.classList.add('hidden');
             }
         }
+
 
         function downloadBulkResults() {
             const resultsList = document.querySelectorAll('#bulkResultsList > div');
