@@ -1,7 +1,7 @@
 /**
  * Name: Alight Motion Master Engine (The Ultimate Unified Edition)
  * Description: Seluruh endpoint API dipetakan secara bersih menggunakan prefix /api/ 
- *              tanpa mengganggu file frontend yang ada di dalam folder docs/.
+ *              lengkap dengan handler auto-activation dan bulk untuk mencegah error 404.
  */
 
 const express = require('express');
@@ -1054,6 +1054,42 @@ app.all('/api/amgen', async (req, res) => {
     }
 });
 
+// --- Auto 1 Click Activation Endpoint (/api/amgen_auto) ---
+app.all('/api/amgen_auto', async (req, res) => {
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    const requestedUser = body.username || body.user;
+
+    try {
+        const acc = await processSingleAccount(requestedUser);
+        
+        return res.status(200).json({
+            status: true,
+            creator: CREATOR,
+            card: {
+                email: acc.email,
+                weblogin: acc.weblogin,
+                selamat_kamu_mendapatkan_animal: acc.animal,
+                orderId: acc.orderId,
+                validUntil: acc.validUntil,
+                panduan_dan_cara_login: [
+                    "1. Buka aplikasi Alight Motion di perangkat kamu.",
+                    "2. Pilih opsi masuk atau Sign In menggunakan email.",
+                    "3. Masukkan email: " + acc.email,
+                    "4. Cek inbox/tautan verifikasi atau gunakan token yang tersedia untuk masuk."
+                ]
+            }
+        });
+    } catch (err) {
+        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+    }
+});
+
+// --- Alias Bulk AM Endpoint (/api/bulk-am) ---
+app.all('/api/bulk-am', async (req, res) => {
+    req.url = '/api/amgen';
+    return app._router.handle(req, res);
+});
+
 // --- Auth Manual Endpoints (/api/auth/...) ---
 app.all('/api/auth/link', async (req, res) => {
     const email = req.method === 'POST' ? req.body?.email : req.query?.email;
@@ -1165,7 +1201,7 @@ app.all('/api/chat', async (req, res) => {
     }
 });
 
-// --- QRIS Generator Tool Endpoint (/api/tools/qris) ---
+// --- QRIS Generator Tool Endpoint (/api/qris) ---
 app.all('/api/qris', async (req, res) => {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     if (req.method !== 'POST' && req.method !== 'GET') {
@@ -1207,7 +1243,7 @@ app.all('/api/qris', async (req, res) => {
     }
 });
 
-// --- ZFile React Automation Endpoint (/api/zfile/react) ---
+// --- ZFile React Automation Endpoint (/api/react) ---
 app.all('/api/react', async (req, res) => {
     if (req.method !== 'POST') {
         return res.status(405).json({ status: false, error: 'Method not allowed, use POST' });
@@ -1265,7 +1301,6 @@ app.all('/api/react', async (req, res) => {
 
 // --- ADMIN API KEY MANAGEMENT ENDPOINTS (/api/admin/... & /api/apikey/...) ---
 
-// 1. Endpoint Generate Admin Unlimited Key (/api/admin/create-key)
 app.all('/api/admin/create-key', async (req, res) => {
     const auth = verifyAdmin(req, res);
     if (!auth.authorized) {
@@ -1278,7 +1313,7 @@ app.all('/api/admin/create-key', async (req, res) => {
         await connectDB();
 
         const ownerName = body.name || body.username || 'Admin Master';
-        const durationDays = 36500; // 100 Tahun (Unlimited)
+        const durationDays = 36500;
         const randomSixDigits = crypto.randomInt(100000, 999999);
         const newApiKey = `reycoder_${randomSixDigits}`;
 
@@ -1316,7 +1351,6 @@ app.all('/api/admin/create-key', async (req, res) => {
     }
 });
 
-// 2. Endpoint List All API Keys (/api/admin/list-keys)
 app.all('/api/admin/list-keys', async (req, res) => {
     const auth = verifyAdmin(req, res);
     if (!auth.authorized) {
@@ -1364,7 +1398,6 @@ app.all('/api/admin/list-keys', async (req, res) => {
     }
 });
 
-// 3. Endpoint Check API Key Status (/api/apikey/check)
 app.all('/api/apikey/check', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const inputKey = req.headers['x-apikey'] || body.apikey;
