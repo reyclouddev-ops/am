@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReyCloudSHP - Initializing Portal...</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #08090c; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden transition-opacity duration-700 opacity-100" id="landingBody">
+
+    <!-- Dynamic Ambient Background Glows -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-amber-500/10 blur-[150px] pointer-events-none rounded-full"></div>
+    <div class="absolute top-1/4 right-10 w-[250px] h-[250px] bg-cyan-500/10 blur-[140px] pointer-events-none rounded-full"></div>
+
+    <div class="w-full max-w-sm text-center space-y-6 relative z-10">
+        
+        <!-- Logo Icon with Pulse Animation -->
+        <div class="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-tr from-amber-500 to-cyan-400 p-[2px] shadow-2xl shadow-amber-500/20 animate-pulse">
+            <div class="w-full h-full bg-[#0d0f12] rounded-[14px] flex items-center justify-center text-amber-400 font-black text-2xl">
+                ⚡
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <h1 class="text-lg font-black tracking-widest uppercase text-white">
+                REYCLOUD<span class="text-amber-400">SHP</span>
+            </h1>
+            <p id="loadingStatusText" class="text-xs font-mono text-slate-400 tracking-wider">Memuat Engine & Menghubungkan Sistem...</p>
+        </div>
+
+        <!-- Progress Bar & Spinner -->
+        <div class="space-y-3 px-6">
+            <div class="w-full bg-[#151922] border border-[#232936] h-2 rounded-full overflow-hidden p-0.5 shadow-inner">
+                <div id="progressBar" class="bg-gradient-to-r from-amber-400 to-cyan-400 h-full rounded-full transition-all duration-300 w-[10%]"></div>
+            </div>
+            <div class="flex justify-between text-[10px] font-mono text-slate-500">
+                <span>SECURE_BOOT</span>
+                <span id="progressPercentage">10%</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Simulasi proses loading sistem sebelum masuk ke dashboard
+        let progress = 10;
+        const progressBar = document.getElementById('progressBar');
+        const progressPercentage = document.getElementById('progressPercentage');
+        const statusText = document.getElementById('loadingStatusText');
+        const landingBody = document.getElementById('landingBody');
+
+        const loadingSteps = [
+            { at: 30, text: "Memuat Database & Konfigurasi API..." },
+            { at: 60, text: "Sinkronisasi Rute Folder Docs & Server..." },
+            { at: 85, text: "Mempersiapkan Dashboard Eksklusif..." },
+            { at: 100, text: "Berhasil! Membuka Portal Utama..." }
+        ];
+
+        const interval = setInterval(() => {
+            progress += Math.floor(Math.random() * 15) + 5;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                
+                // Update teks terakhir
+                progressBar.style.width = '100%';
+                progressPercentage.textContent = '100%';
+                statusText.textContent = "Berhasil! Membuka Portal Utama...";
+
+                // Efek Fade-Out lalu Redirect ke /dashboard (atau index dashboard utama)
+                setTimeout(() => {
+                    landingBody.classList.remove('opacity-100');
+                    landingBody.classList.add('opacity-0');
+                    
+                    setTimeout(() => {
+                        // Arahkan ke halaman dashboard utama (ubah '/dashboard' jika file dashboard lu namanya berbeda, misal '/dashboard.html')
+                        window.location.href = '/dashboard'; 
+                    }, 700);
+                }, 500);
+            } else {
+                progressBar.style.width = progress + '%';
+                progressPercentage.textContent = progress + '%';
+
+                // Ubah teks status berdasarkan persentase
+                const currentStep = loadingSteps.reverse().find(s => progress >= s.at);
+                if (currentStep) {
+                    statusText.textContent = currentStep.text;
+                }
+            }
+        }, 180);
+    </script>
+</body>
+</html>

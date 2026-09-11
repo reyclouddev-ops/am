@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReyCloud - Media Downloader</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #0d0f12; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 relative">
+
+    <div class="w-full max-w-md space-y-4">
+        
+        <!-- Top Navbar -->
+        <div class="flex items-center justify-between bg-[#151922] border border-[#232936] rounded-2xl p-4 shadow-lg relative">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400 font-bold">
+                    📥
+                </div>
+                <div>
+                    <div class="flex items-center space-x-1.5">
+                        <span class="font-extrabold text-sm tracking-wide text-white">REYCLOUD<span class="text-pink-400">TOOLS</span></span>
+                    </div>
+                    <span class="text-[10px] tracking-widest text-slate-400 font-semibold uppercase">DOWNLOADER ENGINE</span>
+                </div>
+            </div>
+            
+            <a href="/dashboard" class="px-3 py-1.5 rounded-xl bg-[#1e2330] border border-[#2b3344] text-[11px] text-slate-300 hover:text-white transition-all font-medium">
+                Kembali Dashboard
+            </a>
+        </div>
+
+        <div class="space-y-1 px-1">
+            <div class="text-[11px] text-slate-400">Multi-Platform <span class="text-pink-400 font-bold tracking-wide">SOCIAL MEDIA DOWNLOADER</span></div>
+            <p id="subTitleDesc" class="text-[11px] text-slate-400 leading-relaxed">Unduh video HD TikTok tanpa watermark beserta preview & statistik lengkap.</p>
+        </div>
+
+        <!-- Platform Switcher -->
+        <div class="grid grid-cols-2 gap-2 bg-[#151922] p-1.5 rounded-2xl border border-[#232936]">
+            <button id="btnTabIg" onclick="switchPlatform('instagram')" class="py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                📷 Instagram DL
+            </button>
+            <button id="btnTabTt" onclick="switchPlatform('tiktok')" class="py-2.5 rounded-xl text-xs font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer">
+                🎵 TikTok DL
+            </button>
+        </div>
+
+        <!-- TIKTOK DOWNLOAD SECTION -->
+        <div id="sectionTiktok" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-4">
+            <div class="flex items-start space-x-3.5">
+                <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-pink-400 shrink-0">
+                    🎵
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-white tracking-tight">TikTok HD Downloader</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Tempel tautan video TikTok untuk mengambil video HD & statistik.</p>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">URL TIKTOK</label>
+                <input type="text" id="tiktokUrlInput" placeholder="https://vt.tiktok.com/..." 
+                    class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-pink-500 transition-colors">
+                <button onclick="processTikTok()" id="btnProcessTiktok"
+                    class="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                    Download Video TikTok HD
+                </button>
+            </div>
+
+            <div id="tiktokLoading" class="hidden text-center py-6 space-y-3">
+                <div class="inline-block w-7 h-7 border-2 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-xs text-pink-400 animate-pulse font-medium">Mengambil data video & preview...</p>
+            </div>
+
+            <!-- PREVIEW & DETAIL RESULT BOX -->
+            <div id="tiktokResultBox" class="hidden space-y-4 bg-[#0d0f12] border border-pink-500/30 rounded-2xl p-4">
+                <div class="flex items-center space-x-3 border-b border-[#232936] pb-3">
+                    <img id="authorAvatar" src="" class="w-10 h-10 rounded-full object-cover border border-pink-500/40">
+                    <div class="overflow-hidden">
+                        <h4 id="authorName" class="text-xs font-bold text-white truncate">Author Name</h4>
+                        <span id="videoDesc" class="text-[10px] text-slate-400 line-clamp-1">Caption video...</span>
+                    </div>
+                </div>
+
+                <!-- Video Preview Player -->
+                <div class="relative w-full rounded-xl overflow-hidden border border-[#232936] bg-black aspect-video flex items-center justify-center">
+                    <video id="videoPreview" controls class="w-full h-full object-contain"></video>
+                </div>
+
+                <!-- Statistik Interaksi -->
+                <div class="grid grid-cols-4 gap-1 text-center bg-[#151922] border border-[#232936] rounded-xl p-2.5">
+                    <div>
+                        <span class="text-[9px] text-slate-400 block uppercase">❤️ Likes</span>
+                        <span id="statLikes" class="text-[11px] font-bold text-white font-mono">0</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-slate-400 block uppercase">💬 Comments</span>
+                        <span id="statComments" class="text-[11px] font-bold text-white font-mono">0</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-slate-400 block uppercase">🔄 Shares</span>
+                        <span id="statShares" class="text-[11px] font-bold text-white font-mono">0</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-slate-400 block uppercase">👁️ Views</span>
+                        <span id="statViews" class="text-[11px] font-bold text-white font-mono">0</span>
+                    </div>
+                </div>
+
+                <!-- Tombol Download -->
+                <div class="space-y-2 pt-1">
+                    <a id="downloadHdBtn" href="" target="_blank" class="block w-full text-center bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 rounded-xl text-xs transition-all shadow">
+                        📥 Download Video HD (Tanpa Watermark)
+                    </a>
+                    <a id="downloadAudioBtn" href="" target="_blank" class="block w-full text-center bg-[#1e2330] hover:bg-[#2b3344] text-slate-300 font-bold py-2.5 rounded-xl text-xs transition-all border border-[#2b3344]">
+                        🎵 Download Original Audio (MP3)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- INSTAGRAM DOWNLOAD SECTION -->
+        <div id="sectionInstagram" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-4 hidden">
+            <div class="flex items-start space-x-3.5">
+                <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-cyan-400 shrink-0">
+                    📷
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-white tracking-tight">Instagram Downloader</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Unduh Reels dan foto Instagram dengan mudah.</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">URL INSTAGRAM</label>
+                <input type="text" id="igUrlInput" placeholder="https://www.instagram.com/reel/..." 
+                    class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-500">
+                <button onclick="processInstagram()" id="btnProcessIg" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                    Download Media Instagram
+                </button>
+            </div>
+        </div>
+
+        <div class="pt-2 text-center text-[11px] text-slate-400">
+            <span>ReyCloudSHP Downloader Engine</span>
+        </div>
+
+    </div>
+
+    <script>
+        function switchPlatform(platform) {
+            const btnIg = document.getElementById('btnTabIg');
+            const btnTt = document.getElementById('btnTabTt');
+            const secIg = document.getElementById('sectionInstagram');
+            const secTt = document.getElementById('sectionTiktok');
+            const subTitle = document.getElementById('subTitleDesc');
+
+            if (platform === 'instagram') {
+                btnIg.className = "py-2.5 rounded-xl text-xs font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
+                btnTt.className = "py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
+                secIg.classList.remove('hidden');
+                secTt.classList.add('hidden');
+                subTitle.textContent = "Unduh Reels dan foto Instagram dengan mudah dan cepat.";
+            } else {
+                btnTt.className = "py-2.5 rounded-xl text-xs font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
+                btnIg.className = "py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
+                secTt.classList.remove('hidden');
+                secIg.classList.add('hidden');
+                subTitle.textContent = "Unduh video HD TikTok tanpa watermark beserta preview & statistik lengkap.";
+            }
+        }
+
+        async function processTikTok() {
+            const urlInput = document.getElementById('tiktokUrlInput').value.trim();
+            const btnProcess = document.getElementById('btnProcessTiktok');
+            const loading = document.getElementById('tiktokLoading');
+            const resultBox = document.getElementById('tiktokResultBox');
+
+            if (!urlInput) {
+                return alert('Masukkan URL TikTok terlebih dahulu!');
+            }
+
+            btnProcess.classList.add('hidden');
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            try {
+                const res = await fetch(`/api/tiktok?url=${encodeURIComponent(urlInput)}`);
+                const json = await res.json();
+
+                if (!json.status) {
+                    throw new Error(json.error || 'Gagal mengambil data video TikTok.');
+                }
+
+                const data = json;
+
+                document.getElementById('authorAvatar').src = data.author?.avatar || 'https://via.placeholder.com/150';
+                document.getElementById('authorName').textContent = data.author?.nickname || data.author?.fullname || 'TikTok User';
+                document.getElementById('videoDesc').textContent = data.title || 'Tanpa Keterangan';
+                
+                const hdObj = data.data?.find(item => item.type === 'nowatermark_hd') || data.data?.find(item => item.type === 'nowatermark');
+                const videoUrl = hdObj ? hdObj.url : '';
+
+                document.getElementById('videoPreview').src = videoUrl;
+                
+                document.getElementById('statLikes').textContent = formatNumber(data.stats?.likes || 0);
+                document.getElementById('statComments').textContent = formatNumber(data.stats?.comment || 0);
+                document.getElementById('statShares').textContent = formatNumber(data.stats?.share || 0);
+                document.getElementById('statViews').textContent = formatNumber(data.stats?.views || 0);
+
+                document.getElementById('downloadHdBtn').href = videoUrl;
+                document.getElementById('downloadAudioBtn').href = data.music_info?.url || '#';
+
+                loading.classList.add('hidden');
+                btnProcess.classList.remove('hidden');
+                resultBox.classList.remove('hidden');
+
+            } catch (err) {
+                alert('Error: ' + err.message);
+                loading.classList.add('hidden');
+                btnProcess.classList.remove('hidden');
+            }
+        }
+
+        function processInstagram() {
+            const igUrl = document.getElementById('igUrlInput').value.trim();
+            if (!igUrl) {
+                return alert('Masukkan URL Instagram terlebih dahulu!');
+            }
+            alert('Fitur Instagram Downloader siap dihubungkan ke endpoint API kamu.');
+        }
+
+        function formatNumber(num) {
+            const n = parseInt(num, 10);
+            if (isNaN(n)) return num;
+            if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+            if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+            return n;
+        }
+    </script>
+</body>
+</html>

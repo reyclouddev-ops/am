@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReyCloud - AI Tools, Enhancer & React</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #0d0f12; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 relative">
+
+    <!-- CUSTOM TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-4">
+        <div id="toastBox" class="bg-[#1e2330] border border-amber-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-medium">
+            <span id="toastIcon">⚠️</span>
+            <span id="toastMessage">Pesan notifikasi di sini</span>
+        </div>
+    </div>
+
+    <div class="w-full max-w-md space-y-4">
+        
+        <div class="flex items-center justify-between bg-[#151922] border border-[#232936] rounded-2xl p-4 shadow-lg relative">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
+                    R
+                </div>
+                <div>
+                    <div class="flex items-center space-x-1.5">
+                        <span class="font-extrabold text-sm tracking-wide text-white">REYCLOUD<span class="text-cyan-400">TOOLS</span></span>
+                    </div>
+                    <span class="text-[10px] tracking-widest text-slate-400 font-semibold uppercase">AI UTILITY SUITE</span>
+                </div>
+            </div>
+            
+            <a href="/dashboard" class="px-3 py-1.5 rounded-xl bg-[#1e2330] border border-[#2b3344] text-[11px] text-slate-300 hover:text-white transition-all font-medium">
+                Kembali ke Home
+            </a>
+        </div>
+
+        <div class="space-y-1 px-1">
+            <div class="text-[11px] text-slate-400">ReyCloud <span class="text-cyan-400 font-bold tracking-wide">AI TOOLS, ENHANCER, IMAGEN & REACT</span></div>
+            <p id="subTitleText" class="text-[11px] text-slate-400 leading-relaxed">Tingkatkan gambar, enhance video, hapus background, generate AI image, atau kirim WA reaction.</p>
+        </div>
+
+        <!-- GRID 5 MENU -->
+        <div class="grid grid-cols-5 gap-1 bg-[#151922] p-1.5 rounded-2xl border border-[#232936]">
+            <button id="btnTabUpscale" onclick="switchToolTab('upscale')" 
+                class="flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer">
+                <span>✨ Upscale</span>
+            </button>
+            <button id="btnTabWink" onclick="switchToolTab('wink')" 
+                class="flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                <span>🎬 Wink</span>
+            </button>
+            <button id="btnTabRemoveBg" onclick="switchToolTab('removebg')" 
+                class="flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                <span>✂️ Remove</span>
+            </button>
+            <button id="btnTabImagen" onclick="switchToolTab('imagen')" 
+                class="flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                <span>🎨 Imagen</span>
+            </button>
+            <button id="btnTabReact" onclick="switchToolTab('react')" 
+                class="flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                <span>⚡ React</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: UPSCALE -->
+        <div id="sectionUpscale" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-5">
+            <div class="flex items-start space-x-3.5">
+                <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-cyan-400 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-white tracking-tight">AI Image Upscaler HD</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Upload gambar Anda untuk proses peningkatan kejernihan.</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">PILIH FILE GAMBAR</label>
+                    <input type="file" id="imageFileInput" accept="image/*" 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-2.5 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/10 file:text-cyan-400 hover:file:bg-cyan-500/20 cursor-pointer">
+                </div>
+                <button onclick="processUpscale()" id="btnProcessUpscale"
+                    class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                    Mulai Upscale Gambar
+                </button>
+            </div>
+
+            <div id="upscaleLoading" class="hidden text-center py-6 space-y-3">
+                <div class="inline-block w-7 h-7 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-xs text-cyan-400 animate-pulse font-medium">Sedang memproses & menjernihkan gambar...</p>
+            </div>
+
+            <div id="upscaleResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-cyan-500/30 rounded-2xl p-4 text-center">
+                <div class="flex items-center justify-center space-x-2 text-cyan-400 font-bold text-xs">
+                    <span>✨</span>
+                    <span>Upscale Berhasil!</span>
+                </div>
+                <img id="upscaleResultImg" src="" alt="Upscaled" class="w-full rounded-xl border border-[#232936] max-h-60 object-contain mx-auto">
+                <a id="upscaleDownloadBtn" href="" target="_blank" class="inline-block w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition-all">
+                    Unduh Gambar HD
+                </a>
+            </div>
+        </div>
+
+        <!-- TAB 2: WINK -->
+        <div id="sectionWink" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-5 hidden">
+            <div class="flex items-start space-x-3.5">
+                <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-amber-400 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-white tracking-tight">Wink Video Enhancer Ultra HD</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Tingkatkan kualitas video blur menjadi jernih beresolusi tinggi.</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">PILIH FILE VIDEO</label>
+                    <input type="file" id="videoFileInput" accept="video/*" 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-2.5 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500/10 file:text-amber-400 hover:file:bg-amber-500/20 cursor-pointer">
+                </div>
+                <button onclick="processWink()" id="btnProcessWink"
+                    class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                    Mulai Enhance Video
+                </button>
+            </div>
+
+            <div id="winkLoading" class="hidden text-center py-6 space-y-3">
+                <div class="inline-block w-7 h-7 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-xs text-amber-400 animate-pulse font-medium">Sedang memproses video via Wink AI (Mohon tunggu beberapa saat)...</p>
+            </div>
+
+            <div id="winkResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-amber-500/30 rounded-2xl p-4 text-center">
+                <div class="flex items-center justify-center space-x-2 text-amber-400 font-bold text-xs">
+                    <span>🎉</span>
+                    <span>Video Enhance Berhasil!</span>
+                </div>
+                <video id="winkResultVideo" controls class="w-full rounded-xl border border-[#232936] max-h-60 object-contain mx-auto"></video>
+                <a id="winkDownloadBtn" href="" target="_blank" class="inline-block w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition-all">
+                    Unduh Video HD
+                </a>
+            </div>
+        </div>
+
+        <!-- TAB 3: REMOVEBG -->
+        <div id="sectionRemoveBg" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-5 hidden">
+            <div class="flex items-start space-x-3.5">
+                <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-pink-400 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-white tracking-tight">AI Remove Background</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Hapus latar belakang foto secara otomatis dengan akurat.</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">PILIH FILE GAMBAR</label>
+                    <input type="file" id="removeBgFileInput" accept="image/*" 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-2.5 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-pink-500/10 file:text-pink-400 hover:file:bg-pink-500/20 cursor-pointer">
+                </div>
+                <button onclick="processRemoveBg()" id="btnProcessRemoveBg"
+                    class="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                    Hapus Background Sekarang
+                </button>
+            </div>
+
+            <div id="removeBgLoading" class="hidden text-center py-6 space-y-3">
+                <div class="inline-block w-7 h-7 border-2 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-xs text-pink-400 animate-pulse font-medium">Sedang menghapus background gambar...</p>
+            </div>
+
+            <div id="removeBgResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-pink-500/30 rounded-2xl p-4 text-center">
+                <div class="flex items-center justify-center space-x-2 text-pink-400 font-bold text-xs">
+                    <span>✂️</span>
+                    <span>Background Berhasil Dihapus!</span>
+                </div>
+                <img id="removeBgResultImg" src="" alt="RemoveBG Result" class="w-full rounded-xl border border-[#232936] max-h-60 object-contain mx-auto bg-[linear-gradient(45deg,#1f2937_25%,transparent_25%),linear-gradient(-45deg,#1f2937_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#1f2937_75%),linear-gradient(-45deg,transparent_75%,#1f2937_75%)] bg-[size:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0px]">
+                <a id="removeBgDownloadBtn" href="" download="removebg.png" class="inline-block w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all">
+                    Unduh Gambar Transparan (PNG)
+                </a>
+            </div>
+        </div>
+
+        <!-- TAB 4: IMAGEN (AI Image Generator) -->
+        <div id="sectionImagen" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-4 hidden">
+            <div class="flex items-start space-x-3.5">
+                <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-purple-400 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-white tracking-tight">AI Image Generator (Imagen)</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Buat gambar kreatif dengan Flux AI, pilih style & rasio sesuai keinginan.</p>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PROMPT GAMBAR</label>
+                    <textarea id="imagenPrompt" rows="2" placeholder="Contoh: a cute cat wearing cyberpunk sunglasses..." 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-colors resize-none"></textarea>
+                </div>
+
+                <!-- STYLE PILIHAN CUSTOM GRID -->
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PILIH STYLE</label>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button type="button" onclick="selectImagenStyle('Realistic')" id="styleBtn_Realistic" class="py-2 px-2 rounded-xl text-[10px] font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer">Realistic</button>
+                        <button type="button" onclick="selectImagenStyle('Anime')" id="styleBtn_Anime" class="py-2 px-2 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">Anime</button>
+                        <button type="button" onclick="selectImagenStyle('Digital Art')" id="styleBtn_Digital Art" class="py-2 px-2 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">Digital Art</button>
+                        <button type="button" onclick="selectImagenStyle('Cyberpunk')" id="styleBtn_Cyberpunk" class="py-2 px-2 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">Cyberpunk</button>
+                        <button type="button" onclick="selectImagenStyle('Cinematic')" id="styleBtn_Cinematic" class="py-2 px-2 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">Cinematic</button>
+                        <button type="button" onclick="selectImagenStyle('No Style')" id="styleBtn_No Style" class="py-2 px-2 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">No Style</button>
+                    </div>
+                    <input type="hidden" id="selectedImagenStyle" value="Realistic">
+                </div>
+
+                <!-- RATIO PILIHAN CUSTOM GRID -->
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PILIH RASIO (RATIO)</label>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button type="button" onclick="selectImagenRatio('1:1')" id="ratioBtn_1:1" class="py-2 px-1 rounded-xl text-[10px] font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer">1:1 Square</button>
+                        <button type="button" onclick="selectImagenRatio('3:4')" id="ratioBtn_3:4" class="py-2 px-1 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">3:4 Portrait</button>
+                        <button type="button" onclick="selectImagenRatio('4:3')" id="ratioBtn_4:3" class="py-2 px-1 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">4:3 Landscape</button>
+                        <button type="button" onclick="selectImagenRatio('16:9')" id="ratioBtn_16:9" class="py-2 px-1 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">16:9 Widescreen</button>
+                        <button type="button" onclick="selectImagenRatio('9:16')" id="ratioBtn_9:16" class="py-2 px-1 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">9:16 Story</button>
+                    </div>
+                    <input type="hidden" id="selectedImagenRatio" value="1:1">
+                </div>
+
+                <button onclick="processImagen()" id="btnProcessImagen"
+                    class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl text-xs transition-all shadow cursor-pointer mt-2">
+                    Generate AI Image
+                </button>
+            </div>
+
+            <div id="imagenLoading" class="hidden text-center py-4 space-y-2">
+                <div class="inline-block w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-[11px] text-purple-400 animate-pulse font-medium">Sedang merender gambar AI & Upload ke ImgBB...</p>
+            </div>
+
+            <div id="imagenResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-purple-500/30 rounded-2xl p-3 text-center">
+                <div class="flex items-center justify-center space-x-1.5 text-purple-400 font-bold text-xs">
+                    <span>🎨</span>
+                    <span>Generate Berhasil!</span>
+                </div>
+                <img id="imagenResultImg" src="" alt="Imagen Result" class="w-full rounded-xl border border-[#232936] max-h-52 object-contain mx-auto">
+                <a id="imagenDownloadBtn" href="" target="_blank" class="inline-block w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl text-xs transition-all">
+                    Buka / Unduh Gambar
+                </a>
+            </div>
+        </div>
+
+        <!-- TAB 5: REACT (MAX 4 EMOJI LOCKED & CLEAN CARD) -->
+        <div id="sectionReact" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-5 hidden">
+            <div class="flex items-start space-x-3.5">
+                <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-emerald-400 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-white tracking-tight">WhatsApp Reaction Sender</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Kirim reaksi otomatis ke link/pesan WhatsApp target (Maksimal 4 Emoji).</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">URL TARGET WHATSAPP</label>
+                    <input type="text" id="waUrlInput" placeholder="https://whatsapp.com/channel/... atau link pesan" 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors">
+                </div>
+
+                <!-- PILIHAN CEPAT (PRESET EMOJI) -->
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PILIHAN CEPAT (PRESET)</label>
+                    <div class="grid grid-cols-4 gap-1.5">
+                        <button type="button" onclick="setPresetEmoji('😂')" class="py-2 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-xl text-xs text-slate-200 transition-all cursor-pointer font-medium">😂 Haha</button>
+                        <button type="button" onclick="setPresetEmoji('❤️')" class="py-2 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-xl text-xs text-slate-200 transition-all cursor-pointer font-medium">❤️ Love</button>
+                        <button type="button" onclick="setPresetEmoji('👍')" class="py-2 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-xl text-xs text-slate-200 transition-all cursor-pointer font-medium">👍 Jempol</button>
+                        <button type="button" onclick="setPresetEmoji('🔥')" class="py-2 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-xl text-xs text-slate-200 transition-all cursor-pointer font-medium">🔥 Api</button>
+                        <button type="button" onclick="setPresetEmoji('😂,❤️,👍,🔥')" class="py-2 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-xl text-xs text-emerald-400 transition-all cursor-pointer font-bold col-span-2">⚡ Combo All (4)</button>
+                        <button type="button" onclick="setPresetEmoji('🎉,✨')" class="py-2 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-xl text-xs text-slate-200 transition-all cursor-pointer font-medium col-span-2">🎉 Party Combo</button>
+                    </div>
+                </div>
+
+                <!-- CUSTOM EMOJI INPUT -->
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">CUSTOM EMOJI (Maksimal 4 Biji)</label>
+                    <div class="grid grid-cols-8 gap-1 mb-2">
+                        <button type="button" onclick="appendCustomEmoji('😂')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">😂</button>
+                        <button type="button" onclick="appendCustomEmoji('❤️')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">❤️</button>
+                        <button type="button" onclick="appendCustomEmoji('👍')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">👍</button>
+                        <button type="button" onclick="appendCustomEmoji('🔥')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">🔥</button>
+                        <button type="button" onclick="appendCustomEmoji('😭')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">😭</button>
+                        <button type="button" onclick="appendCustomEmoji('🎉')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">🎉</button>
+                        <button type="button" onclick="appendCustomEmoji('🙏')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">🙏</button>
+                        <button type="button" onclick="appendCustomEmoji('✨')" class="py-1.5 bg-[#0d0f12] border border-[#232936] hover:border-emerald-500 rounded-lg text-sm transition-all cursor-pointer">✨</button>
+                    </div>
+                    <input type="text" id="waEmojisInput" placeholder="Contoh: 😂,❤️" value="😂" readonly
+                        class="w-full bg-[#0d0f12] border border-emerald-500/50 rounded-xl px-4 py-3 text-xs text-emerald-400 font-bold text-center tracking-widest focus:outline-none">
+                </div>
+
+                <button onclick="processReact()" id="btnProcessReact"
+                    class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                    Kirim WhatsApp Reaction
+                </button>
+            </div>
+
+            <div id="reactLoading" class="hidden text-center py-6 space-y-3">
+                <div class="inline-block w-7 h-7 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-xs text-emerald-400 animate-pulse font-medium">Mengirim reaction ke target WhatsApp...</p>
+            </div>
+
+            <!-- CLEAN RESULT CARD -->
+            <div id="reactResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-emerald-500/30 rounded-2xl p-4">
+                <div class="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
+                    <span>⚡</span>
+                    <span>WhatsApp Reaction Berhasil Terkirim!</span>
+                </div>
+                <div class="bg-[#151922] border border-[#232936] rounded-xl p-3 space-y-2 text-xs font-mono">
+                    <div class="flex justify-between border-b border-[#232936] pb-1.5">
+                        <span class="text-slate-400 font-sans">Status:</span>
+                        <span class="text-emerald-400 font-bold">SUCCESS</span>
+                    </div>
+                    <div class="flex justify-between border-b border-[#232936] pb-1.5">
+                        <span class="text-slate-400 font-sans">Emoji Terkirim:</span>
+                        <span id="resReactEmojis" class="text-amber-300 font-bold"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400 font-sans">Creator API:</span>
+                        <span id="resReactCreator" class="text-cyan-400">ReyCode</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-2 text-center text-[11px] text-slate-400">
+            <span>ReyCloudSHP AI Tools Engine</span>
+        </div>
+
+    </div>
+
+    <script>
+        function showToast(message, type = 'warning') {
+            const toast = document.getElementById('toastContainer');
+            const box = document.getElementById('toastBox');
+            const icon = document.getElementById('toastIcon');
+            const msg = document.getElementById('toastMessage');
+
+            msg.textContent = message;
+
+            if (type === 'error') {
+                box.className = "bg-[#1e2330] border border-red-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-medium";
+                icon.textContent = "❌";
+            } else if (type === 'success') {
+                box.className = "bg-[#1e2330] border border-emerald-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-medium";
+                icon.textContent = "✅";
+            } else {
+                box.className = "bg-[#1e2330] border border-amber-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-medium";
+                icon.textContent = "⚠️";
+            }
+
+            toast.classList.remove('opacity-0', '-translate-y-4', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-4', 'pointer-events-none');
+            }, 3000);
+        }
+
+        function appendCustomEmoji(emoji) {
+            const input = document.getElementById('waEmojisInput');
+            let currentVal = input.value.trim();
+            let list = currentVal ? currentVal.split(',').map(e => e.trim()).filter(Boolean) : [];
+            
+            const index = list.indexOf(emoji);
+            if (index > -1) {
+                list.splice(index, 1);
+            } else {
+                if (list.length >= 4) {
+                    showToast('Maksimal hanya dapat memilih 4 emoji!', 'warning');
+                    return;
+                }
+                list.push(emoji);
+            }
+
+            input.value = list.length > 0 ? list.join(',') : '😂';
+        }
+
+        function setPresetEmoji(emojis) {
+            const list = emojis.split(',').map(e => e.trim()).filter(Boolean);
+            if (list.length > 4) {
+                showToast('Pilihan preset melebihi batas maksimal 4 emoji!', 'warning');
+                return;
+            }
+            document.getElementById('waEmojisInput').value = emojis;
+        }
+
+        function selectImagenStyle(style) {
+            document.getElementById('selectedImagenStyle').value = style;
+            const styles = ['Realistic', 'Anime', 'Digital Art', 'Cyberpunk', 'Cinematic', 'No Style'];
+            styles.forEach(s => {
+                const btn = document.getElementById(`styleBtn_${s}`);
+                if (s === style) {
+                    btn.className = "py-2 px-2 rounded-xl text-[10px] font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer";
+                } else {
+                    btn.className = "py-2 px-2 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer";
+                }
+            });
+        }
+
+        function selectImagenRatio(ratio) {
+            document.getElementById('selectedImagenRatio').value = ratio;
+            const ratios = ['1:1', '3:4', '4:3', '16:9', '9:16'];
+            ratios.forEach(r => {
+                const btn = document.getElementById(`ratioBtn_${r}`);
+                if (r === ratio) {
+                    btn.className = "py-2 px-1 rounded-xl text-[10px] font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer";
+                } else {
+                    btn.className = "py-2 px-1 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer";
+                }
+            });
+        }
+
+        function switchToolTab(tab) {
+            const btnUpscale = document.getElementById('btnTabUpscale');
+            const btnWink = document.getElementById('btnTabWink');
+            const btnRemoveBg = document.getElementById('btnTabRemoveBg');
+            const btnImagen = document.getElementById('btnTabImagen');
+            const btnReact = document.getElementById('btnTabReact');
+            
+            const sectionUpscale = document.getElementById('sectionUpscale');
+            const sectionWink = document.getElementById('sectionWink');
+            const sectionRemoveBg = document.getElementById('sectionRemoveBg');
+            const sectionImagen = document.getElementById('sectionImagen');
+            const sectionReact = document.getElementById('sectionReact');
+            const subTitleText = document.getElementById('subTitleText');
+
+            [btnUpscale, btnWink, btnRemoveBg, btnImagen, btnReact].forEach(b => {
+                b.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
+            });
+
+            [sectionUpscale, sectionWink, sectionRemoveBg, sectionImagen, sectionReact].forEach(s => {
+                s.classList.add('hidden');
+            });
+
+            if (tab === 'upscale') {
+                btnUpscale.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
+                sectionUpscale.classList.remove('hidden');
+                subTitleText.textContent = "Tingkatkan resolusi dan kejernihan gambar secara otomatis menggunakan teknologi AI.";
+            } else if (tab === 'wink') {
+                btnWink.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
+                sectionWink.classList.remove('hidden');
+                subTitleText.textContent = "Tingkatkan kualitas video blur menjadi jernih beresolusi tinggi dengan Wink AI.";
+            } else if (tab === 'removebg') {
+                btnRemoveBg.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
+                sectionRemoveBg.classList.remove('hidden');
+                subTitleText.textContent = "Hapus latar belakang foto secara otomatis dengan akurat.";
+            } else if (tab === 'imagen') {
+                btnImagen.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
+                sectionImagen.classList.remove('hidden');
+                subTitleText.textContent = "Buat gambar kreatif dengan Flux AI, pilih style & rasio sesuai keinginan.";
+            } else if (tab === 'react') {
+                btnReact.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
+                sectionReact.classList.remove('hidden');
+                subTitleText.textContent = "Kirim reaksi otomatis ke link/pesan WhatsApp target (Maksimal 4 Emoji).";
+            }
+        }
+
+        async function processUpscale() {
+            const fileInput = document.getElementById('imageFileInput');
+            const btnProcess = document.getElementById('btnProcessUpscale');
+            const loading = document.getElementById('upscaleLoading');
+            const resultBox = document.getElementById('upscaleResultBox');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                return showToast('Pilih file gambar terlebih dahulu!', 'warning');
+            }
+
+            const file = fileInput.files[0];
+            btnProcess.classList.add('hidden');
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async function () {
+                try {
+                    const base64Image = reader.result;
+                    const res = await fetch('/api/upscale', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ base64Image, filename: file.name })
+                    });
+                    const json = await res.json();
+
+                    if (!json.status || !json.url) {
+                        throw new Error(json.error || 'Gagal melakukan upscale gambar.');
+                    }
+
+                    document.getElementById('upscaleResultImg').src = json.url;
+                    document.getElementById('upscaleDownloadBtn').href = json.url;
+
+                    loading.classList.add('hidden');
+                    btnProcess.classList.remove('hidden');
+                    resultBox.classList.remove('hidden');
+
+                } catch (err) {
+                    showToast('Error: ' + err.message, 'error');
+                    loading.classList.add('hidden');
+                    btnProcess.classList.remove('hidden');
+                }
+            };
+        }
+
+        async function processWink() {
+            const fileInput = document.getElementById('videoFileInput');
+            const btnProcess = document.getElementById('btnProcessWink');
+            const loading = document.getElementById('winkLoading');
+            const resultBox = document.getElementById('winkResultBox');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                return showToast('Pilih file video terlebih dahulu!', 'warning');
+            }
+
+            const file = fileInput.files[0];
+            btnProcess.classList.add('hidden');
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async function () {
+                try {
+                    const base64Video = reader.result;
+                    const res = await fetch('/api/wink', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ base64Video, filename: file.name })
+                    });
+                    const json = await res.json();
+
+                    if (!json.status || !json.resultUrl) {
+                        throw new Error(json.error || 'Gagal melakukan enhance video Wink.');
+                    }
+
+                    document.getElementById('winkResultVideo').src = json.resultUrl;
+                    document.getElementById('winkDownloadBtn').href = json.resultUrl;
+
+                    loading.classList.add('hidden');
+                    btnProcess.classList.remove('hidden');
+                    resultBox.classList.remove('hidden');
+
+                } catch (err) {
+                    showToast('Error: ' + err.message, 'error');
+                    loading.classList.add('hidden');
+                    btnProcess.classList.remove('hidden');
+                }
+            };
+        }
+
+        async function processRemoveBg() {
+            const fileInput = document.getElementById('removeBgFileInput');
+            const btnProcess = document.getElementById('btnProcessRemoveBg');
+            const loading = document.getElementById('removeBgLoading');
+            const resultBox = document.getElementById('removeBgResultBox');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                return showToast('Pilih file gambar terlebih dahulu!', 'warning');
+            }
+
+            const file = fileInput.files[0];
+            btnProcess.classList.add('hidden');
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async function () {
+                try {
+                    const base64Image = reader.result;
+                    const res = await fetch('/api/removebg', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ base64Image })
+                    });
+                    const json = await res.json();
+
+                    if (!json.status || !json.result) {
+                        throw new Error(json.error || 'Gagal menghapus background gambar.');
+                    }
+
+                    document.getElementById('removeBgResultImg').src = json.result;
+                    document.getElementById('removeBgDownloadBtn').href = json.result;
+
+                    loading.classList.add('hidden');
+                    btnProcess.classList.remove('hidden');
+                    resultBox.classList.remove('hidden');
+
+                } catch (err) {
+                    showToast('Error: ' + err.message, 'error');
+                    loading.classList.add('hidden');
+                    btnProcess.classList.remove('hidden');
+                }
+            };
+        }
+
+        async function processImagen() {
+            const prompt = document.getElementById('imagenPrompt').value.trim();
+            const style = document.getElementById('selectedImagenStyle').value;
+            const ratio = document.getElementById('selectedImagenRatio').value;
+            const btnProcess = document.getElementById('btnProcessImagen');
+            const loading = document.getElementById('imagenLoading');
+            const resultBox = document.getElementById('imagenResultBox');
+
+            if (!prompt) {
+                return showToast('Masukkan prompt gambar terlebih dahulu!', 'warning');
+            }
+
+            btnProcess.classList.add('hidden');
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/imagen', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, style, ratio })
+                });
+                const json = await res.json();
+
+                if (!json.status || !json.result) {
+                    throw new Error(json.error || 'Gagal merender gambar AI.');
+                }
+
+                document.getElementById('imagenResultImg').src = json.result;
+                document.getElementById('imagenDownloadBtn').href = json.result;
+
+                loading.classList.add('hidden');
+                btnProcess.classList.remove('hidden');
+                resultBox.classList.remove('hidden');
+
+            } catch (err) {
+                showToast('Error: ' + err.message, 'error');
+                loading.classList.add('hidden');
+                btnProcess.classList.remove('hidden');
+            }
+        }
+
+        async function processReact() {
+            const waUrl = document.getElementById('waUrlInput').value.trim();
+            const emojis = document.getElementById('waEmojisInput').value.trim();
+            const btnProcess = document.getElementById('btnProcessReact');
+            const loading = document.getElementById('reactLoading');
+            const resultBox = document.getElementById('reactResultBox');
+
+            if (!waUrl) {
+                return showToast('Masukkan URL target WhatsApp terlebih dahulu!', 'warning');
+            }
+
+            btnProcess.classList.add('hidden');
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/react', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: waUrl, emojis: emojis, count: 1 })
+                });
+                const json = await res.json();
+
+                if (!json.status) {
+                    throw new Error(json.message || json.error || 'Gagal mengirim reaksi WhatsApp.');
+                }
+
+                document.getElementById('resReactEmojis').textContent = emojis;
+                document.getElementById('resReactCreator').textContent = json.creator || 'ReyCode';
+
+                loading.classList.add('hidden');
+                btnProcess.classList.remove('hidden');
+                resultBox.classList.remove('hidden');
+
+            } catch (err) {
+                showToast('Error: ' + err.message, 'error');
+                loading.classList.add('hidden');
+                btnProcess.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
