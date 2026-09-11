@@ -1,7 +1,7 @@
 /**
  * Name: Alight Motion Master Engine (The Ultimate Unified Edition)
  * Description: Seluruh endpoint API dipetakan secara bersih menggunakan prefix /api/ 
- *              lengkap dengan handler auto-activation, bulk, dan generator key admin/user.
+ *              lengkap dengan handler auto-activation, bulk, generator key admin/user, serta NanoBanana AI Image Editor.
  */
 
 const express = require('express');
@@ -217,73 +217,6 @@ async function waitForVerificationLink(username, timeoutSec = 60) {
     return null;
 }
 
-async function authLink(email) {
-  return apiQueue.add(async () => {
-    try {
-      await axios.post(`${IDT}/getOobConfirmationCode?key=${AM_KEY}`, {
-        requestType: 6, email: email, androidInstallApp: true, canHandleCodeInApp: true,
-        continueUrl: 'https://alightcreative.com?ui_sid=0366624874&ui_sd=0',
-        iosBundleId: 'com.alightcreative.motion', androidPackageName: 'com.alightcreative.motion',
-        androidMinimumVersion: '585', clientType: 'CLIENT_TYPE_ANDROID'
-      }, { headers: sp(h1) });
-      return { ok: true };
-    } catch (e) { return { ok: false, why: bad(e) }; }
-  });
-}
-
-async function authVerify(email, raw) {
-  return apiQueue.add(async () => {
-    const c = extractOobCode(raw);
-    if (!c) return { ok: false, why: 'code gak ada' };
-    try {
-      const a = await axios.post(`${IDT}/emailLinkSignin?key=${AM_KEY}`, {
-        email: email, oobCode: c, clientType: 'CLIENT_TYPE_ANDROID'
-      }, { headers: sp(h1) });
-      let u = null;
-      try {
-        const b = await axios.post(`${IDT}/getAccountInfo?key=${AM_KEY}`, { idToken: a.data.idToken }, { headers: sp(h1) });
-        u = b.data?.users?.[0] || null;
-      } catch {}
-      return {
-        ok: true, email: email, id: a.data.idToken, ref: a.data.refreshToken,
-        uid: a.data.localId, baru: !!a.data.isNewUser, user: u
-      };
-    } catch (e) { return { ok: false, why: bad(e) }; }
-  });
-}
-
-async function authPro(id) {
-  return apiQueue.add(async () => {
-    const o = 'reycode-' + crypto.randomBytes(6).toString('hex');
-    const b = {
-      data: {
-        productId: 'am.full.sub.annual.19q4',
-        token: 'mmgaobamlahbbeccfplmbkbb.AO-J1OzqG0or_GJJIx-ms8GrTm-jaglCRfhQSRPUZKpl2YspYS-oN7_94uv8RC5vQbvd_Ios2pPDStZ2n7F0hLE3FiOU7HS3R6Fquulv5xLXFECSv4ctElw',
-        skuType: 'subs', orderId: o
-      }
-    };
-    const h = {
-      ...h2, authorization: 'Bearer ' + id,
-      'firebase-instance-id-token': 'cSDnCyp3T-uwp07z3tL86T:APA91bFkmvvsHw5nnqa1SBFci-99DRsKClLiETdRrVcJjS5yBx1v_FbCb1d8WhBuea_zmwnYBktyTIzcRhN4b6uNOUur9wPc0gKXmJDoZic0LhNq5V2s0xI'
-    };
-    try {
-      const r = await axios.post(VFY, b, { headers: sp(h) });
-      return { ok: true, order: o, r: r.data };
-    } catch (e) { return { ok: false, why: bad(e) }; }
-  });
-}
-
-async function authRefresh(ref) {
-  return apiQueue.add(async () => {
-    try {
-      const r = await axios.post(`https://securetoken.googleapis.com/v1/token?key=${AM_KEY}`, {
-        grant_type: 'refresh_token', refresh_token: ref
-      });
-      return { ok: true, id: r.data.id_token, ref: r.data.refresh_token };
-    } catch (e) { return { ok: false, why: bad(e) }; }
-  });
-}
-
 async function processSingleAccount(customUsername = null) {
     let username, animalName = 'Custom User Input';
     if (customUsername) {
@@ -475,437 +408,103 @@ async function ttdl(url) {
     return res;
 }
 
-async function pixa(img) {
-  let filePath = img;
-  let shouldCleanup = false;
-  if (Buffer.isBuffer(img)) {
-    filePath = path.join(os.tmpdir(), `removebg-${crypto.randomUUID()}.jpg`);
-    await fsp.writeFile(filePath, img);
-    shouldCleanup = true;
-  }
-  try {
-    const fileBuffer = await fsp.readFile(filePath);
-    const form = new FormData();
-    form.append('image', fileBuffer, { filename: path.basename(filePath), contentType: 'image/jpeg' });
-    form.append('format', 'png');
-    form.append('model', 'v1');
-    const res = await axios.post('https://api2.pixelcut.app/image/matte/v1', form, { headers: form.getHeaders() });
-    return Buffer.from(res.data);
-  } finally {
-    if (shouldCleanup) { try { await fsp.unlink(filePath); } catch {} }
-  }
-}
+// NanoBanana AI Image-to-Image Scraper Module
+async function nanoBananaEdit(imageBuffer, promptText = 'enhance image') {
+    const boundary = '----Boundary' + Date.now();
+    const parts = [
+        Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="image.jpg"\r\nContent-Type: image/jpeg\r\n\r\n`),
+        imageBuffer,
+        Buffer.from(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="prompt"\r\n\r\n${promptText}`),
+        Buffer.from(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="output_format"\r\n\r\njpg`),
+        Buffer.from(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="generator_slug"\r\n\r\nai-image-editor`),
+        Buffer.from(`\r\n--${boundary}--\r\n`)
+    ];
+    
+    const body = Buffer.concat(parts);
 
-const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dtz0urit6/auto/upload';
-const SIGN_URL = 'https://cloudinary-tools.netlify.app/.netlify/functions/sign-upload-params';
-const C_API_KEY = '985946268373735';
-const UPLOAD_PRESET = 'cloudinary-tools';
+    const headers = {
+        'Accept': '*/*',
+        'Origin': 'https://banana-nano.ai',
+        'Referer': 'https://banana-nano.ai/ai-image-editor',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+        'Content-Length': body.length,
+    };
 
-async function getSignature() {
-    const timestamp = Math.floor(Date.now() / 1000);
-    const { data } = await axios.post(SIGN_URL, { paramsToSign: { timestamp, upload_preset: UPLOAD_PRESET, source: 'ml' } });
-    return { signature: data.signature, timestamp };
-}
-
-async function upscaleImage(fileInput, filename = 'image.jpg') {
-    let fileStreamOrBuffer = fileInput;
-    if (typeof fileInput === 'string' && fileInput.startsWith('http')) {
-        const response = await axios.get(fileInput, { responseType: 'arraybuffer' });
-        fileStreamOrBuffer = Buffer.from(response.data);
-    }
-    const sig = await getSignature();
-    const form = new FormData();
-    form.append('file', fileStreamOrBuffer, { filename });
-    form.append('upload_preset', UPLOAD_PRESET);
-    form.append('source', 'ml');
-    form.append('api_key', C_API_KEY);
-    form.append('signature', sig.signature);
-    form.append('timestamp', sig.timestamp);
-    const { data } = await axios.post(CLOUDINARY_URL, form, { headers: form.getHeaders() });
-    return { status: true, url: `https://res.cloudinary.com/dtz0urit6/image/upload/f_jpg,e_upscale,q_auto/${data.public_id}.jpg` };
-}
-
-// Wink Video Enhancer Engine
-const WINK_BASE_URL = "https://wink.ai";
-const STRATEGY_URL = "https://strategy.app.meitudata.com";
-const WINK_CLIENT_ID = "1189857605";
-const WINK_VERSION = "5.1.2";
-const WINK_COUNTRY_CODE = "ID";
-const WINK_CLIENT_LANGUAGE = "en_US";
-const WINK_CLIENT_TIMEZONE = "Asia/Jakarta";
-const WINK_TASK_TYPE = "11";
-const WINK_CONTENT_TYPE = "2";
-const WINK_UA = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36";
-
-let _winkApi = null;
-
-async function getWinkApi() {
-  if (_winkApi) return _winkApi;
-  const gnum = crypto.randomUUID();
-  const jar = new CookieJar();
-  await jar.setCookie(`_sm=${gnum}; Path=/; Domain=wink.ai`, WINK_BASE_URL);
-  await jar.setCookie(`meitustat=${encodeURIComponent(JSON.stringify({ wgid: gnum }))}; Path=/; Domain=wink.ai`, WINK_BASE_URL);
-
-  _winkApi = {
-    client: wrapper(
-      axios.create({
-        baseURL: WINK_BASE_URL, jar, withCredentials: true, validateStatus: () => true,
-        headers: { accept: "*/*", origin: WINK_BASE_URL, referer: `${WINK_BASE_URL}/video-enhancer/upload`, "user-agent": WINK_UA },
-      }),
-    ),
-    gnum,
-  };
-  return _winkApi;
-}
-
-function extToMime(file) {
-  const ext = path.extname(file).toLowerCase();
-  if (ext === ".mp4") return "video/mp4";
-  if (ext === ".mov") return "video/quicktime";
-  if (ext === ".webm") return "video/webm";
-  if (ext === ".mkv") return "video/x-matroska";
-  return "application/octet-stream";
-}
-
-function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
-function makeTrace() { return `${crypto.randomBytes(16).toString("hex")}-${crypto.randomBytes(8).toString("hex")}-1`; }
-function traceHeaders() {
-  const trace = makeTrace();
-  return {
-    "sentry-trace": trace,
-    baggage: `sentry-environment=release,sentry-release=5.1.2,sentry-public_key=e1bf914f3448d9bc8a10c7e499d17d54,sentry-trace_id=${trace.split("-")[0]},sentry-sampled=true`,
-  };
-}
-
-async function winkBaseParams(extra = {}) {
-  const { gnum } = await getWinkApi();
-  return new URLSearchParams({
-    client_id: WINK_CLIENT_ID, version: WINK_VERSION, country_code: WINK_COUNTRY_CODE,
-    gnum, client_language: WINK_CLIENT_LANGUAGE, client_channel_id: "", client_timezone: WINK_CLIENT_TIMEZONE, ...extra,
-  });
-}
-
-async function getMaatSign() {
-  const { client: api } = await getWinkApi();
-  const params = await winkBaseParams({ suffix: ".mp4", type: "temp", count: "1" });
-  const res = await api.get(`/api/file/get_maat_sign.json?${params.toString()}`, { headers: traceHeaders() });
-  if (res.status >= 400 || res.data?.code !== 0) throw new Error(`get_maat_sign gagal: ${JSON.stringify(res.data)}`);
-  return res.data.data;
-}
-
-async function getUploadPolicy(sign) {
-  const params = new URLSearchParams({
-    app: sign.app, count: String(sign.count), sig: sign.sig, sigTime: sign.sig_time, sigVersion: sign.sig_version, suffix: sign.suffix, type: sign.type,
-  });
-  const res = await axios.get(`${STRATEGY_URL}/upload/policy?${params.toString()}`, {
-    headers: { accept: "*/*", origin: WINK_BASE_URL, referer: `${WINK_BASE_URL}/`, "user-agent": WINK_UA },
-    validateStatus: () => true,
-  });
-  if (res.status >= 400 || !Array.isArray(res.data) || !res.data[0]?.qiniu) throw new Error(`upload policy gagal: ${JSON.stringify(res.data)}`);
-  return res.data[0].qiniu;
-}
-
-async function uploadToQiniu(policy, filePath) {
-  const form = new FormData();
-  form.append("file", fs.createReadStream(filePath), { filename: path.basename(filePath), contentType: extToMime(filePath) });
-  form.append("token", policy.token);
-  form.append("key", policy.key);
-  form.append("fname", path.basename(filePath));
-
-  const res = await axios.post(policy.url, form, {
-    headers: form.getHeaders({ origin: WINK_BASE_URL, referer: `${WINK_BASE_URL}/`, "user-agent": WINK_UA, accept: "*/*" }),
-    maxBodyLength: Infinity, maxContentLength: Infinity, validateStatus: () => true,
-  });
-  if (res.status >= 400) throw new Error(`upload qiniu gagal HTTP ${res.status}: ${JSON.stringify(res.data)}`);
-  return { file_key: policy.key, source_url: res.data.url || res.data.data || policy.data, video_transcoded: res.data.data || policy.data };
-}
-
-async function getVideoInfo(fileKey) {
-  const { client: api } = await getWinkApi();
-  const body = await winkBaseParams({ file_key: fileKey });
-  await api.post("/api/file/video_cover_and_display_info_ext.json", body.toString(), {
-    headers: { ...traceHeaders(), "content-type": "application/x-www-form-urlencoded;charset=UTF-8" },
-  });
-}
-
-async function startTranscode(fileKey) {
-  const { client: api } = await getWinkApi();
-  const body = await winkBaseParams({ file_key: fileKey });
-  const res = await api.post("/api/file/video_trans_start.json", body.toString(), {
-    headers: { ...traceHeaders(), "content-type": "application/x-www-form-urlencoded;charset=UTF-8" },
-  });
-  return res.data.data.id;
-}
-
-async function queryTranscode(id) {
-  const { client: api } = await getWinkApi();
-  const params = await winkBaseParams({ id });
-  const res = await api.get(`/api/file/video_trans_query.json?${params.toString()}`, { headers: traceHeaders() });
-  return res.data.data;
-}
-
-async function waitTranscode(id, fallbackSourceUrl, maxTry = 80, delayMs = 3000) {
-  for (let i = 1; i <= maxTry; i++) {
-    const data = await queryTranscode(id);
-    const video = data?.video || data?.url || data?.source_url || "";
-    const videoTranscoded = data?.video_transcoded || data?.transcoded_video || data?.transcoded_url || data?.video_url || "";
-    if (videoTranscoded) return { source_url: video || fallbackSourceUrl, video_transcoded: videoTranscoded };
-    await sleep(delayMs);
-  }
-  return { source_url: fallbackSourceUrl, video_transcoded: fallbackSourceUrl };
-}
-
-async function delivery(sourceUrl, videoTranscoded, taskName) {
-  const { client: api } = await getWinkApi();
-  const body = await winkBaseParams({
-    type: WINK_TASK_TYPE, content_type: WINK_CONTENT_TYPE, source_url: sourceUrl,
-    type_params: JSON.stringify({ is_mirror: 0, orientation_tag: 1, j_420_trans: "1", return_ext: "2" }),
-    right_detail: JSON.stringify({ source: "1", touch_type: "4", function_id: "630", material_id: "63011", url: "https://wink.ai/video-enhancer/upload" }),
-    ext_params: JSON.stringify({ task_name: taskName, records: WINK_TASK_TYPE, video_transcoded: videoTranscoded }),
-    with_prepare: "1",
-  });
-  const res = await api.post("/api/meitu_ai/delivery.json", body.toString(), {
-    headers: { ...traceHeaders(), "content-type": "application/x-www-form-urlencoded;charset=UTF-8" },
-  });
-  return res.data.data || {};
-}
-
-async function queryBatch(msgId) {
-  const { client: api } = await getWinkApi();
-  const params = await winkBaseParams({ msg_ids: msgId });
-  const res = await api.get(`/api/meitu_ai/query_batch.json?${params.toString()}`, {
-    headers: { ...traceHeaders(), referer: `${WINK_BASE_URL}/video-enhancer/upload` },
-  });
-  return res.data.data;
-}
-
-function extractResultUrl(data) {
-  const item = data?.item_list?.[0];
-  const media = item?.result?.media_info_list?.[0];
-  return media?.media_data || item?.result?.result_url || item?.result?.url || item?.client_ext_params?.video_transcoded || "";
-}
-
-function extractNextMsgId(data, currentMsgId) {
-  const item = data?.item_list?.[0];
-  const resultValue = item?.result?.result || "";
-  const realMsgId = item?.result?.msg_id || item?.msg_id || "";
-  if (resultValue && resultValue !== currentMsgId && !resultValue.startsWith("http")) return resultValue;
-  if (realMsgId && realMsgId !== currentMsgId && !realMsgId.startsWith("wpr_")) return realMsgId;
-  return "";
-}
-
-async function waitResult(firstMsgId, maxTry = 120, delayMs = 5000) {
-  let msgId = firstMsgId;
-  for (let i = 1; i <= maxTry; i++) {
-    const data = await queryBatch(msgId);
-    const nextMsgId = extractNextMsgId(data, msgId);
-    if (nextMsgId) { msgId = nextMsgId; await sleep(1000); continue; }
-    const url = extractResultUrl(data);
-    const errorCode = data?.item_list?.[0]?.result?.error_code;
-    if (url && url.startsWith("http") && errorCode === 0) return url;
-    await sleep(delayMs);
-  }
-  throw new Error("Timeout menunggu hasil video enhance Wink");
-}
-
-async function winkEnhance(video, { filename } = {}) {
-  if (!video) throw new Error("video is required");
-  const safeName = filename || `wink-${crypto.randomUUID()}.mp4`;
-  const filePath = Buffer.isBuffer(video) ? path.join(os.tmpdir(), safeName) : video;
-  const shouldCleanup = Buffer.isBuffer(video);
-  if (shouldCleanup) await fsp.writeFile(filePath, video);
-
-  try {
-    const taskName = `Enhancer-Ultra HD-${path.parse(filePath).name}`;
-    const sign = await getMaatSign();
-    const policy = await getUploadPolicy(sign);
-    const uploaded = await uploadToQiniu(policy, filePath);
-
-    await getVideoInfo(uploaded.file_key);
-    const transcodeId = await startTranscode(uploaded.file_key);
-    const transcode = await waitTranscode(transcodeId, uploaded.source_url);
-
-    const task = await delivery(transcode.source_url, transcode.video_transcoded, taskName);
-    const firstMsgId = task.msg_id || task.prepare_msg_id;
-    if (!firstMsgId) throw new Error("Delivery gagal mendapatkan msg_id");
-
-    const resultUrl = await waitResult(firstMsgId);
-    return { status: true, resultUrl };
-  } finally {
-    if (shouldCleanup) { try { await fsp.unlink(filePath); } catch {} }
-  }
-}
-
-
-// ==========================================
-// 4. AI CHAT MODULES
-// ==========================================
-class DeepAIChatScraper {
-    constructor() {
-        this.apiUrl = "https://api.deepai.org/hacking_is_a_serious_crime";
-        this.defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-        this.models = [
-            "standard",
-            "deepseek-v3.2",
-            "gemini-2.5-flash-lite",
-            "gemma-4",
-            "llama-3.3-70b-instruct",
-            "gpt-oss-120b",
-            "gpt-5-nano"
-        ];
-    }
-
-    getModels() { return this.models; }
-
-    generateIslandKey(userAgent = this.defaultUserAgent) {
-        let myrandomstr = Math.round((Math.random() * 100000000000)) + "";
-        const myhashfunction = (function() {
-            const a = [];
-            for (let b = 0; 64 > b;) a[b] = 0 | 4294967296 * Math.sin(++b % Math.PI);
-            return function(input) {
-                let d, e, f, g = [d = 1732584193, e = 4023233417, ~d, ~e], h = [], l = unescape(encodeURI(input)) + "\u0080", k = l.length;
-                let c = --k / 4 + 2 | 15;
-                for (h[--c] = 8 * k; ~k;) h[k >> 2] |= l.charCodeAt(k) << 8 * k--;
-                for (let b = 0, l = 0; b < c; b += 16) {
-                    for (k = g; 64 > l; k = [f = k[3], d + ((f = k[0] + [d & e | ~d & f, f & d | ~f & e, d ^ e ^ f, e ^ (d | ~f)][k = l >> 4] + a[l] + ~~h[b | [l, 5 * l + 1, 3 * l + 5, 7 * l][k] & 15]) << (k = [7, 12, 17, 22, 5, 9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21][4 * k + l++ % 4]) | f >>> -k), d, e])
-                        d = k[1] | 0, e = k[2];
-                    for (l = 4; l;) g[--l] += k[l];
-                }
-                let result = "";
-                for (let l = 0; 32 > l;) result += (g[l >> 3] >> 4 * (1 ^ l++) & 15).toString(16);
-                return result.split("").reverse().join("");
-            };
-        })();
-        return 'tryit-' + myrandomstr + '-' + myhashfunction(userAgent + myhashfunction(userAgent + myhashfunction(userAgent + myrandomstr + 'hackers_become_a_little_stinkier_every_time_they_hack')));
-    }
-
-    async chat(messages, options = {}) {
-        const model = options.model || 'standard';
-        if (!this.models.includes(model)) throw new Error(`Model '${model}' tidak valid.`);
-        const userAgent = options.userAgent || this.defaultUserAgent;
-        const key = this.generateIslandKey(userAgent);
-        const sessionUUID = options.sessionUUID || crypto.randomUUID();
-        const sensitivityRequestID = options.sensitivityRequestID || crypto.randomUUID();
-
-        const fd = new FormData();
-        fd.append('chat_style', 'chat');
-        fd.append('model', model);
-        fd.append('session_uuid', sessionUUID);
-        fd.append('sensitivity_request_id', sensitivityRequestID);
-        fd.append('hacker_is_stinky', 'very_stinky');
-        fd.append('enabled_tools', JSON.stringify(['image_generator', 'image_editor']));
-        fd.append('chatHistory', JSON.stringify(messages));
-
-        const res = await axios.post(this.apiUrl, fd, {
-            headers: {
-                "api-key": key,
-                "user-agent": userAgent,
-                "referer": "https://deepai.org/chat",
-                "origin": "https://deepai.org"
-            }
+    try {
+        const response = await axios.post('https://ibbo.ai/api/nano-banana-lite-image-to-image', body, {
+            headers,
+            timeout: 60000,
+            validateStatus: () => true
         });
-        return typeof res.data === 'string' ? res.data : JSON.stringify(res.data);
+
+        if (response.data && response.data.success) {
+            return {
+                status: true,
+                creator: CREATOR,
+                result: response.data.data
+            };
+        } else {
+            return {
+                status: false,
+                error: response.data?._raw || response.data?.message || 'Gagal memproses gambar dengan NanoBanana AI.'
+            };
+        }
+    } catch (err) {
+        return {
+            status: false,
+            error: err.message
+        };
     }
 }
 
-async function rayleighScrape(text) {
-  const systemPrompt = `Kamu adalah Rayleigh AI, asisten AI yang dibuat dan dikembangkan oleh ReyCloudShop.`;
-  try {
-    const res = await axios.post(
-      "https://tabitoken.com/v1/messages",
-      {
-        model: "claude-opus-5-thinking",
-        system: systemPrompt,
-        max_tokens: 8192,
-        messages: [{ role: "user", content: text }]
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": "sk-gfdSPQt3496tsUQwBPYOnaIHyV5LeOlngMhUFrhyajHzruPe",
-          "anthropic-version": "2023-06-01",
-          "User-Agent": "Mozilla/5.0",
-          "Origin": "https://tabitoken.com",
-          "Referer": "https://tabitoken.com/"
-        },
-        timeout: 180000
-      }
-    );
-    let reply = "";
-    if (Array.isArray(res.data?.content)) {
-      reply = res.data.content.filter(item => item?.type === "text").map(item => item.text || "").join("\n").trim();
-    } else if (typeof res.data?.text === "string") {
-      reply = res.data.text.trim();
-    }
-    if (!reply) throw new Error("Server AI tidak mengembalikan teks jawaban.");
-    return { status: true, data: reply };
-  } catch (err) {
-    return { status: false, error: err.message };
-  }
-}
+// --- Free Fire Guest Account Generator Module & API (/api/genfreefiree) ---
+async function generateFreeFireGuest() {
+    const app_id = 100067;
+    const secret = '2ee44819e9b4598845141067b281621874d0d5d7af9d8f7e00c1e54715b7d1e3';
+    const host = 'https://100067.connect.garena.com';
+    const ua = 'GarenaMSDK/4.0.42(NEO G12 ;Android 17;in;ID;app 1.130.1 2019121040;)';
 
+    const password = crypto.randomBytes(32).toString('hex').toUpperCase();
+    const regBody = { app_id, client_type: 2, password, source: 2 };
+    const sig = crypto.createHmac('sha256', secret).update(JSON.stringify(regBody)).digest('hex');
 
-// ==========================================
-// 5. ZFILE REACT MODULES
-// ==========================================
-const ZFILE_BASE = 'https://react.zfile.web.id';
-const ZFILE_UA = 'Mozilla/5.0';
-
-function genSessionId() {
-  const c = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let id = 'zx_';
-  for (let i = 0; i < 16; i++) id += c[Math.floor(Math.random() * c.length)];
-  return id;
-}
-
-function parseCookies(headers, cookiesObj) {
-  const sc = headers['set-cookie'];
-  if (!sc) return;
-  const arr = Array.isArray(sc) ? sc : [sc];
-  for (const c of arr) {
-    const m = c.match(/^([^=]+)=([^;]+)/);
-    if (m) cookiesObj[m[1]] = m[2];
-  }
-}
-
-function cookieHeader(cookiesObj) {
-  return Object.entries(cookiesObj).map(([k,v]) => `${k}=${v}`).join('; ');
-}
-
-function zfileReq(method, pathUrl, body, cookiesObj, extra = {}) {
-  return new Promise((resolve, reject) => {
-    const url = new URL(pathUrl);
-    const hdrs = { 'User-Agent': ZFILE_UA, 'Accept': 'application/json', 'Origin': ZFILE_BASE, 'Referer': ZFILE_BASE + '/', ...extra };
-    const ch = cookieHeader(cookiesObj);
-    if (ch) hdrs['Cookie'] = ch;
-
-    const r = https.request({ method, hostname: url.hostname, port: 443, path: url.pathname, headers: hdrs }, (res) => {
-      parseCookies(res.headers, cookiesObj);
-      let data = '';
-      res.on('data', c => data += c);
-      res.on('end', () => { try { resolve(JSON.parse(data)); } catch { resolve(data); } });
+    const regRes = await axios.post(`${host}/api/v2/oauth/guest:register`, regBody, {
+        headers: { 'User-Agent': ua, 'Content-Type': 'application/json; charset=utf-8', 'Authorization': `Signature ${sig}` },
+        validateStatus: () => true
     });
-    r.on('error', reject);
-    if (body) r.write(typeof body === 'string' ? body : JSON.stringify(body));
-    r.end();
-  });
-}
 
-async function getZFileTicket(sid, cookiesObj) {
-  const data = await zfileReq('GET', ZFILE_BASE + '/api/challenge', null, cookiesObj, { 'X-Session-Id': sid });
-  if (!data.ok) throw new Error('Challenge gagal');
-  return data;
-}
+    if (regRes.data.code !== 0 || !regRes.data.data?.uid) {
+        throw new Error(regRes.data.error || 'Gagal register akun guest Free Fire.');
+    }
 
-async function sendZFileReact(url, reactions, ticket, sid, cookiesObj) {
-  return zfileReq('POST', ZFILE_BASE + '/api/react', { url, reactions, ticket }, cookiesObj, {
-    'Content-Type': 'application/json', 'X-ZX-Request': 'zx-reactch', 'X-Session-Id': sid,
-  });
-}
+    const uid = regRes.data.data.uid;
+    const grantRes = await axios.post(`${host}/api/v2/oauth/guest/token:grant`, {
+        client_id: app_id,
+        client_secret: secret,
+        client_type: 2,
+        password,
+        response_type: 'token',
+        uid
+    }, {
+        headers: { 'User-Agent': ua, 'Content-Type': 'application/json; charset=utf-8' },
+        validateStatus: () => true
+    });
 
+    if (grantRes.data.code !== 0 || !grantRes.data.data?.access_token) {
+        throw new Error(grantRes.data.error || 'Gagal mengambil token guest Free Fire.');
+    }
+
+    return {
+        uid,
+        password,
+        open_id: grantRes.data.data.open_id,
+        access_token: grantRes.data.data.access_token
+    };
+}
 
 // ==========================================
-// 6. ADMIN & USER VERIFICATION HELPERS
+// 4. ADMIN & USER VERIFICATION HELPERS
 // ==========================================
 function verifyAdmin(req) {
     const body = req.method === 'GET' ? req.query : (req.body || {});
@@ -919,7 +518,7 @@ function verifyAdmin(req) {
 
 
 // ==========================================
-// 7. EXPRESS ROUTER & API ENDPOINT MAPPING
+// 5. EXPRESS ROUTER & API ENDPOINT MAPPING
 // ==========================================
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -1014,6 +613,62 @@ app.all('/api/tiktok', async (req, res) => {
     return res.status(200).json(await ttdl(url));
 });
 
+// --- NanoBanana AI Edit Endpoint (/api/nanobanana) ---
+app.all('/api/nanobanana', async (req, res) => {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ status: false, error: 'Gunakan metode POST' });
+    }
+
+    try {
+        const { imageUrl, base64Image, prompt } = req.body || {};
+        let imageBuf = null;
+
+        if (base64Image) {
+            imageBuf = Buffer.from(base64Image.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+        } else if (imageUrl) {
+            const resp = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+            imageBuf = Buffer.from(resp.data);
+        }
+
+        if (!imageBuf) {
+            return res.status(400).json({ status: false, error: 'Parameter imageUrl atau base64Image wajib disertakan!' });
+        }
+
+        const result = await nanoBananaEdit(imageBuf, prompt || 'enhance image');
+        return res.status(200).json(result);
+
+    } catch (err) {
+        return res.status(500).json({ status: false, error: err.message });
+    }
+});
+
+app.all('/api/genfreefiree', async (req, res) => {
+    try {
+        const body = req.method === 'GET' ? req.query : (req.body || {});
+        const count = parseInt(body.count || body.jumlah || 1, 10);
+        const maxCount = Math.min(Math.max(count, 1), 5); // Batasi maksimal 5 akun per request agar tidak timeout
+
+        const results = [];
+        for (let i = 0; i < maxCount; i++) {
+            try {
+                const acc = await generateFreeFireGuest();
+                results.push({ success: true, ...acc });
+            } catch (err) {
+                results.push({ success: false, error: err.message });
+            }
+        }
+
+        return res.status(200).json({
+            status: true,
+            creator: CREATOR,
+            total_generated: results.filter(r => r.success).length,
+            results
+        });
+    } catch (err) {
+        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+    }
+});
+
 app.all('/api/qris', async (req, res) => {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     try {
@@ -1035,16 +690,8 @@ app.all('/api/qris', async (req, res) => {
 
 
 // ==========================================
-// 8. API KEY CREATOR (ADMIN & USER TYPES)
+// 6. API KEY CREATOR (ADMIN & USER TYPES)
 // ==========================================
-
-/**
- * Endpoint Buat API Key (Support Tipe Admin & Tipe User, dengan Parameter 'name')
- * Contoh Query / Body:
- * ?type=admin&name=Reyz4YouXGod
- * ?type=user&name=Budi&days=30&package=Bulk Pro
- */
-// --- ADMIN API KEY MANAGEMENT ENDPOINTS (/api/admin/create-key) ---
 app.all('/api/admin/create-key', async (req, res) => {
     const auth = verifyAdmin(req, res);
     if (!auth.authorized) {
@@ -1057,13 +704,13 @@ app.all('/api/admin/create-key', async (req, res) => {
         await connectDB();
 
         const ownerName = body.name || body.username || 'Client User';
-        const keyType = body.type || 'user'; // Pilihannya: 'admin' atau 'user'
+        const keyType = body.type || 'user';
 
-        let durationDays = 30; // Default User: 30 Hari
+        let durationDays = 30;
         let packageName = 'Bulk Alight Motion Pro (User)';
 
         if (keyType === 'admin') {
-            durationDays = 36500; // 100 Tahun (Unlimited)
+            durationDays = 36500;
             packageName = 'Unlimited Master Admin Key';
         }
 
@@ -1103,16 +750,6 @@ app.all('/api/admin/create-key', async (req, res) => {
     } catch (err) {
         return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
     }
-});
-
-
-// Alias Admin Create Key lama
-app.all('/api/admin/create-key', async (req, res) => {
-    if (!req.query.type && !req.body?.type) {
-        if (req.method === 'GET') req.query.type = 'admin';
-        else if (req.body) req.body.type = 'admin';
-    }
-    return app._router.handle(req, res);
 });
 
 app.all('/api/admin/list-keys', async (req, res) => {

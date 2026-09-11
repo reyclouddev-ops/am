@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReyCloudSHP - NanoBanana AI Image Editor</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #0d0f12; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 relative">
+
+    <div class="w-full max-w-3xl space-y-4">
+        
+        <!-- Navbar -->
+        <div class="flex items-center justify-between bg-[#151922] border border-[#232936] rounded-2xl p-4 shadow-lg">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold">
+                    🍌
+                </div>
+                <div>
+                    <div class="flex items-center space-x-1.5">
+                        <span class="font-extrabold text-sm tracking-wide text-white">NANOBANANA<span class="text-amber-400">AI</span></span>
+                    </div>
+                    <span class="text-[10px] tracking-widest text-slate-400 font-semibold uppercase">IMAGE-TO-IMAGE EDITOR</span>
+                </div>
+            </div>
+            
+            <a href="/dashboard" class="px-3 py-1.5 rounded-xl bg-[#1e2330] border border-[#2b3344] text-[11px] text-slate-300 hover:text-white transition-all font-medium">
+                Kembali Dashboard
+            </a>
+        </div>
+
+        <div class="space-y-1 px-1">
+            <div class="text-[11px] text-slate-400">AI Image Processing <span class="text-amber-400 font-bold tracking-wide">NANO BANANA STUDIO</span></div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">Unggah gambar atau masukkan URL, tulis prompt instruksi, dan biarkan AI mengubah gambar kamu secara instan.</p>
+        </div>
+
+        <!-- MAIN CARD -->
+        <div class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-4">
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">SUMBER GAMBAR (URL ATAU UPLOAD FILE)</label>
+                    <input type="text" id="imageUrlInput" placeholder="https://example.com/image.jpg (atau pilih file di bawah)" 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 font-mono mb-2">
+                    <input type="file" id="imageFileInput" accept="image/*" 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-2.5 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-400 file:text-slate-950 hover:file:bg-amber-300 cursor-pointer">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">PROMPT INSTRUKSI EDIT</label>
+                    <input type="text" id="promptInput" placeholder="Contoh: add stylish glasses, cyberpunk style..." value="enhance image" 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono">
+                </div>
+
+                <button onclick="runNanoBanana()" id="btnRun"
+                    class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                    🍌 Proses Edit Gambar AI Sekarang
+                </button>
+            </div>
+
+            <!-- LOADING SPINNER -->
+            <div id="loadingBox" class="hidden text-center py-6 space-y-3">
+                <div class="inline-block w-7 h-7 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-xs text-amber-400 animate-pulse font-medium">Sedang memproses AI Image-to-Image...</p>
+            </div>
+
+            <!-- RESULT BOX -->
+            <div id="resultBox" class="hidden space-y-3 bg-[#0d0f12] border border-amber-500/30 rounded-2xl p-4">
+                <div class="flex items-center justify-between border-b border-[#232936] pb-2 text-xs">
+                    <span class="text-amber-400 font-bold">🎉 Berhasil Diedit!</span>
+                    <span id="resModelInfo" class="text-slate-400 text-[10px] font-mono"></span>
+                </div>
+
+                <div class="text-center space-y-2">
+                    <div class="bg-[#151922] p-2 rounded-xl inline-block border border-[#232936]">
+                        <img id="resImage" src="" alt="Edited Result" class="max-h-72 mx-auto object-contain rounded-lg">
+                    </div>
+                </div>
+
+                <div class="flex space-x-2 pt-2">
+                    <a id="downloadBtn" href="#" target="_blank" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs text-center transition-all shadow">
+                        📥 Download Gambar
+                    </a>
+                    <button onclick="copyImageUrl()" class="px-4 py-2.5 bg-[#1e2330] hover:bg-[#2b3344] text-slate-300 rounded-xl text-xs font-medium cursor-pointer">
+                        📋 Salin URL
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="pt-2 text-center text-[11px] text-slate-400">
+            <span>ReyCloudSHP NanoBanana Studio</span>
+        </div>
+
+    </div>
+
+    <script>
+        // Helper ubah file ke base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function runNanoBanana() {
+            const urlInput = document.getElementById('imageUrlInput').value.trim();
+            const fileInput = document.getElementById('imageFileInput').files[0];
+            const prompt = document.getElementById('promptInput').value.trim() || 'enhance image';
+
+            const btnRun = document.getElementById('btnRun');
+            const loadingBox = document.getElementById('loadingBox');
+            const resultBox = document.getElementById('resultBox');
+
+            let payload = {};
+
+            if (fileInput) {
+                const base64 = await fileToBase64(fileInput);
+                payload.base64Image = base64;
+            } else if (urlInput) {
+                payload.imageUrl = urlInput;
+            } else {
+                return alert('Harap masukkan URL gambar atau pilih file gambar terlebih dahulu!');
+            }
+
+            payload.prompt = prompt;
+
+            btnRun.disabled = true;
+            btnRun.textContent = 'Memproses...';
+            loadingBox.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/nanobanana', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.status && data.result) {
+                    resultBox.classList.remove('hidden');
+                    document.getElementById('resImage').src = data.result.image_url;
+                    document.getElementById('downloadBtn').href = data.result.image_url;
+                    document.getElementById('resModelInfo').textContent = `Model: ${data.result.model || 'NanoBanana'}`;
+                } else {
+                    alert('Gagal: ' + (data.error || 'Terjadi kesalahan sistem.'));
+                }
+            } catch (err) {
+                alert('Kesalahan koneksi: ' + err.message);
+            } finally {
+                btnRun.disabled = false;
+                btnRun.textContent = '🍌 Proses Edit Gambar AI Sekarang';
+                loadingBox.classList.add('hidden');
+            }
+        }
+
+        function copyImageUrl() {
+            const imgUrl = document.getElementById('resImage').src;
+            navigator.clipboard.writeText(imgUrl).then(() => alert('URL gambar berhasil disalin!'));
+        }
+    </script>
+</body>
+</html>

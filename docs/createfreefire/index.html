@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReyCloudSHP - Free Fire Guest Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #0d0f12; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 relative">
+
+    <div class="w-full max-w-3xl space-y-4">
+        
+        <!-- Navbar -->
+        <div class="flex items-center justify-between bg-[#151922] border border-[#232936] rounded-2xl p-4 shadow-lg">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 font-bold">
+                    🔥
+                </div>
+                <div>
+                    <div class="flex items-center space-x-1.5">
+                        <span class="font-extrabold text-sm tracking-wide text-white">FREEFIRE<span class="text-orange-400">GUEST</span></span>
+                    </div>
+                    <span class="text-[10px] tracking-widest text-slate-400 font-semibold uppercase">AUTO GENERATOR ENGINE</span>
+                </div>
+            </div>
+            
+            <a href="/dashboard" class="px-3 py-1.5 rounded-xl bg-[#1e2330] border border-[#2b3344] text-[11px] text-slate-300 hover:text-white transition-all font-medium">
+                Kembali Dashboard
+            </a>
+        </div>
+
+        <div class="space-y-1 px-1">
+            <div class="text-[11px] text-slate-400">Garena Connect <span class="text-orange-400 font-bold tracking-wide">FREE FIRE GUEST MAKER</span></div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">Tentukan jumlah akun guest Free Fire yang ingin dibuat secara instan melalui sistem otomatis.</p>
+        </div>
+
+        <!-- MAIN CARD -->
+        <div class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-4">
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">JUMLAH AKUN (MAKSIMAL 5 PER REQUEST)</label>
+                    <input type="number" id="countInput" value="3" min="1" max="5" 
+                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 focus:outline-none focus:border-orange-400 font-mono">
+                </div>
+
+                <button onclick="runGenFreeFire()" id="btnRun"
+                    class="w-full bg-orange-500 hover:bg-orange-400 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                    🔥 Generate Akun Guest Sekarang
+                </button>
+            </div>
+
+            <!-- LOADING SPINNER -->
+            <div id="loadingBox" class="hidden text-center py-6 space-y-3">
+                <div class="inline-block w-7 h-7 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-xs text-orange-400 animate-pulse font-medium">Sedang membuat akun guest Free Fire via Garena API...</p>
+            </div>
+
+            <!-- RESULT BOX -->
+            <div id="resultBox" class="hidden space-y-3 bg-[#0d0f12] border border-orange-500/30 rounded-2xl p-4">
+                <div class="flex items-center justify-between border-b border-[#232936] pb-2 text-xs">
+                    <span class="text-orange-400 font-bold">🎉 Berhasil Digenerate!</span>
+                    <button onclick="downloadResults()" class="px-3 py-1 bg-[#1e2330] hover:bg-[#2b3344] text-orange-300 rounded-lg text-[10px] cursor-pointer font-bold">
+                        📥 Download .TXT
+                    </button>
+                </div>
+
+                <div id="resultsList" class="space-y-2 max-h-80 overflow-y-auto pr-1"></div>
+            </div>
+
+        </div>
+
+        <div class="pt-2 text-center text-[11px] text-slate-400">
+            <span>ReyCloudSHP Free Fire Generator</span>
+        </div>
+
+    </div>
+
+    <script>
+        async function runGenFreeFire() {
+            const countVal = parseInt(document.getElementById('countInput').value.trim() || 1, 10);
+            const count = Math.min(Math.max(countVal, 1), 5);
+
+            const btnRun = document.getElementById('btnRun');
+            const loadingBox = document.getElementById('loadingBox');
+            const resultBox = document.getElementById('resultBox');
+            const resultsList = document.getElementById('resultsList');
+
+            btnRun.disabled = true;
+            btnRun.textContent = 'Memproses...';
+            loadingBox.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/genfreefiree', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ count })
+                });
+                const data = await res.json();
+
+                if (data.status && data.results) {
+                    resultBox.classList.remove('hidden');
+                    resultsList.innerHTML = '';
+
+                    data.results.forEach((acc, index) => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = "bg-[#151922] border border-[#232936] rounded-xl p-2.5 text-xs font-mono space-y-1";
+
+                        if (acc.success) {
+                            itemDiv.innerHTML = `
+                                <div class="flex justify-between text-emerald-400 font-bold text-[11px]">
+                                    <span>#${index + 1} - UID: ${acc.uid}</span>
+                                    <span>SUCCESS</span>
+                                </div>
+                                <div class="text-slate-300 select-all truncate text-[10px]">Password: ${acc.password}</div>
+                                <div class="text-cyan-300 select-all truncate text-[10px]">Open ID: ${acc.open_id}</div>
+                                <div class="text-slate-400 select-all truncate text-[9px]">Token: ${acc.access_token}</div>
+                            `;
+                        } else {
+                            itemDiv.innerHTML = `
+                                <div class="flex justify-between text-rose-400 font-bold text-[11px]">
+                                    <span>#${index + 1}</span>
+                                    <span>FAILED</span>
+                                </div>
+                                <div class="text-rose-300 text-[10px]">Error: ${acc.error}</div>
+                            `;
+                        }
+                        resultsList.appendChild(itemDiv);
+                    });
+                } else {
+                    alert('Gagal: ' + (data.error || 'Terjadi kesalahan sistem.'));
+                }
+            } catch (err) {
+                alert('Kesalahan koneksi: ' + err.message);
+            } finally {
+                btnRun.disabled = false;
+                btnRun.textContent = '🔥 Generate Akun Guest Sekarang';
+                loadingBox.classList.add('hidden');
+            }
+        }
+
+        function downloadResults() {
+            const items = document.querySelectorAll('#resultsList > div');
+            if (items.length === 0) return alert('Belum ada data akun!');
+
+            let textContent = "=== REYCLOUDSHP FREE FIRE GUEST ACCOUNTS ===\n";
+            textContent += "Generated at: " + new Date().toLocaleString() + "\n\n";
+
+            items.forEach((item, index) => {
+                textContent += `[Akun ke-${index + 1}]\n${item.innerText}\n-----------------------------------\n`;
+            });
+
+            const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ff_guest_accounts.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
