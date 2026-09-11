@@ -998,7 +998,6 @@ app.all('/api/viu/stream', async (req, res) => {
     }
 });
 
-// --- Mustika Payment QRIS Endpoint (/api/qris) ---
 app.all('/api/qris', async (req, res) => {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     try {
@@ -1008,10 +1007,9 @@ app.all('/api/qris', async (req, res) => {
         const productName = body.product_name || 'Apikey Premium Bulk';
         const customerName = body.customer_name || 'Client ReyCloud';
         const expiry = body.expiry || '30';
-        const redirectUrl = body.redirect_url || 'https://reycloudshp.my.id/docs/amgen';
+        const redirectUrl = body.redirect_url || 'https://reycloudshp.my.id/dashboard';
 
-        // Ganti dengan API Key Mustika Payment kamu yang valid atau set environment variable MUSTIKA_API_KEY
-        const MUSTIKA_APIKEY = process.env.MUSTIKA_APIKEY || 'YOUR_API_KEY';
+        const MUSTIKA_APIKEY = process.env.MUSTIKA_APIKEY || '';
 
         const params = new URLSearchParams();
         params.append('amount', amount);
@@ -1020,7 +1018,7 @@ app.all('/api/qris', async (req, res) => {
         params.append('expiry', expiry);
         params.append('redirect_url', redirectUrl);
 
-        const response = await axios.post('https://mustikapayment.com/api/v1/create/qris', params, {
+        const response = await axios.post('https://mustikapayment.com/api/v1/create/qris', params.toString(), {
             headers: {
                 'X-Api-Key': MUSTIKA_APIKEY,
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -1028,16 +1026,18 @@ app.all('/api/qris', async (req, res) => {
             validateStatus: () => true
         });
 
+        // Debug response asli dari Mustika di console server
+        console.log("Mustika Response:", response.data);
+
         return res.status(200).json(response.data);
     } catch (err) {
+        console.error("QRIS Error Details:", err.message);
         return res.status(500).json({ 
             status: 'error', 
-            message: err.response?.data ? (typeof err.response.data === 'object' ? JSON.stringify(err.response.data) : err.response.data) : err.message 
+            message: err.response?.data ? JSON.stringify(err.response.data) : err.message 
         });
     }
 });
-
-
 
 // ==========================================
 // 6. API KEY CREATOR (ADMIN & USER TYPES)
