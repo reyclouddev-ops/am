@@ -1,7 +1,7 @@
 /**
  * Name: Alight Motion Master Engine (The Ultimate Unified Edition)
  * Description: Seluruh endpoint API dipetakan secara bersih menggunakan prefix /api/ 
- *              lengkap dengan handler auto-activation dan bulk untuk mencegah error 404.
+ *              lengkap dengan handler auto-activation, bulk, dan generator key admin/user.
  */
 
 const express = require('express');
@@ -368,7 +368,7 @@ async function processSingleAccount(customUsername = null) {
 
 
 // ==========================================
-// 3. DOWNLOADERS & TOOLS (IG, TikTok, RemoveBG, Upscale, Wink)
+// 3. DOWNLOADERS & TOOLS
 // ==========================================
 async function indown(url) {
     try {
@@ -738,7 +738,7 @@ async function winkEnhance(video, { filename } = {}) {
 
 
 // ==========================================
-// 4. AI CHAT MODULES (DeepAI & Rayleigh AI)
+// 4. AI CHAT MODULES
 // ==========================================
 class DeepAIChatScraper {
     constructor() {
@@ -755,43 +755,33 @@ class DeepAIChatScraper {
         ];
     }
 
-    getModels() {
-        return this.models;
-    }
+    getModels() { return this.models; }
 
     generateIslandKey(userAgent = this.defaultUserAgent) {
         let myrandomstr = Math.round((Math.random() * 100000000000)) + "";
         const myhashfunction = (function() {
             const a = [];
-            for (let b = 0; 64 > b;)
-                a[b] = 0 | 4294967296 * Math.sin(++b % Math.PI);
+            for (let b = 0; 64 > b;) a[b] = 0 | 4294967296 * Math.sin(++b % Math.PI);
             return function(input) {
                 let d, e, f, g = [d = 1732584193, e = 4023233417, ~d, ~e], h = [], l = unescape(encodeURI(input)) + "\u0080", k = l.length;
                 let c = --k / 4 + 2 | 15;
-                for (h[--c] = 8 * k; ~k;)
-                    h[k >> 2] |= l.charCodeAt(k) << 8 * k--;
+                for (h[--c] = 8 * k; ~k;) h[k >> 2] |= l.charCodeAt(k) << 8 * k--;
                 for (let b = 0, l = 0; b < c; b += 16) {
                     for (k = g; 64 > l; k = [f = k[3], d + ((f = k[0] + [d & e | ~d & f, f & d | ~f & e, d ^ e ^ f, e ^ (d | ~f)][k = l >> 4] + a[l] + ~~h[b | [l, 5 * l + 1, 3 * l + 5, 7 * l][k] & 15]) << (k = [7, 12, 17, 22, 5, 9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21][4 * k + l++ % 4]) | f >>> -k), d, e])
                         d = k[1] | 0, e = k[2];
-                    for (l = 4; l;)
-                        g[--l] += k[l];
+                    for (l = 4; l;) g[--l] += k[l];
                 }
                 let result = "";
-                for (let l = 0; 32 > l;)
-                    result += (g[l >> 3] >> 4 * (1 ^ l++) & 15).toString(16);
+                for (let l = 0; 32 > l;) result += (g[l >> 3] >> 4 * (1 ^ l++) & 15).toString(16);
                 return result.split("").reverse().join("");
             };
         })();
-        const tryitApiKey = 'tryit-' + myrandomstr + '-' + myhashfunction(userAgent + myhashfunction(userAgent + myhashfunction(userAgent + myrandomstr + 'hackers_become_a_little_stinkier_every_time_they_hack')));
-        return tryitApiKey;
+        return 'tryit-' + myrandomstr + '-' + myhashfunction(userAgent + myhashfunction(userAgent + myhashfunction(userAgent + myrandomstr + 'hackers_become_a_little_stinkier_every_time_they_hack')));
     }
 
     async chat(messages, options = {}) {
         const model = options.model || 'standard';
-        if (!this.models.includes(model)) {
-            throw new Error(`Model '${model}' tidak valid atau tidak didukung.`);
-        }
-
+        if (!this.models.includes(model)) throw new Error(`Model '${model}' tidak valid.`);
         const userAgent = options.userAgent || this.defaultUserAgent;
         const key = this.generateIslandKey(userAgent);
         const sessionUUID = options.sessionUUID || crypto.randomUUID();
@@ -807,7 +797,6 @@ class DeepAIChatScraper {
         fd.append('chatHistory', JSON.stringify(messages));
 
         const res = await axios.post(this.apiUrl, fd, {
-            method: "POST",
             headers: {
                 "api-key": key,
                 "user-agent": userAgent,
@@ -815,24 +804,12 @@ class DeepAIChatScraper {
                 "origin": "https://deepai.org"
             }
         });
-
-        if (!res.status || res.status >= 400) {
-            const errText = res.data ? JSON.stringify(res.data) : 'HTTP Error';
-            throw new Error(errText);
-        }
-
         return typeof res.data === 'string' ? res.data : JSON.stringify(res.data);
     }
 }
 
 async function rayleighScrape(text) {
-  const systemPrompt = `
-Kamu adalah Rayleigh AI, asisten AI yang dibuat dan dikembangkan oleh ReyCloudShop.
-IDENTITAS: Rayleigh AI | Developer: ReyCloudShop | Ekosistem: ReyCloud
-PERAN: Membantu pengguna dalam programming, JavaScript, Node.js, HTML, CSS, Python, PHP, API, backend, frontend, database, MongoDB, MySQL, bot WhatsApp, bot Telegram, Baileys, Pterodactyl, VPS, Linux, Termux, hosting, deployment, GitHub, debugging, dll.
-GAYA BICARA: Bahasa Indonesia, santai, ramah, natural, mudah dipahami, tidak bertele-tele.
-`;
-
+  const systemPrompt = `Kamu adalah Rayleigh AI, asisten AI yang dibuat dan dikembangkan oleh ReyCloudShop.`;
   try {
     const res = await axios.post(
       "https://tabitoken.com/v1/messages",
@@ -847,33 +824,23 @@ GAYA BICARA: Bahasa Indonesia, santai, ramah, natural, mudah dipahami, tidak ber
           "Content-Type": "application/json",
           "x-api-key": "sk-gfdSPQt3496tsUQwBPYOnaIHyV5LeOlngMhUFrhyajHzruPe",
           "anthropic-version": "2023-06-01",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+          "User-Agent": "Mozilla/5.0",
           "Origin": "https://tabitoken.com",
           "Referer": "https://tabitoken.com/"
         },
         timeout: 180000
       }
     );
-
     let reply = "";
     if (Array.isArray(res.data?.content)) {
-      reply = res.data.content
-        .filter(item => item?.type === "text")
-        .map(item => item.text || "")
-        .join("\n")
-        .trim();
+      reply = res.data.content.filter(item => item?.type === "text").map(item => item.text || "").join("\n").trim();
     } else if (typeof res.data?.text === "string") {
       reply = res.data.text.trim();
-    } else if (typeof res.data?.response === "string") {
-      reply = res.data.response.trim();
     }
-
     if (!reply) throw new Error("Server AI tidak mengembalikan teks jawaban.");
     return { status: true, data: reply };
-    
   } catch (err) {
-    const errorMessage = err.response?.data?.error?.message || err.response?.data?.message || err.message || "Terjadi kesalahan server.";
-    return { status: false, error: errorMessage };
+    return { status: false, error: err.message };
   }
 }
 
@@ -882,7 +849,7 @@ GAYA BICARA: Bahasa Indonesia, santai, ramah, natural, mudah dipahami, tidak ber
 // 5. ZFILE REACT MODULES
 // ==========================================
 const ZFILE_BASE = 'https://react.zfile.web.id';
-const ZFILE_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+const ZFILE_UA = 'Mozilla/5.0';
 
 function genSessionId() {
   const c = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -908,84 +875,51 @@ function cookieHeader(cookiesObj) {
 function zfileReq(method, pathUrl, body, cookiesObj, extra = {}) {
   return new Promise((resolve, reject) => {
     const url = new URL(pathUrl);
-    const hdrs = {
-      'User-Agent': ZFILE_UA,
-      'Accept': 'application/json',
-      'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8',
-      'Origin': ZFILE_BASE,
-      'Referer': ZFILE_BASE + '/',
-      ...extra,
-    };
+    const hdrs = { 'User-Agent': ZFILE_UA, 'Accept': 'application/json', 'Origin': ZFILE_BASE, 'Referer': ZFILE_BASE + '/', ...extra };
     const ch = cookieHeader(cookiesObj);
     if (ch) hdrs['Cookie'] = ch;
 
-    const opts = {
-      method,
-      hostname: url.hostname,
-      port: 443,
-      path: url.pathname,
-      headers: hdrs,
-    };
-
-    const r = https.request(opts, (res) => {
+    const r = https.request({ method, hostname: url.hostname, port: 443, path: url.pathname, headers: hdrs }, (res) => {
       parseCookies(res.headers, cookiesObj);
       let data = '';
       res.on('data', c => data += c);
-      res.on('end', () => {
-        try { resolve(JSON.parse(data)); }
-        catch { resolve(data); }
-      });
+      res.on('end', () => { try { resolve(JSON.parse(data)); } catch { resolve(data); } });
     });
     r.on('error', reject);
-    r.setTimeout(30000, () => { r.destroy(); reject(new Error('Timeout')); });
     if (body) r.write(typeof body === 'string' ? body : JSON.stringify(body));
     r.end();
   });
 }
 
 async function getZFileTicket(sid, cookiesObj) {
-  const data = await zfileReq('GET', ZFILE_BASE + '/api/challenge', null, cookiesObj, {
-    'X-Session-Id': sid,
-  });
+  const data = await zfileReq('GET', ZFILE_BASE + '/api/challenge', null, cookiesObj, { 'X-Session-Id': sid });
   if (!data.ok) throw new Error('Challenge gagal');
   return data;
 }
 
 async function sendZFileReact(url, reactions, ticket, sid, cookiesObj) {
-  return zfileReq('POST', ZFILE_BASE + '/api/react', {
-    url, reactions, ticket,
-  }, cookiesObj, {
-    'Content-Type': 'application/json',
-    'X-ZX-Request': 'zx-reactch',
-    'X-Session-Id': sid,
+  return zfileReq('POST', ZFILE_BASE + '/api/react', { url, reactions, ticket }, cookiesObj, {
+    'Content-Type': 'application/json', 'X-ZX-Request': 'zx-reactch', 'X-Session-Id': sid,
   });
 }
 
 
 // ==========================================
-// 6. ADMIN VERIFICATION HELPER
+// 6. ADMIN & USER VERIFICATION HELPERS
 // ==========================================
-function verifyAdmin(req, res) {
+function verifyAdmin(req) {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const adminToken = req.headers['x-admin-token'] || body.admintoken;
     const ADMIN_SECRET = process.env.ADMIN_GENERATOR_PASSWORD || '';
-
     if (!adminToken || adminToken !== ADMIN_SECRET) {
-        return {
-            authorized: false,
-            response: {
-                status: false,
-                creator: CREATOR,
-                error: 'Akses ditolak! Token atau password admin tidak valid.'
-            }
-        };
+        return { authorized: false, response: { status: false, creator: CREATOR, error: 'Akses ditolak! Token atau password admin tidak valid.' } };
     }
     return { authorized: true };
 }
 
 
 // ==========================================
-// 7. EXPRESS ROUTER & API ENDPOINT MAPPING (/api/...)
+// 7. EXPRESS ROUTER & API ENDPOINT MAPPING
 // ==========================================
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -996,11 +930,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// Servis folder statis frontend 'docs' dan root dashboard utama
 app.use('/docs', express.static(path.join(__dirname, '../docs')));
 app.use(express.static(path.join(__dirname, '../')));
 
-// Home / Root Dashboard
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
 });
@@ -1009,26 +941,19 @@ app.get('/api/engine', (req, res) => {
     res.status(200).json({ status: true, creator: CREATOR, message: 'Alight Motion Ultimate Unified Master Engine Active in /api/' });
 });
 
-// --- AM Engine (/api/amgen) ---
+// --- AM Engine ---
 app.all('/api/amgen', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const apiKeyInput = req.headers['x-apikey'] || body.apikey;
 
-    if (!apiKeyInput) {
-        return res.status(403).json({ status: false, creator: CREATOR, error: 'Akses ditolak! API Key tidak disertakan.' });
-    }
+    if (!apiKeyInput) return res.status(403).json({ status: false, creator: CREATOR, error: 'Akses ditolak! API Key tidak disertakan.' });
 
     try {
         await connectDB();
         const keyData = await ApiKey.findOne({ apikey: apiKeyInput });
 
-        if (!keyData) {
-            return res.status(403).json({ status: false, creator: CREATOR, error: 'API Key tidak valid atau tidak terdaftar!' });
-        }
-
-        const now = new Date();
-        if (keyData.status !== 'active' || now > new Date(keyData.expired_at)) {
-            return res.status(403).json({ status: false, creator: CREATOR, error: 'API Key sudah kadaluarsa (expired) atau dinonaktifkan.' });
+        if (!keyData || keyData.status !== 'active' || new Date() > new Date(keyData.expired_at)) {
+            return res.status(403).json({ status: false, creator: CREATOR, error: 'API Key tidak valid atau sudah kadaluarsa.' });
         }
 
         const requestedUser = body.username || body.user;
@@ -1038,8 +963,7 @@ app.all('/api/amgen', async (req, res) => {
         const results = [];
         for (let i = 0; i < maxCount; i++) {
             try {
-                const acc = await processSingleAccount(requestedUser);
-                results.push(acc);
+                results.push(await processSingleAccount(requestedUser));
             } catch (err) {
                 results.push({ success: false, error: err.message });
             }
@@ -1047,36 +971,24 @@ app.all('/api/amgen', async (req, res) => {
 
         return res.status(200).json({
             status: true, creator: CREATOR, owner: keyData.owner,
-            expired_at: keyData.expired_at, total_generated: maxCount, results: results
+            expired_at: keyData.expired_at, total_generated: maxCount, results
         });
     } catch (err) {
         return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
     }
 });
 
-// --- Auto 1 Click Activation Endpoint (/api/amgen_auto) ---
 app.all('/api/amgen_auto', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
-    const requestedUser = body.username || body.user;
-
     try {
-        const acc = await processSingleAccount(requestedUser);
-        
+        const acc = await processSingleAccount(body.username || body.user);
         return res.status(200).json({
-            status: true,
-            creator: CREATOR,
+            status: true, creator: CREATOR,
             card: {
-                email: acc.email,
-                weblogin: acc.weblogin,
+                email: acc.email, weblogin: acc.weblogin,
                 selamat_kamu_mendapatkan_animal: acc.animal,
-                orderId: acc.orderId,
-                validUntil: acc.validUntil,
-                panduan_dan_cara_login: [
-                    "1. Buka aplikasi Alight Motion di perangkat kamu.",
-                    "2. Pilih opsi masuk atau Sign In menggunakan email.",
-                    "3. Masukkan email: " + acc.email,
-                    "4. Cek inbox/tautan verifikasi atau gunakan token yang tersedia untuk masuk."
-                ]
+                orderId: acc.orderId, validUntil: acc.validUntil,
+                panduan_dan_cara_login: ["1. Buka aplikasi Alight Motion.", "2. Sign in dengan email: " + acc.email]
             }
         });
     } catch (err) {
@@ -1084,238 +996,82 @@ app.all('/api/amgen_auto', async (req, res) => {
     }
 });
 
-// --- Alias Bulk AM Endpoint (/api/bulk-am) ---
 app.all('/api/bulk-am', async (req, res) => {
     req.url = '/api/amgen';
     return app._router.handle(req, res);
 });
 
-// --- Auth Manual Endpoints (/api/auth/...) ---
-app.all('/api/auth/link', async (req, res) => {
-    const email = req.method === 'POST' ? req.body?.email : req.query?.email;
-    if (!email) return res.status(400).json({ status: false, error: 'Parameter email wajib disertakan!' });
-    const result = await authLink(email);
-    return res.status(result.ok ? 200 : 500).json(result);
-});
-
-app.all('/api/auth/verify', async (req, res) => {
-    const body = req.method === 'POST' ? req.body : req.query;
-    const { email, code: rawCode } = body || {};
-    if (!email || !rawCode) return res.status(400).json({ status: false, error: 'Email dan code/link wajib disertakan!' });
-    const result = await authVerify(email, rawCode);
-    return res.status(result.ok ? 200 : 400).json(result);
-});
-
-app.all('/api/auth/pro', async (req, res) => {
-    const idToken = req.method === 'POST' ? req.body?.idToken : req.query?.idToken;
-    if (!idToken) return res.status(400).json({ status: false, error: 'Parameter idToken wajib disertakan!' });
-    const result = await authPro(idToken);
-    return res.status(result.ok ? 200 : 500).json(result);
-});
-
-app.all('/api/auth/refresh', async (req, res) => {
-    const refreshToken = req.method === 'POST' ? req.body?.refreshToken : req.query?.refreshToken;
-    if (!refreshToken) return res.status(400).json({ status: false, error: 'Parameter refreshToken wajib disertakan!' });
-    const result = await authRefresh(refreshToken);
-    return res.status(result.ok ? 200 : 500).json(result);
-});
-
-// --- Downloader & Tools Endpoints (/api/...) ---
+// --- Downloader & Tools ---
 app.all('/api/igdl', async (req, res) => {
-    const targetUrl = req.method === 'POST' ? req.body?.url : req.query?.url;
-    if (!targetUrl) return res.status(400).json({ status: false, error: 'URL Instagram wajib disertakan!' });
-    return res.status(200).json(await igdl(targetUrl));
+    const url = req.method === 'POST' ? req.body?.url : req.query?.url;
+    if (!url) return res.status(400).json({ status: false, error: 'URL Instagram wajib!' });
+    return res.status(200).json(await igdl(url));
 });
 
 app.all('/api/tiktok', async (req, res) => {
-    const targetUrl = req.method === 'POST' ? req.body?.url : req.query?.url;
-    if (!targetUrl) return res.status(400).json({ status: false, error: 'URL TikTok wajib disertakan!' });
-    return res.status(200).json(await ttdl(targetUrl));
+    const url = req.method === 'POST' ? req.body?.url : req.query?.url;
+    if (!url) return res.status(400).json({ status: false, error: 'URL TikTok wajib!' });
+    return res.status(200).json(await ttdl(url));
 });
 
-app.all('/api/removebg', async (req, res) => {
-    if (req.method !== 'POST') return res.status(405).json({ status: false, error: 'Gunakan metode POST' });
-    const { base64Image } = req.body || {};
-    if (!base64Image) return res.status(400).json({ status: false, error: 'Parameter base64Image wajib!' });
-    const buf = Buffer.from(base64Image.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-    const resBuf = await pixa(buf);
-    return res.status(200).json({ status: true, creator: CREATOR, result: `data:image/png;base64,${resBuf.toString('base64')}` });
-});
-
-app.all('/api/upscale', async (req, res) => {
-    if (req.method !== 'POST') return res.status(405).json({ status: false, error: 'Gunakan metode POST' });
-    const { imageUrl, base64Image, filename } = req.body || {};
-    let inputData = imageUrl || base64Image;
-    if (!inputData) return res.status(400).json({ status: false, error: 'imageUrl atau base64Image wajib!' });
-    if (typeof inputData === 'string' && inputData.startsWith('data:image')) {
-        inputData = Buffer.from(inputData.split(';base64,').pop(), 'base64');
-    }
-    return res.status(200).json(await upscaleImage(inputData, filename || 'upload.jpg'));
-});
-
-app.all('/api/wink', async (req, res) => {
-    if (req.method !== 'POST') return res.status(405).json({ status: false, error: 'Gunakan metode POST' });
-    try {
-        const { videoUrl, base64Video, filename } = req.body || {};
-        let targetVideo = videoUrl || base64Video;
-        if (!targetVideo) return res.status(400).json({ status: false, error: 'videoUrl atau base64Video wajib disertakan!' });
-
-        if (typeof targetVideo === 'string' && targetVideo.startsWith('data:video')) {
-            targetVideo = Buffer.from(targetVideo.split(';base64,').pop(), 'base64');
-        } else if (typeof targetVideo === 'string' && targetVideo.startsWith('http')) {
-            const response = await axios.get(targetVideo, { responseType: 'arraybuffer' });
-            targetVideo = Buffer.from(response.data);
-        }
-
-        const result = await winkEnhance(targetVideo, { filename: filename || 'enhance.mp4' });
-        return res.status(200).json(result);
-    } catch (err) {
-        return res.status(500).json({ status: false, error: err.message });
-    }
-});
-
-// --- AI Chat Endpoint (/api/chat) ---
-app.all('/api/chat', async (req, res) => {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ status: false, error: 'Method not allowed' });
-    }
-
-    const { prompt, engine = 'rayleigh', model = 'standard', history = [] } = req.body || {};
-
-    if (!prompt && history.length === 0) {
-        return res.status(400).json({ status: false, error: 'Prompt pesan wajib disertakan!' });
-    }
-
-    try {
-        if (engine === 'deepai') {
-            const deepAi = new DeepAIChatScraper();
-            const messages = history.length > 0 ? history : [{ role: 'user', content: prompt }];
-            const answer = await deepAi.chat(messages, { model });
-            return res.status(200).json({ status: true, engine: 'deepai', model, result: answer });
-        } else {
-            const result = await rayleighScrape(prompt || history[history.length - 1]?.content || "");
-            return res.status(200).json({ status: true, engine: 'rayleigh', result: result.data || result.error });
-        }
-    } catch (err) {
-        return res.status(500).json({ status: false, error: err.message });
-    }
-});
-
-// --- QRIS Generator Tool Endpoint (/api/qris) ---
 app.all('/api/qris', async (req, res) => {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
-    if (req.method !== 'POST' && req.method !== 'GET') {
-        return res.status(405).json({ status: false, creator: CREATOR, error: 'Method not allowed' });
-    }
-
     try {
-        const amount = "5000";
         const imagePath = path.join(__dirname, '../lib/qris.png');
-
-        if (!fs.existsSync(imagePath)) {
-            return res.status(404).json({ 
-                status: false, 
-                creator: CREATOR, 
-                error: "File qris.png tidak ditemukan di dalam folder lib!" 
-            });
-        }
+        if (!fs.existsSync(imagePath)) return res.status(404).json({ status: false, error: "File qris.png tidak ditemukan!" });
 
         const form = new FormData();
-        form.append('amount', amount);
+        form.append('amount', '5000');
         form.append('image', fs.createReadStream(imagePath));
 
         const response = await axios.post('https://api.theresav.eu/api/tools/qris', form, {
-            headers: {
-                ...form.getHeaders(),
-                'x-apikey': 'DNcBJ'
-            }
+            headers: { ...form.getHeaders(), 'x-apikey': 'DNcBJ' }
         });
-
         return res.status(200).json(response.data);
-
     } catch (err) {
-        const errorMsg = err.response?.data ? (typeof err.response.data === 'object' ? JSON.stringify(err.response.data) : err.response.data) : err.message;
-        return res.status(500).json({ 
-            status: false, 
-            creator: CREATOR, 
-            error: errorMsg 
-        });
+        return res.status(500).json({ status: false, error: err.message });
     }
 });
 
-// --- ZFile React Automation Endpoint (/api/react) ---
-app.all('/api/react', async (req, res) => {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ status: false, error: 'Method not allowed, use POST' });
-    }
 
-    const { url, emojis, count } = req.body || {};
+// ==========================================
+// 8. API KEY CREATOR (ADMIN & USER TYPES)
+// ==========================================
 
-    if (!url || !emojis) {
-        return res.status(400).json({ status: false, error: 'Parameter url dan emojis wajib diisi!' });
-    }
-
-    const emojiArray = Array.isArray(emojis) ? emojis : emojis.split(',').map(e => e.trim());
-    const totalCount = parseInt(count) || 1;
-
-    let ok = 0, fail = 0;
-    const results = [];
-
-    for (let i = 1; i <= totalCount; i++) {
-        const sid = genSessionId();
-        const cookiesObj = {};
-        try {
-            const challenge = await getZFileTicket(sid, cookiesObj);
-            const ticket = challenge.ticket;
-            const delay = Math.max(2500, challenge.minAgeMs || 2500);
-            await sleep(delay);
-
-            const resReact = await sendZFileReact(url, emojiArray, ticket, sid, cookiesObj);
-
-            results.push({
-                index: i,
-                success: resReact.success || false,
-                message: resReact.message || 'Unknown',
-            });
-
-            if (resReact.success) ok++;
-            else fail++;
-        } catch (e) {
-            results.push({ index: i, success: false, message: e.message });
-            fail++;
-        }
-        if (i < totalCount) await sleep(1000);
-    }
-
-    return res.status(200).json({
-        status: ok > 0,
-        creator: CREATOR,
-        target: url,
-        emojis: emojiArray,
-        total: totalCount,
-        success: ok,
-        failed: fail,
-        results: results,
-    });
-});
-
-// --- ADMIN API KEY MANAGEMENT ENDPOINTS (/api/admin/... & /api/apikey/...) ---
-
-app.all('/api/admin/create-key', async (req, res) => {
-    const auth = verifyAdmin(req, res);
-    if (!auth.authorized) {
-        return res.status(403).json(auth.response);
-    }
-
+/**
+ * Endpoint Buat API Key (Support Tipe Admin & Tipe User, dengan Parameter 'name')
+ * Contoh Query / Body:
+ * ?type=admin&name=Reyz4YouXGod
+ * ?type=user&name=Budi&days=30&package=Bulk Pro
+ */
+app.all('/api/apikey/create', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
+    const type = (body.type || 'user').toLowerCase(); // 'admin' atau 'user'
+    const nameInput = body.name || body.username || (type === 'admin' ? 'Master Admin' : 'Valued Client');
+    
+    // Jika type == admin, wajib verifikasi Admin Token
+    if (type === 'admin') {
+        const auth = verifyAdmin(req);
+        if (!auth.authorized) return res.status(403).json(auth.response);
+    }
 
     try {
         await connectDB();
 
-        const ownerName = body.name || body.username || 'Admin Master';
-        const durationDays = 36500;
+        let durationDays = parseInt(body.days || body.duration || 0, 10);
+        let packageName = body.package || '';
+
+        if (type === 'admin') {
+            durationDays = 36500; // 100 Tahun (Unlimited)
+            packageName = packageName || 'Unlimited Master Admin Key';
+        } else {
+            if (!durationDays || isNaN(durationDays)) durationDays = 30; // Default user 30 hari
+            packageName = packageName || 'Bulk Alight Motion Pro (User)';
+        }
+
         const randomSixDigits = crypto.randomInt(100000, 999999);
-        const newApiKey = `reycoder_${randomSixDigits}`;
+        const prefixKey = type === 'admin' ? 'reyadmin' : 'reycoder';
+        const newApiKey = `${prefixKey}_${randomSixDigits}`;
 
         const issuedAt = new Date();
         const expiredAt = new Date();
@@ -1323,8 +1079,8 @@ app.all('/api/admin/create-key', async (req, res) => {
 
         const newKeyDoc = new ApiKey({
             apikey: newApiKey,
-            owner: ownerName,
-            package: 'Unlimited Master Admin Key',
+            owner: nameInput,
+            package: packageName,
             duration_days: durationDays,
             created_at: issuedAt,
             expired_at: expiredAt,
@@ -1336,12 +1092,13 @@ app.all('/api/admin/create-key', async (req, res) => {
         return res.status(200).json({
             status: true,
             creator: CREATOR,
-            message: 'API Key Admin Unlimited berhasil dibuat dan disimpan ke MongoDB!',
+            message: `API Key tipe ${type.toUpperCase()} berhasil dibuat!`,
             data: {
                 apikey: newApiKey,
-                owner: ownerName,
-                package: 'Unlimited Master Admin Key',
-                duration_days: 'Unlimited (100 Tahun)',
+                type: type,
+                name: nameInput,
+                package: packageName,
+                duration_days: durationDays >= 30000 ? 'Unlimited (100 Tahun)' : `${durationDays} Hari`,
                 created_at: issuedAt,
                 expired_at: expiredAt
             }
@@ -1351,11 +1108,18 @@ app.all('/api/admin/create-key', async (req, res) => {
     }
 });
 
-app.all('/api/admin/list-keys', async (req, res) => {
-    const auth = verifyAdmin(req, res);
-    if (!auth.authorized) {
-        return res.status(403).json(auth.response);
+// Alias Admin Create Key lama
+app.all('/api/admin/create-key', async (req, res) => {
+    if (!req.query.type && !req.body?.type) {
+        if (req.method === 'GET') req.query.type = 'admin';
+        else if (req.body) req.body.type = 'admin';
     }
+    return app._router.handle(req, res);
+});
+
+app.all('/api/admin/list-keys', async (req, res) => {
+    const auth = verifyAdmin(req);
+    if (!auth.authorized) return res.status(403).json(auth.response);
 
     try {
         await connectDB();
@@ -1363,36 +1127,19 @@ app.all('/api/admin/list-keys', async (req, res) => {
         const now = new Date();
 
         const formattedKeys = keys.map(k => {
-            const expiredDate = new Date(k.expired_at);
-            const diffTime = expiredDate - now;
+            const diffTime = new Date(k.expired_at) - now;
             let remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
             let statusText = 'active';
-            if (k.duration_days >= 30000) {
-                remainingDays = 'Unlimited';
-            } else if (remainingDays <= 0) {
-                remainingDays = 'Expired';
-                statusText = 'expired';
-            }
+            if (k.duration_days >= 30000) remainingDays = 'Unlimited';
+            else if (remainingDays <= 0) { remainingDays = 'Expired'; statusText = 'expired'; }
 
             return {
-                id: k._id,
-                apikey: k.apikey,
-                owner: k.owner,
-                package: k.package,
-                created_at: k.created_at,
-                expired_at: k.expired_at,
-                remaining_days: remainingDays,
-                status: statusText
+                id: k._id, apikey: k.apikey, owner: k.owner, package: k.package,
+                created_at: k.created_at, expired_at: k.expired_at, remaining_days: remainingDays, status: statusText
             };
         });
 
-        return res.status(200).json({
-            status: true,
-            creator: CREATOR,
-            total: formattedKeys.length,
-            keys: formattedKeys
-        });
+        return res.status(200).json({ status: true, creator: CREATOR, total: formattedKeys.length, keys: formattedKeys });
     } catch (err) {
         return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
     }
@@ -1402,58 +1149,30 @@ app.all('/api/apikey/check', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const inputKey = req.headers['x-apikey'] || body.apikey;
 
-    if (!inputKey) {
-        return res.status(400).json({
-            status: false,
-            creator: CREATOR,
-            error: 'Silakan masukkan API Key Anda terlebih dahulu.'
-        });
-    }
+    if (!inputKey) return res.status(400).json({ status: false, creator: CREATOR, error: 'Silakan masukkan API Key Anda.' });
 
     try {
         await connectDB();
         const keyData = await ApiKey.findOne({ apikey: inputKey });
-
-        if (!keyData) {
-            return res.status(404).json({
-                status: false,
-                creator: CREATOR,
-                error: 'API Key tidak ditemukan atau tidak terdaftar!'
-            });
-        }
+        if (!keyData) return res.status(404).json({ status: false, creator: CREATOR, error: 'API Key tidak ditemukan!' });
 
         const now = new Date();
-        const expiredDate = new Date(keyData.expired_at);
-        const diffTime = expiredDate - now;
+        const diffTime = new Date(keyData.expired_at) - now;
         let remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
         let statusText = 'active';
-        if (keyData.duration_days >= 30000) {
-            remainingDays = 'Unlimited';
-        } else if (remainingDays <= 0) {
-            remainingDays = 'Expired';
-            statusText = 'expired';
-        }
+        if (keyData.duration_days >= 30000) remainingDays = 'Unlimited';
+        else if (remainingDays <= 0) { remainingDays = 'Expired'; statusText = 'expired'; }
 
         return res.status(200).json({
-            status: true,
-            creator: CREATOR,
+            status: true, creator: CREATOR,
             data: {
-                apikey: keyData.apikey,
-                owner: keyData.owner,
-                package: keyData.package,
-                created_at: keyData.created_at,
-                expired_at: keyData.expired_at,
-                remaining_days: remainingDays,
-                status: statusText
+                apikey: keyData.apikey, owner: keyData.owner, package: keyData.package,
+                created_at: keyData.created_at, expired_at: keyData.expired_at,
+                remaining_days: remainingDays, status: statusText
             }
         });
     } catch (err) {
-        return res.status(500).json({
-            status: false,
-            creator: CREATOR,
-            error: err.message
-        });
+        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
     }
 });
 

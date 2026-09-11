@@ -28,7 +28,7 @@
             </div>
             
             <div class="flex items-center space-x-2">
-                <a href="docs/usercek" class="px-3 py-1.5 rounded-xl bg-[#1e2330] border border-[#2b3344] text-[11px] text-slate-300 hover:text-white transition-all font-medium">
+                <a href="/usercek" class="px-3 py-1.5 rounded-xl bg-[#1e2330] border border-[#2b3344] text-[11px] text-slate-300 hover:text-white transition-all font-medium">
                     Cek Key User
                 </a>
                 <a href="/dashboard" class="px-3 py-1.5 rounded-xl bg-purple-600/20 border border-purple-500/40 text-[11px] text-purple-300 hover:bg-purple-600/30 transition-all font-medium">
@@ -59,18 +59,27 @@
                 <!-- Generator Key -->
                 <div class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-4 h-fit">
                     <div class="space-y-1 border-b border-[#232936] pb-3">
-                        <h2 class="text-sm font-bold text-white">⚡ Generate Master Key</h2>
-                        <p class="text-[11px] text-slate-400">Buat API key unlimited baru.</p>
+                        <h2 class="text-sm font-bold text-white">⚡ Generate API Key</h2>
+                        <p class="text-[11px] text-slate-400">Buat API key baru (Admin / User).</p>
                     </div>
 
                     <div class="space-y-3">
                         <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">TIPE KEY</label>
+                            <select id="keyTypeInput" class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-purple-400">
+                                <option value="user">User (Bulk AM Pro - 30 Hari)</option>
+                                <option value="admin">Admin (Master Unlimited)</option>
+                            </select>
+                        </div>
+
+                        <div>
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">NAMA / PEMILIK</label>
-                            <input type="text" id="clientNameInput" value="Admin Master" 
+                            <input type="text" id="clientNameInput" placeholder="Masukkan nama pemilik..." 
                                 class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-purple-400">
                         </div>
+
                         <button onclick="generateApiKey()" id="btnGen" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl text-xs transition-all shadow cursor-pointer">
-                            ➕ Buat Key Unlimited
+                            ➕ Buat API Key
                         </button>
                     </div>
 
@@ -128,7 +137,6 @@
             if (!token) return alert('Masukkan password admin!');
 
             try {
-                // Endpoint disesuaikan ke prefix /api/admin/list-keys
                 const res = await fetch('/api/admin/list-keys', {
                     method: 'GET',
                     headers: { 'x-admin-token': token }
@@ -153,7 +161,6 @@
             tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-purple-400 animate-pulse text-xs">Memuat data dari MongoDB...</td></tr>`;
 
             try {
-                // Endpoint disesuaikan ke prefix /api/admin/list-keys
                 const res = await fetch('/api/admin/list-keys', {
                     method: 'GET',
                     headers: { 'x-admin-token': adminTokenStored }
@@ -204,7 +211,8 @@
         }
 
         async function generateApiKey() {
-            const name = document.getElementById('clientNameInput').value.trim() || 'Admin Master';
+            const name = document.getElementById('clientNameInput').value.trim() || 'Client User';
+            const type = document.getElementById('keyTypeInput').value;
             const btnGen = document.getElementById('btnGen');
             const resultBox = document.getElementById('resultBox');
 
@@ -213,14 +221,13 @@
             resultBox.classList.add('hidden');
 
             try {
-                // Endpoint disesuaikan ke prefix /api/admin/create-key
                 const res = await fetch('/api/admin/create-key', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'x-admin-token': adminTokenStored
                     },
-                    body: JSON.stringify({ name, admintoken: adminTokenStored })
+                    body: JSON.stringify({ name, type, admintoken: adminTokenStored })
                 });
                 const data = await res.json();
 
@@ -235,7 +242,7 @@
                 alert('Error: ' + err.message);
             } finally {
                 btnGen.disabled = false;
-                btnGen.textContent = '➕ Buat Key Unlimited';
+                btnGen.textContent = '➕ Buat API Key';
             }
         }
 
