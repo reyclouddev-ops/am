@@ -255,18 +255,27 @@
         // Verifikasi sesi langsung ke MongoDB / .env via Backend API (Tanpa LocalStorage)
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const usernameParam = urlParams.get('user');
+            let usernameParam = urlParams.get('user');
+
+            // Fallback: Ambil dari session storage jika parameter URL kosong agar tidak mental
+            if (!usernameParam) {
+                usernameParam = sessionStorage.getItem('reycloud_active_user');
+            }
 
             if (!usernameParam) {
                 window.location.href = '/index.html';
                 return;
             }
 
+            // Simpan ke session storage agar aman saat berpindah halaman
+            sessionStorage.setItem('reycloud_active_user', usernameParam);
+
             try {
                 const res = await fetch(`/api/auth/session?username=${encodeURIComponent(usernameParam)}`);
                 const data = await res.json();
 
                 if (!data.status) {
+                    sessionStorage.removeItem('reycloud_active_user');
                     window.location.href = '/index.html';
                     return;
                 }
@@ -277,9 +286,9 @@
                 // Amankan dan lampirkan parameter ?user=... ke seluruh link internal agar tidak mental
                 document.querySelectorAll('a').forEach(link => {
                     const href = link.getAttribute('href');
-                    if (href && !href.startsWith('http') && !href.startsWith('#') && !href.includes('user=')) {
-                        const separator = href.includes('?') ? '&' : '?';
-                        link.setAttribute('href', `${href}${separator}user=${encodeURIComponent(user.username)}`);
+                    if (href && !href.startsWith('http') && !href.startsWith('#')) {
+                        const cleanHref = href.split('?')[0]; // Bersihkan query lama jika ada
+                        link.setAttribute('href', `${cleanHref}?user=${encodeURIComponent(user.username)}`);
                     }
                 });
 
@@ -297,6 +306,7 @@
         });
 
         function handleLogout() {
+            sessionStorage.removeItem('reycloud_active_user');
             window.location.href = '/index.html';
         }
 
