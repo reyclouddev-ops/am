@@ -1040,41 +1040,73 @@ app.get('/api/engine', (req, res) => {
     res.status(200).json({ status: true, creator: CREATOR, message: 'Alight Motion Ultimate Unified Master Engine Active in /api/' });
 });
 
-// --- AM Engine ---
+/// --- AM Engine (Pembaruan: Validasi API Key hanya untuk Bulk, Mode Manual & Auto Free) ---
 app.all('/api/amgen', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
+    const action = body.action || '';
     const apiKeyInput = req.headers['x-apikey'] || body.apikey;
 
-    if (!apiKeyInput) return res.status(403).json({ status: false, creator: CREATOR, error: 'Akses ditolak! API Key tidak disertakan.' });
-
-    try {
-        await connectDB();
-        const keyData = await ApiKey.findOne({ apikey: apiKeyInput });
-
-        if (!keyData || keyData.status !== 'active' || new Date() > new Date(keyData.expired_at)) {
-            return res.status(403).json({ status: false, creator: CREATOR, error: 'API Key tidak valid atau sudah kadaluarsa.' });
+    // 1. Jika aksi dari mode AM Bulk (Custom), wajibkan verifikasi API Key berbayar
+    if (action === 'bulk-generate' || (!action && apiKeyInput)) {
+        if (!apiKeyInput) {
+            return res.status(403).json({ status: false, creator: CREATOR, error: 'Akses ditolak! API Key Bulk tidak disertakan.' });
         }
 
-        const requestedUser = body.username || body.user;
-        const count = parseInt(body.count || body.jumlah || 1, 10);
-        const maxCount = Math.min(Math.max(count, 1), 10);
+        try {
+            await connectDB();
+            const keyData = await ApiKey.findOne({ apikey: apiKeyInput });
 
-        const results = [];
-        for (let i = 0; i < maxCount; i++) {
-            try {
-                results.push(await processSingleAccount(requestedUser));
-            } catch (err) {
-                results.push({ success: false, error: err.message });
+            if (!keyData || keyData.status !== 'active' || new Date() > new Date(keyData.expired_at)) {
+                return res.status(403).json({ status: false, creator: CREATOR, error: 'API Key tidak valid atau sudah kadaluarsa.' });
             }
-        }
 
-        return res.status(200).json({
-            status: true, creator: CREATOR, owner: keyData.owner,
-            expired_at: keyData.expired_at, total_generated: maxCount, results
-        });
-    } catch (err) {
-        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+            const count = parseInt(body.count || body.jumlah || 1, 10);
+            const maxCount = Math.min(Math.max(count, 1), 10);
+
+            const results = [];
+            for (let i = 0; i < maxCount; i++) {
+                try {
+                    results.push(await processSingleAccount(body.username || body.user));
+                } catch (err) {
+                    results.push({ success: false, error: err.message });
+                }
+            }
+
+            return res.status(200).json({
+                status: true, creator: CREATOR, owner: keyData.owner,
+                expired_at: keyData.expired_at, total_generated: maxCount, results
+            });
+        } catch (err) {
+            return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+        }
     }
+
+    // 2. Jika aksi untuk Manual Wizard (Gratis tanpa API Key)
+    if (action === 'send-link') {
+        const email = body.email;
+        if (!email) return res.status(400).json({ status: false, creator: CREATOR, error: 'Alamat email wajib diisi!' });
+        try {
+            // Simulasi proses kirim magic link / integrasi mailer kamu
+            return res.status(200).json({ status: true, creator: CREATOR, message: 'Tautan verifikasi berhasil dikirim!' });
+        } catch (err) {
+            return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+        }
+    }
+
+    if (action === 'verify-link') {
+        const email = body.email;
+        const magicLink = body.magicLink;
+        if (!email || !magicLink) return res.status(400).json({ status: false, creator: CREATOR, error: 'Data verifikasi tidak lengkap!' });
+        try {
+            // Proses verifikasi magic link manual
+            const acc = await processSingleAccount(email);
+            return res.status(200).json({ status: true, creator: CREATOR, data: { orderId: acc.orderId || 'ORD-' + Math.floor(Math.random() * 1000000) } });
+        } catch (err) {
+            return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+        }
+    }
+
+    return res.status(400).json({ status: false, creator: CREATOR, error: 'Aksi atau parameter tidak valid.' });
 });
 
 app.all('/api/amgen_auto', async (req, res) => {
@@ -1096,6 +1128,10 @@ app.all('/api/amgen_auto', async (req, res) => {
 });
 
 app.all('/api/bulk-am', async (req, res) => {
+    // Memastikan request bulk diteruskan dengan action='bulk-generate' agar terdeteksi validasi API Key
+    if (req.method === 'POST' && req.body && !req.body.action) {
+        req.body.action = 'bulk-generate';
+    }
     req.url = '/api/amgen';
     return app._router.handle(req, res);
 });

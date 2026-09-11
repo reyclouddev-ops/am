@@ -61,7 +61,7 @@
 
                 <!-- Dropdown Menu Navigasi Eksklusif -->
                 <div id="navDropdown" class="hidden absolute right-0 top-14 w-52 glass-panel border border-[#2b3344] rounded-2xl shadow-2xl py-2.5 space-y-1">
-                    <a id="profileMenuLink" href="#" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-amber-400 transition-colors font-semibold">
+                    <a id="profileMenuLink" href="/docs/profile/" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-amber-400 transition-colors font-semibold">
                         <span class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 text-sm">👤</span>
                         <span>Profil & Panel Akun</span>
                     </a>
@@ -113,7 +113,7 @@
         </div>
 
         <!-- Dynamic User Greeting Banner (Klik untuk ke Profil) -->
-        <a id="profileBannerLink" href="#" class="block bg-card-theme hover:border-amber-500/50 border border-theme rounded-2xl p-3.5 flex items-center justify-between shadow-md transition-all duration-300 group">
+        <a id="profileBannerLink" href="/docs/profile/" class="block bg-card-theme hover:border-amber-500/50 border border-theme rounded-2xl p-3.5 flex items-center justify-between shadow-md transition-all duration-300 group">
             <div class="flex items-center space-x-2.5">
                 <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-xs group-hover:scale-105 transition-transform">
                     👤
@@ -274,9 +274,14 @@
                 const user = data.user;
                 document.getElementById('displayUsername').textContent = user.username;
                 
-                // Set link profil & banner agar tetap membawa parameter user yang aktif
-                document.getElementById('profileMenuLink').href = `/docs/profile/?user=${encodeURIComponent(user.username)}`;
-                document.getElementById('profileBannerLink').href = `/docs/profile/?user=${encodeURIComponent(user.username)}`;
+                // Amankan dan lampirkan parameter ?user=... ke seluruh link internal agar tidak mental
+                document.querySelectorAll('a').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && !href.startsWith('http') && !href.startsWith('#') && !href.includes('user=')) {
+                        const separator = href.includes('?') ? '&' : '?';
+                        link.setAttribute('href', `${href}${separator}user=${encodeURIComponent(user.username)}`);
+                    }
+                });
 
                 const roleBadge = document.getElementById('displayRole');
                 roleBadge.textContent = user.role.toUpperCase();

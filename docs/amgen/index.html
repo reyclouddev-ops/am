@@ -7,6 +7,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body { background-color: #0d0f12; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        .glass-card {
+            background: rgba(21, 25, 34, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 relative">
@@ -27,14 +33,14 @@
                 </div>
             </div>
             
-            <a href="/dashboard" class="px-3 py-1.5 rounded-xl bg-[#1e2330] border border-[#2b3344] text-[11px] text-slate-300 hover:text-white transition-all font-medium">
+            <a id="dashboardLink" href="#" class="px-3 py-1.5 rounded-xl bg-[#1e2330] border border-[#2b3344] text-[11px] text-slate-300 hover:text-white transition-all font-medium">
                 Kembali Dashboard
             </a>
         </div>
 
         <div class="space-y-1 px-1">
             <div class="text-[11px] text-slate-400">Multi-Method <span class="text-cyan-400 font-bold tracking-wide">ALIGHT MOTION ACTIVATION</span></div>
-            <p class="text-[11px] text-slate-400 leading-relaxed">Pilih metode aktivasi: Manual Wizard, Auto 1 Click, atau Mode Bulk (Custom Jumlah Akun dengan API Key).</p>
+            <p class="text-[11px] text-slate-400 leading-relaxed">Pilih metode aktivasi: Manual Wizard, Auto 1 Click (Gratis), atau Mode Bulk (Custom Jumlah Akun dengan API Key).</p>
         </div>
 
         <!-- Method Switcher -->
@@ -61,7 +67,7 @@
                     </div>
                     <div>
                         <h2 class="text-sm font-bold text-white tracking-tight">Manual Wizard Aktivasi</h2>
-                        <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Masukkan email pribadi untuk menerima magic link verifikasi.</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Masukkan email pribadi untuk menerima magic link verifikasi (Free).</p>
                     </div>
                 </div>
 
@@ -124,7 +130,7 @@
                         </div>
                         <div>
                             <h2 class="text-sm font-bold text-white tracking-tight">Auto 1 Click Activation</h2>
-                            <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Sistem otomatis membuat email sementara dan mengambil verifikasi secara instan.</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Sistem otomatis membuat email sementara dan mengambil verifikasi secara instan (Free).</p>
                         </div>
                     </div>
 
@@ -263,6 +269,20 @@
 
     </div>
 
+    <!-- MODERN CUSTOM MODAL NOTIFIKASI UMUM -->
+    <div id="customModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card border border-white/10 rounded-2xl p-5 max-w-xs w-full space-y-3.5 shadow-2xl text-center">
+            <div id="modalIcon" class="mx-auto w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-lg">⚠️</div>
+            <div class="space-y-1">
+                <h3 id="modalTitle" class="text-xs font-black text-white uppercase tracking-wider">Pemberitahuan Sistem</h3>
+                <p id="modalMessage" class="text-[11px] text-slate-300 leading-relaxed"></p>
+            </div>
+            <button onclick="closeModal()" class="w-full bg-[#1e2535] hover:bg-[#2f3b52] text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
     <!-- MODAL POPUP QRIS -->
     <div id="qrisModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-[#151922] border border-[#232936] rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl relative">
@@ -289,7 +309,7 @@
                 <a href="https://mustikapayment.com/l/apikey-bulk" target="_blank" class="block bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl text-xs text-center transition-all shadow">
                     🔗 Buka Link Pembayaran Resmi Mustika
                 </a>
-                <a href="https://wa.me/6281260512743?text=Halo%20Admin,%20saya%20sudah%20melakukan%20pembayaran%20untuk%20pembelian%20API%20Key%20Bulk.%20Berikut%20saya%20lampirkan%20bukti%20pembayarannya.%20Mohon%20bantuannya,%20terima%20kasih." 
+                <a href="https://wa.me/6281260512743?text=Halo%2520Admin,%2520saya%2520sudah%2520melakukan%2520pembayaran%2520untuk%2520pembelian%2520API%2520Key%2520Bulk.%2520Berikut%2520saya%2520lampirkan%2520bukti%2520pembayarannya.%2520Mohon%2520bantuannya,%2520terima%2520kasih." 
                    target="_blank" 
                    style="display: block; background-color: #25d366; color: white; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 12px; text-align: center; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);">
                     💬 Konfirmasi Bukti Bayar ke Admin
@@ -300,6 +320,37 @@
 
     <script>
         let currentEmail = '';
+
+        function showModernModal(title, message, type = 'error') {
+            const modal = document.getElementById('customModal');
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            const icon = document.getElementById('modalIcon');
+            
+            if (type === 'success') {
+                icon.className = "mx-auto w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl shadow-lg";
+                icon.textContent = "🎉";
+            } else {
+                icon.className = "mx-auto w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl shadow-lg";
+                icon.textContent = "🛡️";
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        // Mengatur link Dashboard agar membawa parameter user aktif
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const usernameParam = urlParams.get('user');
+            if (usernameParam) {
+                document.getElementById('dashboardLink').href = `/dashboard?user=${encodeURIComponent(usernameParam)}`;
+            } else {
+                document.getElementById('dashboardLink').href = '/dashboard';
+            }
+        });
 
         function switchMethod(method) {
             const btnManual = document.getElementById('btnTabManual');
@@ -372,10 +423,9 @@
                 const data = await res.json();
 
                 if (data.status && data.data?.status === 'active') {
-                    statusNotice.innerHTML = `<span>🎉</span><span class="text-emerald-400">API Key Aktif! Owner: <b>${data.data.owner}</b> (Sisa: ${data.data.remaining_days})</span>`;
+                    statusNotice.innerHTML = `<span>🎉</span><span class="text-emerald-400">API Key Aktif! Owner: <b>${data.data.owner}</b></span>`;
                     statusNotice.className = 'text-[11px] font-medium text-emerald-400 flex items-center space-x-1.5 pt-1';
                     
-                    // Buka kunci fitur bulk
                     controlPanel.classList.remove('opacity-40', 'pointer-events-none');
                     lockedMsg.classList.add('hidden');
                 } else {
@@ -405,7 +455,10 @@
 
         async function sendLink() {
             const email = document.getElementById('emailInput').value.trim();
-            if (!email) return alert('Alamat email wajib diisi!');
+            if (!email) {
+                showModernModal('Peringatan', 'Alamat email wajib diisi!', 'error');
+                return;
+            }
             currentEmail = email;
             document.getElementById('form-step-1').classList.add('hidden');
             document.getElementById('form-step-loading').classList.remove('hidden');
@@ -421,12 +474,12 @@
                     document.getElementById('form-step-loading').classList.add('hidden');
                     document.getElementById('form-step-2').classList.remove('hidden');
                 } else {
-                    alert('Gagal: ' + (data.error || data.message));
+                    showModernModal('Gagal', data.error || data.message, 'error');
                     document.getElementById('form-step-loading').classList.add('hidden');
                     document.getElementById('form-step-1').classList.remove('hidden');
                 }
             } catch (err) {
-                alert('Kesalahan koneksi: ' + err.message);
+                showModernModal('Kesalahan', 'Kesalahan koneksi: ' + err.message, 'error');
                 document.getElementById('form-step-loading').classList.add('hidden');
                 document.getElementById('form-step-1').classList.remove('hidden');
             }
@@ -437,7 +490,10 @@
             const btnVerify = document.getElementById('btnVerify');
             const resultBox = document.getElementById('resultBoxManual');
 
-            if (!magicLink) return alert('Magic link wajib diisi!');
+            if (!magicLink) {
+                showModernModal('Peringatan', 'Magic link wajib diisi!', 'error');
+                return;
+            }
             btnVerify.disabled = true;
             btnVerify.textContent = 'Memproses...';
 
@@ -454,10 +510,10 @@
                     document.getElementById('resManualOrder').textContent = data.data.orderId || '-';
                     document.getElementById('form-step-2').classList.add('hidden');
                 } else {
-                    alert('Verifikasi Gagal: ' + (data.error || data.message));
+                    showModernModal('Verifikasi Gagal', data.error || data.message, 'error');
                 }
             } catch (err) {
-                alert('Kesalahan koneksi: ' + err.message);
+                showModernModal('Kesalahan', 'Kesalahan koneksi: ' + err.message, 'error');
             } finally {
                 btnVerify.disabled = false;
                 btnVerify.textContent = 'Verifikasi & Ambil Akun';
@@ -504,10 +560,10 @@
                         });
                     }
                 } else {
-                    alert('Auto Aktivasi Gagal: ' + (data.error || data.message));
+                    showModernModal('Auto Aktivasi Gagal', data.error || data.message, 'error');
                 }
             } catch (err) {
-                alert('Kesalahan koneksi: ' + err.message);
+                showModernModal('Kesalahan', 'Kesalahan koneksi: ' + err.message, 'error');
             } finally {
                 btnAutoRun.disabled = false;
                 btnAutoRun.textContent = '🚀 Jalankan Auto Aktivasi';
@@ -582,7 +638,7 @@
                     showQrisModal(data.error || 'API Key Bulk tidak valid atau sudah kadaluarsa.');
                 }
             } catch (err) {
-                alert('Kesalahan koneksi: ' + err.message);
+                showModernModal('Kesalahan', 'Kesalahan koneksi: ' + err.message, 'error');
             } finally {
                 btnBulkRun.disabled = false;
                 btnBulkRun.textContent = '📦 Generate Akun Pro Sekarang';
@@ -592,7 +648,10 @@
 
         function downloadBulkResults() {
             const resultsList = document.querySelectorAll('#bulkResultsList > div');
-            if (resultsList.length === 0) return alert('Belum ada data akun yang di-generate!');
+            if (resultsList.length === 0) {
+                showModernModal('Peringatan', 'Belum ada data akun yang di-generate!', 'error');
+                return;
+            }
 
             let textContent = "=== REYCODE ALIGHT MOTION PRO ACCOUNTS ===\n";
             textContent += "Generated at: " + new Date().toLocaleString() + "\n\n";
