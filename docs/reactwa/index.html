@@ -3,337 +3,841 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Reaction & Link Bypass Engine - ReyCode Professional Suite</title>
-    <!-- Tailwind CSS CDN -->
+    <meta name="theme-color" content="#05070a">
+    <title>ReactWA Suite — Automation Console</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
+            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#07090e',
-                        cardbg: '#0f172a',
-                        cardborder: '#1e293b',
-                        accent: '#6366f1',
-                        accenthover: '#4f46e5',
-                        cyanaccent: '#06b6d4',
-                        emeraldaccent: '#10b981'
+                        base: "#05070a",
+                        surface: "#0b1017",
+                        surface2: "#101722",
+                        line: "#1b2635",
+                        emeraldx: "#10b981",
+                        cyanx: "#06b6d4"
+                    },
+                    fontFamily: {
+                        sans: ["Plus Jakarta Sans", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"]
                     },
                     boxShadow: {
-                        glow: '0 0 25px -5px rgba(99, 102, 241, 0.3)',
-                        cyanGlow: '0 0 20px -5px rgba(6, 182, 212, 0.3)'
+                        soft: "0 20px 60px rgba(0,0,0,.35)",
+                        glow: "0 0 40px rgba(16,185,129,.12)"
                     }
                 }
             }
         }
     </script>
-    <!-- FontAwesome & SweetAlert2 & Google Fonts -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-        .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); }
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: "Plus Jakarta Sans", sans-serif;
+            background:
+                radial-gradient(circle at 15% 0%, rgba(16,185,129,.08), transparent 28%),
+                radial-gradient(circle at 90% 15%, rgba(6,182,212,.07), transparent 25%),
+                #05070a;
+        }
+
+        .mono {
+            font-family: "JetBrains Mono", monospace;
+        }
+
+        .glass {
+            background: rgba(11,16,23,.78);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .grid-bg {
+            background-image:
+                linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        .input {
+            width: 100%;
+            background: rgba(5,7,10,.8);
+            border: 1px solid #1b2635;
+            color: #fff;
+            border-radius: 14px;
+            padding: 13px 14px 13px 42px;
+            outline: none;
+            font-size: 12px;
+            transition: .2s ease;
+        }
+
+        .input:hover {
+            border-color: #263548;
+        }
+
+        .input:focus {
+            border-color: rgba(16,185,129,.65);
+            box-shadow: 0 0 0 3px rgba(16,185,129,.08);
+        }
+
+        .field-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .emoji-btn {
+            min-width: 36px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            border: 1px solid #1b2635;
+            background: #080c12;
+            transition: .2s ease;
+            font-size: 14px;
+        }
+
+        .emoji-btn:hover {
+            border-color: rgba(16,185,129,.5);
+            background: rgba(16,185,129,.08);
+            transform: translateY(-1px);
+        }
+
+        .execute-btn {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(110deg,#059669,#10b981,#06b6d4);
+            box-shadow: 0 12px 35px rgba(16,185,129,.16);
+        }
+
+        .execute-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                110deg,
+                transparent 25%,
+                rgba(255,255,255,.18) 50%,
+                transparent 75%
+            );
+            transform: translateX(-120%);
+            transition: .6s ease;
+        }
+
+        .execute-btn:hover::before {
+            transform: translateX(120%);
+        }
+
+        .execute-btn:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 12px rgba(52,211,153,.7);
+        }
+
+        .progress-track {
+            height: 7px;
+            background: #080c12;
+            border: 1px solid #1b2635;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: inherit;
+            background: linear-gradient(90deg,#10b981,#06b6d4);
+            box-shadow: 0 0 18px rgba(16,185,129,.35);
+            transition: width .35s ease;
+        }
+
+        .fade-up {
+            animation: fadeUp .45s ease both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse-ring {
+            animation: pulseRing 2s infinite;
+        }
+
+        @keyframes pulseRing {
+            0%,100% {
+                box-shadow: 0 0 0 0 rgba(16,185,129,.18);
+            }
+            50% {
+                box-shadow: 0 0 0 7px rgba(16,185,129,0);
+            }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1b2635;
+            border-radius: 999px;
+        }
+
+        @media (max-width: 640px) {
+            .main-card {
+                border-radius: 20px;
+            }
+        }
     </style>
 </head>
-<body class="bg-darkbg text-gray-100 min-h-screen flex flex-col justify-between selection:bg-accent selection:text-white">
 
-    <!-- Navbar Modern Glassmorphism -->
-    <nav class="border-b border-gray-800/80 glass-panel sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div class="relative">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-2xl blur opacity-75"></div>
-                    <div class="relative bg-cardbg p-3 rounded-2xl border border-gray-700 text-emerald-400 flex items-center justify-center">
-                        <i class="fa-solid fa-bolt text-xl"></i>
+<body class="min-h-screen text-slate-200 grid-bg">
+
+    <div class="min-h-screen flex flex-col">
+
+        <header class="sticky top-0 z-50 border-b border-white/[.06] glass">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 h-[68px] flex items-center justify-between">
+
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-[13px] flex items-center justify-center bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 border border-emerald-500/20 pulse-ring">
+                        <i class="fa-brands fa-whatsapp text-emerald-400"></i>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-sm font-extrabold tracking-tight text-white">
+                                ReactWA
+                            </h1>
+                            <span class="text-[9px] px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 font-bold">
+                                PRO
+                            </span>
+                        </div>
+
+                        <p class="text-[10px] text-slate-500 mt-0.5">
+                            Automation Console
+                        </p>
                     </div>
                 </div>
-                <div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-extrabold text-lg tracking-tight text-white">ReactWA & <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Bypass</span></span>
-                        <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Validated</span>
-                    </div>
-                    <p class="text-xs text-gray-400">WhatsApp Channel Reaction & Link Skipper Suite</p>
-                </div>
-            </div>
-            <div class="flex items-center space-x-3">
-                <a href="/dashboard" class="text-xs sm:text-sm px-4 py-2.5 rounded-xl bg-gray-900/80 hover:bg-gray-800 transition text-gray-300 font-medium border border-gray-800 flex items-center space-x-2 shadow-sm">
-                    <i class="fa-solid fa-house text-gray-400"></i>
-                    <span class="hidden sm:inline">Dashboard</span>
+
+                <a
+                    href="/dashboard"
+                    class="group flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-white/[.07] bg-white/[.025] hover:bg-white/[.05] transition"
+                >
+                    <i class="fa-solid fa-arrow-left text-[10px] text-slate-500 group-hover:text-emerald-400 transition"></i>
+                    <span class="hidden sm:block text-[11px] font-semibold text-slate-300">
+                        Dashboard
+                    </span>
                 </a>
+
             </div>
-        </div>
-    </nav>
+        </header>
 
-    <!-- Main Container -->
-    <main class="max-w-5xl mx-auto px-4 py-12 flex-grow w-full">
-        
-        <!-- Hero Header -->
-        <div class="text-center mb-12">
-            <div class="inline-flex items-center space-x-2 bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-indigo-500/10 border border-emerald-500/20 px-4 py-1.5 rounded-full text-xs font-semibold text-emerald-300 mb-4 shadow-inner">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Strict URL Validation Engine Online</span>
-            </div>
-            <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
-                WhatsApp Reaction & <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400">Link Skipper</span>
-            </h1>
-            <p class="text-gray-400 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-                Wajib memasukkan URL Channel WhatsApp yang valid. Maksimal 4 emoji. Jika format salah, eksekusi dibatalkan dan terkena cooldown 1 menit.
-            </p>
-        </div>
+        <main class="flex-1 w-full max-w-3xl mx-auto px-4 py-8 sm:py-12">
 
-        <!-- Automation Console Card -->
-        <div class="bg-cardbg border border-cardborder rounded-3xl p-6 sm:p-10 shadow-glow mb-10 relative overflow-hidden">
-            <div class="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <section class="text-center mb-7 fade-up">
 
-            <form id="automationForm" onsubmit="handleExecute(event)" class="space-y-6 relative z-10">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Target URL Channel WhatsApp</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500"><i class="fa-brands fa-whatsapp"></i></span>
-                            <input type="text" id="targetUrlInput" required placeholder="https://whatsapp.com/channel/..." class="w-full bg-[#07090e] border border-gray-800 rounded-2xl pl-11 pr-4 py-3.5 text-white focus:outline-none focus:border-emerald-500 transition text-sm font-mono">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Emoji Reaction (Maksimal 4 Emoji)</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500"><i class="fa-solid fa-face-smile"></i></span>
-                            <input type="text" id="emojisInput" value="👍" placeholder="👍, 🔥, ❤️, 👏" class="w-full bg-[#07090e] border border-gray-800 rounded-2xl pl-11 pr-4 py-3.5 text-white focus:outline-none focus:border-emerald-500 transition text-sm">
-                        </div>
-                        <!-- Quick Emoji Picker Buttons -->
-                        <div class="flex flex-wrap gap-1.5 mt-2.5">
-                            <button type="button" onclick="addEmoji('👍')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">👍</button>
-                            <button type="button" onclick="addEmoji('❤️')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">❤️</button>
-                            <button type="button" onclick="addEmoji('🔥')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">🔥</button>
-                            <button type="button" onclick="addEmoji('😂')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">😂</button>
-                            <button type="button" onclick="addEmoji('😮')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">😮</button>
-                            <button type="button" onclick="addEmoji('😢')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">😢</button>
-                            <button type="button" onclick="addEmoji('🙏')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">🙏</button>
-                            <button type="button" onclick="addEmoji('👏')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">👏</button>
-                        </div>
-                    </div>
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/15 bg-emerald-500/[.06] text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                    <span class="status-dot"></span>
+                    <span>Automation Engine Online</span>
                 </div>
 
-                <!-- Pengaturan Proxy Opsional -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2 border-t border-gray-800/60">
-                    <div class="flex items-center space-x-3 pt-2">
-                        <input type="checkbox" id="useProxyCheck" class="w-5 h-5 rounded bg-[#07090e] border-gray-800 text-emerald-500 focus:ring-emerald-500">
-                        <label for="useProxyCheck" class="text-sm text-gray-300 font-medium cursor-pointer">Gunakan ProxyScrape Pool Otomatis</label>
-                    </div>
-                    <div>
-                        <input type="text" id="manualProxyInput" placeholder="Custom Proxy (host:port) Opsional" class="w-full bg-[#07090e] border border-gray-800 rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-emerald-500 transition text-sm font-mono">
-                    </div>
-                </div>
-
-                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 text-white font-extrabold py-4 px-6 rounded-2xl transition-all duration-300 transform active:scale-[0.99] shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-3 text-base cursor-pointer">
-                    <i class="fa-solid fa-bolt" id="btnIcon"></i>
-                    <span id="btnText">EXECUTE NOW</span>
-                </button>
-            </form>
-
-            <!-- Live Terminal Logs -->
-            <div id="logsContainer" class="hidden mt-8 bg-[#040609] border border-gray-800/80 rounded-2xl p-5 font-mono text-xs text-emerald-400 max-h-52 overflow-y-auto space-y-1.5 shadow-inner">
-                <div class="text-gray-500">// Menunggu instruksi eksekusi engine...</div>
-            </div>
-        </div>
-
-        <!-- Result Container -->
-        <div id="resultBox" class="hidden space-y-6 mb-12 animate-fadeIn">
-            <div class="flex items-center justify-between border-b border-gray-800 pb-4">
-                <h2 class="text-xl font-extrabold text-white flex items-center tracking-tight">
-                    <i class="fa-solid fa-circle-check text-cyan-400 mr-2.5"></i> Hasil Eksekusi <span class="text-emerald-400 ml-1.5" id="resProviderName">Success</span>
+                <h2 class="mt-4 text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                    WhatsApp Channel
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+                        Reaction Console
+                    </span>
                 </h2>
-                <span class="text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full font-mono">Completed</span>
-            </div>
-            <div id="resultCard" class="bg-[#07090e] border border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
-                <!-- Result Content injected via JS -->
-            </div>
-        </div>
 
-    </main>
+                <p class="mt-2 max-w-xl mx-auto text-xs sm:text-sm leading-6 text-slate-500">
+                    Kelola proses reaction melalui console yang cepat, sederhana,
+                    dan nyaman digunakan dari perangkat mobile.
+                </p>
 
-    <!-- Modern Footer -->
-    <footer class="border-t border-gray-800/80 glass-panel py-8 mt-20 text-center text-xs text-gray-500">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
-            <p>&copy; 2026 ReyCode Enterprise. All rights reserved.</p>
-            <div class="flex items-center space-x-4 text-gray-400 font-medium">
-                <span>ReactWA & Link Skipper Suite</span>
-                <span>•</span>
-                <span class="text-emerald-400">Secure & High Performance</span>
+            </section>
+
+            <section class="main-card relative overflow-hidden rounded-[24px] border border-white/[.07] bg-[#0b1017]/90 shadow-soft fade-up">
+
+                <div class="absolute -top-32 -right-32 w-64 h-64 bg-emerald-500/[.05] rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-32 -left-32 w-64 h-64 bg-cyan-500/[.04] rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10 p-5 sm:p-7">
+
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[.18em] text-slate-500 font-bold">
+                                Execution Console
+                            </p>
+                            <h3 class="text-sm font-bold text-white mt-1">
+                                Configure Automation
+                            </h3>
+                        </div>
+
+                        <div class="w-9 h-9 rounded-xl bg-white/[.03] border border-white/[.06] flex items-center justify-center">
+                            <i class="fa-solid fa-sliders text-xs text-slate-400"></i>
+                        </div>
+                    </div>
+
+                    <form id="automationForm" onsubmit="handleExecute(event)" class="space-y-5">
+
+                        <div>
+                            <label class="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-2">
+                                Channel URL
+                            </label>
+
+                            <div class="relative">
+                                <i class="fa-brands fa-whatsapp field-icon"></i>
+
+                                <input
+                                    type="url"
+                                    id="targetUrlInput"
+                                    required
+                                    autocomplete="off"
+                                    placeholder="https://whatsapp.com/channel/..."
+                                    class="input mono"
+                                >
+                            </div>
+
+                            <p class="mt-1.5 text-[10px] text-slate-600">
+                                Masukkan URL channel WhatsApp yang menjadi target.
+                            </p>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+                                    Reaction Emoji
+                                </label>
+
+                                <span class="text-[9px] text-slate-600 font-semibold">
+                                    MAX 4
+                                </span>
+                            </div>
+
+                            <div class="relative">
+                                <i class="fa-solid fa-face-smile field-icon"></i>
+
+                                <input
+                                    type="text"
+                                    id="emojisInput"
+                                    value="👍"
+                                    autocomplete="off"
+                                    placeholder="👍, 🔥, ❤️"
+                                    class="input"
+                                >
+                            </div>
+
+                            <div class="flex flex-wrap gap-1.5 mt-2.5">
+                                <button type="button" onclick="addEmoji('👍')" class="emoji-btn">👍</button>
+                                <button type="button" onclick="addEmoji('❤️')" class="emoji-btn">❤️</button>
+                                <button type="button" onclick="addEmoji('🔥')" class="emoji-btn">🔥</button>
+                                <button type="button" onclick="addEmoji('😂')" class="emoji-btn">😂</button>
+                                <button type="button" onclick="addEmoji('😮')" class="emoji-btn">😮</button>
+                                <button type="button" onclick="addEmoji('😢')" class="emoji-btn">😢</button>
+                                <button type="button" onclick="addEmoji('🙏')" class="emoji-btn">🙏</button>
+                                <button type="button" onclick="addEmoji('👏')" class="emoji-btn">👏</button>
+                            </div>
+                        </div>
+
+                        <div class="pt-5 border-t border-white/[.06]">
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                                <label class="flex items-center gap-3 p-3 rounded-xl bg-[#070b10] border border-white/[.06] cursor-pointer hover:border-emerald-500/20 transition">
+                                    <input
+                                        type="checkbox"
+                                        id="useProxyCheck"
+                                        class="w-4 h-4 accent-emerald-500"
+                                    >
+
+                                    <div>
+                                        <p class="text-[11px] font-semibold text-slate-300">
+                                            Proxy Pool
+                                        </p>
+                                        <p class="text-[9px] text-slate-600 mt-0.5">
+                                            Gunakan pool proxy otomatis
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <div class="relative">
+                                    <i class="fa-solid fa-network-wired field-icon"></i>
+
+                                    <input
+                                        type="text"
+                                        id="manualProxyInput"
+                                        placeholder="host:port"
+                                        autocomplete="off"
+                                        class="input mono"
+                                    >
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            id="submitBtn"
+                            class="execute-btn w-full h-12 rounded-xl text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all active:scale-[.99]"
+                        >
+                            <i id="btnIcon" class="fa-solid fa-bolt"></i>
+                            <span id="btnText">EXECUTE AUTOMATION</span>
+                        </button>
+
+                    </form>
+
+                    <div id="progressContainer" class="hidden mt-5 rounded-2xl border border-white/[.06] bg-[#070b10] p-4">
+
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="status-dot shrink-0"></span>
+                                <span
+                                    id="progressStatusText"
+                                    class="text-[10px] text-emerald-400 font-semibold mono truncate"
+                                >
+                                    Initializing...
+                                </span>
+                            </div>
+
+                            <span
+                                id="progressPercentage"
+                                class="text-[10px] text-cyan-400 font-bold mono ml-3"
+                            >
+                                0%
+                            </span>
+                        </div>
+
+                        <div class="progress-track">
+                            <div id="progressBarFill" class="progress-fill"></div>
+                        </div>
+
+                    </div>
+
+                    <div id="resultBox" class="hidden mt-4">
+                        <div class="rounded-2xl border border-emerald-500/15 bg-emerald-500/[.035] p-4 fade-up">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                    <i class="fa-solid fa-check text-emerald-400 text-xs"></i>
+                                </div>
+
+                                <div>
+                                    <p class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">
+                                        Execution Result
+                                    </p>
+                                    <p class="text-xs font-bold text-white">
+                                        Operation Completed
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div id="resultCard"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="grid grid-cols-3 gap-2 mt-4">
+
+                <div class="rounded-xl border border-white/[.05] bg-white/[.018] p-3 text-center">
+                    <i class="fa-solid fa-gauge-high text-emerald-400 text-xs"></i>
+                    <p class="text-[9px] text-slate-500 mt-1.5">Fast Console</p>
+                </div>
+
+                <div class="rounded-xl border border-white/[.05] bg-white/[.018] p-3 text-center">
+                    <i class="fa-solid fa-mobile-screen text-cyan-400 text-xs"></i>
+                    <p class="text-[9px] text-slate-500 mt-1.5">Mobile Ready</p>
+                </div>
+
+                <div class="rounded-xl border border-white/[.05] bg-white/[.018] p-3 text-center">
+                    <i class="fa-solid fa-chart-line text-emerald-400 text-xs"></i>
+                    <p class="text-[9px] text-slate-500 mt-1.5">Live Status</p>
+                </div>
+
             </div>
-        </div>
-    </footer>
 
-    <!-- Script Interaksi Professional & Eksekusi API -->
+        </main>
+
+        <footer class="border-t border-white/[.05] glass">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+
+                <p class="text-[10px] text-slate-600">
+                    © 2026 ReyCode Enterprise
+                </p>
+
+                <div class="flex items-center gap-2 text-[10px] text-slate-600">
+                    <span>ReactWA Suite</span>
+                    <span>•</span>
+                    <span class="text-emerald-500/70">
+                        Automation Console
+                    </span>
+                </div>
+
+            </div>
+        </footer>
+
+    </div>
+
     <script>
         let cooldownTimer = null;
 
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 2600,
+            timerProgressBar: true,
+            background: "#0b1017",
+            color: "#fff",
+            customClass: {
+                popup: "border border-white/[.08]"
+            }
+        });
+
         function addEmoji(emoji) {
-            const input = document.getElementById('emojisInput');
-            let currentVal = input.value.trim();
-            
-            if (!currentVal) {
+            const input = document.getElementById("emojisInput");
+            const current = input.value.trim();
+
+            if (!current) {
                 input.value = emoji;
                 return;
             }
 
-            let parts = currentVal.split(',').map(e => e.trim()).filter(Boolean);
-            if (parts.length >= 4) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Batas Maksimal Emoji!',
-                    text: 'Maksimal hanya boleh memilih 4 emoji dalam sekali eksekusi.',
-                    background: '#0f172a',
-                    color: '#fff',
-                    confirmButtonColor: '#6366f1',
-                    timer: 2000,
-                    showConfirmButton: false
+            const parts = current
+                .split(",")
+                .map(item => item.trim())
+                .filter(Boolean);
+
+            if (parts.includes(emoji)) {
+                Toast.fire({
+                    icon: "info",
+                    title: "Emoji sudah dipilih"
                 });
                 return;
             }
 
-            input.value = currentVal + ', ' + emoji;
+            if (parts.length >= 4) {
+                Toast.fire({
+                    icon: "warning",
+                    title: "Maksimal 4 emoji"
+                });
+                return;
+            }
+
+            input.value = `${current}, ${emoji}`;
         }
 
         function triggerCooldown(seconds) {
-            const btn = document.getElementById('submitBtn');
-            const btnText = document.getElementById('btnText');
-            const btnIcon = document.getElementById('btnIcon');
+            const button = document.getElementById("submitBtn");
+            const text = document.getElementById("btnText");
+            const icon = document.getElementById("btnIcon");
 
-            btn.disabled = true;
-            let timeLeft = seconds;
-            btnIcon.className = 'fa-solid fa-triangle-exclamation text-amber-400 animate-spin';
-            
             clearInterval(cooldownTimer);
-            cooldownTimer = setInterval(() => {
-                let mins = Math.floor(timeLeft / 60);
-                let secs = timeLeft % 60;
-                let timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-                
-                btnText.innerHTML = `COOLDOWN (${timeStr})`;
-                timeLeft--;
-                
-                if (timeLeft < 0) {
+
+            button.disabled = true;
+            icon.className = "fa-solid fa-clock text-amber-300";
+
+            let timeLeft = Number(seconds);
+
+            const update = () => {
+                if (timeLeft <= 0) {
                     clearInterval(cooldownTimer);
-                    btn.disabled = false;
-                    btnIcon.className = 'fa-solid fa-bolt';
-                    btnText.innerHTML = 'EXECUTE NOW';
+
+                    button.disabled = false;
+                    icon.className = "fa-solid fa-bolt";
+                    text.textContent = "EXECUTE AUTOMATION";
+                    return;
                 }
-            }, 1000);
+
+                const minutes = Math.floor(timeLeft / 60);
+                const secondsLeft = timeLeft % 60;
+
+                const formatted = minutes > 0
+                    ? `${minutes}m ${secondsLeft}s`
+                    : `${secondsLeft}s`;
+
+                text.textContent = `COOLDOWN · ${formatted}`;
+                timeLeft--;
+            };
+
+            update();
+            cooldownTimer = setInterval(update, 1000);
         }
 
-        async function handleExecute(e) {
-            e.preventDefault();
-            const url = document.getElementById('targetUrlInput').value.trim();
-            const emojis = document.getElementById('emojisInput').value.trim() || '👍';
-            const useProxy = document.getElementById('useProxyCheck').checked;
-            const manualProxy = document.getElementById('manualProxyInput').value.trim();
+        function updateProgress(percent, text) {
+            const container = document.getElementById("progressContainer");
+            const fill = document.getElementById("progressBarFill");
+            const percentage = document.getElementById("progressPercentage");
+            const status = document.getElementById("progressStatusText");
 
-            const btn = document.getElementById('submitBtn');
-            const btnText = document.getElementById('btnText');
-            const btnIcon = document.getElementById('btnIcon');
-            const logsContainer = document.getElementById('logsContainer');
-            const resultBox = document.getElementById('resultBox');
-            const resultCard = document.getElementById('resultCard');
+            const value = Math.max(0, Math.min(100, Number(percent) || 0));
 
-            // Validasi Emoji Max 4
-            const emojiParts = emojis.split(',').map(e => e.trim()).filter(Boolean);
+            container.classList.remove("hidden");
+            fill.style.width = `${value}%`;
+            percentage.textContent = `${value}%`;
+            status.textContent = text;
+        }
+
+        function resetProgress() {
+            const container = document.getElementById("progressContainer");
+            const fill = document.getElementById("progressBarFill");
+            const percentage = document.getElementById("progressPercentage");
+            const status = document.getElementById("progressStatusText");
+
+            container.classList.add("hidden");
+            fill.style.width = "0%";
+            percentage.textContent = "0%";
+            status.textContent = "Initializing...";
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        async function handleExecute(event) {
+            event.preventDefault();
+
+            const url = document.getElementById("targetUrlInput").value.trim();
+            const emojis = document.getElementById("emojisInput").value.trim() || "👍";
+            const useProxy = document.getElementById("useProxyCheck").checked;
+            const manualProxy = document.getElementById("manualProxyInput").value.trim();
+
+            const button = document.getElementById("submitBtn");
+            const buttonText = document.getElementById("btnText");
+            const buttonIcon = document.getElementById("btnIcon");
+            const resultBox = document.getElementById("resultBox");
+            const resultCard = document.getElementById("resultCard");
+
+            const emojiParts = emojis
+                .split(",")
+                .map(item => item.trim())
+                .filter(Boolean);
+
             if (emojiParts.length > 4) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Terlalu Banyak Emoji!',
-                    text: 'Maksimal emoji yang diizinkan adalah 4 buah. Eksekusi dibatalkan!',
-                    background: '#0f172a',
-                    color: '#fff',
-                    confirmButtonColor: '#ef4444'
+                Toast.fire({
+                    icon: "error",
+                    title: "Maksimal 4 emoji"
                 });
                 return;
             }
 
-            // Validasi URL Channel WhatsApp
-            const waChannelRegex = /^https:\/\/(www\.)?whatsapp\.com\/channel\/[a-zA-Z0-9_-]+(\/.+)?$/i;
-            if (!waChannelRegex.test(url)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'URL Tidak Valid!',
-                    text: 'Format URL salah! Wajib menggunakan URL Channel WhatsApp yang valid. Cooldown 1 menit aktif.',
-                    background: '#0f172a',
-                    color: '#fff',
-                    confirmButtonColor: '#ef4444'
+            const channelRegex =
+                /^https:\/\/(www\.)?whatsapp\.com\/channel\/[a-zA-Z0-9_-]+(\/.+)?$/i;
+
+            if (!channelRegex.test(url)) {
+                Toast.fire({
+                    icon: "error",
+                    title: "URL Channel WhatsApp tidak valid"
                 });
 
-                logsContainer.classList.remove('hidden');
-                logsContainer.innerHTML = `<div class="text-red-400 font-bold">[!] ERROR: URL Channel WhatsApp tidak valid. Eksekusi dibatalkan. Cooldown 1 menit aktif.</div>`;
+                updateProgress(100, "ERROR · URL tidak valid");
                 triggerCooldown(60);
                 return;
             }
 
-            btn.disabled = true;
-            btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Mengeksekusi...';
-            logsContainer.classList.remove('hidden');
-            logsContainer.innerHTML = `<div class="text-gray-400">// Memvalidasi dan mengirim request WhatsApp Reaction melalui Cloudflare Worker...</div>`;
-            resultBox.classList.add('hidden');
+            button.disabled = true;
+            buttonIcon.className = "fa-solid fa-circle-notch fa-spin";
+            buttonText.textContent = "PROCESSING...";
+
+            resultBox.classList.add("hidden");
+            resultCard.innerHTML = "";
+
+            updateProgress(20, "CONNECTING · Menyiapkan request...");
 
             try {
-                const response = await fetch('/api/automation/run', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ provider: 'keyyss', url, emojis, proxy: useProxy, manualProxy })
+                await new Promise(resolve => setTimeout(resolve, 450));
+
+                updateProgress(45, "PROCESSING · Request sedang diproses...");
+
+                const response = await fetch("/api/automation/run", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        provider: "keyyss",
+                        url,
+                        emojis,
+                        proxy: useProxy,
+                        manualProxy
+                    })
                 });
 
-                const json = await response.json();
-                if (!json.status || !json.result) {
-                    throw new Error(json.error || json.result?.message || 'Gagal menjalankan automasi.');
+                updateProgress(75, "RECEIVING · Menunggu response server...");
+
+                let json;
+
+                try {
+                    json = await response.json();
+                } catch {
+                    throw new Error("Response server bukan JSON yang valid.");
                 }
 
-                const res = json.result;
-                document.getElementById('resProviderName').textContent = res.provider || 'Keyyss';
+                if (!response.ok) {
+                    throw new Error(
+                        json?.error ||
+                        json?.message ||
+                        `Request gagal (${response.status})`
+                    );
+                }
 
-                const htmlContent = `
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs uppercase text-gray-400 font-bold">Status: <strong class="text-emerald-400">${res.status}</strong></span>
-                            <span class="text-xs font-mono text-cyan-400">Durasi: ${res.data.duration}</span>
+                if (!json.status || !json.result) {
+                    throw new Error(
+                        json?.error ||
+                        json?.result?.message ||
+                        "Automasi gagal dijalankan."
+                    );
+                }
+
+                const result = json.result;
+                const data = result.data || {};
+
+                updateProgress(100, "COMPLETE · Operation berhasil");
+
+                resultCard.innerHTML = `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+
+                        <div class="rounded-xl bg-[#070b10] border border-white/[.05] p-3">
+                            <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">
+                                Status
+                            </p>
+
+                            <p class="mt-1.5 text-[11px] font-bold text-emerald-400">
+                                <i class="fa-solid fa-circle-check mr-1"></i>
+                                ${escapeHtml(result.status || "SUCCESS")}
+                            </p>
                         </div>
-                        <div class="bg-cardbg p-4 rounded-2xl border border-cardborder">
-                            <span class="text-gray-400 text-xs font-semibold uppercase block mb-1">Target Channel WhatsApp</span>
-                            <div class="font-mono text-gray-300 text-xs break-all">${res.data.target}</div>
+
+                        <div class="rounded-xl bg-[#070b10] border border-white/[.05] p-3">
+                            <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">
+                                Duration
+                            </p>
+
+                            <p class="mt-1.5 text-[11px] font-bold text-cyan-400 mono">
+                                ${escapeHtml(data.duration || "-")}
+                            </p>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="bg-cardbg p-4 rounded-2xl border border-cardborder">
-                                <span class="text-gray-400 text-xs font-semibold uppercase block mb-1">Emoji Dikirim</span>
-                                <div class="text-white font-bold">${res.data.emojis}</div>
-                            </div>
-                            <div class="bg-cardbg p-4 rounded-2xl border border-cardborder">
-                                <span class="text-gray-400 text-xs font-semibold uppercase block mb-1">Proxy Digunakan</span>
-                                <div class="font-mono text-cyan-300 text-xs">${res.data.proxy || 'Direct Connection'}</div>
-                            </div>
+
+                        <div class="sm:col-span-2 rounded-xl bg-[#070b10] border border-white/[.05] p-3">
+                            <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">
+                                Target
+                            </p>
+
+                            <p class="mt-1.5 text-[10px] text-slate-300 mono break-all">
+                                ${escapeHtml(data.target || url)}
+                            </p>
                         </div>
+
+                        <div class="rounded-xl bg-[#070b10] border border-white/[.05] p-3">
+                            <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">
+                                Reaction
+                            </p>
+
+                            <p class="mt-1.5 text-[12px]">
+                                ${escapeHtml(data.emojis || emojis)}
+                            </p>
+                        </div>
+
+                        <div class="rounded-xl bg-[#070b10] border border-white/[.05] p-3">
+                            <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">
+                                Network
+                            </p>
+
+                            <p class="mt-1.5 text-[10px] text-cyan-300 mono truncate">
+                                ${escapeHtml(data.proxy || "Direct Edge")}
+                            </p>
+                        </div>
+
                     </div>
                 `;
 
-                logsContainer.innerHTML += `<div class="text-emerald-400 font-bold mt-2">> ${res.message}</div>`;
-                resultCard.innerHTML = htmlContent;
-                resultBox.classList.remove('hidden');
+                resultBox.classList.remove("hidden");
 
-            } catch (err) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Eksekusi Gagal!',
-                    text: err.message,
-                    background: '#0f172a',
-                    color: '#fff',
-                    confirmButtonColor: '#6366f1'
+                Toast.fire({
+                    icon: "success",
+                    title: result.message || "Operation berhasil"
                 });
-                logsContainer.innerHTML += `<div class="text-red-400 font-bold mt-2">[!] Error: ${err.message}</div>`;
+
+            } catch (error) {
+                const message =
+                    error?.message ||
+                    "Terjadi kesalahan saat memproses request.";
+
+                updateProgress(
+                    100,
+                    `ERROR · ${message}`
+                );
+
+                Toast.fire({
+                    icon: "error",
+                    title: message
+                });
+
             } finally {
                 triggerCooldown(10);
             }
         }
+
+        document
+            .getElementById("emojisInput")
+            .addEventListener("input", function() {
+                const parts = this.value
+                    .split(",")
+                    .map(item => item.trim())
+                    .filter(Boolean);
+
+                if (parts.length > 4) {
+                    this.value = parts.slice(0, 4).join(", ");
+                    Toast.fire({
+                        icon: "warning",
+                        title: "Maksimal 4 emoji"
+                    });
+                }
+            });
     </script>
+
 </body>
 </html>

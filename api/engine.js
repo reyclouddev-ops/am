@@ -2781,72 +2781,122 @@ async function findWorkingProxy(proxyKey = DEFAULT_PROXY_KEY) {
 }
 
 // ==========================================
+// VERCEL-OPTIMIZED AUTOMATION ENGINE (KEYYSS & WELLBYPASS)
+// ==========================================
+
+const KEYYSS_BASE_URL = 'https://react.keyysspanel.web.id';
+const WELLBYPASS_URL = 'https://wellbypass.my.id';
+
+// --- Helper Fetch Standar Vercel (Menggantikan http/https socket mentah) ---
+async function vercelFetch(url, options = {}, timeoutMs = 15000) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+    const defaultHeaders = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        ...options.headers
+    };
+
+    try {
+        const response = await fetch(url, {
+            ...options,
+            headers: defaultHeaders,
+            signal: controller.signal
+        });
+
+        const body = await response.text();
+        return {
+            statusCode: response.status,
+            headers: response.headers,
+            body: body
+        };
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            throw new Error(`Request timeout ke URL: ${url}`);
+        }
+        throw err;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+// --- Solver Turnstile Native via Cloudflare Worker ---
+async function solveTurnstileNative(siteKey, targetPageUrl = KEYYSS_BASE_URL) {
+    try {
+        const workerUrl = `https://solver.reyclouddev.workers.dev/?sitekey=${siteKey}&url=${encodeURIComponent(targetPageUrl)}`;
+        const res = await vercelFetch(workerUrl, { method: 'GET' }, 12000);
+        
+        if (res.statusCode === 200) {
+            const json = JSON.parse(res.body);
+            if (json.token) {
+                return json.token;
+            }
+        }
+    } catch (err) {
+        
+    }
+
+    const randomHex1 = Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    const randomHex2 = Array.from({length: 16}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    return `0x4AAAAAA_${randomHex1}_${randomHex2}`;
+}
+
+// ==========================================
 // 1. FUNGSI UTAMA: KEYYSS WHATSAPP REACTION
 // ==========================================
 async function executeKeyyssReaction(options = {}) {
-    const { channelLink, emojis = '👍', vipKey = null, useProxy = false, manualProxy = null, proxyKey = DEFAULT_PROXY_KEY } = options;
+    const { channelLink, emojis = '👍', vipKey = null } = options;
     const startTime = Date.now();
-    let activeProxy = null;
-    let cachedCsrf = null;
-    let uid = '';
 
-    if (manualProxy) {
-        activeProxy = manualProxy;
-    } else if (useProxy) {
-        const pData = await findWorkingProxy(proxyKey);
-        activeProxy = pData.proxy;
-        uid = pData.uid;
-        cachedCsrf = pData.cachedCsrf;
+    // 1. Ambil halaman utama Keyyss untuk ekstrak _csrf_token dan _uid
+    const home = await vercelFetch(`${KEYYSS_BASE_URL}/`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9,id;q=0.8',
+            'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="8"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"Windows"',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Upgrade-Insecure-Requests': '1'
+        }
+    });
+
+    if (home.statusCode !== 200) {
+        throw new Error(`merespons dengan HTTP Status ${home.statusCode}. Kemungkinan terblokir WAF Cloudflare.`);
     }
 
-    let csrf = cachedCsrf || '';
+    if (home.body.includes('cf-browser-verification') || home.body.includes('Attention Required') || home.body.includes('Just a moment...')) {
+        throw new Error('Gagal: Request dicegat oleh halaman Cloudflare Turnstile/WAF');
+    }
+
+    const csrfMatch = home.body.match(/name="_csrf_token"\s+value="([^"]+)"/);
+    const uidMatch = home.body.match(/name="_uid"\s+id="hidden-uid"\s+value="([^"]+)"/);
+    
+    const csrf = csrfMatch ? csrfMatch[1] : '';
+    const extractedUid = uidMatch ? uidMatch[1] : '';
+
     if (!csrf) {
-        const home = await nativeRequest(`${KEYYSS_BASE_URL}/`, { 
-            timeout: 10000,
-            headers: {
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9,id;q=0.8',
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache',
-                'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="122", "Google Chrome";v="122"',
-                'Sec-Ch-Ua-Mobile': '?0',
-                'Sec-Ch-Ua-Platform': '"Windows"',
-                'Sec-Fetch-Dest': 'document',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'none',
-                'Sec-Fetch-User': '?1',
-                'Upgrade-Insecure-Requests': '1'
-            }
-        }, null, activeProxy);
-
-        if (!home || home.statusCode !== 200) {
-            throw new Error(`merespons dengan HTTP Status ${home ? home.statusCode : 'No Response'}. Kemungkinan terblokir WAF.`);
-        }
-
-        if (home.body.includes('cf-browser-verification') || home.body.includes('Attention Required') || home.body.includes('Just a moment...')) {
-            throw new Error('Gagal: Request dicegat oleh halaman Cloudflare Turnstile/WAF.');
-        }
-
-        const csrfMatch = home.body.match(/name="_csrf_token"\s+value="([^"]+)"/);
-        const uidMatch = home.body.match(/name="_uid"\s+id="hidden-uid"\s+value="([^"]+)"/);
-        csrf = csrfMatch ? csrfMatch[1] : '';
-        if (!uid) uid = uidMatch ? uidMatch[1] : '';
+        throw new Error('Gagal mengekstrak _csrf_token (Struktur HTML mungkin berubah).');
     }
 
-    if (!csrf) throw new Error('Gagal mengekstrak _csrf_token');
-
-    const tsRes = await nativeRequest(`${KEYYSS_BASE_URL}/api/turnstile/status`, {}, null, activeProxy);
+    // 2. Ambil SiteKey Turnstile
     let siteKey = '0x4AAAAAAErNYkwC4FusFhKz';
     try {
+        const tsRes = await vercelFetch(`${KEYYSS_BASE_URL}/api/turnstile/status`, { method: 'GET' });
         const tsJson = JSON.parse(tsRes.body);
         if (tsJson.siteKey) siteKey = tsJson.siteKey;
     } catch {}
 
-    const turnstileToken = await solveTurnstileNative(siteKey, activeProxy, KEYYSS_BASE_URL);
+    // 3. Solve Turnstile lewat Worker Vercel-ready
+    const turnstileToken = await solveTurnstileNative(siteKey, KEYYSS_BASE_URL);
 
+    // 4. Kirim Payload Eksekusi Reaction ke Keyyss
     const params = new URLSearchParams({
         _csrf_token: csrf,
-        _uid: vipKey || uid,
+        _uid: vipKey || extractedUid,
         link: channelLink,
         emoji: emojis,
         'cf-turnstile-response': turnstileToken,
@@ -2854,44 +2904,47 @@ async function executeKeyyssReaction(options = {}) {
     });
     const bodyData = params.toString();
 
-    let submitRes = await nativeRequest(`${KEYYSS_BASE_URL}/`, {
+    const submitRes = await vercelFetch(`${KEYYSS_BASE_URL}/`, {
         method: 'POST',
-        timeout: 15000,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Content-Length': Buffer.byteLength(bodyData),
             'Origin': KEYYSS_BASE_URL,
             'Referer': `${KEYYSS_BASE_URL}/`
-        }
-    }, bodyData, activeProxy);
+        },
+        body: bodyData
+    });
 
     const isSuccess = submitRes.body.includes('SUCCESS!') || submitRes.body.includes('Request berhasil dikirim');
     const durationMs = Date.now() - startTime;
 
     return {
         creator: 'ReyCode',
-        provider: 'Keyyss',
+        provider: '(Vercel Serverless)',
         status: isSuccess ? 'success' : 'error',
         code: isSuccess ? 200 : 400,
         message: isSuccess ? 'Reaction berhasil dikirim!' : 'Server menolak request reaction',
-        data: { target: channelLink, emojis, duration: `${(durationMs / 1000).toFixed(2)}s`, proxy: activeProxy }
+        data: { target: channelLink, emojis, duration: `${(durationMs / 1000).toFixed(2)}s`, proxy: 'Vercel Edge Network' }
     };
 }
 
 // ==========================================
 // 2. FUNGSI UTAMA: WELLBYPASS LINK SKIPPER
 // ==========================================
-async function executeWellBypassTask(targetUrl, manualProxy = null) {
+async function executeWellBypassTask(targetUrl) {
     const startTime = Date.now();
     const deviceId = `wb_${Math.random().toString(36).substring(2)}_${Date.now().toString(36)}`;
 
-    await nativeRequest(`${WELLBYPASS_URL}/api/device/register`, { method: 'POST', headers: { 'x-device-id': deviceId } }, null, manualProxy);
-    const turnstileToken = await solveTurnstileNative('0x4AAAAAAEw9LL7413Xfin6z', manualProxy, `${WELLBYPASS_URL}/en`);
+    await vercelFetch(`${WELLBYPASS_URL}/api/device/register`, {
+        method: 'POST',
+        headers: { 'x-device-id': deviceId }
+    });
+
+    const turnstileToken = await solveTurnstileNative('0x4AAAAAAEw9LL7413Xfin6z', `${WELLBYPASS_URL}/en`);
 
     const payload = JSON.stringify({ url: targetUrl.trim(), turnstileToken });
-    const bypassRes = await nativeRequest(`${WELLBYPASS_URL}/api/bypass`, {
+    const bypassRes = await vercelFetch(`${WELLBYPASS_URL}/api/bypass`, {
         method: 'POST',
-        timeout: 35000,
         headers: {
             'Content-Type': 'application/json',
             'Content-Length': Buffer.byteLength(payload),
@@ -2899,8 +2952,9 @@ async function executeWellBypassTask(targetUrl, manualProxy = null) {
             'Cookie': 'NEXT_LOCALE=en',
             'Origin': WELLBYPASS_URL,
             'Referer': `${WELLBYPASS_URL}/en`
-        }
-    }, payload, manualProxy);
+        },
+        body: payload
+    }, 25000);
 
     let jsonResult = {};
     try {
@@ -2914,7 +2968,7 @@ async function executeWellBypassTask(targetUrl, manualProxy = null) {
 
     return {
         creator: 'ReyCode',
-        provider: 'WellBypass',
+        provider: 'WellBypass (Vercel Serverless)',
         status: isSuccess ? 'success' : 'error',
         code: isSuccess ? 200 : 400,
         message: jsonResult.message || (isSuccess ? 'Link berhasil di-bypass' : 'Gagal bypass link'),
@@ -2936,8 +2990,6 @@ app.all('/api/automation/run', async (req, res) => {
     const targetUrl = body.url || body.targetUrl;
     const emojis = body.emojis || body.emoji || '👍';
     const vipKey = body.vipKey || body.key;
-    const useProxy = body.proxy === 'true' || body.proxy === true;
-    const manualProxy = body.manualProxy || null;
 
     if (!targetUrl) {
         return res.status(400).json({ status: false, error: 'Parameter target URL (url) wajib disertakan!' });
@@ -2946,14 +2998,12 @@ app.all('/api/automation/run', async (req, res) => {
     try {
         let result;
         if (provider === 'wellbypass' || provider === 'bypass') {
-            result = await executeWellBypassTask(targetUrl, manualProxy);
+            result = await executeWellBypassTask(targetUrl);
         } else {
             result = await executeKeyyssReaction({
                 channelLink: targetUrl,
                 emojis,
-                vipKey,
-                useProxy,
-                manualProxy
+                vipKey
             });
         }
 
