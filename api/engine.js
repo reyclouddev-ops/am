@@ -2773,6 +2773,41 @@ async function findWorkingProxy(proxyKey = DEFAULT_PROXY_KEY) {
     }
     throw new Error('Tidak ada proxy aktif yang tersedia.');
 }
+// ==========================================
+// EXPRESS ENDPOINT INTEGRATION (/api/automation/run)
+// ==========================================
+app.all('/api/automation/run', async (req, res) => {
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    const provider = (body.provider || 'keyyss').toLowerCase();
+    const targetUrl = body.url || body.targetUrl;
+    const emojis = body.emojis || body.emoji || '👍';
+    const vipKey = body.vipKey || body.key;
+    const useProxy = body.proxy === 'true' || body.proxy === true;
+    const manualProxy = body.manualProxy || null;
+
+    if (!targetUrl) {
+        return res.status(400).json({ status: false, error: 'Parameter target URL (url) wajib disertakan!' });
+    }
+
+    try {
+        let result;
+        if (provider === 'wellbypass' || provider === 'bypass') {
+            result = await executeWellBypassTask(targetUrl, manualProxy);
+        } else {
+            result = await executeKeyyssReaction({
+                channelLink: targetUrl,
+                emojis,
+                vipKey,
+                useProxy,
+                manualProxy
+            });
+        }
+
+        return res.status(200).json({ status: true, creator: 'ReyCode', result });
+    } catch (err) {
+        return res.status(500).json({ status: false, creator: 'ReyCode', error: err.message });
+    }
+});
 
 // Fallback 404
 app.use((req, res) => {
