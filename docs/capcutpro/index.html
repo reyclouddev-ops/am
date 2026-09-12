@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapCut Pro 7d Trial Engine - ReyCode Professional Suite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#07090e',
+                        cardbg: '#0f172a',
+                        cardborder: '#1e293b',
+                        accent: '#6366f1',
+                        accenthover: '#4f46e5',
+                        cyanaccent: '#06b6d4'
+                    },
+                    boxShadow: {
+                        glow: '0 0 25px -5px rgba(99, 102, 241, 0.3)',
+                        cyanGlow: '0 0 20px -5px rgba(6, 182, 212, 0.3)'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome & SweetAlert2 & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); }
+    </style>
+</head>
+<body class="bg-darkbg text-gray-100 min-h-screen flex flex-col justify-between selection:bg-accent selection:text-white">
+
+    <!-- Navbar Modern Glassmorphism -->
+    <nav class="border-b border-gray-800/80 glass-panel sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-2xl blur opacity-75"></div>
+                    <div class="relative bg-cardbg p-3 rounded-2xl border border-gray-700 text-accent flex items-center justify-center">
+                        <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-extrabold text-lg tracking-tight text-white">CapCut Pro <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Master</span></span>
+                        <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">CapCut Trial 7d</span>
+                    </div>
+                    <p class="text-xs text-gray-400">Automated Enterprise Tier Generator & Scraper Suite</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="/dashboard" class="text-xs sm:text-sm px-4 py-2.5 rounded-xl bg-gray-900/80 hover:bg-gray-800 transition text-gray-300 font-medium border border-gray-800 flex items-center space-x-2 shadow-sm">
+                    <i class="fa-solid fa-arrow-left text-gray-400"></i>
+                    <span class="hidden sm:inline">Kembali ke Home</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 py-12 flex-grow w-full">
+        
+        <!-- Hero Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center space-x-2 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-cyan-500/10 border border-indigo-500/20 px-4 py-1.5 rounded-full text-xs font-semibold text-indigo-300 mb-4 shadow-inner">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                <span>CapCut Trial 7d Engine v2.5 Online</span>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
+                Auto Generator <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400">CapCut Pro Trial 7d</span>
+            </h1>
+            <p class="text-gray-400 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+                Sistem pendaftaran otomatis dengan temporary email, verifikasi OTP instan, dan aktivasi trial eksklusif <strong class="text-white font-semibold">CapCut Trial 7d</strong> dalam satu klik.
+            </p>
+        </div>
+
+        <!-- Generator Console Card -->
+        <div class="bg-cardbg border border-cardborder rounded-3xl p-6 sm:p-10 shadow-glow mb-10 relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <form id="capcutForm" onsubmit="handleGenerate(event)" class="space-y-6 relative z-10">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Jumlah Akun (Maks 5)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500"><i class="fa-solid fa-layer-group"></i></span>
+                            <input type="number" id="countInput" min="1" max="5" value="1" class="w-full bg-[#07090e] border border-gray-800 rounded-2xl pl-11 pr-4 py-3.5 text-white focus:outline-none focus:border-indigo-500 transition font-mono text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Kode Referral / Fission (Opsional)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500"><i class="fa-solid fa-ticket"></i></span>
+                            <input type="text" id="referralInput" placeholder="Masukkan kode referral / invite_code" class="w-full bg-[#07090e] border border-gray-800 rounded-2xl pl-11 pr-4 py-3.5 text-white focus:outline-none focus:border-indigo-500 transition text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 text-white font-extrabold py-4 px-6 rounded-2xl transition-all duration-300 transform active:scale-[0.99] shadow-lg shadow-indigo-500/25 flex items-center justify-center space-x-3 text-base">
+                    <i class="fa-solid fa-rocket animate-bounce"></i>
+                    <span id="btnText">Generate CapCut Pro Trial 7d</span>
+                </button>
+            </form>
+
+            <!-- Live Terminal Logs -->
+            <div id="logsContainer" class="hidden mt-8 bg-[#040609] border border-gray-800/80 rounded-2xl p-5 font-mono text-xs text-emerald-400 max-h-52 overflow-y-auto space-y-1.5 shadow-inner">
+                <div class="text-gray-500">// Menunggu instruksi eksekusi engine...</div>
+            </div>
+        </div>
+
+        <!-- Result Container -->
+        <div id="resultBox" class="hidden space-y-6 mb-12 animate-fadeIn">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+                <h2 class="text-xl font-extrabold text-white flex items-center tracking-tight">
+                    <i class="fa-solid fa-circle-check text-cyan-400 mr-2.5"></i> Hasil Akun <span class="text-indigo-400 ml-1.5">CapCut Trial 7d</span> Berhasil
+                </h2>
+                <span class="text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full font-mono">Ready to Use</span>
+            </div>
+            <div id="resultCards" class="grid grid-cols-1 gap-6">
+                <!-- Data injected via JS -->
+            </div>
+        </div>
+
+        <!-- Secondary Professional Tools Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Template Scraper Card -->
+            <div class="bg-cardbg border border-cardborder rounded-3xl p-6 sm:p-8 shadow-xl relative">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-bold text-white flex items-center">
+                        <i class="fa-solid fa-film text-indigo-400 mr-2.5"></i> Scraper Template
+                    </h3>
+                    <span class="text-[10px] bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-0.5 rounded-full font-semibold">Publik</span>
+                </div>
+                <p class="text-xs text-gray-400 mb-5">Ambil data detail, statistik, dan link video template CapCut instan.</p>
+                <div class="space-y-4">
+                    <input type="text" id="templateInput" placeholder="https://www.capcut.com/template-detail/..." class="w-full bg-[#07090e] border border-gray-800 rounded-2xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                    <button onclick="handleTemplateScrape()" class="w-full bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-200 font-semibold py-3 rounded-2xl transition text-sm flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-magnifying-glass text-indigo-400"></i>
+                        <span>Ambil Detail Template</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Profile Checker Card -->
+            <div class="bg-cardbg border border-cardborder rounded-3xl p-6 sm:p-8 shadow-xl relative">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-bold text-white flex items-center">
+                        <i class="fa-solid fa-user-shield text-cyan-400 mr-2.5"></i> Cek Profil Cookie
+                    </h3>
+                    <span class="text-[10px] bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 px-2.5 py-0.5 rounded-full font-semibold">Session</span>
+                </div>
+                <p class="text-xs text-gray-400 mb-5">Validasi status paket Pro dan sisa kuota dari sesi cookie akun.</p>
+                <div class="space-y-4">
+                    <textarea id="cookieInput" rows="2" placeholder="Tempel session cookie di sini..." class="w-full bg-[#07090e] border border-gray-800 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 transition font-mono"></textarea>
+                    <button onclick="handleCheckProfile()" class="w-full bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-200 font-semibold py-3 rounded-2xl transition text-sm flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-shield-check text-cyan-400"></i>
+                        <span>Cek Status Akun</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modern Footer -->
+    <footer class="border-t border-gray-800/80 glass-panel py-8 mt-20 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+            <p>&copy; 2026 ReyCode Enterprise. All rights reserved.</p>
+            <div class="flex items-center space-x-4 text-gray-400 font-medium">
+                <span>CapCut Trial 7d Automated Suite</span>
+                <span>•</span>
+                <span class="text-cyan-400">Secure & High Performance</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script Interaksi Professional -->
+    <script>
+        async function handleGenerate(e) {
+            e.preventDefault();
+            const count = document.getElementById('countInput').value;
+            const referralInput = document.getElementById('referralInput').value;
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const logsContainer = document.getElementById('logsContainer');
+            const resultBox = document.getElementById('resultBox');
+            const resultCards = document.getElementById('resultCards');
+
+            btn.disabled = true;
+            btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Menginisialisasi Akun CapCut Trial 7d...';
+            logsContainer.classList.remove('hidden');
+            logsContainer.innerHTML = '<div class="text-gray-400">// Menghubungkan ke gateway pendaftaran CapCut Trial 7d...</div>';
+            resultBox.classList.add('hidden');
+            resultCards.innerHTML = '';
+
+            try {
+                const response = await fetch(`/api/capcut/register?count=${count}&referralInput=${encodeURIComponent(referralInput)}`);
+                const json = await response.json();
+
+                if (!json.status) {
+                    throw new Error(json.error || 'Gagal memproses akun CapCut Trial 7d.');
+                }
+
+                const resultsArray = Array.isArray(json.results) ? json.results : [json.results];
+                
+                let htmlCards = '';
+                let allLogs = [];
+
+                resultsArray.forEach((item, idx) => {
+                    if (item.logs) {
+                        item.logs.forEach(l => allLogs.push(`[Akun ${idx+1}] ${l}`));
+                    }
+
+                    if (item.success && item.card) {
+                        const c = item.card;
+                        htmlCards += `
+                            <div class="bg-[#07090e] border border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl transition hover:border-indigo-500/40">
+                                <div class="absolute top-0 right-0 bg-gradient-to-l from-indigo-500/20 to-transparent text-indigo-300 text-[11px] font-bold px-4 py-2 rounded-bl-2xl border-l border-b border-indigo-500/30 font-mono flex items-center space-x-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span>
+                                    <span>CapCut Trial 7d (UID: ${c.uid})</span>
+                                </div>
+                                <div class="flex items-center space-x-3 mb-6">
+                                    <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold">
+                                        #${idx+1}
+                                    </div>
+                                    <div>
+                                        <h3 class="font-extrabold text-white text-lg tracking-tight">Akun Berhasil Dibuat</h3>
+                                        <p class="text-xs text-gray-400">Paket aktif: <span class="text-cyan-400 font-semibold">CapCut Trial 7d</span></p>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mb-4">
+                                    <div class="bg-cardbg p-4 rounded-2xl border border-cardborder">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-gray-400 text-xs font-semibold uppercase">Email Sementara</span>
+                                            <button onclick="copyText('${c.email}', this)" class="text-xs text-indigo-400 hover:text-indigo-300"><i class="fa-regular fa-copy"></i></button>
+                                        </div>
+                                        <div class="font-mono text-indigo-200 select-all text-xs sm:text-sm break-all">${c.email}</div>
+                                    </div>
+                                    <div class="bg-cardbg p-4 rounded-2xl border border-cardborder">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-gray-400 text-xs font-semibold uppercase">Password</span>
+                                            <button onclick="copyText('${c.password}', this)" class="text-xs text-emerald-400 hover:text-emerald-300"><i class="fa-regular fa-copy"></i></button>
+                                        </div>
+                                        <div class="font-mono text-emerald-300 select-all text-xs sm:text-sm">${c.password}</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-cardbg p-4 rounded-2xl border border-cardborder mb-6">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-gray-400 text-xs font-semibold uppercase">Session Cookie</span>
+                                        <button onclick="copyText('${c.cookie}', this)" class="text-xs text-cyan-400 hover:text-cyan-300"><i class="fa-regular fa-copy"></i></button>
+                                    </div>
+                                    <div class="font-mono text-gray-300 text-xs truncate select-all bg-[#07090e] p-2.5 rounded-xl border border-gray-800">${c.cookie}</div>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 border-t border-gray-800/80 pt-4 space-y-2 sm:space-y-0">
+                                    <span>Fitur: <strong class="text-white">${c.selamat_kamu_mendapatkan}</strong></span>
+                                    <span>Masa Aktif: <strong class="text-cyan-400">${c.validUntil}</strong></span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        htmlCards += `
+                            <div class="bg-red-950/20 border border-red-900/40 rounded-3xl p-6">
+                                <h3 class="font-bold text-red-400 text-base mb-1">Akun #${idx+1} Gagal Diproses</h3>
+                                <p class="text-xs text-gray-300 font-mono">${item.error || 'Terjadi kesalahan sistem.'}</p>
+                            </div>
+                        `;
+                    }
+                });
+
+                logsContainer.innerHTML = allLogs.map(l => `<div>> ${l}</div>`).join('') + '<div class="text-cyan-400 font-bold mt-2">> Semua proses CapCut Trial 7d selesai dengan sukses!</div>';
+                resultCards.innerHTML = htmlCards;
+                resultBox.classList.remove('hidden');
+
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Eksekusi Gagal!',
+                    text: err.message,
+                    background: '#0f172a',
+                    color: '#fff',
+                    confirmButtonColor: '#6366f1'
+                });
+            } finally {
+                btn.disabled = false;
+                btnText.innerHTML = 'Generate CapCut Pro Trial 7d';
+            }
+        }
+
+        async function handleTemplateScrape() {
+            const urlOrId = document.getElementById('templateInput').value.trim();
+            if (!urlOrId) return Swal.fire({ icon: 'warning', title: 'Peringatan', text: 'Masukkan URL atau ID template terlebih dahulu!', background: '#0f172a', color: '#fff', confirmButtonColor: '#6366f1' });
+
+            try {
+                const res = await fetch(`/api/capcut/template?url=${encodeURIComponent(urlOrId)}`);
+                const json = await res.json();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Template Berhasil Discrape',
+                    html: `<pre class="text-xs text-left bg-[#07090e] p-4 rounded-2xl border border-gray-800 overflow-auto max-h-60 text-indigo-300 font-mono">${JSON.stringify(json, null, 2)}</pre>`,
+                    background: '#0f172a',
+                    color: '#fff',
+                    width: '650px',
+                    confirmButtonColor: '#6366f1'
+                });
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error', text: err.message, background: '#0f172a', color: '#fff', confirmButtonColor: '#6366f1' });
+            }
+        }
+
+        async function handleCheckProfile() {
+            const cookie = document.getElementById('cookieInput').value.trim();
+            if (!cookie) return Swal.fire({ icon: 'warning', title: 'Peringatan', text: 'Masukkan session cookie akun terlebih dahulu!', background: '#0f172a', color: '#fff', confirmButtonColor: '#6366f1' });
+
+            try {
+                const res = await fetch('/api/capcut/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cookie })
+                });
+                const json = await res.json();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Profil Akun CapCut Trial 7d',
+                    html: `<pre class="text-xs text-left bg-[#07090e] p-4 rounded-2xl border border-gray-800 overflow-auto max-h-60 text-cyan-300 font-mono">${JSON.stringify(json, null, 2)}</pre>`,
+                    background: '#0f172a',
+                    color: '#fff',
+                    width: '650px',
+                    confirmButtonColor: '#6366f1'
+                });
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error', text: err.message, background: '#0f172a', color: '#fff', confirmButtonColor: '#6366f1' });
+            }
+        }
+
+        function copyText(text, btn) {
+            navigator.clipboard.writeText(text);
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i>';
+            setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+        }
+    </script>
+</body>
+</html>

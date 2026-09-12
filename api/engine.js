@@ -1,7 +1,7 @@
 /**
- * Name: Alight Motion Master Engine (The Ultimate Monolith Edition with Auth)
+ * Name: Alight Motion Master Engine (The Ultimate Monolith Edition with Auth & CapCut Engine)
  * Description: Seluruh endpoint API, scraper, downloader, QRIS Mustika, AI Tools, 
- *              serta sistem Auth IP & Akun digabung utuh dalam satu file.
+ *              CapCut Automation, serta sistem Auth IP & Akun digabung utuh dalam satu file.
  */
 
 const express = require('express');
@@ -25,7 +25,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const CREATOR = 'ReyCode';
 
-//Turnel Site
+// ==========================================
+// 0. TURNSTILE CLOUDFLARE PROTECTION
+// ==========================================
 const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY || '';
 
 async function verifyTurnstile(token, remoteip = '') {
@@ -90,6 +92,7 @@ async function requireTurnstile(req, res, next) {
 
     next();
 }
+
 // ==========================================
 // 1. DATABASE & CONFIG SETUP (MONGODB)
 // ==========================================
@@ -349,9 +352,438 @@ async function rayleighScrape(text) {
 }
 
 
+// ==========================================
+// 3. MAIL MODULE & CAPCUT AUTOMATION ENGINE
+// ==========================================
+const MAIL_BASE = process.env.MAIL_BASE_URL || 'https://glx.web.id';
+const MAIL_DOMAIN = process.env.MAIL_DOMAIN || 'glx.web.id';
+
+function generateRandomMailUsername() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz';
+  let prefix = '';
+  for (let i = 0; i < 7; i++) {
+    prefix += chars[crypto.randomBytes(1)[0] % 26];
+  }
+  const timestampSuffix = String(Date.now()).slice(-6);
+  return `${prefix}${timestampSuffix}`;
+}
+
+async function createTempEmail(domain = MAIL_DOMAIN) {
+  const username = generateRandomMailUsername();
+  const address = `${username}@${domain}`;
+
+  const confirmUrl = `${MAIL_BASE}/confirm/${encodeURIComponent(address)}/__data.json?x-sveltekit-invalidated=01`;
+  const res = await fetch(confirmUrl, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to initialize mailbox ${address}: HTTP ${res.status}`);
+  }
+
+  return address;
+}
+
+function resolveCompact(v, raw, depth = 0) {
+  if (depth > 50) return v;
+  if (typeof v === 'number') return resolveCompact(raw[v], raw, depth + 1);
+  if (Array.isArray(v)) return v.map((i) => resolveCompact(i, raw, depth + 1));
+  if (v && typeof v === 'object' && !Array.isArray(v)) {
+    const obj = {};
+    for (const [k, val] of Object.entries(v)) {
+      obj[k] = resolveCompact(val, raw, depth + 1);
+    }
+    return obj;
+  }
+  return v;
+}
+
+async function fetchEmails(address) {
+  const inboxUrl = `${MAIL_BASE}/inbox/${encodeURIComponent(address)}/__data.json?x-sveltekit-invalidated=01`;
+  const res = await fetch(inboxUrl, {
+    headers: {
+      Accept: 'application/json',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch mailbox: HTTP ${res.status}`);
+  }
+
+  const json = await res.json();
+  for (const node of json.nodes || []) {
+    if (node?.type === 'data') {
+      const raw = node.data;
+      if (Array.isArray(raw)) {
+        const descriptor = resolveCompact(raw[0], raw);
+        if (descriptor && Array.isArray(descriptor.emails)) {
+          return descriptor.emails;
+        }
+      } else if (raw?.emails && Array.isArray(raw.emails)) {
+        return raw.emails;
+      }
+    }
+  }
+
+  return [];
+}
+
+function extractVerificationCode(emails) {
+  for (const email of emails) {
+    const rawContent = `${email.subject || ''} ${email.text || ''} ${email.html || ''}`;
+    const matchOtp = rawContent.match(/verification code is (\d{6})/i) ||
+                     rawContent.match(/verify code:[\s\S]*?>\s*(\d{6})\s*</i) ||
+                     rawContent.match(/(\d{6})<\/p>/i) ||
+                     rawContent.match(/\b(\d{6})\b/);
+    if (matchOtp) {
+      return matchOtp[1];
+    }
+  }
+  return null;
+}
+
+async function waitForVerificationCode(address, timeoutMs = 60000, intervalMs = 2500) {
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const emails = await fetchEmails(address);
+      if (emails && emails.length > 0) {
+        const code = extractVerificationCode(emails);
+        if (code) {
+          return code;
+        }
+      }
+    } catch {}
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+
+  throw new Error(`Timeout waiting for verification email after ${Math.round(timeoutMs / 1000)}s`);
+}
+
+// --- Utility Functions for CapCut & AM ---
+function encryptToTargetHex(input) {
+  let hexResult = '';
+  for (const char of String(input)) {
+    const encryptedCharCode = char.charCodeAt(0) ^ 0x05;
+    hexResult += encryptedCharCode.toString(16).padStart(2, '0');
+  }
+  return hexResult;
+}
+
+function generateSecurePassword() {
+  const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*';
+  let pass = 'Cc9!';
+  for (let i = 0; i < 10; i++) {
+    pass += chars[crypto.randomBytes(1)[0] % chars.length];
+  }
+  return pass;
+}
+
+function generateRandomBirthday() {
+  const start = new Date(1992, 0, 1).getTime();
+  const end = new Date(2003, 11, 31).getTime();
+  const d = new Date(start + Math.random() * (end - start));
+  return d.toISOString().split('T')[0];
+}
+
+function formatTimestamp(ts) {
+  if (!ts) return null;
+  const num = typeof ts === 'number' ? ts : parseInt(ts, 10);
+  if (isNaN(num) || num <= 0) return null;
+  const ms = num < 1e11 ? num * 1000 : num;
+  const d = new Date(ms);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().replace('T', ' ').substring(0, 19);
+}
+
+// --- CapCut Engine Class ---
+class CapCut {
+  constructor(options = {}) {
+    this.apiBase = options.apiBase || process.env.CAPCUT_API_BASE || 'https://www.capcut.com';
+    this.editApiBase = options.editApiBase || process.env.CAPCUT_EDIT_API_BASE || 'https://edit-api-sg.capcut.com';
+    this.commerceApiBase = options.commerceApiBase || 'https://commerce-api-sg.capcut.com';
+    this.feedApiBase = options.feedApiBase || 'https://feed-api-sg.capcut.com';
+    this.userAgent = options.userAgent || process.env.USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+    this.aid = options.aid || '348188';
+    this.cookie = options.cookie || '';
+  }
+
+  generateFeedSign(url, pf = 0, timestamp = null) {
+    const ts = timestamp || Math.floor(Date.now() / 1000);
+    const raw = `9e2c|${url.slice(-7)}|${pf}||${ts}||11ac`;
+    const sign = crypto.createHash('md5').update(raw).digest('hex');
+    return { sign, deviceTime: ts };
+  }
+
+  getFeedHeaders(path, cookieString = null, extraHeaders = {}) {
+    const effectiveCookie = cookieString || this.cookie;
+    const { sign, deviceTime } = this.generateFeedSign(path, 0);
+    return {
+      'Content-Type': 'application/json',
+      'Cookie': effectiveCookie,
+      'sign': sign,
+      'sign-ver': '1',
+      'device-time': String(deviceTime),
+      'pf': '0',
+      'loc': 'SG',
+      'app-sdk-version': '100.0.0',
+      'User-Agent': this.userAgent,
+      ...extraHeaders
+    };
+  }
+
+  setCookie(cookie) {
+    this.cookie = cookie;
+  }
+
+  buildHeaders(extraHeaders = {}) {
+    const headers = {
+      'User-Agent': this.userAgent,
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'en-US,en;q=0.9,id;q=0.8',
+      ...extraHeaders
+    };
+    if (this.cookie) {
+      headers['Cookie'] = this.cookie;
+    }
+    return headers;
+  }
+
+  buildWorkspaceHeaders(cookieString = null, extraHeaders = {}) {
+    const effectiveCookie = cookieString || this.cookie;
+    return this.buildHeaders({
+      'Cookie': effectiveCookie,
+      'Content-Type': 'application/json',
+      'loc': 'sg',
+      'lan': 'en',
+      'pf': '7',
+      'sign-ver': '1',
+      ...extraHeaders
+    });
+  }
+
+  parseCookiesFromHeaders(res) {
+    let setCookieHeaders = [];
+    if (typeof res.headers.getSetCookie === 'function') {
+      setCookieHeaders = res.headers.getSetCookie();
+    } else {
+      const raw = res.headers.get('set-cookie');
+      if (raw) {
+        setCookieHeaders = [raw];
+      }
+    }
+
+    const cookies = {};
+    for (const header of setCookieHeaders) {
+      const parts = header.split(';')[0].split('=');
+      const key = parts[0]?.trim();
+      const val = parts.slice(1).join('=').trim();
+      if (key) {
+        cookies[key] = val;
+      }
+    }
+    return cookies;
+  }
+
+  formatCookieString(cookiesObj) {
+    return Object.entries(cookiesObj)
+      .map(([k, v]) => `${k}=${v}`)
+      .join('; ');
+  }
+
+  async sendVerificationCode(email, password) {
+    const encryptedEmail = encryptToTargetHex(email);
+    const encryptedPassword = encryptToTargetHex(password);
+
+    const url = new URL(`${this.apiBase}/passport/web/email/send_code/`);
+    url.searchParams.append('aid', this.aid);
+    url.searchParams.append('account_sdk_source', 'web');
+    url.searchParams.append('language', 'en');
+    url.searchParams.append('verifyFp', 'verify_m7euzwhw_PNtb4tlY_I0az_4me0_9Hrt_sEBZgW5GGPdn');
+    url.searchParams.append('check_region', '1');
+
+    const formData = new URLSearchParams();
+    formData.append('mix_mode', '1');
+    formData.append('email', encryptedEmail);
+    formData.append('password', encryptedPassword);
+    formData.append('type', '34');
+    formData.append('fixed_mix_mode', '1');
+
+    const res = await fetch(url.toString(), {
+      method: 'POST',
+      headers: this.buildHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }),
+      body: formData
+    });
+
+    const json = await res.json();
+    if (json.message !== 'success') {
+      throw new Error(`Failed to send verification code: ${json.message || JSON.stringify(json)}`);
+    }
+    return json;
+  }
+
+  async registerVerifyLogin(email, password, code, options = {}) {
+    const encryptedEmail = encryptToTargetHex(email);
+    const encryptedPassword = encryptToTargetHex(password);
+    const encryptedCode = encryptToTargetHex(code);
+
+    const birthday = options.birthday || generateRandomBirthday();
+    const region = options.region || 'ID';
+
+    let bizParam = '%7B%7D';
+    if (options.inviteCode || options.inviterUserId) {
+      const bizObj = {};
+      if (options.inviteCode) bizObj.invite_code = options.inviteCode;
+      if (options.inviterUserId) bizObj.inviter_uid = options.inviterUserId;
+      bizObj.enter_from = 'share';
+      bizParam = encodeURIComponent(JSON.stringify(bizObj));
+    }
+
+    const url = new URL(`${this.apiBase}/passport/web/email/register_verify_login/`);
+    url.searchParams.append('aid', this.aid);
+    url.searchParams.append('account_sdk_source', 'web');
+    url.searchParams.append('language', 'en');
+    url.searchParams.append('verifyFp', 'verify_m7euzwhw_PNtb4tlY_I0az_4me0_9Hrt_sEBZgW5GGPdn');
+    url.searchParams.append('check_region', '1');
+
+    const formData = new URLSearchParams();
+    formData.append('mix_mode', '1');
+    formData.append('email', encryptedEmail);
+    formData.append('code', encryptedCode);
+    formData.append('password', encryptedPassword);
+    formData.append('type', '34');
+    formData.append('birthday', birthday);
+    formData.append('force_user_region', region);
+    formData.append('biz_param', bizParam);
+    formData.append('check_region', '1');
+    formData.append('fixed_mix_mode', '1');
+
+    const res = await fetch(url.toString(), {
+      method: 'POST',
+      headers: this.buildHeaders({
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }),
+      body: formData
+    });
+
+    const json = await res.json();
+    if (json.message !== 'success' || !json.data) {
+      throw new Error(`Failed to verify and register: ${json.message || JSON.stringify(json)}`);
+    }
+
+    const cookies = this.parseCookiesFromHeaders(res);
+    const cookieString = this.formatCookieString(cookies);
+    if (cookieString) {
+      this.setCookie(cookieString);
+    }
+
+    return {
+      data: json.data,
+      cookies,
+      cookieString
+    };
+  }
+
+  async getFullAccountProfile(cookieString = null) {
+    const effCookie = cookieString || this.cookie;
+    const url = `${this.apiBase}/lv/web/v1/user/get_user_info`;
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: this.buildHeaders({ 'Cookie': effCookie })
+    });
+    const json = await res.json();
+    return json;
+  }
+
+  async claimReferral(referralCode, cookieString = null, progressCb = () => {}) {
+    const effCookie = cookieString || this.cookie;
+    progressCb(`Mengklaim referral / kode: ${referralCode}`);
+    
+    const url = `${this.apiBase}/lv/web/v1/fission/claim`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: this.buildHeaders({
+        'Cookie': effCookie,
+        'Content-Type': 'application/json'
+      }),
+      body: JSON.stringify({ invite_code: referralCode })
+    });
+    const json = await res.json();
+    return json;
+  }
+
+  async registerDisposableAccount(options = {}, progressCb = () => {}) {
+    progressCb('Membuat email sementara baru...');
+    const email = await createTempEmail();
+    const password = generateSecurePassword();
+
+    progressCb(`Mengirim kode OTP ke ${email}...`);
+    await this.sendVerificationCode(email, password);
+
+    progressCb('Menunggu kode verifikasi masuk ke inbox...');
+    const usernameOnly = email.split('@')[0];
+    const otpCode = await waitForVerificationCode(usernameOnly, 60000, 2500);
+    if (!otpCode) {
+      throw new Error('Timeout: OTP tidak diterima dalam 60 detik.');
+    }
+
+    progressCb(`OTP diterima (${otpCode}), mendaftarkan akun ke CapCut...`);
+    const regResult = await this.registerVerifyLogin(email, password, otpCode, {
+      birthday: generateRandomBirthday(),
+      region: options.region || 'ID',
+      inviteCode: options.referralInput,
+      inviterUserId: options.inviterUserId
+    });
+
+    let fissionResult = null;
+    if (options.getTrial && options.referralInput) {
+      try {
+        progressCb('Mengklaim trial / fission referral...');
+        fissionResult = await this.claimReferral(options.referralInput, regResult.cookieString, progressCb);
+      } catch (err) {
+        progressCb(`Gagal klaim trial: ${err.message}`);
+      }
+    }
+
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 7);
+    const validUntil = expiryDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+
+    return {
+      email,
+      password,
+      uid: regResult.data?.user_id || regResult.data?.uid || 'unknown',
+      cookie: regResult.cookieString,
+      validUntil,
+      fissionResult
+    };
+  }
+
+  async scrapeTemplate(urlOrId) {
+    let templateId = urlOrId;
+    if (urlOrId.includes('capcut.com')) {
+      const match = urlOrId.match(/\/template-detail\/(\d+)/) || urlOrId.match(/\/t\/([a-zA-Z0-9_-]+)/);
+      if (match) templateId = match[1];
+    }
+
+    const apiLink = `${this.feedApiBase}/lv/v1/meta_template/template_detail?template_id=${templateId}`;
+    const res = await fetch(apiLink, {
+      method: 'GET',
+      headers: this.getFeedHeaders(apiLink)
+    });
+    const json = await res.json();
+    return json;
+  }
+}
 
 // ==========================================
-// 3. CORE ALIGHT MOTION & AKUNLAMA SCRAPER
+// 4. CORE ALIGHT MOTION & AKUNLAMA SCRAPER
 // ==========================================
 const AM_KEY = process.env.AM_KEY || '';
 const IDT = process.env.IDT || '';
@@ -880,7 +1312,7 @@ class Viu {
 const viuInstance = new Viu();
 
 // ==========================================
-// 4. DOWNLOADERS & TOOLS
+// 5. DOWNLOADERS & TOOLS
 // ==========================================
 async function indown(url) {
     try {
@@ -1105,32 +1537,28 @@ app.get('/api/engine', (req, res) => {
     res.status(200).json({ status: true, creator: CREATOR, message: 'Alight Motion Ultimate Unified Master Engine Active in /api/' });
 });
 
-/// --- AM Engine (Pembaruan: Validasi Otomatis API Key dari Database User) ---
+// --- AM Engine ---
 app.all('/api/amgen', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const action = body.action || '';
     let apiKeyInput = req.headers['x-apikey'] || body.apikey;
     const username = body.username || body.user || '';
 
-    // 1. Jika mode bulk-generate atau ada permintaan khusus, cek apakah user punya API Key di database
     if (action === 'bulk-generate' || (!action && apiKeyInput) || (username && !apiKeyInput)) {
         try {
             await connectDB();
 
-            // Jika user mengirimkan username, cari apakah user tersebut memiliki apikey tersimpan di database
             if (username && !apiKeyInput) {
                 const userData = await User.findOne({ username: username.toLowerCase() });
                 if (userData && userData.apikey) {
-                    apiKeyInput = userData.apikey; // Otomatis ambil API key milik user dari database!
+                    apiKeyInput = userData.apikey;
                 }
             }
 
-            // Jika setelah dicek tetap tidak ada API Key sama sekali
             if (!apiKeyInput) {
                 return res.status(403).json({ status: false, creator: CREATOR, error: 'Akses ditolak! API Key tidak ditemukan untuk akun ini.' });
             }
 
-            // Validasi ke koleksi ApiKey
             const keyData = await ApiKey.findOne({ apikey: apiKeyInput });
 
             if (!keyData || keyData.status !== 'active' || new Date() > new Date(keyData.expired_at)) {
@@ -1158,7 +1586,6 @@ app.all('/api/amgen', async (req, res) => {
         }
     }
 
-    // 2. Jika aksi untuk Manual Wizard (Gratis tanpa API Key)
     if (action === 'send-link') {
         const email = body.email;
         if (!email) return res.status(400).json({ status: false, creator: CREATOR, error: 'Alamat email wajib diisi!' });
@@ -1322,8 +1749,6 @@ app.all('/api/viu/stream', async (req, res) => {
     }
 });
 
-
-
 // --- Chat AI Endpoint (/api/chat) ---
 app.post('/api/chat', async (req, res) => {
     try {
@@ -1447,7 +1872,6 @@ app.post('/api/imagen', async (req, res) => {
 // 7. AUTH & API KEY MANAGEMENT ENDPOINTS
 // ==========================================
 
-// --- Endpoint Register (Proteksi 1 IP = 1 Akun) ---
 app.post('/api/auth/register', requireTurnstile, async (req, res) => {
     try {
         await connectDB();
@@ -1496,7 +1920,6 @@ app.post('/api/auth/register', requireTurnstile, async (req, res) => {
     }
 });
 
-// --- Endpoint Login ---
 app.post('/api/auth/login', requireTurnstile, async (req, res) => {
     try {
         await connectDB();
@@ -1507,8 +1930,6 @@ app.post('/api/auth/login', requireTurnstile, async (req, res) => {
         }
 
         const inputUser = username.toLowerCase();
-        
-        // 1. Cek apakah yang login adalah Creator/Admin Utama dari .env
         const creatorUsername = (process.env.CREATOR_USERNAME || '').toLowerCase();
         const creatorPassword = process.env.CREATOR_PASSWORD || '';
 
@@ -1529,7 +1950,6 @@ app.post('/api/auth/login', requireTurnstile, async (req, res) => {
             });
         }
 
-        // 2. Jika bukan creator, cek login untuk User biasa di database MongoDB
         const user = await User.findOne({ 
             $or: [{ username: inputUser }, { email: inputUser }] 
         });
@@ -1557,7 +1977,6 @@ app.post('/api/auth/login', requireTurnstile, async (req, res) => {
     }
 });
 
-// --- Endpoint Cek Sesi (Auth Check) ---
 app.get('/api/auth/session', async (req, res) => {
     try {
         const usernameQuery = req.query.username;
@@ -1568,7 +1987,6 @@ app.get('/api/auth/session', async (req, res) => {
         const inputUser = usernameQuery.toLowerCase();
         const creatorUsername = (process.env.CREATOR_USERNAME || '').toLowerCase();
 
-        // Jika yang dicek adalah Creator dari .env
         if (creatorUsername && inputUser === creatorUsername) {
             return res.status(200).json({
                 status: true,
@@ -1580,7 +1998,6 @@ app.get('/api/auth/session', async (req, res) => {
             });
         }
 
-        // Jika user biasa, cek ke MongoDB
         await connectDB();
         const user = await User.findOne({ username: inputUser });
         if (!user) {
@@ -1600,7 +2017,6 @@ app.get('/api/auth/session', async (req, res) => {
     }
 });
 
-// --- Endpoint Ganti Password ---
 app.post('/api/auth/change-password', async (req, res) => {
     try {
         await connectDB();
@@ -1632,7 +2048,6 @@ app.post('/api/auth/change-password', async (req, res) => {
     }
 });
 
-// Endpoint untuk mengambil data profil & status API Key user yang sedang login (Diperbaiki)
 app.get('/api/user/profile', async (req, res) => {
     try {
         await connectDB();
@@ -1642,7 +2057,6 @@ app.get('/api/user/profile', async (req, res) => {
             return res.status(401).json({ status: false, error: 'Unauthorized: Silakan login terlebih dahulu' });
         }
 
-        // Cari API Key yang dimiliki oleh user ini berdasarkan field 'owner'
         const userApiKey = await ApiKey.findOne({ owner: username.toLowerCase(), status: 'active' });
 
         if (!userApiKey) {
@@ -1656,8 +2070,8 @@ app.get('/api/user/profile', async (req, res) => {
         return res.status(200).json({
             status: true,
             hasKey: true,
-            apiKey: userApiKey.apikey,       // Mengambil dari field 'apikey' di database
-            expiredAt: userApiKey.expired_at // Mengambil dari field 'expired_at' di database
+            apiKey: userApiKey.apikey,
+            expiredAt: userApiKey.expired_at
         });
 
     } catch (err) {
@@ -1667,7 +2081,7 @@ app.get('/api/user/profile', async (req, res) => {
 });
 
 // ==========================================
-// 5. ADMIN & USER VERIFICATION HELPERS
+// 8. ADMIN & USER VERIFICATION HELPERS
 // ==========================================
 async function verifyAdmin(req) {
     const body = req.method === 'GET' ? req.query : (req.body || {});
@@ -1676,12 +2090,10 @@ async function verifyAdmin(req) {
     const ADMIN_SECRET = process.env.ADMIN_GENERATOR_PASSWORD || '';
     const creatorUsername = (process.env.CREATOR_USERNAME || '').toLowerCase();
 
-    // 1. Cek apakah yang merequest adalah Creator Utama dari .env
     if (usernameQuery && usernameQuery.toLowerCase() === creatorUsername) {
         return { authorized: true };
     }
 
-    // 2. Jika ada username, cek role-nya di database MongoDB
     if (usernameQuery) {
         try {
             await connectDB();
@@ -1692,19 +2104,13 @@ async function verifyAdmin(req) {
         } catch {}
     }
 
-    // 3. Fallback jika tidak lolos role creator, wajib pakai adminToken/password .env
     if (!adminToken || adminToken !== ADMIN_SECRET) {
         return { authorized: false, response: { status: false, creator: CREATOR, error: 'Akses ditolak! Token atau password admin tidak valid.' } };
     }
     return { authorized: true };
 }
 
-
-// ==========================================
-// 6. EXPRESS ROUTER & API ENDPOINT MAPPING
-// ==========================================
-
-// --- Endpoint Admin Key Manager ---
+// --- Admin Key & User Manager Endpoints ---
 app.all('/api/admin/create-key', async (req, res) => {
     const auth = await verifyAdmin(req);
     if (!auth.authorized) return res.status(403).json(auth.response);
@@ -1756,9 +2162,6 @@ app.all('/api/admin/list-keys', async (req, res) => {
     }
 });
 
-// ==========================================
-// ENDPOINT: Cek Status API Key & Validasi Kepemilikan User
-// ==========================================
 app.all('/api/apikey/check', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const inputKey = req.headers['x-apikey'] || body.apikey;
@@ -1774,7 +2177,6 @@ app.all('/api/apikey/check', async (req, res) => {
             return res.status(404).json({ status: false, creator: CREATOR, error: 'API Key tidak ditemukan!' });
         }
 
-        // Validasi Ketat: Pastikan owner API Key sesuai dengan username yang sedang aktif di sesi
         if (currentUsername && keyData.owner.toLowerCase() !== currentUsername.toLowerCase()) {
             return res.status(403).json({ 
                 status: false, 
@@ -1783,7 +2185,6 @@ app.all('/api/apikey/check', async (req, res) => {
             });
         }
 
-        // Cek apakah key aktif dan belum melewati tanggal kadaluarsa
         const now = new Date();
         const expiredDate = new Date(keyData.expired_at);
         const isActive = keyData.status === 'active' && now <= expiredDate;
@@ -1796,7 +2197,6 @@ app.all('/api/apikey/check', async (req, res) => {
             });
         }
 
-        // Hitung sisa hari aktif secara dinamis
         const diffTime = Math.abs(expiredDate - now);
         const remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -1816,7 +2216,6 @@ app.all('/api/apikey/check', async (req, res) => {
     }
 });
 
-
 app.all('/api/admin/list-users', async (req, res) => {
     const auth = await verifyAdmin(req);
     if (!auth.authorized) return res.status(403).json(auth.response);
@@ -1829,6 +2228,9 @@ app.all('/api/admin/list-users', async (req, res) => {
     }
 });
 
+// ==========================================
+// 9. VERCEL DEPLOYMENT & PAYMENT NOTIFICATIONS
+// ==========================================
 const multer = require('multer');
 const upload = multer({ dest: os.tmpdir() });
 const AdmZip = require('adm-zip');
@@ -1938,7 +2340,6 @@ app.post('/api/deploy', upload.single('file'), requireTurnstile, async (req, res
     try {
         const projectName = cleanProjectName(req.body.name);
         
-        // 1. Validasi 3 Domain Resmi
         const allowedDomains = ['legionteknologi.my.id', 'reycode.my.id', 'reycode.web.id'];
         let selectedDomain = (req.body.domain || '').trim().toLowerCase();
         if (!allowedDomains.includes(selectedDomain)) {
@@ -1960,14 +2361,12 @@ app.post('/api/deploy', upload.single('file'), requireTurnstile, async (req, res
         let siteDir = workDir;
         const filename = uploadedFile.originalname.toLowerCase();
 
-        // 2. Ekstraksi file ZIP atau penanganan file HTML tunggal
         if (filename.endsWith('.zip')) {
             const extractDir = path.join(workDir, 'site');
             fs.mkdirSync(extractDir, { recursive: true });
             const zip = new AdmZip(targetPath);
             zip.extractAllTo(extractDir, true);
             
-            // Normalisasi struktur root direktori jika index.html berada di dalam subfolder
             const indexPath = findFileRecursive(extractDir, "index.html");
             if (indexPath) {
                 const indexDir = path.dirname(indexPath);
@@ -1992,7 +2391,6 @@ app.post('/api/deploy', upload.single('file'), requireTurnstile, async (req, res
         const files = collectFiles(siteDir);
         if (!files.length) throw new Error('Tidak ada file ditemukan dalam arsip.');
 
-        // 3. Deteksi Framework Project secara Otomatis
         const framework = detectFramework(siteDir);
 
         const payloadFiles = files.map(file => ({
@@ -2001,13 +2399,11 @@ app.post('/api/deploy', upload.single('file'), requireTurnstile, async (req, res
             encoding: 'base64'
         }));
 
-        // 4. Buat Project di Vercel
         await axios.post(`${VERCEL_API_URL}/v9/projects`, { name: projectName }, {
             headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             validateStatus: () => true
         });
 
-        // 5. Deploy File ke Vercel dengan Pengaturan Framework Terdeteksi
         const deployPayload = {
             name: projectName,
             project: projectName,
@@ -2027,7 +2423,6 @@ app.post('/api/deploy', upload.single('file'), requireTurnstile, async (req, res
         const deploymentId = deployRes.data.id;
         const vercelUrl = deployRes.data.url ? `https://${deployRes.data.url}` : `https://${projectName}.vercel.app`;
         
-        // 6. Integrasi Custom Domain ke salah satu dari 3 Domain Pilihan
         const customDomain = `${projectName}.${selectedDomain}`;
 
         await axios.post(`${VERCEL_API_URL}/v10/projects/${encodeURIComponent(projectName)}/domains`, {
@@ -2058,6 +2453,132 @@ app.post('/api/deploy', upload.single('file'), requireTurnstile, async (req, res
     }
 });
 
+// ==========================================
+// 10. CAPCUT AUTOMATION ENDPOINTS (/api/capcut/*)
+// ==========================================
+const capcutEngine = new CapCut();
+
+// 1. Auto Register + Auto OTP + Auto Trial Format Card (Bisa GET / POST)
+app.all('/api/capcut/register', async (req, res) => {
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    const count = parseInt(body.count || body.jumlah || 1, 10);
+    const maxCount = Math.min(Math.max(count, 1), 5); // Batasi maks 5 akun sekali tembak
+
+    const results = [];
+    for (let i = 0; i < maxCount; i++) {
+        const logs = [];
+        const progressCb = (msg) => logs.push(msg);
+
+        try {
+            const result = await capcutEngine.registerDisposableAccount({
+                referralInput: body.referralInput || body.inviteCode || body.ref,
+                inviterUserId: body.inviterUserId,
+                region: body.region || 'SG',
+                getTrial: true, 
+                timeoutMs: 60000
+            }, progressCb);
+
+            results.push({
+                success: true,
+                card: {
+                    email: result.email,
+                    password: result.password,
+                    uid: result.uid,
+                    cookie: result.cookie,
+                    weblogin: 'https://www.capcut.com',
+                    selamat_kamu_mendapatkan: 'CapCut Pro Trial',
+                    validUntil: result.validUntil,
+                    panduan_dan_cara_login: [
+                        "1. Buka aplikasi atau website resmi CapCut.",
+                        "2. Login menggunakan Email: " + result.email,
+                        "3. Masukkan Password yang tertera, atau gunakan Cookie session."
+                    ]
+                },
+                logs
+            });
+        } catch (err) {
+            results.push({ success: false, error: err.message, logs });
+        }
+    }
+
+    return res.status(200).json({
+        status: true,
+        creator: CREATOR,
+        total_generated: results.filter(r => r.success).length,
+        results: results.length === 1 ? results[0] : results
+    });
+});
+
+// 2. Scraper Template Publik (TANPA COOKIE)
+app.all('/api/capcut/template', async (req, res) => {
+    const urlOrId = req.method === 'POST' ? req.body?.url || req.body?.id : req.query?.url || req.query?.id;
+    if (!urlOrId) {
+        return res.status(400).json({ status: false, error: 'URL atau ID template CapCut wajib disertakan!' });
+    }
+
+    try {
+        const templateData = await capcutEngine.scrapeTemplate(urlOrId);
+        return res.status(200).json({
+            status: true,
+            creator: CREATOR,
+            data: templateData
+        });
+    } catch (err) {
+        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+    }
+});
+
+// 3. Cek Profil & Status Akun (BUTUH COOKIE)
+app.all('/api/capcut/profile', async (req, res) => {
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    const cookie = req.headers['x-cookie'] || body.cookie;
+
+    if (!cookie) {
+        return res.status(400).json({ status: false, error: 'Cookie CapCut wajib disertakan di body, query, atau header x-cookie!' });
+    }
+
+    try {
+        const profile = await capcutEngine.getFullAccountProfile(cookie);
+        return res.status(200).json({
+            status: true,
+            creator: CREATOR,
+            data: profile
+        });
+    } catch (err) {
+        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+    }
+});
+
+// 4. Klaim Referral / Redeem Kode Tambahan (BUTUH COOKIE)
+app.all('/api/capcut/claim', async (req, res) => {
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    const cookie = req.headers['x-cookie'] || body.cookie;
+    const referralInput = body.referralInput || body.inviteCode || body.inviterUserId;
+
+    if (!cookie) {
+        return res.status(400).json({ status: false, error: 'Cookie CapCut wajib disertakan!' });
+    }
+    if (!referralInput) {
+        return res.status(400).json({ status: false, error: 'Parameter referral (referralInput / inviteCode) wajib diisi!' });
+    }
+
+    try {
+        const logs = [];
+        const progressCb = (msg) => logs.push(msg);
+
+        const result = await capcutEngine.claimReferral(referralInput, cookie, progressCb);
+
+        return res.status(200).json({
+            status: true,
+            creator: CREATOR,
+            result,
+            logs
+        });
+    } catch (err) {
+        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+    }
+});
+
 app.all('/api/payment/success-notif', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const username = body.user || body.username || 'Tamu / Umum';
@@ -2073,7 +2594,10 @@ app.all('/api/payment/success-notif', async (req, res) => {
                 `🕒 Waktu: <code>${new Date().toLocaleString('id-ID')}</code>\n\n` +
                 `<i>User membuka halaman sukses dan siap melakukan konfirmasi via WhatsApp.</i>`;
 
-    sendTelegramNotification(msg);
+    // Pastikan sendTelegramNotification terdefinisi jika digunakan
+    if (typeof sendTelegramNotification === 'function') {
+        sendTelegramNotification(msg);
+    }
 
     return res.status(200).json({ status: true, message: 'Notifikasi terkirim.' });
 });
