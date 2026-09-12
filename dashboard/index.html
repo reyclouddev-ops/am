@@ -102,7 +102,7 @@
                         <span>Rayleigh AI Chat</span>
                     </a>
                     <div class="h-px bg-white/10 my-1.5 mx-3"></div>
-                    <a href="https://mustikapayment.com/l/donasi-untuk-reycloud" target="_blank" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-pink-400 transition-colors font-semibold">
+                    <a href="#" onclick="handleDonation(event)" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-pink-400 transition-colors font-semibold cursor-pointer">
                         <span class="w-7 h-7 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-400 text-sm">💖</span>
                         <span>Donasi ReyCloud</span>
                     </a>
@@ -204,7 +204,7 @@
                 </a>
             </div>
             
-            <a href="https://mustikapayment.com/l/donasi-untuk-reycloud" target="_blank" class="w-full bg-card-theme hover:border-pink-500/60 border border-theme text-pink-400 font-bold py-3.5 px-4 rounded-2xl text-xs flex items-center justify-center space-x-2 shadow-md transition-all duration-300 transform hover:-translate-y-0.5 text-center">
+            <a href="#" onclick="handleDonation(event)" class="w-full bg-card-theme hover:border-pink-500/60 border border-theme text-pink-400 font-bold py-3.5 px-4 rounded-2xl text-xs flex items-center justify-center space-x-2 shadow-md transition-all duration-300 transform hover:-translate-y-0.5 text-center cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-pink-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
@@ -267,6 +267,13 @@
     </div>
 
     <script>
+        // Fungsi untuk menangani klik donasi agar mencatat session type dan mengarah ke link terbaru
+        function handleDonation(event) {
+            event.preventDefault();
+            sessionStorage.setItem('pending_tx_type', 'donasi');
+            window.open('https://mustikapayment.com/l/donasi-reycoe', '_blank');
+        }
+
         // Verifikasi sesi langsung ke MongoDB / .env via Backend API (Tanpa LocalStorage)
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
