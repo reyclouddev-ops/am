@@ -2611,7 +2611,7 @@ app.all('/api/payment/success-notif', async (req, res) => {
     return res.status(200).json({ status: true, message: 'Notifikasi terkirim.' });
 });
 // ==========================================
-// NATIVE AUTOMATION ENGINE (KEYYSS & WELLBYPASS) - UPGRADED
+// NATIVE AUTOMATION ENGINE (KEYYSS & WELLBYPASS) - FULL UPGRADED
 // ==========================================
 
 const KEYYSS_BASE_URL = 'https://react.keyysspanel.web.id';
@@ -2626,7 +2626,7 @@ function nativeRequest(url, options = {}, postData = null, proxy = null) {
         const defaultPort = isHttps ? 443 : 80;
         const targetPort = u.port || defaultPort;
         const headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
             Host: u.hostname,
             ...options.headers
         };
@@ -2714,13 +2714,13 @@ function nativeRequest(url, options = {}, postData = null, proxy = null) {
     });
 }
 
-// --- Solver Turnstile Native via Cloudflare Worker (Dengan Forwarding IP & SiteKey) ---
+// --- Solver Turnstile Native via Cloudflare Worker (Terkonfigurasi Sesuai Worker Terbaru) ---
 async function solveTurnstileNative(siteKey, proxy = null, targetPageUrl = KEYYSS_BASE_URL) {
     try {
         const workerUrl = `https://solver.reyclouddev.workers.dev/?sitekey=${siteKey}&url=${encodeURIComponent(targetPageUrl)}`;
         
-        // Menambahkan header ekstra untuk mendeteksi atau merotasi jejak proxy/IP ke worker jika ada
-        const workerHeaders = proxy ? { 'X-Forwarded-For': proxy.split(':')[0] } : {};
+        // Meneruskan IP proxy melalui header X-Custom-IP agar sinkron dengan Cloudflare Worker baru
+        const workerHeaders = proxy ? { 'X-Custom-IP': proxy.split(':')[0] } : {};
         const res = await nativeRequest(workerUrl, { timeout: 15000, headers: workerHeaders }, null, proxy);
         
         if (res.statusCode === 200) {
@@ -2733,8 +2733,9 @@ async function solveTurnstileNative(siteKey, proxy = null, targetPageUrl = KEYYS
         // Fallback aman jika terjadi gangguan jaringan pada worker
     }
 
-    const randomHex = Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('');
-    return `0x4AAAAAA_${randomHex}`;
+    const randomHex1 = Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    const randomHex2 = Array.from({length: 16}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    return `0x4AAAAAA_${randomHex1}_${randomHex2}`;
 }
 
 // --- Proxy Scrape Helper ---
@@ -2800,15 +2801,39 @@ async function executeKeyyssReaction(options = {}) {
 
     let csrf = cachedCsrf || '';
     if (!csrf) {
-        const home = await nativeRequest(`${KEYYSS_BASE_URL}/`, { timeout: 8000 }, null, activeProxy);
-        if (home && home.statusCode === 200) {
-            const csrfMatch = home.body.match(/name="_csrf_token"\s+value="([^"]+)"/);
-            const uidMatch = home.body.match(/name="_uid"\s+id="hidden-uid"\s+value="([^"]+)"/);
-            csrf = csrfMatch ? csrfMatch[1] : '';
-            if (!uid) uid = uidMatch ? uidMatch[1] : '';
+        const home = await nativeRequest(`${KEYYSS_BASE_URL}/`, { 
+            timeout: 10000,
+            headers: {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9,id;q=0.8',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="122", "Google Chrome";v="122"',
+                'Sec-Ch-Ua-Mobile': '?0',
+                'Sec-Ch-Ua-Platform': '"Windows"',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1',
+                'Upgrade-Insecure-Requests': '1'
+            }
+        }, null, activeProxy);
+
+        if (!home || home.statusCode !== 200) {
+            throw new Error(`merespons dengan HTTP Status ${home ? home.statusCode : 'No Response'}. Kemungkinan terblokir WAF.`);
         }
+
+        if (home.body.includes('cf-browser-verification') || home.body.includes('Attention Required') || home.body.includes('Just a moment...')) {
+            throw new Error('Gagal: Request dicegat oleh halaman Cloudflare Turnstile/WAF.');
+        }
+
+        const csrfMatch = home.body.match(/name="_csrf_token"\s+value="([^"]+)"/);
+        const uidMatch = home.body.match(/name="_uid"\s+id="hidden-uid"\s+value="([^"]+)"/);
+        csrf = csrfMatch ? csrfMatch[1] : '';
+        if (!uid) uid = uidMatch ? uidMatch[1] : '';
     }
-    if (!csrf) throw new Error('Gagal mengekstrak _csrf_token dari Keyyss panel');
+
+    if (!csrf) throw new Error('Gagal mengekstrak _csrf_token');
 
     const tsRes = await nativeRequest(`${KEYYSS_BASE_URL}/api/turnstile/status`, {}, null, activeProxy);
     let siteKey = '0x4AAAAAAErNYkwC4FusFhKz';
