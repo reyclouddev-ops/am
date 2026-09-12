@@ -60,12 +60,19 @@
                 </button>
 
                 <!-- Dropdown Menu Navigasi Eksklusif -->
-                <div id="navDropdown" class="hidden absolute right-0 top-14 w-52 glass-panel border border-[#2b3344] rounded-2xl shadow-2xl py-2.5 space-y-1">
+                <div id="navDropdown" class="hidden absolute right-0 top-14 w-56 glass-panel border border-[#2b3344] rounded-2xl shadow-2xl py-2.5 space-y-1">
                     <a id="profileMenuLink" href="/docs/profile/" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-amber-400 transition-colors font-semibold">
                         <span class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 text-sm">👤</span>
                         <span>Profil & Panel Akun</span>
                     </a>
                     <div class="h-px bg-white/10 my-1 mx-3"></div>
+                    
+                    <!-- MENU SMM & RUMAHOTP PANEL BARU -->
+                    <a href="/docs/panelsmm/" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-amber-400 transition-colors font-semibold">
+                        <span class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 text-sm">📱</span>
+                        <span>SMM & RumahOTP Panel</span>
+                    </a>
+
                     <a href="/docs/amgen/" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-amber-400 transition-colors font-semibold">
                         <span class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 text-sm">🚀</span>
                         <span>Generator Amgen</span>
@@ -140,7 +147,7 @@
         <!-- 1. Running Text Pengumuman Gacor -->
         <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 rounded-2xl py-2.5 px-3.5 overflow-hidden whitespace-nowrap relative shadow-inner">
             <div class="inline-block animate-marquee text-[11px] text-amber-300 font-semibold">
-                🔥 <strong class="text-white">INFO GACOR REYCLOUDSHP:</strong> ReyRube kini sudah resmi tersedia di menu! Gas nonton drakor favoritmu! 🚀🍿
+                🔥 <strong class="text-white">INFO GACOR REYCLOUDSHP:</strong> SMM & RumahOTP Panel kini sudah resmi tersedia di menu! Gas order nomor virtualmu! 🚀📱
             </div>
         </div>
 
@@ -161,6 +168,14 @@
 
         <!-- Tombol Aksi Cepat -->
         <div class="space-y-2.5">
+            <!-- Tombol Utama Akses Cepat SMM Panel -->
+            <a href="/docs/panelsmm/" class="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-cyan-400 hover:from-amber-300 hover:to-cyan-300 text-slate-950 font-black py-3.5 px-4 rounded-2xl text-xs flex items-center justify-center space-x-2.5 shadow-xl shadow-amber-500/25 transition-all duration-300 transform hover:-translate-y-0.5 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <span>Buka Panel SMM & RumahOTP</span>
+            </a>
+
             <a href="/docs/amgen/" class="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black py-3.5 px-4 rounded-2xl text-xs flex items-center justify-center space-x-2.5 shadow-xl shadow-amber-500/25 transition-all duration-300 transform hover:-translate-y-0.5 text-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -205,7 +220,7 @@
             </div>
             <div class="stat-card bg-card-theme border border-theme rounded-2xl p-3.5 text-center space-y-1 transition-colors duration-300 shadow-sm">
                 <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest block">Tools Active</span>
-                <p class="text-xs font-black text-cyan-400 font-mono">8 Services</p>
+                <p class="text-xs font-black text-cyan-400 font-mono">9 Services</p>
             </div>
             <div class="stat-card bg-card-theme border border-theme rounded-2xl p-3.5 text-center space-y-1 transition-colors duration-300 shadow-sm">
                 <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest block">Success Rate</span>

@@ -2034,6 +2034,216 @@ app.post('/api/deploy', upload.single('file'), requireTurnstile, async (req, res
         }
     }
 });
+// ==========================================
+// 8. RUMAHOTP INTEGRATION ENDPOINTS & TELEGRAM NOTIF
+// ==========================================
+const RUMAHOTP_BASE_URL = 'https://www.rumahotp.io';
+
+function getMasterApiKey() {
+    return process.env.RUMAHOTP_API_KEY || '';
+}
+
+async function callMasterRumahOtp(endpoint, method = 'GET') {
+    try {
+        const response = await axios({
+            method: method,
+            url: `${RUMAHOTP_BASE_URL}${endpoint}`,
+            headers: {
+                'x-apikey': getMasterApiKey(),
+                'Accept': 'application/json'
+            }
+        });
+        return response.data;
+    } catch (err) {
+        return { 
+            success: false, 
+            error: err.response ? err.response.data : err.message 
+        };
+    }
+}
+
+async function verifyUserAndQuota(req) {
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    const username = req.headers['x-username'] || body.username;
+
+    if (!username) {
+        return { authorized: false, error: 'Sesi tidak valid! Harap login terlebih dahulu.' };
+    }
+
+    try {
+        await connectDB();
+        const user = await User.findOne({ username: username.toLowerCase() });
+        if (!user) {
+            return { authorized: false, error: 'Akun pengguna tidak ditemukan di database.' };
+        }
+        return { authorized: true, user };
+    } catch (err) {
+        return { authorized: false, error: 'Database error: ' + err.message };
+    }
+}
+
+// 1. Cek Saldo Master
+app.all('/api/otp/balance', async (req, res) => {
+    const auth = await verifyUserAndQuota(req);
+    if (!auth.authorized) return res.status(401).json({ status: false, error: auth.error });
+    const result = await callMasterRumahOtp('/api/v1/user/balance');
+    return res.status(200).json(result);
+});
+
+// 2. Daftar Layanan
+app.all('/api/otp/services', async (req, res) => {
+    const auth = await verifyUserAndQuota(req);
+    if (!auth.authorized) return res.status(401).json({ status: false, error: auth.error });
+    const result = await callMasterRumahOtp('/api/v2/services');
+    return res.status(200).json(result);
+});
+
+// 3. Daftar Negara
+app.all('/api/otp/countries', async (req, res) => {
+    const auth = await verifyUserAndQuota(req);
+    if (!auth.authorized) return res.status(401).json({ status: false, error: auth.error });
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    if (!body.service_id) return res.status(400).json({ status: false, error: 'Parameter service_id wajib diisi!' });
+    const result = await callMasterRumahOtp(`/api/v2/countries?service_id=${body.service_id}`);
+    return res.status(200).json(result);
+});
+
+// 4. Daftar Operator
+app.all('/api/otp/operators', async (req, res) => {
+    const auth = await verifyUserAndQuota(req);
+    if (!auth.authorized) return res.status(401).json({ status: false, error: auth.error });
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    if (!body.country || !body.provider_id) return res.status(400).json({ status: false, error: 'Parameter country & provider_id wajib diisi!' });
+    const result = await callMasterRumahOtp(`/api/v2/operators?country=${encodeURIComponent(body.country)}&provider_id=${body.provider_id}`);
+    return res.status(200).json(result);
+});
+
+// 5. Pesan Nomor OTP Baru + Notifikasi Telegram Sukses Beli
+app.all('/api/otp/order', async (req, res) => {
+    const auth = await verifyUserAndQuota(req);
+    if (!auth.authorized) return res.status(401).json({ status: false, error: auth.error });
+
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    const { number_id, provider_id, operator_id } = body;
+
+    if (!number_id || !provider_id || !operator_id) {
+        return res.status(400).json({ status: false, error: 'Parameter pesanan tidak lengkap!' });
+    }
+
+    const result = await callMasterRumahOtp(`/api/v2/orders?number_id=${number_id}&provider_id=${provider_id}&operator_id=${operator_id}`);
+
+    if (result.success && result.data) {
+        const orderData = result.data;
+        const msg = `<b>🔔 NOTIFIKASI PEMBELIAN OTP</b>\n\n` +
+                    `👤 User: <code>${auth.user.username}</code>\n` +
+                    `📱 Layanan: <b>${orderData.service}</b>\n` +
+                    `🌍 Negara: ${orderData.country}\n` +
+                    `📞 Nomor: <code>${orderData.phone_number}</code>\n` +
+                    `💰 Harga: <b>${orderData.price_formated || 'Rp' + orderData.price}</b>\n` +
+                    `🆔 Order ID: <code>${orderData.order_id}</code>`;
+        
+        // Kirim ke Telegram Owner & Channel secara asynchronous
+        sendTelegramNotification(msg);
+    }
+
+    return res.status(200).json(result);
+});
+
+// 6. Cek Status OTP
+app.all('/api/otp/status', async (req, res) => {
+    const auth = await verifyUserAndQuota(req);
+    if (!auth.authorized) return res.status(401).json({ status: false, error: auth.error });
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    if (!body.order_id) return res.status(400).json({ status: false, error: 'Parameter order_id wajib diisi!' });
+    const result = await callMasterRumahOtp(`/api/v1/orders/get_status?order_id=${body.order_id}`);
+    return res.status(200).json(result);
+});
+
+// 7. Ubah Status Pesanan
+app.all('/api/otp/set-status', async (req, res) => {
+    const auth = await verifyUserAndQuota(req);
+    if (!auth.authorized) return res.status(401).json({ status: false, error: auth.error });
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    if (!body.order_id || !body.status) return res.status(400).json({ status: false, error: 'Parameter tidak lengkap!' });
+    const result = await callMasterRumahOtp(`/api/v1/orders/set_status?order_id=${body.order_id}&status=${body.status}`);
+    return res.status(200).json(result);
+});
+
+// 8. Buat Deposit QRIS
+app.all('/api/otp/deposit', async (req, res) => {
+    const auth = await verifyUserAndQuota(req);
+    if (!auth.authorized) return res.status(401).json({ status: false, error: auth.error });
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    if (!body.amount) return res.status(400).json({ status: false, error: 'Parameter amount wajib diisi!' });
+    const result = await callMasterRumahOtp(`/api/v1/deposit/create?amount=${body.amount}&payment_id=qris`);
+    return res.status(200).json(result);
+});
+
+// 9. Cek Status Deposit
+app.all('/api/otp/deposit/status', async (req, res) => {
+    const auth = await verifyUserAndQuota(req);
+    if (!auth.authorized) return res.status(401).json({ status: false, error: auth.error });
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    if (!body.deposit_id) return res.status(400).json({ status: false, error: 'Parameter deposit_id wajib diisi!' });
+    const result = await callMasterRumahOtp(`/api/v1/deposit/get_status?deposit_id=${body.deposit_id}`);
+    return res.status(200).json(result);
+});
+
+// 10. Webhook Callback Deposit Otomatis + Notifikasi Telegram Topup Berhasil
+app.post('/api/webhook/rumahotp', async (req, res) => {
+    try {
+        const webhookData = req.body;
+
+        if (webhookData.category === 'callback.deposit') {
+            const depositId = webhookData.id;
+            const amountReceived = webhookData.diterima;
+            const totalBayar = webhookData.total;
+            const paymentBrand = webhookData.brand?.name || 'QRIS';
+            const senderName = webhookData.reference?.name || '-';
+
+            const msg = `<b>🟢 NOTIFIKASI TOPUP / DEPOSIT SUKSES</b>\n\n` +
+                        `💳 Metode: <b>${paymentBrand}</b>\n` +
+                        `💰 Saldo Diterima: <b>Rp${amountReceived.toLocaleString('id-ID')}</b>\n` +
+                        `💵 Total Bayar: Rp${totalBayar.toLocaleString('id-ID')}\n` +
+                        `👤 Referensi/Pengirim: ${senderName}\n` +
+                        `🆔 ID Deposit: <code>${depositId}</code>`;
+
+            // Kirim notifikasi ke channel & owner ID secara otomatis
+            sendTelegramNotification(msg);
+
+            // TODO: Update status di database MongoDB (tambahkan saldo ke user jika ada mapping akun)
+        }
+
+        return res.status(200).json({ status: true, message: 'Webhook received' });
+    } catch (err) {
+        console.error('[WEBHOOK ERROR]', err);
+        return res.status(500).json({ status: false, error: err.message });
+    }
+});
+// --- TELEGRAM NOTIFICATION HELPER ---
+async function sendTelegramNotification(text) {
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const ownerId = process.env.TELEGRAM_OWNER_ID;
+    const channelId = process.env.TELEGRAM_CHANNEL_ID;
+
+    if (!token) return;
+
+    const targets = [];
+    if (ownerId) targets.push(ownerId);
+    if (channelId) targets.push(channelId);
+
+    for (const chatId of targets) {
+        try {
+            await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+                chat_id: chatId,
+                text: text,
+                parse_mode: 'HTML'
+            });
+        } catch (err) {
+            console.error(`[TELEGRAM ERROR] Gagal kirim ke ${chatId}:`, err.message);
+        }
+    }
+}
 
 // Fallback 404
 app.use((req, res) => {
