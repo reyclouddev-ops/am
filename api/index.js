@@ -1875,7 +1875,6 @@ app.post('/api/imagen', async (req, res) => {
         return res.status(500).json({ status: false, error: err.message });
     }
 });
-
 // ==========================================
 // 7. AUTH & API KEY MANAGEMENT ENDPOINTS
 // ==========================================
@@ -2087,6 +2086,7 @@ app.get('/api/user/profile', async (req, res) => {
         return res.status(500).json({ status: false, error: 'Internal server error' });
     }
 });
+
 
 // ==========================================
 // 8. ADMIN & USER VERIFICATION HELPERS
