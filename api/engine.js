@@ -25,6 +25,71 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const CREATOR = 'ReyCode';
 
+//Turnel Site
+const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY || '';
+
+async function verifyTurnstile(token, remoteip = '') {
+    if (!TURNSTILE_SECRET_KEY) {
+        return {
+            success: false,
+            error: 'Turnstile secret key belum dikonfigurasi.'
+        };
+    }
+
+    if (!token) {
+        return {
+            success: false,
+            error: 'Token Turnstile wajib diisi.'
+        };
+    }
+
+    try {
+        const response = await axios.post(
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+            new URLSearchParams({
+                secret: TURNSTILE_SECRET_KEY,
+                response: token,
+                remoteip
+            }).toString(),
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                timeout: 10000
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        return {
+            success: false,
+            error: 'Gagal memverifikasi Turnstile.'
+        };
+    }
+}
+
+async function requireTurnstile(req, res, next) {
+    const token =
+        req.body?.['cf-turnstile-response'] ||
+        req.body?.turnstileToken ||
+        req.headers['x-turnstile-token'];
+
+    const result = await verifyTurnstile(
+        token,
+        req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+        req.socket.remoteAddress ||
+        ''
+    );
+
+    if (!result.success) {
+        return res.status(403).json({
+            status: false,
+            error: result.error || 'Verifikasi Turnstile gagal.'
+        });
+    }
+
+    next();
+}
 // ==========================================
 // 1. DATABASE & CONFIG SETUP (MONGODB)
 // ==========================================
@@ -1374,7 +1439,7 @@ app.post('/api/imagen', async (req, res) => {
 // ==========================================
 
 // --- Endpoint Register (Proteksi 1 IP = 1 Akun) ---
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', requireTurnstile, async (req, res) => {
     try {
         await connectDB();
         const { username, email, password } = req.body;
@@ -1423,7 +1488,7 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 // --- Endpoint Login ---
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', requireTurnstile, async (req, res) => {
     try {
         await connectDB();
         const { username, password } = req.body;
@@ -1845,7 +1910,7 @@ function detectFramework(siteDir) {
     return { name: "Other", type: "static", vercel: null };
 }
 
-app.post('/api/deploy', upload.single('file'), async (req, res) => {
+app.post('/api/deploy', upload.single('file'), requireTurnstile, async (req, res) => {
     let workDir = null;
     try {
         const projectName = cleanProjectName(req.body.name);
