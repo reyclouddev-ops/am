@@ -2058,26 +2058,25 @@ app.post('/api/deploy', upload.single('file'), requireTurnstile, async (req, res
     }
 });
 
-// ==========================================
-// ENDPOINT: Notifikasi Halaman Sukses Pembayaran
-// ==========================================
 app.all('/api/payment/success-notif', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const username = body.user || body.username || 'Tamu / Umum';
-    const packageType = body.package || 'API Key Bulk (Rp 5.000)';
+    const txType = body.type || 'am-bulk';
 
-    const msg = `<b>🟢 KLIK KONFIRMASI PEMBAYARAN WHATSAPP</b>\n\n` +
+    let label = 'API Key Bulk (Rp 5.000)';
+    if (txType === 'donasi') label = 'Donasi / Dukungan Kreator';
+    if (txType === 'topup') label = 'Topup Saldo SMM & OTP';
+
+    const msg = `<b>🟢 KONFIRMASI PEMBAYARAN BERHASIL</b>\n\n` +
                 `👤 User: <code>${username}</code>\n` +
-                `📦 Layanan/Produk: <b>${packageType}</b>\n` +
+                `📦 Kategori: <b>${label}</b>\n` +
                 `🕒 Waktu: <code>${new Date().toLocaleString('id-ID')}</code>\n\n` +
-                `<i>User baru saja membuka halaman sukses pembayaran dan bersiap konfirmasi via WhatsApp.</i>`;
+                `<i>User membuka halaman sukses dan siap melakukan konfirmasi via WhatsApp.</i>`;
 
-    // Kirim notifikasi menggunakan helper Telegram yang sudah ada
     sendTelegramNotification(msg);
 
-    return res.status(200).json({ status: true, message: 'Notifikasi berhasil dikirim ke owner.' });
+    return res.status(200).json({ status: true, message: 'Notifikasi terkirim.' });
 });
-
 
 // Fallback 404
 app.use((req, res) => {

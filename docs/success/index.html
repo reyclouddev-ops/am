@@ -25,8 +25,8 @@
             <h1 class="text-base font-black tracking-wide text-white uppercase">
                 Pembayaran <span class="text-emerald-400">Berhasil!</span>
             </h1>
-            <p class="text-xs text-slate-400 leading-relaxed">
-                Terima kasih telah melakukan pembayaran melalui Mustika Payment. Langkah terakhir, silakan konfirmasi ke admin untuk klaim API Key Bulk kamu.
+            <p id="descText" class="text-xs text-slate-400 leading-relaxed">
+                Terima kasih telah melakukan pembayaran melalui Mustika Payment. Silakan lakukan konfirmasi ke admin untuk memproses transaksi Anda.
             </p>
         </div>
 
@@ -36,7 +36,7 @@
             <ul class="text-[11px] text-slate-300 space-y-1.5 list-disc list-inside">
                 <li>Klik tombol WhatsApp di bawah.</li>
                 <li>Kirimkan bukti transfer / riwayat pembayaran.</li>
-                <li>Admin akan memproses & mengirim API Key Bulk dalam beberapa saat.</li>
+                <li>Admin akan segera memproses pesanan Anda.</li>
             </ul>
         </div>
 
@@ -61,22 +61,34 @@
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const username = urlParams.get('user') || sessionStorage.getItem('reycloud_active_user') || 'Tamu';
+            
+            // Deteksi jenis transaksi dinamis (misal: ?type=donasi, ?type=topup, atau default am-bulk)
+            const txType = urlParams.get('type') || 'am-bulk';
+            
+            let packageDesc = 'API Key Bulk (Rp 5.000)';
+            if (txType === 'donasi') {
+                packageDesc = 'Donasi / Dukungan Kreator';
+                document.getElementById('descText').textContent = 'Terima kasih atas dukungan donasi Anda untuk pengembangan platform ini! Silakan konfirmasi ke admin.';
+            } else if (txType === 'topup') {
+                packageDesc = 'Topup Saldo SMM & OTP';
+                document.getElementById('descText').textContent = 'Topup saldo Anda telah berhasil dibayar. Silakan konfirmasi agar saldo otomatis masuk.';
+            }
 
-            // Update link kembali ke dashboard agar tetap membawa parameter user
+            // Update link kembali ke dashboard agar membawa user
             const dashLink = document.getElementById('dashboardLink');
             if (username && username !== 'Tamu') {
                 dashLink.href = `/dashboard?user=${encodeURIComponent(username)}`;
             }
 
-            // Kirim notifikasi otomatis ke Telegram owner saat halaman sukses ini dibuka
-            fetch(`/api/payment/success-notif?user=${encodeURIComponent(username)}`)
+            // Kirim notifikasi otomatis ke Telegram dengan membawa jenis transaksi
+            fetch(`/api/payment/success-notif?user=${encodeURIComponent(username)}&type=${encodeURIComponent(txType)}`)
                 .then(res => res.json())
                 .then(data => console.log('Notif terkirim:', data))
                 .catch(err => console.error('Gagal kirim notif:', err));
 
-            // Format pesan WhatsApp
+            // Format pesan WhatsApp dinamis
             const now = new Date().toLocaleString('id-ID');
-            const waMessage = `Halo admin, saya (${username}) sudah menyelesaikan pembayaran untuk pembelian Apikey Premium Bulk via Mustika Payment pada (${now}). Mohon bantuannya untuk mengirimkan API Key saya ya min. Terima kasih!`;
+            const waMessage = `Halo admin, saya (${username}) sudah menyelesaikan pembayaran untuk transaksi [${packageDesc}] via Mustika Payment pada (${now}). Mohon bantuannya ya min. Terima kasih!`;
             
             const whatsappNumber = "6281260512743"; 
             document.getElementById('waConfirmBtn').href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waMessage)}`;
