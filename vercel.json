@@ -1,5 +1,8 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/engine.js" }
+    {
+      "source": "/api/(.*)",
+      "destination": "/engine.js"
+    }
   ]
 }
