@@ -2611,7 +2611,7 @@ app.all('/api/payment/success-notif', async (req, res) => {
     return res.status(200).json({ status: true, message: 'Notifikasi terkirim.' });
 });
 // ==========================================
-// NATIVE AUTOMATION ENGINE (KEYYSS & WELLBYPASS)
+// NATIVE AUTOMATION ENGINE (KEYYSS & WELLBYPASS) - UPGRADED
 // ==========================================
 
 const KEYYSS_BASE_URL = 'https://react.keyysspanel.web.id';
@@ -2714,11 +2714,14 @@ function nativeRequest(url, options = {}, postData = null, proxy = null) {
     });
 }
 
-// --- Solver Turnstile Native via Cloudflare Worker ---
+// --- Solver Turnstile Native via Cloudflare Worker (Dengan Forwarding IP & SiteKey) ---
 async function solveTurnstileNative(siteKey, proxy = null, targetPageUrl = KEYYSS_BASE_URL) {
     try {
         const workerUrl = `https://solver.reyclouddev.workers.dev/?sitekey=${siteKey}&url=${encodeURIComponent(targetPageUrl)}`;
-        const res = await nativeRequest(workerUrl, { timeout: 15000 }, null, proxy);
+        
+        // Menambahkan header ekstra untuk mendeteksi atau merotasi jejak proxy/IP ke worker jika ada
+        const workerHeaders = proxy ? { 'X-Forwarded-For': proxy.split(':')[0] } : {};
+        const res = await nativeRequest(workerUrl, { timeout: 15000, headers: workerHeaders }, null, proxy);
         
         if (res.statusCode === 200) {
             const json = JSON.parse(res.body);
