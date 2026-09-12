@@ -72,7 +72,7 @@
             </div>
         </div>
 
-        <!-- Main Panel Container (PERHATIKAN: overflow-visible agar dropdown tidak terpotong) -->
+        <!-- Main Panel Container -->
         <div class="bg-[#0e1117]/90 backdrop-blur-xl border border-[#1e2637] rounded-2xl p-4 shadow-2xl space-y-4 overflow-visible">
             
             <!-- Tab Navigation Menu -->
@@ -95,9 +95,8 @@
                         <span id="serviceSelectedText">-- Pilih Layanan Aplikasi --</span>
                         <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </div>
-                    <!-- Dropdown List dengan z-50 agar tampil di atas elemen lain -->
                     <div id="serviceDropdownList" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#0a0d12] border border-[#232f46] rounded-xl max-h-56 overflow-y-auto z-50 shadow-2xl p-1 space-y-0.5">
-                        <div class="p-2 text-xs text-slate-500 text-center">Memuat layanan...</div>
+                        <div class="p-2 text-xs text-amber-400 text-center animate-pulse">Memuat layanan dari server...</div>
                     </div>
                 </div>
 
@@ -108,7 +107,6 @@
                         <span id="countrySelectedText">-- Pilih Negara --</span>
                         <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </div>
-                    <!-- Dropdown List dengan z-50 agar tampil di atas elemen lain -->
                     <div id="countryDropdownList" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#0a0d12] border border-[#232f46] rounded-xl max-h-56 overflow-y-auto z-50 shadow-2xl p-1 space-y-0.5">
                         <div class="p-2 text-xs text-slate-500 text-center">Pilih layanan terlebih dahulu</div>
                     </div>
@@ -181,11 +179,11 @@
                 <button onclick="closeDepositModal()" class="text-slate-400 hover:text-white text-xs font-bold px-2 py-1 rounded bg-[#161d2b] cursor-pointer">✕</button>
             </div>
 
-            <!-- Form Nominal -->
+            <!-- Form Nominal (Diubah ke type="text" agar bebas diketik di HP tanpa bug keyboard) -->
             <div id="depositFormStep" class="space-y-3">
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nominal Deposit (IDR)</label>
-                    <input type="number" id="depositAmountInput" placeholder="Minimal Rp10.000" 
+                    <input type="text" inputmode="numeric" id="depositAmountInput" placeholder="Contoh: 10000" 
                         class="w-full bg-[#07080b] border border-[#1e2637] rounded-xl px-3 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-400/70 font-mono">
                 </div>
                 <button onclick="generateQris()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 cursor-pointer">
@@ -329,10 +327,13 @@
 
         async function loadServices() {
             try {
+                const listContainer = document.getElementById('serviceDropdownList');
+                listContainer.innerHTML = '<div class="p-2 text-xs text-amber-400 text-center animate-pulse">Memuat layanan...</div>';
+
                 const res = await fetch(`/api/otp/services?user=${encodeURIComponent(currentUsername)}`);
                 const json = await res.json();
-                if (json.success && json.data) {
-                    const listContainer = document.getElementById('serviceDropdownList');
+                
+                if (json.success && json.data && json.data.length > 0) {
                     listContainer.innerHTML = '';
                     
                     json.data.forEach(s => {
@@ -352,10 +353,12 @@
                         };
                         listContainer.appendChild(item);
                     });
+                } else {
+                    listContainer.innerHTML = '<div class="p-2 text-xs text-rose-400 text-center">Tidak ada layanan tersedia</div>';
                 }
             } catch (err) {
                 console.error('Gagal load services:', err);
-                document.getElementById('serviceDropdownList').innerHTML = '<div class="p-2 text-xs text-rose-400 text-center">Gagal memuat layanan</div>';
+                document.getElementById('serviceDropdownList').innerHTML = '<div class="p-2 text-xs text-rose-400 text-center">Gagal terhubung ke server</div>';
             }
         }
 
@@ -363,11 +366,12 @@
             if (!serviceId) return;
             try {
                 const listContainer = document.getElementById('countryDropdownList');
-                listContainer.innerHTML = '<div class="p-2 text-xs text-slate-400 text-center">Memuat negara...</div>';
+                listContainer.innerHTML = '<div class="p-2 text-xs text-amber-400 text-center animate-pulse">Memuat negara...</div>';
 
                 const res = await fetch(`/api/otp/countries?service_id=${serviceId}&user=${encodeURIComponent(currentUsername)}`);
                 const json = await res.json();
-                if (json.success && json.data) {
+                
+                if (json.success && json.data && json.data.length > 0) {
                     listContainer.innerHTML = '';
 
                     json.data.forEach(c => {
@@ -383,9 +387,12 @@
                         };
                         listContainer.appendChild(item);
                     });
+                } else {
+                    listContainer.innerHTML = '<div class="p-2 text-xs text-rose-400 text-center">Stok negara kosong</div>';
                 }
             } catch (err) {
                 console.error('Gagal load countries:', err);
+                document.getElementById('countryDropdownList').innerHTML = '<div class="p-2 text-xs text-rose-400 text-center">Gagal memuat negara</div>';
             }
         }
 
@@ -489,8 +496,8 @@
         }
 
         async function generateQris() {
-            const amount = document.getElementById('depositAmountInput').value.trim();
-            if (!amount || amount < 10000) {
+            const amount = document.getElementById('depositAmountInput').value.replace(/[^0-9]/g, '').trim();
+            if (!amount || parseInt(amount) < 10000) {
                 showCustomAlert('Peringatan', 'Minimal nominal deposit adalah Rp10.000', 'warning');
                 return;
             }
