@@ -503,8 +503,7 @@ function formatTimestamp(ts) {
   if (isNaN(d.getTime())) return null;
   return d.toISOString().replace('T', ' ').substring(0, 19);
 }
-
-// --- CapCut Engine Class ---
+// --- CapCut Engine Class (Fixed & Optimized) ---
 class CapCut {
   constructor(options = {}) {
     this.apiBase = options.apiBase || process.env.CAPCUT_API_BASE || 'https://www.capcut.com';
@@ -626,8 +625,11 @@ class CapCut {
     });
 
     const json = await res.json();
-    if (json.message !== 'success') {
-      throw new Error(`Failed to send verification code: ${json.message || JSON.stringify(json)}`);
+    
+    // PENYESUAIAN/FIX VALIDASI RESPONSE: Cek apakah error_code === 0 atau message === 'success'
+    const isSuccess = json.message === 'success' || json.error_code === 0 || json.data?.error_code === 0;
+    if (!isSuccess) {
+      throw new Error(`Failed to send verification code: ${json.message || json.data?.description || JSON.stringify(json)}`);
     }
     return json;
   }
@@ -677,8 +679,11 @@ class CapCut {
     });
 
     const json = await res.json();
-    if (json.message !== 'success' || !json.data) {
-      throw new Error(`Failed to verify and register: ${json.message || JSON.stringify(json)}`);
+    
+    // PENYESUAIAN/FIX VALIDASI RESPONSE: Menangani struktur error handling TikTok/CapCut Passport API yang lebih fleksibel
+    const isSuccess = (json.message === 'success' || json.error_code === 0 || json.data?.error_code === 0) && (json.data || json.user_id || json.sec_user_id);
+    if (!isSuccess) {
+      throw new Error(`Failed to verify and register: ${json.message || json.data?.description || JSON.stringify(json)}`);
     }
 
     const cookies = this.parseCookiesFromHeaders(res);
@@ -688,7 +693,7 @@ class CapCut {
     }
 
     return {
-      data: json.data,
+      data: json.data || json,
       cookies,
       cookieString
     };
@@ -731,7 +736,6 @@ class CapCut {
     await this.sendVerificationCode(email, password);
 
     progressCb('Menunggu kode verifikasi masuk ke inbox...');
-    // Diperbarui: Mengirim full alamat email (bukan hanya username) ke fungsi waitForVerificationCode
     const otpCode = await waitForVerificationCode(email, 60000, 2500);
     if (!otpCode) {
       throw new Error('Timeout: OTP tidak diterima dalam 60 detik.');
@@ -762,7 +766,7 @@ class CapCut {
     return {
       email,
       password,
-      uid: regResult.data?.user_id || regResult.data?.uid || 'unknown',
+      uid: regResult.data?.user_id || regResult.data?.uid || regResult.data?.user_info?.user_id || 'unknown',
       cookie: regResult.cookieString,
       validUntil,
       fissionResult
@@ -785,7 +789,6 @@ class CapCut {
     return json;
   }
 }
-
 
 // ==========================================
 // 4. CORE ALIGHT MOTION & AKUNLAMA SCRAPER
@@ -2457,7 +2460,6 @@ app.post('/api/deploy', upload.single('file'), requireTurnstile, async (req, res
         }
     }
 });
-
 // ==========================================
 // 10. AUTOMATION ENDPOINTS (/api/capcut/*) - UPGRADED PARALLEL
 // ==========================================
@@ -2586,7 +2588,7 @@ app.all('/api/capcut/claim', async (req, res) => {
         return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
     }
 });
-
+// TeleGram
 app.all('/api/payment/success-notif', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const username = body.user || body.username || 'Tamu / Umum';
@@ -2773,6 +2775,130 @@ async function findWorkingProxy(proxyKey = DEFAULT_PROXY_KEY) {
     }
     throw new Error('Tidak ada proxy aktif yang tersedia.');
 }
+
+// ==========================================
+// 1. FUNGSI UTAMA: KEYYSS WHATSAPP REACTION
+// ==========================================
+async function executeKeyyssReaction(options = {}) {
+    const { channelLink, emojis = '👍', vipKey = null, useProxy = false, manualProxy = null, proxyKey = DEFAULT_PROXY_KEY } = options;
+    const startTime = Date.now();
+    let activeProxy = null;
+    let cachedCsrf = null;
+    let uid = '';
+
+    if (manualProxy) {
+        activeProxy = manualProxy;
+    } else if (useProxy) {
+        const pData = await findWorkingProxy(proxyKey);
+        activeProxy = pData.proxy;
+        uid = pData.uid;
+        cachedCsrf = pData.cachedCsrf;
+    }
+
+    let csrf = cachedCsrf || '';
+    if (!csrf) {
+        const home = await nativeRequest(`${KEYYSS_BASE_URL}/`, { timeout: 8000 }, null, activeProxy);
+        if (home && home.statusCode === 200) {
+            const csrfMatch = home.body.match(/name="_csrf_token"\s+value="([^"]+)"/);
+            const uidMatch = home.body.match(/name="_uid"\s+id="hidden-uid"\s+value="([^"]+)"/);
+            csrf = csrfMatch ? csrfMatch[1] : '';
+            if (!uid) uid = uidMatch ? uidMatch[1] : '';
+        }
+    }
+    if (!csrf) throw new Error('Gagal mengekstrak _csrf_token dari Keyyss panel');
+
+    const tsRes = await nativeRequest(`${KEYYSS_BASE_URL}/api/turnstile/status`, {}, null, activeProxy);
+    let siteKey = '0x4AAAAAAErNYkwC4FusFhKz';
+    try {
+        const tsJson = JSON.parse(tsRes.body);
+        if (tsJson.siteKey) siteKey = tsJson.siteKey;
+    } catch {}
+
+    const turnstileToken = await solveTurnstileNative(siteKey, activeProxy, KEYYSS_BASE_URL);
+
+    const params = new URLSearchParams({
+        _csrf_token: csrf,
+        _uid: vipKey || uid,
+        link: channelLink,
+        emoji: emojis,
+        'cf-turnstile-response': turnstileToken,
+        execute: ''
+    });
+    const bodyData = params.toString();
+
+    let submitRes = await nativeRequest(`${KEYYSS_BASE_URL}/`, {
+        method: 'POST',
+        timeout: 15000,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': Buffer.byteLength(bodyData),
+            'Origin': KEYYSS_BASE_URL,
+            'Referer': `${KEYYSS_BASE_URL}/`
+        }
+    }, bodyData, activeProxy);
+
+    const isSuccess = submitRes.body.includes('SUCCESS!') || submitRes.body.includes('Request berhasil dikirim');
+    const durationMs = Date.now() - startTime;
+
+    return {
+        creator: 'ReyCode',
+        provider: 'Keyyss',
+        status: isSuccess ? 'success' : 'error',
+        code: isSuccess ? 200 : 400,
+        message: isSuccess ? 'Reaction berhasil dikirim!' : 'Server menolak request reaction',
+        data: { target: channelLink, emojis, duration: `${(durationMs / 1000).toFixed(2)}s`, proxy: activeProxy }
+    };
+}
+
+// ==========================================
+// 2. FUNGSI UTAMA: WELLBYPASS LINK SKIPPER
+// ==========================================
+async function executeWellBypassTask(targetUrl, manualProxy = null) {
+    const startTime = Date.now();
+    const deviceId = `wb_${Math.random().toString(36).substring(2)}_${Date.now().toString(36)}`;
+
+    await nativeRequest(`${WELLBYPASS_URL}/api/device/register`, { method: 'POST', headers: { 'x-device-id': deviceId } }, null, manualProxy);
+    const turnstileToken = await solveTurnstileNative('0x4AAAAAAEw9LL7413Xfin6z', manualProxy, `${WELLBYPASS_URL}/en`);
+
+    const payload = JSON.stringify({ url: targetUrl.trim(), turnstileToken });
+    const bypassRes = await nativeRequest(`${WELLBYPASS_URL}/api/bypass`, {
+        method: 'POST',
+        timeout: 35000,
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(payload),
+            'x-device-id': deviceId,
+            'Cookie': 'NEXT_LOCALE=en',
+            'Origin': WELLBYPASS_URL,
+            'Referer': `${WELLBYPASS_URL}/en`
+        }
+    }, payload, manualProxy);
+
+    let jsonResult = {};
+    try {
+        jsonResult = JSON.parse(bypassRes.body);
+    } catch {
+        jsonResult = { status: false, message: 'Invalid response from WellBypass' };
+    }
+
+    const durationMs = Date.now() - startTime;
+    const isSuccess = Boolean(jsonResult.status && jsonResult.bypassedUrl);
+
+    return {
+        creator: 'ReyCode',
+        provider: 'WellBypass',
+        status: isSuccess ? 'success' : 'error',
+        code: isSuccess ? 200 : 400,
+        message: jsonResult.message || (isSuccess ? 'Link berhasil di-bypass' : 'Gagal bypass link'),
+        data: {
+            originalUrl: targetUrl,
+            bypassedUrl: jsonResult.bypassedUrl || null,
+            service: jsonResult.service || null,
+            duration: `${(durationMs / 1000).toFixed(2)}s`
+        }
+    };
+}
+
 // ==========================================
 // EXPRESS ENDPOINT INTEGRATION (/api/automation/run)
 // ==========================================
