@@ -18,6 +18,10 @@ const mongoose = require('mongoose');
 const FormData = require('form-data');
 const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
+const http = require('http');
+const tls = require('tls');
+const { execSync } = require('child_process');
+
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -727,8 +731,8 @@ class CapCut {
     await this.sendVerificationCode(email, password);
 
     progressCb('Menunggu kode verifikasi masuk ke inbox...');
-    const usernameOnly = email.split('@')[0];
-    const otpCode = await waitForVerificationCode(usernameOnly, 60000, 2500);
+    // Diperbarui: Mengirim full alamat email (bukan hanya username) ke fungsi waitForVerificationCode
+    const otpCode = await waitForVerificationCode(email, 60000, 2500);
     if (!otpCode) {
       throw new Error('Timeout: OTP tidak diterima dalam 60 detik.');
     }
@@ -781,6 +785,7 @@ class CapCut {
     return json;
   }
 }
+
 
 // ==========================================
 // 4. CORE ALIGHT MOTION & AKUNLAMA SCRAPER
@@ -2454,20 +2459,20 @@ app.post('/api/deploy', upload.single('file'), requireTurnstile, async (req, res
 });
 
 // ==========================================
-// 10. CAPCUT AUTOMATION ENDPOINTS (/api/capcut/*)
+// 10. AUTOMATION ENDPOINTS (/api/capcut/*) - UPGRADED PARALLEL
 // ==========================================
 const capcutEngine = new CapCut();
 
-// 1. Auto Register + Auto OTP + Auto Trial Format Card (Bisa GET / POST)
+// 1. Auto Register + Auto OTP + Auto Trial Format Card (Bisa GET / POST) - Paralel Execution
 app.all('/api/capcut/register', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const count = parseInt(body.count || body.jumlah || 1, 10);
     const maxCount = Math.min(Math.max(count, 1), 5); // Batasi maks 5 akun sekali tembak
 
-    const results = [];
-    for (let i = 0; i < maxCount; i++) {
+    // Buat array promise untuk menjalankan pembuatan akun secara paralel (bersamaan)
+    const taskPromises = Array.from({ length: maxCount }, async (_, i) => {
         const logs = [];
-        const progressCb = (msg) => logs.push(msg);
+        const progressCb = (msg) => logs.push(`[Akun ${i + 1}] ${msg}`);
 
         try {
             const result = await capcutEngine.registerDisposableAccount({
@@ -2478,7 +2483,7 @@ app.all('/api/capcut/register', async (req, res) => {
                 timeoutMs: 60000
             }, progressCb);
 
-            results.push({
+            return {
                 success: true,
                 card: {
                     email: result.email,
@@ -2486,7 +2491,7 @@ app.all('/api/capcut/register', async (req, res) => {
                     uid: result.uid,
                     cookie: result.cookie,
                     weblogin: 'https://www.capcut.com',
-                    selamat_kamu_mendapatkan: 'CapCut Pro Trial',
+                    selamat_kamu_mendapatkan: 'CapCut Pro Trial 7d',
                     validUntil: result.validUntil,
                     panduan_dan_cara_login: [
                         "1. Buka aplikasi atau website resmi CapCut.",
@@ -2495,11 +2500,14 @@ app.all('/api/capcut/register', async (req, res) => {
                     ]
                 },
                 logs
-            });
+            };
         } catch (err) {
-            results.push({ success: false, error: err.message, logs });
+            return { success: false, error: err.message, logs };
         }
-    }
+    });
+
+    // Jalankan semua task secara bersamaan menggunakan Promise.all
+    const results = await Promise.all(taskPromises);
 
     return res.status(200).json({
         status: true,
@@ -2594,13 +2602,349 @@ app.all('/api/payment/success-notif', async (req, res) => {
                 `🕒 Waktu: <code>${new Date().toLocaleString('id-ID')}</code>\n\n` +
                 `<i>User membuka halaman sukses dan siap melakukan konfirmasi via WhatsApp.</i>`;
 
-    // Pastikan sendTelegramNotification terdefinisi jika digunakan
     if (typeof sendTelegramNotification === 'function') {
         sendTelegramNotification(msg);
     }
 
     return res.status(200).json({ status: true, message: 'Notifikasi terkirim.' });
 });
+
+
+// ==========================================
+// NATIVE AUTOMATION ENGINE (KEYYSS & WELLBYPASS)
+// ==========================================
+
+const KEYYSS_BASE_URL = 'https://react.keyysspanel.web.id';
+const WELLBYPASS_URL = 'https://wellbypass.my.id';
+const DEFAULT_PROXY_KEY = process.env.PROXY_SCRAPE_KEY || '';
+
+// --- Helper Request Native ---
+function nativeRequest(url, options = {}, postData = null, proxy = null) {
+    return new Promise((resolve, reject) => {
+        const u = new URL(url);
+        const isHttps = u.protocol === 'https:';
+        const defaultPort = isHttps ? 443 : 80;
+        const targetPort = u.port || defaultPort;
+        const headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            Host: u.hostname,
+            ...options.headers
+        };
+
+        if (proxy) {
+            const [proxyHost, proxyPortStr] = proxy.replace(/^https?:\/\//, '').split(':');
+            const proxyPort = parseInt(proxyPortStr) || 8080;
+            const connectReq = http.request({
+                host: proxyHost,
+                port: proxyPort,
+                method: 'CONNECT',
+                path: `${u.hostname}:${targetPort}`,
+                headers: { Host: `${u.hostname}:${targetPort}` }
+            });
+
+            connectReq.setTimeout(options.timeout || 15000, () => {
+                connectReq.destroy();
+                reject(new Error(`Proxy CONNECT timeout (${proxyHost}:${proxyPort})`));
+            });
+
+            connectReq.on('connect', (res, socket) => {
+                if (res.statusCode !== 200) {
+                    socket.destroy();
+                    return reject(new Error(`Proxy CONNECT returned HTTP ${res.statusCode}`));
+                }
+
+                const proceedWithSocket = (networkSocket) => {
+                    const req = (isHttps ? https : http).request({
+                        hostname: u.hostname,
+                        port: targetPort,
+                        path: u.pathname + u.search,
+                        method: options.method || 'GET',
+                        createConnection: () => networkSocket,
+                        headers
+                    }, (response) => {
+                        let data = '';
+                        response.on('data', chunk => data += chunk);
+                        response.on('end', () => resolve({ statusCode: response.statusCode, headers: response.headers, body: data }));
+                    });
+
+                    req.setTimeout(options.timeout || 15000, () => {
+                        req.destroy();
+                        reject(new Error(`Request timeout via proxy: ${url}`));
+                    });
+                    req.on('error', reject);
+                    if (postData) req.write(postData);
+                    req.end();
+                };
+
+                if (isHttps) {
+                    const tlsSocket = tls.connect({ socket, servername: u.hostname, rejectUnauthorized: false }, () => {
+                        proceedWithSocket(tlsSocket);
+                    });
+                    tlsSocket.on('error', reject);
+                } else {
+                    proceedWithSocket(socket);
+                }
+            });
+
+            connectReq.on('error', reject);
+            connectReq.end();
+            return;
+        }
+
+        const client = isHttps ? https : http;
+        const reqOptions = {
+            hostname: u.hostname,
+            port: targetPort,
+            path: u.pathname + u.search,
+            method: options.method || 'GET',
+            timeout: options.timeout || 15000,
+            headers
+        };
+
+        const req = client.request(reqOptions, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => resolve({ statusCode: res.statusCode, headers: res.headers, body: data }));
+        });
+
+        req.on('timeout', () => { req.destroy(); reject(new Error(`Request timeout: ${url}`)); });
+        req.on('error', reject);
+        if (postData) req.write(postData);
+        req.end();
+    });
+}
+
+// --- Solver Turnstile Native ---
+function solveTurnstileNative(siteKey, proxy = null, targetPageUrl = KEYYSS_BASE_URL) {
+    const pageUrl = targetPageUrl.endsWith('/') ? targetPageUrl : targetPageUrl;
+    const proxyArg = proxy ? ` --proxy http://${proxy.replace(/^https?:\/\//, '')}` : '';
+    const cmd = `npx haidarcf turnstile-min --url ${pageUrl} --sitekey ${siteKey}${proxyArg}`;
+    
+    try {
+        const output = execSync(cmd, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+        const match = output.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error('Solver output invalid');
+        const data = JSON.parse(match[0]);
+        if (!data.token) throw new Error('Failed to obtain captcha token');
+        return data.token;
+    } catch (err) {
+        throw new Error(`Cloudflare Turnstile Solver Error: ${err.message}`);
+    }
+}
+
+// --- Proxy Scrape Helper ---
+async function fetchProxyList(apiKey = DEFAULT_PROXY_KEY) {
+    const endpoint = `https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=2500&country=all&ssl=all&anonymity=elite&key=${apiKey}`;
+    const res = await nativeRequest(endpoint);
+    if (res.statusCode !== 200 || !res.body) {
+        throw new Error(`ProxyScrape API error (${res.statusCode})`);
+    }
+    return res.body.trim().split(/\r?\n/).map(p => p.trim()).filter(p => p && !p.includes('<') && !p.includes(' '));
+}
+
+async function findWorkingProxy(proxyKey = DEFAULT_PROXY_KEY) {
+    const proxies = await fetchProxyList(proxyKey);
+    if (!proxies.length) throw new Error('ProxyScrape tidak mengembalikan proxy aktif');
+
+    const chunkSize = 12;
+    const maxToTest = Math.min(proxies.length, 48);
+    for (let i = 0; i < maxToTest; i += chunkSize) {
+        const chunk = proxies.slice(i, i + chunkSize);
+        const testPromises = chunk.map(async (proxyAddr) => {
+            try {
+                const testRes = await nativeRequest(`${KEYYSS_BASE_URL}/api/free/status`, { timeout: 3000 }, null, proxyAddr);
+                if (testRes.statusCode === 200) {
+                    const statusData = JSON.parse(testRes.body);
+                    if (statusData.limit > 0 && !statusData.ipBlocked) {
+                        const pingHome = await nativeRequest(`${KEYYSS_BASE_URL}/`, { timeout: 3000 }, null, proxyAddr);
+                        if (pingHome.statusCode === 200 && pingHome.body.includes('_csrf_token')) {
+                            const csrfMatch = pingHome.body.match(/name="_csrf_token"\s+value="([^"]+)"/);
+                            return { proxy: proxyAddr, uid: statusData.uid, limit: statusData.limit, cachedCsrf: csrfMatch ? csrfMatch[1] : null };
+                        }
+                    }
+                }
+            } catch {}
+            return null;
+        });
+
+        const results = await Promise.all(testPromises);
+        const valid = results.find(r => r !== null);
+        if (valid) return valid;
+    }
+    throw new Error('Tidak ada proxy aktif yang tersedia.');
+}
+
+// ==========================================
+// 1. FUNGSI UTAMA: KEYYSS WHATSAPP REACTION
+// ==========================================
+async function executeKeyyssReaction(options = {}) {
+    const { channelLink, emojis = '👍', vipKey = null, useProxy = false, manualProxy = null, proxyKey = DEFAULT_PROXY_KEY } = options;
+    const startTime = Date.now();
+    let activeProxy = null;
+    let cachedCsrf = null;
+    let uid = '';
+
+    if (manualProxy) {
+        activeProxy = manualProxy;
+    } else if (useProxy) {
+        const pData = await findWorkingProxy(proxyKey);
+        activeProxy = pData.proxy;
+        uid = pData.uid;
+        cachedCsrf = pData.cachedCsrf;
+    }
+
+    // Ambil CSRF Token
+    let csrf = cachedCsrf || '';
+    if (!csrf) {
+        const home = await nativeRequest(`${KEYYSS_BASE_URL}/`, { timeout: 8000 }, null, activeProxy);
+        if (home && home.statusCode === 200) {
+            const csrfMatch = home.body.match(/name="_csrf_token"\s+value="([^"]+)"/);
+            const uidMatch = home.body.match(/name="_uid"\s+id="hidden-uid"\s+value="([^"]+)"/);
+            csrf = csrfMatch ? csrfMatch[1] : '';
+            if (!uid) uid = uidMatch ? uidMatch[1] : '';
+        }
+    }
+    if (!csrf) throw new Error('Gagal mengekstrak _csrf_token dari Keyyss panel');
+
+    // Solve Turnstile
+    const tsRes = await nativeRequest(`${KEYYSS_BASE_URL}/api/turnstile/status`, {}, null, activeProxy);
+    let siteKey = '0x4AAAAAAErNYkwC4FusFhKz';
+    try {
+        const tsJson = JSON.parse(tsRes.body);
+        if (tsJson.siteKey) siteKey = tsJson.siteKey;
+    } catch {}
+
+    let turnstileToken = null;
+    try {
+        turnstileToken = solveTurnstileNative(siteKey, activeProxy, KEYYSS_BASE_URL);
+    } catch {
+        turnstileToken = solveTurnstileNative(siteKey, null, KEYYSS_BASE_URL);
+    }
+
+    // Kirim Payload Reaction
+    const params = new URLSearchParams({
+        _csrf_token: csrf,
+        _uid: vipKey || uid,
+        link: channelLink,
+        emoji: emojis,
+        'cf-turnstile-response': turnstileToken,
+        execute: ''
+    });
+    const bodyData = params.toString();
+
+    let submitRes = await nativeRequest(`${KEYYSS_BASE_URL}/`, {
+        method: 'POST',
+        timeout: 15000,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': Buffer.byteLength(bodyData),
+            'Origin': KEYYSS_BASE_URL,
+            'Referer': `${KEYYSS_BASE_URL}/`
+        }
+    }, bodyData, activeProxy);
+
+    const isSuccess = submitRes.body.includes('SUCCESS!') || submitRes.body.includes('Request berhasil dikirim');
+    const durationMs = Date.now() - startTime;
+
+    return {
+        creator: CREATOR,
+        provider: 'Keyyss',
+        status: isSuccess ? 'success' : 'error',
+        code: isSuccess ? 200 : 400,
+        message: isSuccess ? 'Reaction berhasil dikirim!' : 'Server menolak request reaction',
+        data: { target: channelLink, emojis, duration: `${(durationMs / 1000).toFixed(2)}s`, proxy: activeProxy }
+    };
+}
+
+// ==========================================
+// 2. FUNGSI UTAMA: WELLBYPASS LINK SKIPPER
+// ==========================================
+async function executeWellBypassTask(targetUrl, manualProxy = null) {
+    const startTime = Date.now();
+    const deviceId = `wb_${Math.random().toString(36).substring(2)}_${Date.now().toString(36)}`;
+
+    // Register device
+    await nativeRequest(`${WELLBYPASS_URL}/api/device/register`, { method: 'POST', headers: { 'x-device-id': deviceId } }, null, manualProxy);
+
+    // Solve Turnstile untuk WellBypass
+    const turnstileToken = solveTurnstileNative('0x4AAAAAAEw9LL7413Xfin6z', manualProxy, `${WELLBYPASS_URL}/en`);
+
+    const payload = JSON.stringify({ url: targetUrl.trim(), turnstileToken });
+    const bypassRes = await nativeRequest(`${WELLBYPASS_URL}/api/bypass`, {
+        method: 'POST',
+        timeout: 35000,
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(payload),
+            'x-device-id': deviceId,
+            'Cookie': 'NEXT_LOCALE=en',
+            'Origin': WELLBYPASS_URL,
+            'Referer': `${WELLBYPASS_URL}/en`
+        }
+    }, payload, manualProxy);
+
+    let jsonResult = {};
+    try {
+        jsonResult = JSON.parse(bypassRes.body);
+    } catch {
+        jsonResult = { status: false, message: 'Invalid response from WellBypass' };
+    }
+
+    const durationMs = Date.now() - startTime;
+    const isSuccess = Boolean(jsonResult.status && jsonResult.bypassedUrl);
+
+    return {
+        creator: CREATOR,
+        provider: 'WellBypass',
+        status: isSuccess ? 'success' : 'error',
+        code: isSuccess ? 200 : 400,
+        message: jsonResult.message || (isSuccess ? 'Link berhasil di-bypass' : 'Gagal bypass link'),
+        data: {
+            originalUrl: targetUrl,
+            bypassedUrl: jsonResult.bypassedUrl || null,
+            service: jsonResult.service || null,
+            duration: `${(durationMs / 1000).toFixed(2)}s`
+        }
+    };
+}
+
+
+// ==========================================
+// EXPRESS ENDPOINT INTEGRATION (/api/automation/run)
+// ==========================================
+app.all('/api/automation/run', async (req, res) => {
+    const body = req.method === 'GET' ? req.query : (req.body || {});
+    const provider = (body.provider || 'keyyss').toLowerCase();
+    const targetUrl = body.url || body.targetUrl;
+    const emojis = body.emojis || body.emoji || '👍';
+    const vipKey = body.vipKey || body.key;
+    const useProxy = body.proxy === 'true' || body.proxy === true;
+    const manualProxy = body.manualProxy || null;
+
+    if (!targetUrl) {
+        return res.status(400).json({ status: false, error: 'Parameter target URL (url) wajib disertakan!' });
+    }
+
+    try {
+        let result;
+        if (provider === 'wellbypass' || provider === 'bypass') {
+            result = await executeWellBypassTask(targetUrl, manualProxy);
+        } else {
+            result = await executeKeyyssReaction({
+                channelLink: targetUrl,
+                emojis,
+                vipKey,
+                useProxy,
+                manualProxy
+            });
+        }
+
+        return res.status(200).json({ status: true, creator: CREATOR, result });
+    } catch (err) {
+        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+    }
+});
+
 
 // Fallback 404
 app.use((req, res) => {

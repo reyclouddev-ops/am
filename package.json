@@ -1,8 +1,8 @@
 {
   "name": "reycloud-am-generator",
-  "version": "2.1.0",
+  "version": "2.5.0",
   "type": "commonjs",
-  "description": "Alight Motion Premium Generator, Tools, Rayleigh AI, Free Fire, NontonAnime & Vercel Web Deployer API on Vercel",
+  "description": "Alight Motion Premium Generator, CapCut Pro Trial 7d Automation, Tools, Rayleigh AI, Free Fire, NontonAnime & Vercel Web Deployer API on Vercel",
   "main": "api/engine.js",
   "dependencies": {
     "adm-zip": "^0.5.16",

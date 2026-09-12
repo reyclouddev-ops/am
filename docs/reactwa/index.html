@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Reaction & Link Bypass Engine - ReyCode Professional Suite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#07090e',
+                        cardbg: '#0f172a',
+                        cardborder: '#1e293b',
+                        accent: '#6366f1',
+                        accenthover: '#4f46e5',
+                        cyanaccent: '#06b6d4',
+                        emeraldaccent: '#10b981'
+                    },
+                    boxShadow: {
+                        glow: '0 0 25px -5px rgba(99, 102, 241, 0.3)',
+                        cyanGlow: '0 0 20px -5px rgba(6, 182, 212, 0.3)'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome & SweetAlert2 & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); }
+    </style>
+</head>
+<body class="bg-darkbg text-gray-100 min-h-screen flex flex-col justify-between selection:bg-accent selection:text-white">
+
+    <!-- Navbar Modern Glassmorphism -->
+    <nav class="border-b border-gray-800/80 glass-panel sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-2xl blur opacity-75"></div>
+                    <div class="relative bg-cardbg p-3 rounded-2xl border border-gray-700 text-emerald-400 flex items-center justify-center">
+                        <i class="fa-solid fa-bolt text-xl"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-extrabold text-lg tracking-tight text-white">ReactWA & <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Bypass</span></span>
+                        <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Validated</span>
+                    </div>
+                    <p class="text-xs text-gray-400">WhatsApp Channel Reaction & Link Skipper Suite</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="/dashboard" class="text-xs sm:text-sm px-4 py-2.5 rounded-xl bg-gray-900/80 hover:bg-gray-800 transition text-gray-300 font-medium border border-gray-800 flex items-center space-x-2 shadow-sm">
+                    <i class="fa-solid fa-arrow-left text-gray-400"></i>
+                    <span class="hidden sm:inline">Kembali ke Home</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 py-12 flex-grow w-full">
+        
+        <!-- Hero Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center space-x-2 bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-indigo-500/10 border border-emerald-500/20 px-4 py-1.5 rounded-full text-xs font-semibold text-emerald-300 mb-4 shadow-inner">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Strict URL Validation Engine Online</span>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
+                WhatsApp Reaction & <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400">Link Skipper</span>
+            </h1>
+            <p class="text-gray-400 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+                Wajib memasukkan URL Channel WhatsApp yang valid. Jika format salah, eksekusi dibatalkan dan terkena cooldown 1 menit.
+            </p>
+        </div>
+
+        <!-- Automation Console Card -->
+        <div class="bg-cardbg border border-cardborder rounded-3xl p-6 sm:p-10 shadow-glow mb-10 relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <form id="automationForm" onsubmit="handleExecute(event)" class="space-y-6 relative z-10">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Target URL Channel WhatsApp</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500"><i class="fa-brands fa-whatsapp"></i></span>
+                            <input type="text" id="targetUrlInput" required placeholder="https://whatsapp.com/channel/..." class="w-full bg-[#07090e] border border-gray-800 rounded-2xl pl-11 pr-4 py-3.5 text-white focus:outline-none focus:border-emerald-500 transition text-sm font-mono">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Emoji Reaction (Pisahkan dengan Koma)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500"><i class="fa-solid fa-face-smile"></i></span>
+                            <input type="text" id="emojisInput" value="👍" placeholder="👍, 🔥, ❤️" oninput="formatEmojis(this)" class="w-full bg-[#07090e] border border-gray-800 rounded-2xl pl-11 pr-4 py-3.5 text-white focus:outline-none focus:border-emerald-500 transition text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pengaturan Proxy Opsional -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2 border-t border-gray-800/60">
+                    <div class="flex items-center space-x-3 pt-2">
+                        <input type="checkbox" id="useProxyCheck" class="w-5 h-5 rounded bg-[#07090e] border-gray-800 text-emerald-500 focus:ring-emerald-500">
+                        <label for="useProxyCheck" class="text-sm text-gray-300 font-medium cursor-pointer">Gunakan ProxyScrape Pool Otomatis</label>
+                    </div>
+                    <div>
+                        <input type="text" id="manualProxyInput" placeholder="Custom Proxy (host:port) Opsional" class="w-full bg-[#07090e] border border-gray-800 rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-emerald-500 transition text-sm font-mono">
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 text-white font-extrabold py-4 px-6 rounded-2xl transition-all duration-300 transform active:scale-[0.99] shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-3 text-base cursor-pointer">
+                    <i class="fa-solid fa-bolt animate-bounce" id="btnIcon"></i>
+                    <span id="btnText">EXECUTE NOW</span>
+                </button>
+            </form>
+
+            <!-- Live Terminal Logs -->
+            <div id="logsContainer" class="hidden mt-8 bg-[#040609] border border-gray-800/80 rounded-2xl p-5 font-mono text-xs text-emerald-400 max-h-52 overflow-y-auto space-y-1.5 shadow-inner">
+                <div class="text-gray-500">// Menunggu instruksi eksekusi engine...</div>
+            </div>
+        </div>
+
+        <!-- Result Container -->
+        <div id="resultBox" class="hidden space-y-6 mb-12 animate-fadeIn">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+                <h2 class="text-xl font-extrabold text-white flex items-center tracking-tight">
+                    <i class="fa-solid fa-circle-check text-cyan-400 mr-2.5"></i> Hasil Eksekusi <span class="text-emerald-400 ml-1.5" id="resProviderName">Success</span>
+                </h2>
+                <span class="text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full font-mono">Completed</span>
+            </div>
+            <div id="resultCard" class="bg-[#07090e] border border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
+                <!-- Result Content injected via JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modern Footer -->
+    <footer class="border-t border-gray-800/80 glass-panel py-8 mt-20 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+            <p>&copy; 2026 ReyCode Enterprise. All rights reserved.</p>
+            <div class="flex items-center space-x-4 text-gray-400 font-medium">
+                <span>ReactWA & Link Skipper Suite</span>
+                <span>•</span>
+                <span class="text-emerald-400">Secure & High Performance</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script Interaksi Professional -->
+    <script>
+        let cooldownTimer = null;
+
+        function formatEmojis(input) {
+            let val = input.value.replace(/\s+/g, '');
+            const emojisArray = Array.from(val);
+            if (emojisArray.length > 1) {
+                input.value = emojisArray.join(', ');
+            }
+        }
+
+        function triggerCooldown(seconds) {
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+
+            btn.disabled = true;
+            let timeLeft = seconds;
+            btnIcon.className = 'fa-solid fa-triangle-exclamation text-amber-400 animate-spin';
+            
+            clearInterval(cooldownTimer);
+            cooldownTimer = setInterval(() => {
+                let mins = Math.floor(timeLeft / 60);
+                let secs = timeLeft % 60;
+                let timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+                
+                btnText.innerHTML = `COOLDOWN (${timeStr})`;
+                timeLeft--;
+                
+                if (timeLeft < 0) {
+                    clearInterval(cooldownTimer);
+                    btn.disabled = false;
+                    btnIcon.className = 'fa-solid fa-bolt animate-bounce';
+                    btnText.innerHTML = 'EXECUTE NOW';
+                }
+            }, 1000);
+        }
+
+        async function handleExecute(e) {
+            e.preventDefault();
+            const url = document.getElementById('targetUrlInput').value.trim();
+            const emojis = document.getElementById('emojisInput').value.trim() || '👍';
+            const useProxy = document.getElementById('useProxyCheck').checked;
+            const manualProxy = document.getElementById('manualProxyInput').value.trim();
+
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const logsContainer = document.getElementById('logsContainer');
+            const resultBox = document.getElementById('resultBox');
+            const resultCard = document.getElementById('resultCard');
+
+            // --- VALIDASI URL CHANNEL WHATSAPP ---
+            const waChannelRegex = /^https:\/\/(www\.)?whatsapp\.com\/channel\/[a-zA-Z0-9_-]+(\/.+)?$/i;
+            if (!waChannelRegex.test(url)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'URL Tidak Valid!',
+                    text: 'Format URL salah! Wajib menggunakan URL Channel WhatsApp yang valid (contoh: https://whatsapp.com/channel/...). Eksekusi dibatalkan dan terkena cooldown 1 menit.',
+                    background: '#0f172a',
+                    color: '#fff',
+                    confirmButtonColor: '#ef4444'
+                });
+
+                logsContainer.classList.remove('hidden');
+                logsContainer.innerHTML = `<div class="text-red-400 font-bold">[!] ERROR: URL Channel WhatsApp tidak valid. Eksekusi dibatalkan. Cooldown 1 menit aktif.</div>`;
+                
+                // Trigger cooldown 60 detik (1 menit)
+                triggerCooldown(60);
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Mengeksekusi...';
+            logsContainer.classList.remove('hidden');
+            logsContainer.innerHTML = `<div class="text-gray-400">// Memvalidasi dan menjalankan WhatsApp Reaction Engine...</div>`;
+            resultBox.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/automation/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provider: 'keyyss', url, emojis, proxy: useProxy, manualProxy })
+                });
+
+                const json = await response.json();
+                if (!json.status || !json.result) {
+                    throw new Error(json.error || json.result?.message || 'Gagal menjalankan automasi.');
+                }
+
+                const res = json.result;
+                document.getElementById('resProviderName').textContent = res.provider || 'Keyyss';
+
+                const htmlContent = `
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs uppercase text-gray-400 font-bold">Status: <strong class="text-emerald-400">${res.status}</strong></span>
+                            <span class="text-xs font-mono text-cyan-400">Durasi: ${res.data.duration}</span>
+                        </div>
+                        <div class="bg-cardbg p-4 rounded-2xl border border-cardborder">
+                            <span class="text-gray-400 text-xs font-semibold uppercase block mb-1">Target Channel WhatsApp</span>
+                            <div class="font-mono text-gray-300 text-xs break-all">${res.data.target}</div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-cardbg p-4 rounded-2xl border border-cardborder">
+                                <span class="text-gray-400 text-xs font-semibold uppercase block mb-1">Emoji Dikirim</span>
+                                <div class="text-white font-bold">${res.data.emojis}</div>
+                            </div>
+                            <div class="bg-cardbg p-4 rounded-2xl border border-cardborder">
+                                <span class="text-gray-400 text-xs font-semibold uppercase block mb-1">Proxy Digunakan</span>
+                                <div class="font-mono text-cyan-300 text-xs">${res.data.proxy || 'Direct Connection'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                logsContainer.innerHTML += `<div class="text-emerald-400 font-bold mt-2">> ${res.message}</div>`;
+                resultCard.innerHTML = htmlContent;
+                resultBox.classList.remove('hidden');
+
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Eksekusi Gagal!',
+                    text: err.message,
+                    background: '#0f172a',
+                    color: '#fff',
+                    confirmButtonColor: '#6366f1'
+                });
+            } finally {
+                // Cooldown sukses normal (10 detik)
+                triggerCooldown(10);
+            }
+        }
+    </script>
+</body>
+</html>
