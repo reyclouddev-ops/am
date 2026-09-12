@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReyTube - YouTube Player & Seamless Mini Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #0f0f0f; color: #f1f1f1; font-family: system-ui, -apple-system, sans-serif; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3f3f3f; border-radius: 9999px; }
+        
+        /* State Mode Mini Player */
+        body.mini-active #activeWatchView {
+            position: fixed;
+            bottom: 56px; /* Di atas navbar bawah */
+            left: 12px;
+            right: 12px;
+            height: 72px;
+            background: #1e1e1e;
+            border: 1px solid #3f3f3f;
+            border-radius: 12px;
+            z-index: 100;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center;
+            padding: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            backdrop-blur: 10px;
+        }
+        body.mini-active #activeWatchView .hide-on-mini {
+            display: none !important;
+        }
+        body.mini-active #activeWatchView .player-box-wrapper {
+            width: 110px !important;
+            height: 62px !important;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+        body.mini-active #activeWatchView .mini-controls {
+            display: flex !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between relative overflow-hidden">
+
+    <div class="w-full max-w-md flex flex-col h-screen relative z-10 bg-[#0f0f0f]">
+        
+        <!-- YouTube Header Navbar -->
+        <div class="flex items-center justify-between bg-[#0f0f0f]/95 backdrop-blur-md px-4 py-3 border-b border-[#272727] shrink-0 sticky top-0 z-50">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="resetHome()">
+                <div class="w-7 h-5 bg-red-600 rounded-md flex items-center justify-center text-white font-black text-[10px] tracking-tighter shadow-sm">
+                    ▶
+                </div>
+                <span class="font-extrabold text-sm tracking-tight text-white">Rey<span class="text-red-500">Tube</span></span>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <a href="/dashboard" class="px-3 py-1 bg-[#272727] hover:bg-[#3f3f3f] text-slate-200 text-[11px] rounded-full font-medium transition-colors">
+                    Home
+                </a>
+            </div>
+        </div>
+
+        <!-- Search Bar Header -->
+        <div class="px-4 py-2.5 bg-[#0f0f0f] border-b border-[#272727] shrink-0">
+            <div class="flex items-center space-x-2">
+                <div class="flex-1 flex items-center bg-[#121212] border border-[#3f3f3f] rounded-full px-3.5 py-1.5 focus-within:border-blue-500 transition-colors">
+                    <input type="text" id="searchInput" placeholder="Telusuri ReyTube..." 
+                        class="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none"
+                        onkeypress="handleKeyPress(event)">
+                </div>
+                <button onclick="searchYouTube()" id="searchBtn"
+                    class="bg-[#272727] hover:bg-[#3f3f3f] text-white p-2 rounded-full transition-colors shrink-0 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Container -->
+        <div id="appContainer" class="flex-1 overflow-y-auto pb-24 relative">
+            <!-- Default Home State -->
+            <div id="homeState" class="flex flex-col items-center justify-center h-full p-6 text-center space-y-3">
+                <div class="w-14 h-14 bg-[#272727] rounded-full flex items-center justify-center text-red-500 text-2xl shadow-inner">
+                    ▶
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-slate-200">Selamat Datang di ReyTube</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Cari video musik, podcast, atau hiburan favoritmu sekarang.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation Bar ala YouTube Mobile -->
+        <div class="flex items-center justify-around bg-[#0f0f0f] border-t border-[#272727] py-2 shrink-0 absolute bottom-0 left-0 right-0 z-40">
+            <button onclick="resetHome()" class="flex flex-col items-center text-red-500 space-y-0.5 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span class="text-[9px] font-medium">Beranda</span>
+            </button>
+            <div class="flex flex-col items-center text-slate-400 space-y-0.5 cursor-pointer hover:text-white" onclick="document.getElementById('searchInput').focus()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <span class="text-[9px] font-medium">Pencarian</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentVideos = [];
+        let activeVideo = { id: '', title: '', channel: '' };
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') searchYouTube();
+        }
+
+        function resetHome() {
+            closeMiniPlayer();
+            const container = document.getElementById('appContainer');
+            container.innerHTML = `
+                <div id="homeState" class="flex flex-col items-center justify-center h-full p-6 text-center space-y-3">
+                    <div class="w-14 h-14 bg-[#272727] rounded-full flex items-center justify-center text-red-500 text-2xl shadow-inner">
+                        ▶
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-200">Selamat Datang di ReyTube</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Cari video musik, podcast, atau hiburan favoritmu sekarang.</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('searchInput').value = '';
+        }
+
+        function getYouTubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        async function searchYouTube() {
+            const input = document.getElementById('searchInput');
+            const container = document.getElementById('appContainer');
+            const query = input.value.trim();
+
+            if (!query) return;
+
+            // Jika sedang ada mini player aktif, jangan reset total, biarkan mengambang
+            const existingWatchView = document.getElementById('activeWatchView');
+            if (!existingWatchView) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-64 space-y-2">
+                        <div class="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                        <span class="text-xs text-slate-400">Memuat video...</span>
+                    </div>
+                `;
+            }
+
+            try {
+                const res = await fetch(`https://v2.api-varhad.my.id/search/youtube?q=${encodeURIComponent(query)}`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const json = await res.json();
+
+                if (!json.status || !json.result || json.result.length === 0) {
+                    if (!existingWatchView) container.innerHTML = `<div class="text-center text-slate-400 text-xs py-16">Tidak ada video yang ditemukan.</div>`;
+                    return;
+                }
+
+                currentVideos = json.result;
+                renderVideoFeed(currentVideos);
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderVideoFeed(videos) {
+            const container = document.getElementById('appContainer');
+            
+            // Simpan watch view jika ada di dalam container
+            const watchView = document.getElementById('activeWatchView');
+            container.innerHTML = '';
+            if (watchView) container.appendChild(watchView);
+
+            videos.forEach((v) => {
+                const ytId = getYouTubeId(v.link);
+                const card = document.createElement('div');
+                card.className = "flex flex-col mb-4 cursor-pointer group bg-[#0f0f0f] border-b border-[#272727] pb-3";
+                card.onclick = () => watchVideo(ytId, v.title, v.channel);
+                
+                card.innerHTML = `
+                    <div class="relative w-full aspect-video bg-[#272727] overflow-hidden">
+                        <img src="${v.imageUrl}" alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
+                        <div class="absolute bottom-1.5 right-1.5 bg-black/80 px-1.5 py-0.5 rounded text-[9px] font-mono text-white font-bold">
+                            ${v.duration}
+                        </div>
+                    </div>
+                    <div class="flex px-3 pt-3 space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-[#3f3f3f] flex items-center justify-center text-white font-bold text-xs shrink-0">
+                            ${v.channel.charAt(0).toUpperCase()}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-xs font-semibold text-white line-clamp-2 leading-snug">${escapeHtml(v.title)}</h3>
+                            <p class="text-[10px] text-slate-400 mt-1">${escapeHtml(v.channel)}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function watchVideo(ytId, title, channel) {
+            activeVideo = { id: ytId, title: title, channel: channel };
+            document.body.classList.remove('mini-active');
+
+            let watchView = document.getElementById('activeWatchView');
+            if (!watchView) {
+                watchView = document.createElement('div');
+                watchView.id = 'activeWatchView';
+                document.getElementById('appContainer').prepend(watchView);
+            }
+
+            watchView.innerHTML = `
+                <!-- Player Box Wrapper -->
+                <div class="player-box-wrapper relative w-full aspect-video bg-black shrink-0">
+                    <iframe id="persistentIframe" src="https://www.youtube.com/embed/${ytId}?autoplay=1" 
+                        class="w-full h-full border-0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                    <!-- Tombol Minimize (Panah Bawah) -->
+                    <button onclick="minimizePlayer(event)" class="hide-on-mini absolute top-2 left-2 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full backdrop-blur-sm cursor-pointer shadow transition-all z-20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                </div>
+
+                <!-- Info Video (Hidden saat mini) -->
+                <div class="hide-on-mini p-3 border-b border-[#272727]">
+                    <h2 class="text-xs font-bold text-white leading-snug">${escapeHtml(title)}</h2>
+                    <div class="flex items-center space-x-2 mt-2.5">
+                        <div class="w-7 h-7 rounded-full bg-[#3f3f3f] flex items-center justify-center text-white font-bold text-xs">
+                            ${channel.charAt(0).toUpperCase()}
+                        </div>
+                        <span class="text-[11px] font-medium text-slate-300">${escapeHtml(channel)}</span>
+                    </div>
+                </div>
+
+                <!-- Konten Mini Player (Hanya muncul saat mini) -->
+                <div class="mini-controls hidden flex-1 min-w-0 px-2.5 items-center justify-between">
+                    <div class="min-w-0 flex-1 pr-2" onclick="expandPlayer()">
+                        <h4 class="text-[11px] font-semibold text-white truncate leading-tight">${escapeHtml(title)}</h4>
+                        <p class="text-[9px] text-slate-400 truncate mt-0.5">${escapeHtml(channel)}</p>
+                    </div>
+                    <div class="flex items-center space-x-2 shrink-0">
+                        <button onclick="expandPlayer()" class="w-7 h-7 rounded-full bg-[#272727] text-white flex items-center justify-center text-xs">🗖</button>
+                        <button onclick="closeMiniPlayer()" class="w-7 h-7 rounded-full bg-[#272727] text-slate-300 flex items-center justify-center text-xs">✕</button>
+                    </div>
+                </div>
+
+                <!-- Rekomendasi (Hidden saat mini) -->
+                <div class="hide-on-mini flex flex-col">
+                    <div class="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Video Lainnya</div>
+                    <div id="recommendationsList" class="space-y-3 px-3 pb-6"></div>
+                </div>
+            `;
+
+            if (currentVideos.length > 0) {
+                const recList = watchView.querySelector('#recommendationsList');
+                if (recList) {
+                    currentVideos.forEach(v => {
+                        const id = getYouTubeId(v.link);
+                        if (id === ytId) return;
+
+                        const recItem = document.createElement('div');
+                        recItem.className = "flex space-x-2.5 cursor-pointer group";
+                        recItem.onclick = () => watchVideo(id, v.title, v.channel);
+                        recItem.innerHTML = `
+                            <div class="relative w-32 aspect-video bg-[#272727] rounded-md overflow-hidden shrink-0">
+                                <img src="${v.imageUrl}" alt="Thumb" class="w-full h-full object-cover">
+                                <div class="absolute bottom-1 right-1 bg-black/80 px-1 py-0.2 rounded text-[8px] font-mono text-white font-bold">
+                                    ${v.duration}
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-[11px] font-semibold text-white line-clamp-2 leading-snug">${escapeHtml(v.title)}</h4>
+                                <p class="text-[10px] text-slate-400 mt-1">${escapeHtml(v.channel)}</p>
+                            </div>
+                        `;
+                        recList.appendChild(recItem);
+                    });
+                }
+            }
+
+            document.getElementById('appContainer').scrollTop = 0;
+        }
+
+        function minimizePlayer(e) {
+            e.stopPropagation();
+            document.body.classList.add('mini-active');
+        }
+
+        function expandPlayer() {
+            document.body.classList.remove('mini-active');
+        }
+
+        function closeMiniPlayer() {
+            document.body.classList.remove('mini-active');
+            const watchView = document.getElementById('activeWatchView');
+            if (watchView) watchView.remove();
+            activeVideo = { id: '', title: '', channel: '' };
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+    </script>
+</body>
+</html>
