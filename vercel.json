@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/api/automation/run",
+      "source": "/api/(.*)",
       "destination": "/api/engine"
     }
   ]
