@@ -46,7 +46,7 @@
                 <span>💬 Konfirmasi ke WhatsApp Admin</span>
             </a>
 
-            <a href="/dashboard" class="block w-full bg-[#1e2330] hover:bg-[#2b3344] text-slate-300 font-bold py-3 rounded-xl text-xs transition-all text-center">
+            <a id="dashboardLink" href="/dashboard" class="block w-full bg-[#1e2330] hover:bg-[#2b3344] text-slate-300 font-bold py-3 rounded-xl text-xs transition-all text-center">
                 🏠 Kembali ke Beranda Dashboard
             </a>
         </div>
@@ -58,14 +58,29 @@
     </div>
 
     <script>
-        // Otomatis buat format pesan WhatsApp dengan menyertakan sapaan dan waktu lokal
-        const now = new Date().toLocaleString('id-ID');
-        const waMessage = `Halo admin, saya sudah menyelesaikan pembayaran untuk pembelian Apikey Premium Bulk via Mustika Payment pada (${now}). Mohon bantuannya untuk mengirimkan API Key saya ya min. Terima kasih!`;
-        
-        // Ganti dengan nomor WhatsApp kamu
-        const whatsappNumber = "6281260512743"; 
-        
-        document.getElementById('waConfirmBtn').href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waMessage)}`;
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const username = urlParams.get('user') || sessionStorage.getItem('reycloud_active_user') || 'Tamu';
+
+            // Update link kembali ke dashboard agar tetap membawa parameter user
+            const dashLink = document.getElementById('dashboardLink');
+            if (username && username !== 'Tamu') {
+                dashLink.href = `/dashboard?user=${encodeURIComponent(username)}`;
+            }
+
+            // Kirim notifikasi otomatis ke Telegram owner saat halaman sukses ini dibuka
+            fetch(`/api/payment/success-notif?user=${encodeURIComponent(username)}`)
+                .then(res => res.json())
+                .then(data => console.log('Notif terkirim:', data))
+                .catch(err => console.error('Gagal kirim notif:', err));
+
+            // Format pesan WhatsApp
+            const now = new Date().toLocaleString('id-ID');
+            const waMessage = `Halo admin, saya (${username}) sudah menyelesaikan pembayaran untuk pembelian Apikey Premium Bulk via Mustika Payment pada (${now}). Mohon bantuannya untuk mengirimkan API Key saya ya min. Terima kasih!`;
+            
+            const whatsappNumber = "6281260512743"; 
+            document.getElementById('waConfirmBtn').href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waMessage)}`;
+        });
     </script>
 </body>
 </html>
