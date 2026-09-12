@@ -6,53 +6,65 @@
     <title>AlightFree - Dashboard Aktivasi Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { background-color: #0d0f12; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: #080a0f; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
         .glass-card {
-            background: rgba(21, 25, 34, 0.95);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(18, 22, 31, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
         }
+        .glow-cyan { shadow: 0 0 25px rgba(6, 182, 212, 0.15); }
+        .glow-purple { shadow: 0 0 25px rgba(168, 85, 247, 0.15); }
+        
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #232d3f; border-radius: 9999px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 relative">
+<body class="min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 relative overflow-x-hidden">
 
-    <div class="w-full max-w-4xl space-y-4">
+    <!-- Ambient Dynamic Glows -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-cyan-500/10 blur-[140px] pointer-events-none rounded-full"></div>
+    <div class="absolute top-1/3 -right-20 w-[300px] h-[300px] bg-amber-500/10 blur-[150px] pointer-events-none rounded-full"></div>
+
+    <div class="w-full max-w-4xl space-y-4 relative z-10">
         
         <!-- Top Navbar -->
-        <div class="flex items-center justify-between bg-[#151922] border border-[#232936] rounded-2xl p-4 shadow-lg relative">
-            <div class="flex items-center space-x-2.5">
-                <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
-                    A
+        <div class="flex items-center justify-between glass-card rounded-2xl p-4 shadow-2xl">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-black shadow-inner">
+                    ⚡
                 </div>
                 <div>
                     <div class="flex items-center space-x-1.5">
-                        <span class="font-extrabold text-sm tracking-wide text-white">ALIGHT<span class="text-cyan-400">FREE</span></span>
+                        <span class="font-black text-sm tracking-wider text-white">ALIGHT<span class="text-cyan-400">FREE</span></span>
+                        <span class="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase">Pro</span>
                     </div>
-                    <span class="text-[10px] tracking-widest text-slate-400 font-semibold uppercase">ACTIVATION ENGINE</span>
+                    <span class="text-[9px] tracking-widest text-slate-400 font-extrabold uppercase">ACTIVATION ENGINE</span>
                 </div>
             </div>
             
-            <a id="dashboardLink" href="#" class="px-3 py-1.5 rounded-xl bg-[#1e2330] border border-[#2b3344] text-[11px] text-slate-300 hover:text-white transition-all font-medium">
-                Kembali Dashboard
+            <a id="dashboardLink" href="#" class="px-3.5 py-2 rounded-xl bg-[#141a26] hover:bg-[#1d2638] border border-[#222c42] text-[11px] text-slate-300 hover:text-white transition-all font-bold shadow-sm flex items-center space-x-1.5 cursor-pointer">
+                <span>←</span><span>Menu Utama</span>
             </a>
         </div>
 
+        <!-- Header Intro -->
         <div class="space-y-1 px-1">
-            <div class="text-[11px] text-slate-400">Multi-Method <span class="text-cyan-400 font-bold tracking-wide">ALIGHT MOTION ACTIVATION</span></div>
-            <p class="text-[11px] text-slate-400 leading-relaxed">Pilih metode aktivasi: Manual Wizard, Auto 1 Click (Gratis), atau Mode Bulk (Custom Jumlah Akun dengan API Key).</p>
+            <div class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">PORTAL UTAMA <span class="text-cyan-400 font-extrabold">АКTIVASI KREATIF</span></div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">Pilih metode aktivasi yang kamu inginkan: Manual Wizard, Auto 1 Click (Gratis), atau Mode Bulk (Custom Jumlah Akun dengan API Key).</p>
         </div>
 
         <!-- Method Switcher -->
-        <div class="grid grid-cols-3 gap-2 bg-[#151922] p-1.5 rounded-2xl border border-[#232936]">
-            <button id="btnTabManual" onclick="switchMethod('manual')" class="py-2.5 rounded-xl text-xs font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer">
-                ✍️ Manual
+        <div class="grid grid-cols-3 gap-2 glass-card p-1.5 rounded-2xl shadow-lg border border-[#1f293d]">
+            <button id="btnTabManual" onclick="switchMethod('manual')" class="py-2.5 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center space-x-1.5">
+                <span>✍️</span><span>Manual</span>
             </button>
-            <button id="btnTabAuto" onclick="switchMethod('auto')" class="py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-                ⚡ Auto 1 Click
+            <button id="btnTabAuto" onclick="switchMethod('auto')" class="py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5">
+                <span>⚡</span><span>Auto 1 Click</span>
             </button>
-            <button id="btnTabBulk" onclick="switchMethod('bulk')" class="py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-                📦 AM Bulk (Custom)
+            <button id="btnTabBulk" onclick="switchMethod('bulk')" class="py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5">
+                <span>📦</span><span>AM Bulk</span>
             </button>
         </div>
 
@@ -60,56 +72,56 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             
             <!-- SECTION KIRI: MANUAL WIZARD -->
-            <div id="sectionManual" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-4">
+            <div id="sectionManual" class="glass-card rounded-2xl p-5 shadow-2xl space-y-4">
                 <div class="flex items-start space-x-3.5">
-                    <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-amber-400 shrink-0">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 font-bold">
                         ✍️
                     </div>
                     <div>
-                        <h2 class="text-sm font-bold text-white tracking-tight">Manual Wizard Aktivasi</h2>
-                        <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Masukkan email pribadi untuk menerima magic link verifikasi (Free).</p>
+                        <h2 class="text-xs font-black text-white tracking-wide uppercase">Manual Wizard Aktivasi</h2>
+                        <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Masukkan email pribadi untuk menerima magic link verifikasi.</p>
                     </div>
                 </div>
 
                 <div id="form-step-1" class="space-y-3">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">ALAMAT EMAIL PRIBADI</label>
+                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">ALAMAT EMAIL PRIBADI</label>
                     <input type="email" id="emailInput" placeholder="user@example.com" 
-                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors">
+                        class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors">
                     <button onclick="sendLink()" id="btnSend"
-                        class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                        class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 cursor-pointer">
                         Kirim Tautan Magic
                     </button>
                 </div>
 
                 <div id="form-step-loading" class="hidden text-center py-6 space-y-3">
                     <div class="inline-block w-7 h-7 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-                    <p class="text-xs text-amber-400 animate-pulse font-medium">Mengirim tautan verifikasi...</p>
+                    <p class="text-xs text-amber-400 animate-pulse font-bold">Mengirim tautan verifikasi...</p>
                 </div>
 
                 <div id="form-step-2" class="space-y-3 hidden">
-                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 text-[10px] text-amber-300 leading-relaxed">
+                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-[10px] text-amber-300 leading-relaxed font-medium">
                         ⚠️ Cek email kamu, salin magic link yang masuk, lalu tempel di bawah ini.
                     </div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">MAGIC LINK VERIFIKASI</label>
+                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">MAGIC LINK VERIFIKASI</label>
                     <input type="text" id="linkInput" placeholder="Tempel URL magic link di sini..." 
-                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors">
+                        class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors font-mono">
                     <button onclick="verifyLink()" id="btnVerify"
-                        class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                        class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-emerald-500/20 cursor-pointer">
                         Verifikasi & Ambil Akun
                     </button>
                 </div>
 
-                <div id="resultBoxManual" class="hidden space-y-3 bg-[#0d0f12] border border-emerald-500/30 rounded-2xl p-4">
+                <div id="resultBoxManual" class="hidden space-y-3 bg-[#080a0f] border border-emerald-500/30 rounded-2xl p-4 shadow-inner">
                     <div class="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
                         <span>🎉</span>
                         <span>Manual Berhasil Diaktifkan!</span>
                     </div>
-                    <div class="bg-[#151922] border border-[#232936] rounded-xl p-3 space-y-2 text-xs font-mono">
-                        <div class="flex justify-between border-b border-[#232936] pb-1.5">
+                    <div class="glass-card rounded-xl p-3 space-y-2 text-xs font-mono border border-[#222c42]">
+                        <div class="flex justify-between border-b border-[#222c42] pb-1.5">
                             <span class="text-slate-400 font-sans">Email:</span>
-                            <span id="resManualEmail" class="text-cyan-400 select-all"></span>
+                            <span id="resManualEmail" class="text-cyan-400 select-all font-bold"></span>
                         </div>
-                        <div class="flex justify-between border-b border-[#232936] pb-1.5">
+                        <div class="flex justify-between border-b border-[#222c42] pb-1.5">
                             <span class="text-slate-400 font-sans">Order ID:</span>
                             <span id="resManualOrder" class="text-slate-300 select-all text-[10px]"></span>
                         </div>
@@ -122,51 +134,51 @@
             </div>
 
             <!-- SECTION KANAN: AUTO 1 CLICK -->
-            <div id="sectionAuto" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-4 flex flex-col justify-between hidden">
+            <div id="sectionAuto" class="glass-card rounded-2xl p-5 shadow-2xl space-y-4 flex flex-col justify-between hidden">
                 <div class="space-y-4">
                     <div class="flex items-start space-x-3.5">
-                        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0 font-bold">
                             ⚡
                         </div>
                         <div>
-                            <h2 class="text-sm font-bold text-white tracking-tight">Auto 1 Click Activation</h2>
-                            <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Sistem otomatis membuat email sementara dan mengambil verifikasi secara instan (Free).</p>
+                            <h2 class="text-xs font-black text-white tracking-wide uppercase">Auto 1 Click Activation</h2>
+                            <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Sistem otomatis membuat email sementara dan mengambil verifikasi.</p>
                         </div>
                     </div>
 
                     <div class="space-y-3">
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">CUSTOM USERNAME (OPSIONAL)</label>
+                        <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">CUSTOM USERNAME (OPSIONAL)</label>
                         <input type="text" id="autoUsernameInput" placeholder="kosongkan untuk auto-generate" 
-                            class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 transition-colors font-mono">
+                            class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 transition-colors font-mono">
                         
                         <button onclick="runAutoActivation()" id="btnAutoRun"
-                            class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                            class="w-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-cyan-500/20 cursor-pointer">
                             🚀 Jalankan Auto Aktivasi
                         </button>
                     </div>
 
                     <div id="autoLoading" class="hidden text-center py-4 space-y-2">
                         <div class="inline-block w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-                        <p class="text-[11px] text-cyan-400 animate-pulse font-medium">Membuat email & menunggu magic link...</p>
+                        <p class="text-[11px] text-cyan-400 animate-pulse font-bold">Membuat email & menunggu magic link...</p>
                     </div>
                 </div>
 
-                <div id="resultBoxAuto" class="hidden space-y-3 bg-[#0d0f12] border border-cyan-500/30 rounded-2xl p-4 mt-3 shadow-inner">
-                    <div class="flex items-center space-x-2 text-cyan-400 font-bold text-xs border-b border-[#232936] pb-2">
+                <div id="resultBoxAuto" class="hidden space-y-3 bg-[#080a0f] border border-cyan-500/30 rounded-2xl p-4 mt-3 shadow-inner">
+                    <div class="flex items-center space-x-2 text-cyan-400 font-bold text-xs border-b border-[#222c42] pb-2">
                         <span>🎉</span>
                         <span>Auto 1 Click Berhasil!</span>
                     </div>
 
-                    <div class="bg-[#151922] border border-[#232936] rounded-xl p-3 space-y-2 text-xs font-mono">
-                        <div class="flex flex-col border-b border-[#232936] pb-1.5">
-                            <span class="text-slate-400 font-sans text-[10px]">Email:</span>
+                    <div class="glass-card rounded-xl p-3 space-y-2 text-xs font-mono border border-[#222c42]">
+                        <div class="flex flex-col border-b border-[#222c42] pb-1.5">
+                            <span class="text-slate-400 font-sans text-[10px] font-bold">Email:</span>
                             <span id="resAutoEmail" class="text-cyan-300 select-all font-bold"></span>
                         </div>
-                        <div class="flex flex-col border-b border-[#232936] pb-1.5">
-                            <span class="text-slate-400 font-sans text-[10px]">Web Login / Inbox:</span>
+                        <div class="flex flex-col border-b border-[#222c42] pb-1.5">
+                            <span class="text-slate-400 font-sans text-[10px] font-bold">Web Login / Inbox:</span>
                             <a id="resAutoWebLogin" href="#" target="_blank" class="text-cyan-400 hover:underline truncate text-[11px]"></a>
                         </div>
-                        <div class="flex justify-between border-b border-[#232936] pb-1.5">
+                        <div class="flex justify-between border-b border-[#222c42] pb-1.5">
                             <span class="text-slate-400 font-sans">Animal Hoki:</span>
                             <span id="resAutoAnimal" class="text-amber-400 font-bold"></span>
                         </div>
@@ -176,42 +188,46 @@
                         </div>
                     </div>
 
-                    <div class="bg-[#151922] border border-[#232936] rounded-xl p-3 space-y-1.5 text-[11px] text-slate-300">
-                        <div class="font-bold text-cyan-400 text-[10px] uppercase tracking-wider">📚 Cara Login & Panduan:</div>
+                    <div class="glass-card rounded-xl p-3 space-y-1.5 text-[11px] text-slate-300 border border-[#222c42]">
+                        <div class="font-black text-cyan-400 text-[10px] uppercase tracking-wider">📚 Cara Login & Panduan:</div>
                         <ol id="resAutoGuide" class="list-decimal list-inside space-y-1 text-[11px] text-slate-400"></ol>
                     </div>
                 </div>
 
-                <div class="pt-3 border-t border-[#232936] text-[11px] text-slate-400 flex items-center justify-center">
-                    <span class="text-cyan-400 font-medium">Status: Online & Ready 🟢</span>
+                <div class="pt-3 border-t border-[#222c42] text-[11px] text-slate-400 flex items-center justify-between">
+                    <span class="text-slate-500 font-semibold">Sistem Instan</span>
+                    <span class="text-emerald-400 font-bold flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span>100% Operational</span>
+                    </span>
                 </div>
             </div>
 
         </div>
 
-        <!-- SECTION: AM BULK (CUSTOM JUMLAH & DOWNLOAD .TXT) DENGAN SISTEM KUNCI PREMIUM -->
-        <div id="sectionBulk" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-4 hidden">
+        <!-- SECTION: AM BULK (CUSTOM JUMLAH & DOWNLOAD .TXT) -->
+        <div id="sectionBulk" class="glass-card rounded-2xl p-5 shadow-2xl space-y-4 hidden">
             <div class="flex items-start space-x-3.5">
-                <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+                <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0 font-bold">
                     📦
                 </div>
                 <div>
-                    <h2 class="text-sm font-bold text-white tracking-tight">AM Bulk Activation Engine</h2>
-                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Masukkan API Key berbayar kamu (format <code class="text-purple-300">reycoder_XXXXXX</code>) untuk membuka akses fitur Bulk.</p>
+                    <h2 class="text-xs font-black text-white tracking-wide uppercase">AM Bulk Activation Engine</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Masukkan API Key berbayar kamu untuk membuka akses fitur Bulk (Maksimal 10 Akun).</p>
                 </div>
             </div>
 
             <!-- INPUT API KEY & CEK STATUS -->
-            <div class="space-y-3 bg-[#0d0f12] border border-[#232936] rounded-2xl p-4">
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">VERIFIKASI API KEY BULK</label>
+            <div class="space-y-3 bg-[#080a0f] border border-[#222c42] rounded-2xl p-4 shadow-inner">
+                <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">VERIFIKASI API KEY BULK</label>
                 <div class="flex space-x-2">
                     <input type="text" id="bulkApiKeyInput" placeholder="reycoder_XXXXXX" oninput="checkApiKeyLive()"
-                        class="w-full bg-[#151922] border border-[#232936] rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-400 font-mono">
-                    <button onclick="verifyApiKeyBtn()" class="bg-[#212838] hover:bg-[#2b3344] text-purple-300 border border-purple-500/30 font-bold px-4 py-2.5 rounded-xl text-xs transition-all shrink-0 cursor-pointer">
+                        class="w-full glass-card border border-[#222c42] rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-400 font-mono">
+                    <button onclick="verifyApiKeyBtn()" class="bg-[#1b2230] hover:bg-[#252f44] text-purple-300 border border-purple-500/30 font-bold px-4 py-2.5 rounded-xl text-xs transition-all shrink-0 cursor-pointer shadow">
                         Cek Key 🔍
                     </button>
                 </div>
-                <div id="keyStatusNotice" class="text-[11px] font-medium text-amber-400 flex items-center space-x-1.5 pt-1">
+                <div id="keyStatusNotice" class="text-[11px] font-bold text-amber-400 flex items-center space-x-1.5 pt-1">
                     <span>⚠️</span><span>Fitur terkunci. Masukkan API Key aktif untuk membuka akses.</span>
                 </div>
             </div>
@@ -219,13 +235,13 @@
             <!-- KONTROL GENERATOR (TERKUNCI SECARA DEFAULT) -->
             <div id="bulkControlPanel" class="space-y-3 opacity-40 pointer-events-none transition-all duration-300">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">JUMLAH AKUN (MAKSIMAL 10)</label>
+                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">JUMLAH AKUN (MAKSIMAL 10)</label>
                     <input type="number" id="bulkCountInput" value="10" min="1" max="10" 
-                        class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 focus:outline-none focus:border-purple-400 transition-colors font-mono">
+                        class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 focus:outline-none focus:border-purple-400 transition-colors font-mono">
                 </div>
                 
                 <button onclick="runBulkActivation()" id="btnBulkRun"
-                    class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+                    class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-purple-500/20 cursor-pointer">
                     📦 Generate Akun Pro Sekarang
                 </button>
             </div>
@@ -238,80 +254,81 @@
                     <p class="text-[11px] text-slate-300">Anda memerlukan API Key Bulk aktif untuk menggunakan fitur generator massal ini.</p>
                 </div>
                 <button onclick="showQrisModal('Akses Bulk memerlukan API Key Pro aktif. Silakan lakukan pembayaran QRIS untuk mendapatkan akses instan.')" 
-                    class="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-black py-3 rounded-xl text-xs transition-all shadow-lg cursor-pointer">
+                    class="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 text-slate-950 font-black py-3 rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 cursor-pointer">
                     💎 Upgrade & Beli API Key Bulk (Rp 5.000)
                 </button>
             </div>
 
             <div id="bulkLoading" class="hidden text-center py-6 space-y-2">
                 <div class="inline-block w-7 h-7 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
-                <p id="loadingText" class="text-xs text-purple-400 animate-pulse font-medium">Sedang memproses akun, mohon tunggu...</p>
+                <p id="loadingText" class="text-xs text-purple-400 animate-pulse font-bold">Sedang memproses akun, mohon tunggu...</p>
             </div>
 
             <!-- HASIL BULK -->
-            <div id="resultBoxBulk" class="hidden space-y-3 bg-[#0d0f12] border border-purple-500/30 rounded-2xl p-4">
-                <div class="flex items-center justify-between border-b border-[#232936] pb-2 text-xs">
+            <div id="resultBoxBulk" class="hidden space-y-3 bg-[#080a0f] border border-purple-500/30 rounded-2xl p-4 shadow-inner">
+                <div class="flex items-center justify-between border-b border-[#222c42] pb-2 text-xs">
                     <span class="text-purple-400 font-bold">🎉 AM Bulk Berhasil Digenerate!</span>
                     <span id="bulkOwnerInfo" class="text-slate-400 text-[10px]"></span>
                 </div>
 
-                <button onclick="downloadBulkResults()" class="w-full bg-[#1e2330] hover:bg-[#2b3344] text-purple-300 border border-purple-500/30 font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center space-x-2 cursor-pointer shadow">
-                    <span>📥 Download Data (filename.txt)</span>
+                <button onclick="downloadBulkResults()" class="w-full bg-[#141a26] hover:bg-[#1d2638] text-purple-300 border border-purple-500/30 font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center space-x-2 cursor-pointer shadow">
+                    <span>📥 Download Data (.txt)</span>
                 </button>
 
                 <div id="bulkResultsList" class="space-y-2 max-h-80 overflow-y-auto pr-1"></div>
             </div>
         </div>
 
-        <div class="pt-2 text-center text-[11px] text-slate-400">
-            <span>ReyCloudSHP Activation Engine</span>
+        <!-- Footer Copyright -->
+        <div class="text-center pt-2 pb-4">
+            <span class="text-[10px] font-semibold text-slate-500 tracking-wider">© 2026 ReyCloudSHP • All Rights Reserved</span>
         </div>
 
     </div>
 
     <!-- MODERN CUSTOM MODAL NOTIFIKASI UMUM -->
-    <div id="customModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div id="customModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card border border-white/10 rounded-2xl p-5 max-w-xs w-full space-y-3.5 shadow-2xl text-center">
             <div id="modalIcon" class="mx-auto w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-lg">⚠️</div>
             <div class="space-y-1">
                 <h3 id="modalTitle" class="text-xs font-black text-white uppercase tracking-wider">Pemberitahuan Sistem</h3>
                 <p id="modalMessage" class="text-[11px] text-slate-300 leading-relaxed"></p>
             </div>
-            <button onclick="closeModal()" class="w-full bg-[#1e2535] hover:bg-[#2f3b52] text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow cursor-pointer">
+            <button onclick="closeModal()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 font-black py-2.5 rounded-xl text-xs transition-all shadow-md cursor-pointer">
                 Mengerti
             </button>
         </div>
     </div>
 
     <!-- MODAL POPUP QRIS -->
-    <div id="qrisModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-[#151922] border border-[#232936] rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl relative">
-            <div class="flex items-center justify-between border-b border-[#232936] pb-3">
+    <div id="qrisModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card border border-white/10 rounded-2xl p-5 max-w-sm w-full space-y-4 shadow-2xl relative">
+            <div class="flex items-center justify-between border-b border-[#222c42] pb-3">
                 <div class="flex items-center space-x-2">
-                    <span class="text-lg">💎</span>
-                    <h3 class="text-sm font-bold text-white">Upgrade API Key Bulk</h3>
+                    <span class="text-base">💎</span>
+                    <h3 class="text-xs font-black text-white uppercase tracking-wider">Upgrade API Key Bulk</h3>
                 </div>
-                <button onclick="closeQrisModal()" class="text-slate-400 hover:text-white text-xs font-bold px-2 py-1 rounded-lg bg-[#1e2330] cursor-pointer">✕ Tutup</button>
+                <button onclick="closeQrisModal()" class="text-slate-400 hover:text-white text-xs font-bold px-2.5 py-1 rounded-lg bg-[#141a26] cursor-pointer">✕</button>
             </div>
 
-            <div class="text-center space-y-2">
-                <p id="qrisErrorMsg" class="text-xs text-amber-400 font-medium bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl"></p>
+            <div class="text-center space-y-2.5">
+                <p id="qrisErrorMsg" class="text-[11px] text-amber-400 font-medium bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl leading-relaxed"></p>
                 <p class="text-[11px] text-slate-400">Silakan scan QRIS di bawah ini untuk berlangganan sebesar <b class="text-white">Rp 5.000/bulan</b>:</p>
                 
-                <div class="bg-white p-3 rounded-xl inline-block shadow-inner">
-                    <img id="qrisImage" src="" alt="QRIS Payment" class="w-48 h-48 mx-auto object-contain rounded-lg">
+                <div class="bg-white p-2.5 rounded-xl inline-block shadow-inner border border-[#222c42]">
+                    <img id="qrisImage" src="" alt="QRIS Payment" class="w-44 h-44 mx-auto object-contain rounded-lg">
                 </div>
                 
-                <div class="text-[10px] text-slate-400 font-mono">Jika Qris Ga Muncul Silahkan Pakai Jalur Donasi</div>
+                <div class="text-[10px] text-slate-400 font-mono">Gunakan QRIS / Dompet Digital apa saja</div>
             </div>
 
-            <div class="pt-2 space-y-2">
-                <a href="https://mustikapayment.com/l/apikey-bulk" target="_blank" class="block bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl text-xs text-center transition-all shadow">
+            <div class="pt-1 space-y-2">
+                <a href="https://mustikapayment.com/l/apikey-bulk" target="_blank" class="block bg-purple-600 hover:bg-purple-500 text-white font-black py-3 rounded-xl text-xs text-center transition-all shadow-md">
                     🔗 Buka Link Pembayaran Resmi Mustika
                 </a>
                 <a href="https://wa.me/6281260512743?text=Halo%2520Admin,%2520saya%2520sudah%2520melakukan%2520pembayaran%2520untuk%2520pembelian%2520API%2520Key%2520Bulk.%2520Berikut%2520saya%2520lampirkan%2520bukti%2520pembayarannya.%2520Mohon%2520bantuannya,%2520terima%2520kasih." 
                    target="_blank" 
-                   style="display: block; background-color: #25d366; color: white; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 12px; text-align: center; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);">
+                   class="block bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl text-xs text-center transition-all shadow-md">
                     💬 Konfirmasi Bukti Bayar ke Admin
                 </a>
             </div>
@@ -361,22 +378,22 @@
             const secAuto = document.getElementById('sectionAuto');
             const secBulk = document.getElementById('sectionBulk');
 
-            btnManual.className = "py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
-            btnAuto.className = "py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
-            btnBulk.className = "py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
+            btnManual.className = "py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+            btnAuto.className = "py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+            btnBulk.className = "py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5";
 
             secManual.classList.add('hidden');
             secAuto.classList.add('hidden');
             secBulk.classList.add('hidden');
 
             if (method === 'manual') {
-                btnManual.className = "py-2.5 rounded-xl text-xs font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
+                btnManual.className = "py-2.5 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center space-x-1.5";
                 secManual.classList.remove('hidden');
             } else if (method === 'auto') {
-                btnAuto.className = "py-2.5 rounded-xl text-xs font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
+                btnAuto.className = "py-2.5 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center space-x-1.5";
                 secAuto.classList.remove('hidden');
             } else if (method === 'bulk') {
-                btnBulk.className = "py-2.5 rounded-xl text-xs font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
+                btnBulk.className = "py-2.5 rounded-xl text-xs font-bold bg-purple-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center space-x-1.5";
                 secBulk.classList.remove('hidden');
             }
         }
@@ -403,7 +420,6 @@
             document.getElementById('qrisModal').classList.add('hidden');
         }
 
-        // --- Cek Status API Key Secara Real-time ---
         async function checkApiKeyLive() {
             const apikey = document.getElementById('bulkApiKeyInput').value.trim();
             const statusNotice = document.getElementById('keyStatusNotice');
@@ -412,7 +428,7 @@
 
             if (!apikey) {
                 statusNotice.innerHTML = '<span>⚠️</span><span>Fitur terkunci. Masukkan API Key aktif untuk membuka akses.</span>';
-                statusNotice.className = 'text-[11px] font-medium text-amber-400 flex items-center space-x-1.5 pt-1';
+                statusNotice.className = 'text-[11px] font-bold text-amber-400 flex items-center space-x-1.5 pt-1';
                 controlPanel.classList.add('opacity-40', 'pointer-events-none');
                 lockedMsg.classList.remove('hidden');
                 return;
@@ -424,13 +440,13 @@
 
                 if (data.status && data.data?.status === 'active') {
                     statusNotice.innerHTML = `<span>🎉</span><span class="text-emerald-400">API Key Aktif! Owner: <b>${data.data.owner}</b></span>`;
-                    statusNotice.className = 'text-[11px] font-medium text-emerald-400 flex items-center space-x-1.5 pt-1';
+                    statusNotice.className = 'text-[11px] font-bold text-emerald-400 flex items-center space-x-1.5 pt-1';
                     
                     controlPanel.classList.remove('opacity-40', 'pointer-events-none');
                     lockedMsg.classList.add('hidden');
                 } else {
                     statusNotice.innerHTML = `<span>❌</span><span class="text-rose-400">API Key tidak valid atau sudah kadaluarsa.</span>`;
-                    statusNotice.className = 'text-[11px] font-medium text-rose-400 flex items-center space-x-1.5 pt-1';
+                    statusNotice.className = 'text-[11px] font-bold text-rose-400 flex items-center space-x-1.5 pt-1';
                     
                     controlPanel.classList.add('opacity-40', 'pointer-events-none');
                     lockedMsg.classList.remove('hidden');
@@ -612,7 +628,7 @@
                     bulkResultsList.innerHTML = '';
                     data.results.forEach((acc, index) => {
                         const itemDiv = document.createElement('div');
-                        itemDiv.className = "bg-[#151922] border border-[#232936] rounded-xl p-2.5 text-xs font-mono space-y-1";
+                        itemDiv.className = "bg-[#080a0f] border border-[#222c42] rounded-xl p-2.5 text-xs font-mono space-y-1";
                         
                         if (acc.success) {
                             itemDiv.innerHTML = `
