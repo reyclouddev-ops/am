@@ -1558,6 +1558,45 @@ app.post('/api/auth/change-password', async (req, res) => {
     }
 });
 
+// Endpoint untuk mengambil data profil & status API Key user yang sedang login
+app.get('/api/user/profile', async (req, res) => {
+    try {
+        // Sesuaikan cara kamu mendeteksi user yang login (misal via session, cookies, atau query parameter ?username=...)
+        // Contoh jika menggunakan session / query:
+        const username = req.session?.user?.username || req.query.username;
+
+        if (!username) {
+            return res.status(401).json({ status: false, error: 'Unauthorized: Silakan login terlebih dahulu' });
+        }
+
+        // Cari data user di database MongoDB (sesuaikan nama Model user kamu, misal User)
+        // const userData = await User.findOne({ username: username });
+        
+        // Cari API Key yang dimiliki oleh user ini di database (sesuaikan nama Model API Key kamu, misal ApiKey)
+        const userApiKey = await ApiKey.findOne({ owner: username, status: 'active' }); // atau sesuaikan field pencariannya
+
+        if (!userApiKey) {
+            return res.status(200).json({
+                status: true,
+                hasKey: false,
+                message: 'Belum berlangganan API Key Bulk'
+            });
+        }
+
+        return res.status(200).json({
+            status: true,
+            hasKey: true,
+            apiKey: userApiKey.key, // atau field key yang kamu simpan
+            expiredAt: userApiKey.expiredAt
+        });
+
+    } catch (err) {
+        console.error('[PROFILE API ERROR]', err);
+        return res.status(500).json({ status: false, error: 'Internal server error' });
+    }
+});
+
+
 // ==========================================
 // 5. ADMIN & USER VERIFICATION HELPERS
 // ==========================================
