@@ -1558,22 +1558,18 @@ app.post('/api/auth/change-password', async (req, res) => {
     }
 });
 
-// Endpoint untuk mengambil data profil & status API Key user yang sedang login
+// Endpoint untuk mengambil data profil & status API Key user yang sedang login (Diperbaiki)
 app.get('/api/user/profile', async (req, res) => {
     try {
-        // Sesuaikan cara kamu mendeteksi user yang login (misal via session, cookies, atau query parameter ?username=...)
-        // Contoh jika menggunakan session / query:
+        await connectDB();
         const username = req.session?.user?.username || req.query.username;
 
         if (!username) {
             return res.status(401).json({ status: false, error: 'Unauthorized: Silakan login terlebih dahulu' });
         }
 
-        // Cari data user di database MongoDB (sesuaikan nama Model user kamu, misal User)
-        // const userData = await User.findOne({ username: username });
-        
-        // Cari API Key yang dimiliki oleh user ini di database (sesuaikan nama Model API Key kamu, misal ApiKey)
-        const userApiKey = await ApiKey.findOne({ owner: username, status: 'active' }); // atau sesuaikan field pencariannya
+        // Cari API Key yang dimiliki oleh user ini berdasarkan field 'owner'
+        const userApiKey = await ApiKey.findOne({ owner: username.toLowerCase(), status: 'active' });
 
         if (!userApiKey) {
             return res.status(200).json({
@@ -1586,8 +1582,8 @@ app.get('/api/user/profile', async (req, res) => {
         return res.status(200).json({
             status: true,
             hasKey: true,
-            apiKey: userApiKey.key, // atau field key yang kamu simpan
-            expiredAt: userApiKey.expiredAt
+            apiKey: userApiKey.apikey,       // Mengambil dari field 'apikey' di database
+            expiredAt: userApiKey.expired_at // Mengambil dari field 'expired_at' di database
         });
 
     } catch (err) {
@@ -1595,7 +1591,6 @@ app.get('/api/user/profile', async (req, res) => {
         return res.status(500).json({ status: false, error: 'Internal server error' });
     }
 });
-
 
 // ==========================================
 // 5. ADMIN & USER VERIFICATION HELPERS
