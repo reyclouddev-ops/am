@@ -45,15 +45,15 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 <div class="relative">
-                    <div id="navIconGlow" class="absolute -inset-1 bg-gradient-to-r from-amber-500 to-rose-500 rounded-2xl blur opacity-75 animate-pulse"></div>
-                    <div id="navIconBox" class="relative bg-cardbg p-3 rounded-2xl border border-gray-700 text-amber-400 flex items-center justify-center">
-                        <i id="navIcon" class="fa-solid fa-screwdriver-wrench text-xl"></i>
+                    <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-2xl blur opacity-75"></div>
+                    <div class="relative bg-cardbg p-3 rounded-2xl border border-gray-700 text-emerald-400 flex items-center justify-center">
+                        <i class="fa-solid fa-bolt text-xl"></i>
                     </div>
                 </div>
                 <div>
                     <div class="flex items-center space-x-2">
                         <span class="font-extrabold text-lg tracking-tight text-white">ReactWA & <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Bypass</span></span>
-                        <span id="navStatusBadge" class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Maintenance</span>
+                        <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Validated</span>
                     </div>
                     <p class="text-xs text-gray-400">WhatsApp Channel Reaction & Link Skipper Suite</p>
                 </div>
@@ -70,142 +70,87 @@
     <!-- Main Container -->
     <main class="max-w-5xl mx-auto px-4 py-12 flex-grow w-full">
         
-        <!-- ========================================== -->
-        <!-- VIEW 1: HALAMAN MAINTENANCE & COUNTDOWN    -->
-        <!-- ========================================== -->
-        <div id="maintenanceView" class="max-w-3xl mx-auto py-8">
-            <div class="bg-cardbg border border-cardborder rounded-3xl p-8 sm:p-12 shadow-glow w-full text-center relative overflow-hidden">
-                <div class="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <!-- Hero Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center space-x-2 bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-indigo-500/10 border border-emerald-500/20 px-4 py-1.5 rounded-full text-xs font-semibold text-emerald-300 mb-4 shadow-inner">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Strict URL Validation Engine Online</span>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
+                WhatsApp Reaction & <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400">Link Skipper</span>
+            </h1>
+            <p class="text-gray-400 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+                Wajib memasukkan URL Channel WhatsApp yang valid. Maksimal 4 emoji. Jika format salah, eksekusi dibatalkan dan terkena cooldown 1 menit.
+            </p>
+        </div>
 
-                <div class="relative z-10 space-y-6">
-                    <div class="w-20 h-20 mx-auto rounded-3xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-3xl shadow-inner animate-bounce">
-                        <i class="fa-solid fa-gear fa-spin" style="animation-duration: 6s;"></i>
-                    </div>
+        <!-- Automation Console Card -->
+        <div class="bg-cardbg border border-cardborder rounded-3xl p-6 sm:p-10 shadow-glow mb-10 relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                    <div class="space-y-2">
-                        <div class="inline-flex items-center space-x-2 bg-amber-500/10 border border-amber-500/20 px-4 py-1.5 rounded-full text-xs font-semibold text-amber-300">
-                            <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-                            <span>System Upgrade & Optimization</span>
-                        </div>
-                        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                            Sedang Dalam Pemeliharaan
-                        </h1>
-                        <p class="text-gray-400 max-w-md mx-auto text-sm sm:text-base leading-relaxed">
-                            Engine Cloudflare Worker dan solver sedang di-upgrade. Sistem akan otomatis dibuka pada pukul <strong class="text-white">23:35</strong>.
-                        </p>
-                    </div>
-
-                    <!-- Countdown Box -->
-                    <div class="bg-[#07090e] border border-gray-800 rounded-2xl p-5 text-center font-mono space-y-2 max-w-md mx-auto">
-                        <div class="text-xs uppercase tracking-wider text-gray-400 mb-1">Sisa Waktu Menuju Pembukaan Sistem:</div>
-                        <div id="countdownTimer" class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-rose-400">
-                            00:00:00
+            <form id="automationForm" onsubmit="handleExecute(event)" class="space-y-6 relative z-10">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Target URL Channel WhatsApp</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500"><i class="fa-brands fa-whatsapp"></i></span>
+                            <input type="text" id="targetUrlInput" required placeholder="https://whatsapp.com/channel/..." class="w-full bg-[#07090e] border border-gray-800 rounded-2xl pl-11 pr-4 py-3.5 text-white focus:outline-none focus:border-emerald-500 transition text-sm font-mono">
                         </div>
                     </div>
-
-                    <!-- Progress Box -->
-                    <div class="bg-[#07090e] border border-gray-800 rounded-2xl p-5 text-left font-mono text-xs space-y-2 max-w-md mx-auto">
-                        <div class="flex items-center justify-between text-gray-400">
-                            <span>Status Engine:</span>
-                            <span class="text-amber-400 font-bold">UPGRADING...</span>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Emoji Reaction (Maksimal 4 Emoji)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500"><i class="fa-solid fa-face-smile"></i></span>
+                            <input type="text" id="emojisInput" value="👍" placeholder="👍, 🔥, ❤️, 👏" class="w-full bg-[#07090e] border border-gray-800 rounded-2xl pl-11 pr-4 py-3.5 text-white focus:outline-none focus:border-emerald-500 transition text-sm">
                         </div>
-                        <div class="flex items-center justify-between text-gray-400">
-                            <span>Target Buka:</span>
-                            <span class="text-emerald-400 font-bold">23:35 WIB</span>
-                        </div>
-                        <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden mt-3">
-                            <div id="progressBar" class="bg-gradient-to-r from-amber-500 to-rose-500 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
+                        <!-- Quick Emoji Picker Buttons -->
+                        <div class="flex flex-wrap gap-1.5 mt-2.5">
+                            <button type="button" onclick="addEmoji('👍')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">👍</button>
+                            <button type="button" onclick="addEmoji('❤️')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">❤️</button>
+                            <button type="button" onclick="addEmoji('🔥')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">🔥</button>
+                            <button type="button" onclick="addEmoji('😂')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">😂</button>
+                            <button type="button" onclick="addEmoji('😮')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">😮</button>
+                            <button type="button" onclick="addEmoji('😢')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">😢</button>
+                            <button type="button" onclick="addEmoji('🙏')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">🙏</button>
+                            <button type="button" onclick="addEmoji('👏')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">👏</button>
                         </div>
                     </div>
                 </div>
+
+                <!-- Pengaturan Proxy Opsional -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2 border-t border-gray-800/60">
+                    <div class="flex items-center space-x-3 pt-2">
+                        <input type="checkbox" id="useProxyCheck" class="w-5 h-5 rounded bg-[#07090e] border-gray-800 text-emerald-500 focus:ring-emerald-500">
+                        <label for="useProxyCheck" class="text-sm text-gray-300 font-medium cursor-pointer">Gunakan ProxyScrape Pool Otomatis</label>
+                    </div>
+                    <div>
+                        <input type="text" id="manualProxyInput" placeholder="Custom Proxy (host:port) Opsional" class="w-full bg-[#07090e] border border-gray-800 rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-emerald-500 transition text-sm font-mono">
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 text-white font-extrabold py-4 px-6 rounded-2xl transition-all duration-300 transform active:scale-[0.99] shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-3 text-base cursor-pointer">
+                    <i class="fa-solid fa-bolt" id="btnIcon"></i>
+                    <span id="btnText">EXECUTE NOW</span>
+                </button>
+            </form>
+
+            <!-- Live Terminal Logs -->
+            <div id="logsContainer" class="hidden mt-8 bg-[#040609] border border-gray-800/80 rounded-2xl p-5 font-mono text-xs text-emerald-400 max-h-52 overflow-y-auto space-y-1.5 shadow-inner">
+                <div class="text-gray-500">// Menunggu instruksi eksekusi engine...</div>
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VIEW 2: HALAMAN UTAMA EXECUTE (TERSEMBUNYI) -->
-        <!-- ========================================== -->
-        <div id="appView" class="hidden animate-fadeIn">
-            <!-- Hero Header -->
-            <div class="text-center mb-12">
-                <div class="inline-flex items-center space-x-2 bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-indigo-500/10 border border-emerald-500/20 px-4 py-1.5 rounded-full text-xs font-semibold text-emerald-300 mb-4 shadow-inner">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Strict URL Validation Engine Online</span>
-                </div>
-                <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
-                    WhatsApp Reaction & <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400">Link Skipper</span>
-                </h1>
-                <p class="text-gray-400 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-                    Wajib memasukkan URL Channel WhatsApp yang valid. Maksimal 4 emoji. Jika format salah, eksekusi dibatalkan dan terkena cooldown 1 menit.
-                </p>
+        <!-- Result Container -->
+        <div id="resultBox" class="hidden space-y-6 mb-12 animate-fadeIn">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+                <h2 class="text-xl font-extrabold text-white flex items-center tracking-tight">
+                    <i class="fa-solid fa-circle-check text-cyan-400 mr-2.5"></i> Hasil Eksekusi <span class="text-emerald-400 ml-1.5" id="resProviderName">Success</span>
+                </h2>
+                <span class="text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full font-mono">Completed</span>
             </div>
-
-            <!-- Automation Console Card -->
-            <div class="bg-cardbg border border-cardborder rounded-3xl p-6 sm:p-10 shadow-glow mb-10 relative overflow-hidden">
-                <div class="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-                <form id="automationForm" onsubmit="handleExecute(event)" class="space-y-6 relative z-10">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Target URL Channel WhatsApp</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500"><i class="fa-brands fa-whatsapp"></i></span>
-                                <input type="text" id="targetUrlInput" required placeholder="https://whatsapp.com/channel/..." class="w-full bg-[#07090e] border border-gray-800 rounded-2xl pl-11 pr-4 py-3.5 text-white focus:outline-none focus:border-emerald-500 transition text-sm font-mono">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Emoji Reaction (Maksimal 4 Emoji)</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500"><i class="fa-solid fa-face-smile"></i></span>
-                                <input type="text" id="emojisInput" value="👍" placeholder="👍, 🔥, ❤️, 👏" class="w-full bg-[#07090e] border border-gray-800 rounded-2xl pl-11 pr-4 py-3.5 text-white focus:outline-none focus:border-emerald-500 transition text-sm">
-                            </div>
-                            <!-- Quick Emoji Picker -->
-                            <div class="flex flex-wrap gap-1.5 mt-2.5">
-                                <button type="button" onclick="addEmoji('👍')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">👍</button>
-                                <button type="button" onclick="addEmoji('❤️')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">❤️</button>
-                                <button type="button" onclick="addEmoji('🔥')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">🔥</button>
-                                <button type="button" onclick="addEmoji('😂')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">😂</button>
-                                <button type="button" onclick="addEmoji('😮')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">😮</button>
-                                <button type="button" onclick="addEmoji('😢')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">😢</button>
-                                <button type="button" onclick="addEmoji('🙏')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">🙏</button>
-                                <button type="button" onclick="addEmoji('👏')" class="px-2.5 py-1 bg-[#07090e] hover:bg-emerald-500/20 border border-gray-800 hover:border-emerald-500/50 rounded-xl text-xs transition">👏</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Proxy Settings -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2 border-t border-gray-800/60">
-                        <div class="flex items-center space-x-3 pt-2">
-                            <input type="checkbox" id="useProxyCheck" class="w-5 h-5 rounded bg-[#07090e] border-gray-800 text-emerald-500 focus:ring-emerald-500">
-                            <label for="useProxyCheck" class="text-sm text-gray-300 font-medium cursor-pointer">Gunakan ProxyScrape Pool Otomatis</label>
-                        </div>
-                        <div>
-                            <input type="text" id="manualProxyInput" placeholder="Custom Proxy (host:port) Opsional" class="w-full bg-[#07090e] border border-gray-800 rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-emerald-500 transition text-sm font-mono">
-                        </div>
-                    </div>
-
-                    <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 text-white font-extrabold py-4 px-6 rounded-2xl transition-all duration-300 transform active:scale-[0.99] shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-3 text-base cursor-pointer">
-                        <i class="fa-solid fa-bolt" id="btnIcon"></i>
-                        <span id="btnText">EXECUTE NOW</span>
-                    </button>
-                </form>
-
-                <!-- Terminal Logs -->
-                <div id="logsContainer" class="hidden mt-8 bg-[#040609] border border-gray-800/80 rounded-2xl p-5 font-mono text-xs text-emerald-400 max-h-52 overflow-y-auto space-y-1.5 shadow-inner">
-                    <div class="text-gray-500">// Menunggu instruksi eksekusi engine...</div>
-                </div>
-            </div>
-
-            <!-- Result Container -->
-            <div id="resultBox" class="hidden space-y-6 mb-12 animate-fadeIn">
-                <div class="flex items-center justify-between border-b border-gray-800 pb-4">
-                    <h2 class="text-xl font-extrabold text-white flex items-center tracking-tight">
-                        <i class="fa-solid fa-circle-check text-cyan-400 mr-2.5"></i> Hasil Eksekusi <span class="text-emerald-400 ml-1.5" id="resProviderName">Success</span>
-                    </h2>
-                    <span class="text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full font-mono">Completed</span>
-                </div>
-                <div id="resultCard" class="bg-[#07090e] border border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl"></div>
+            <div id="resultCard" class="bg-[#07090e] border border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
+                <!-- Result Content injected via JS -->
             </div>
         </div>
 
@@ -223,61 +168,10 @@
         </div>
     </footer>
 
-    <!-- Script Countdown Target 23:35 & Eksekusi Utama -->
+    <!-- Script Interaksi Professional & Eksekusi API -->
     <script>
         let cooldownTimer = null;
 
-        // Target waktu buka: Pukul 23:35 WIB hari ini
-        function getTargetTime() {
-            const now = new Date();
-            const target = new Date();
-            target.setHours(23, 35, 0, 0);
-
-            if (now.getTime() > target.getTime()) {
-                // Jika sudah lewat jam 23:35 hari ini, set ke esok hari
-                target.setDate(target.getDate() + 1);
-            }
-            return target.getTime();
-        }
-
-        const targetTime = getTargetTime();
-        const totalDuration = targetTime - new Date().getTime();
-
-        const countdownInterval = setInterval(() => {
-            const now = new Date().getTime();
-            const distance = targetTime - now;
-
-            if (distance <= 0) {
-                clearInterval(countdownInterval);
-                // Beralih otomatis ke halaman aplikasi utama
-                document.getElementById('maintenanceView').classList.add('hidden');
-                document.getElementById('appView').classList.remove('hidden');
-                
-                // Ubah status Navbar jadi Validated/Online
-                document.getElementById('navIconGlow').className = 'absolute -inset-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-2xl blur opacity-75';
-                document.getElementById('navIconBox').className = 'relative bg-cardbg p-3 rounded-2xl border border-gray-700 text-emerald-400 flex items-center justify-center';
-                document.getElementById('navIcon').className = 'fa-solid fa-bolt text-xl';
-                document.getElementById('navStatusBadge').className = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider';
-                document.getElementById('navStatusBadge').textContent = 'Validated';
-                return;
-            }
-
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            document.getElementById('countdownTimer').innerHTML = 
-                String(hours).padStart(2, '0') + ':' + 
-                String(minutes).padStart(2, '0') + ':' + 
-                String(seconds).padStart(2, '0');
-
-            const elapsed = totalDuration - distance;
-            const percentage = Math.min(Math.max((elapsed / totalDuration) * 100, 0), 100);
-            document.getElementById('progressBar').style.width = percentage + '%';
-
-        }, 1000);
-
-        // --- Fitur Emoji Picker ---
         function addEmoji(emoji) {
             const input = document.getElementById('emojisInput');
             let currentVal = input.value.trim();
@@ -305,7 +199,6 @@
             input.value = currentVal + ', ' + emoji;
         }
 
-        // --- Cooldown Handler ---
         function triggerCooldown(seconds) {
             const btn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
@@ -333,7 +226,6 @@
             }, 1000);
         }
 
-        // --- Tombol Execute Handler ---
         async function handleExecute(e) {
             e.preventDefault();
             const url = document.getElementById('targetUrlInput').value.trim();
