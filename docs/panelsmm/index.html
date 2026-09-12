@@ -24,7 +24,7 @@
         }
     </style>
 </head>
-<body id="pageBody" class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 relative overflow-x-hidden bg-[#08090c] text-[#f8fafc]" style="font-family: system-ui, -apple-system, sans-serif;">
+<body id="pageBody" class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 relative bg-[#08090c] text-[#f8fafc]" style="font-family: system-ui, -apple-system, sans-serif;">
 
     <!-- Ambient Glow Background -->
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[180px] bg-amber-500/15 blur-[120px] pointer-events-none rounded-full"></div>
@@ -45,7 +45,7 @@
                         <span class="font-black text-xs tracking-wider text-white">REY<span class="text-amber-400">CLOUD</span></span>
                         <span class="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase">Pro</span>
                     </div>
-                    <span class="text-[9px] tracking-widest text-slate-400 font-semibold uppercase">Panel SMM & OTP</span>
+                    <span class="text-[9px] tracking-widest text-slate-400 font-semibold uppercase">PANEL SMM & OTP</span>
                 </div>
             </div>
             
@@ -54,7 +54,7 @@
             </a>
         </div>
 
-        <!-- User Info & Balance Card (Username & Saldo) -->
+        <!-- User Info & Balance Card -->
         <div class="bg-gradient-to-br from-[#0e1117] to-[#141a25] border border-[#1e2637] rounded-2xl p-4 shadow-2xl relative overflow-hidden">
             <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-500/5 blur-2xl rounded-full pointer-events-none"></div>
             <div class="flex items-center justify-between">
@@ -62,7 +62,6 @@
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Username</span>
                     <span id="uiUsername" class="text-xs font-bold text-white tracking-wide mt-0.5 block font-mono">Memuat...</span>
                 </div>
-                <!-- Tombol Deposit -->
                 <button onclick="openDepositModal()" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-[11px] rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center space-x-1.5 cursor-pointer">
                     <span>➕ Deposit</span>
                 </button>
@@ -73,8 +72,8 @@
             </div>
         </div>
 
-        <!-- Main Panel Container -->
-        <div class="bg-[#0e1117]/80 backdrop-blur-xl border border-[#1e2637] rounded-2xl p-4 shadow-2xl space-y-4">
+        <!-- Main Panel Container (PERHATIKAN: overflow-visible agar dropdown tidak terpotong) -->
+        <div class="bg-[#0e1117]/90 backdrop-blur-xl border border-[#1e2637] rounded-2xl p-4 shadow-2xl space-y-4 overflow-visible">
             
             <!-- Tab Navigation Menu -->
             <div class="grid grid-cols-2 gap-2 bg-[#07080b] p-1 rounded-xl border border-[#1e2637]">
@@ -86,29 +85,31 @@
                 </button>
             </div>
 
-            <!-- Tab 1: Pesan Nomor OTP (100% Custom Modern UI Tanpa Select Browser) -->
-            <div id="tabOrder" class="space-y-3">
+            <!-- Tab 1: Pesan Nomor OTP -->
+            <div id="tabOrder" class="space-y-3 overflow-visible">
                 
                 <!-- Custom Dropdown Layanan -->
-                <div class="space-y-1 relative">
+                <div class="space-y-1 relative overflow-visible">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pilih Layanan Aplikasi</label>
                     <div onclick="toggleDropdown('serviceDropdownList')" id="serviceDropdownBtn" class="w-full bg-[#07080b] border border-[#1e2637] hover:border-amber-400/50 rounded-xl px-3 py-2.5 text-xs text-slate-300 flex items-center justify-between cursor-pointer transition-all">
                         <span id="serviceSelectedText">-- Pilih Layanan Aplikasi --</span>
                         <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </div>
-                    <div id="serviceDropdownList" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#0a0d12] border border-[#1e2637] rounded-xl max-h-48 overflow-y-auto z-30 shadow-2xl p-1 space-y-0.5">
-                        <!-- Diisi via JS -->
+                    <!-- Dropdown List dengan z-50 agar tampil di atas elemen lain -->
+                    <div id="serviceDropdownList" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#0a0d12] border border-[#232f46] rounded-xl max-h-56 overflow-y-auto z-50 shadow-2xl p-1 space-y-0.5">
+                        <div class="p-2 text-xs text-slate-500 text-center">Memuat layanan...</div>
                     </div>
                 </div>
 
                 <!-- Custom Dropdown Negara -->
-                <div class="space-y-1 relative">
+                <div class="space-y-1 relative overflow-visible">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pilih Negara & Harga</label>
                     <div onclick="toggleDropdown('countryDropdownList')" id="countryDropdownBtn" class="w-full bg-[#07080b] border border-[#1e2637] hover:border-amber-400/50 rounded-xl px-3 py-2.5 text-xs text-slate-300 flex items-center justify-between cursor-pointer transition-all">
                         <span id="countrySelectedText">-- Pilih Negara --</span>
                         <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </div>
-                    <div id="countryDropdownList" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#0a0d12] border border-[#1e2637] rounded-xl max-h-48 overflow-y-auto z-30 shadow-2xl p-1 space-y-0.5">
+                    <!-- Dropdown List dengan z-50 agar tampil di atas elemen lain -->
+                    <div id="countryDropdownList" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#0a0d12] border border-[#232f46] rounded-xl max-h-56 overflow-y-auto z-50 shadow-2xl p-1 space-y-0.5">
                         <div class="p-2 text-xs text-slate-500 text-center">Pilih layanan terlebih dahulu</div>
                     </div>
                 </div>
@@ -289,7 +290,6 @@
             sessionStorage.setItem('reycloud_active_user', currentUsername);
             document.getElementById('uiUsername').textContent = currentUsername;
 
-            // Lampirkan parameter ?user=... ke tombol kembali / home menu
             document.getElementById('homeMenuLink').setAttribute('href', `/dashboard?user=${encodeURIComponent(currentUsername)}`);
 
             await fetchUserProfileAndBalance();
@@ -337,7 +337,7 @@
                     
                     json.data.forEach(s => {
                         const item = document.createElement('div');
-                        item.className = "px-3 py-2 text-xs text-slate-300 hover:bg-amber-500/10 hover:text-amber-400 rounded-lg cursor-pointer transition-colors flex items-center justify-between";
+                        item.className = "px-3 py-2.5 text-xs text-slate-200 hover:bg-amber-500/20 hover:text-amber-400 rounded-lg cursor-pointer transition-colors flex items-center justify-between";
                         item.innerHTML = `<span>${s.service_name}</span>`;
                         item.onclick = () => {
                             selectedServiceCode = s.service_code;
@@ -355,22 +355,25 @@
                 }
             } catch (err) {
                 console.error('Gagal load services:', err);
+                document.getElementById('serviceDropdownList').innerHTML = '<div class="p-2 text-xs text-rose-400 text-center">Gagal memuat layanan</div>';
             }
         }
 
         async function loadCountries(serviceId) {
             if (!serviceId) return;
             try {
+                const listContainer = document.getElementById('countryDropdownList');
+                listContainer.innerHTML = '<div class="p-2 text-xs text-slate-400 text-center">Memuat negara...</div>';
+
                 const res = await fetch(`/api/otp/countries?service_id=${serviceId}&user=${encodeURIComponent(currentUsername)}`);
                 const json = await res.json();
                 if (json.success && json.data) {
-                    const listContainer = document.getElementById('countryDropdownList');
                     listContainer.innerHTML = '';
 
                     json.data.forEach(c => {
                         const priceInfo = c.pricelist && c.pricelist[0] ? c.pricelist[0].price_format : '';
                         const item = document.createElement('div');
-                        item.className = "px-3 py-2 text-xs text-slate-300 hover:bg-amber-500/10 hover:text-amber-400 rounded-lg cursor-pointer transition-colors flex items-center justify-between";
+                        item.className = "px-3 py-2.5 text-xs text-slate-200 hover:bg-amber-500/20 hover:text-amber-400 rounded-lg cursor-pointer transition-colors flex items-center justify-between";
                         item.innerHTML = `<span>${c.name}</span> <span class="font-mono font-bold text-amber-400">${priceInfo}</span>`;
                         item.onclick = () => {
                             selectedCountryJson = c;
