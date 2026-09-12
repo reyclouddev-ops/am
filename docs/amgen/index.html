@@ -213,7 +213,7 @@
                 </div>
                 <div>
                     <h2 class="text-xs font-black text-white tracking-wide uppercase">AM Bulk Activation Engine</h2>
-                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Masukkan API Key berbayar kamu untuk membuka akses fitur Bulk (Maksimal 10 Akun).</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Masukkan API Key berbayar milik Anda untuk membuka akses fitur Bulk (Maksimal 10 Akun).</p>
                 </div>
             </div>
 
@@ -228,7 +228,7 @@
                     </button>
                 </div>
                 <div id="keyStatusNotice" class="text-[11px] font-bold text-amber-400 flex items-center space-x-1.5 pt-1">
-                    <span>⚠️</span><span>Fitur terkunci. Masukkan API Key aktif untuk membuka akses.</span>
+                    <span>⚠️</span><span>Fitur terkunci. Masukkan API Key aktif milik Anda untuk membuka akses.</span>
                 </div>
             </div>
 
@@ -251,9 +251,9 @@
                 <div class="text-xl">🔒</div>
                 <div class="space-y-1">
                     <h3 class="text-xs font-black text-rose-400 uppercase tracking-wider">Fitur Bulk Terkunci</h3>
-                    <p class="text-[11px] text-slate-300">Anda memerlukan API Key Bulk aktif untuk menggunakan fitur generator massal ini.</p>
+                    <p class="text-[11px] text-slate-300">Anda memerlukan API Key Bulk aktif milik Anda sendiri untuk menggunakan fitur generator massal ini.</p>
                 </div>
-                <button onclick="showQrisModal('Akses Bulk memerlukan API Key Pro aktif. Silakan lakukan pembayaran QRIS untuk mendapatkan akses instan.')" 
+                <button onclick="showQrisModal('Akses Bulk memerlukan API Key Pro aktif milik akun Anda. Silakan lakukan pembayaran QRIS jika belum memilikinya.')" 
                     class="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 text-slate-950 font-black py-3 rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 cursor-pointer">
                     💎 Upgrade & Beli API Key Bulk (Rp 5.000)
                 </button>
@@ -420,14 +420,18 @@
             document.getElementById('qrisModal').classList.add('hidden');
         }
 
+        // --- Diperbarui: Mengirimkan parameter user aktif agar API Key terkunci dan tidak bisa dibajak ---
         async function checkApiKeyLive() {
             const apikey = document.getElementById('bulkApiKeyInput').value.trim();
             const statusNotice = document.getElementById('keyStatusNotice');
             const controlPanel = document.getElementById('bulkControlPanel');
             const lockedMsg = document.getElementById('bulkLockedMessage');
 
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeUser = urlParams.get('user') || sessionStorage.getItem('reycloud_active_user') || '';
+
             if (!apikey) {
-                statusNotice.innerHTML = '<span>⚠️</span><span>Fitur terkunci. Masukkan API Key aktif untuk membuka akses.</span>';
+                statusNotice.innerHTML = '<span>⚠️</span><span>Fitur terkunci. Masukkan API Key aktif milik Anda untuk membuka akses.</span>';
                 statusNotice.className = 'text-[11px] font-bold text-amber-400 flex items-center space-x-1.5 pt-1';
                 controlPanel.classList.add('opacity-40', 'pointer-events-none');
                 lockedMsg.classList.remove('hidden');
@@ -435,17 +439,17 @@
             }
 
             try {
-                const res = await fetch(`/api/apikey/check?apikey=${encodeURIComponent(apikey)}`);
+                const res = await fetch(`/api/apikey/check?apikey=${encodeURIComponent(apikey)}&user=${encodeURIComponent(activeUser)}`);
                 const data = await res.json();
 
                 if (data.status && data.data?.status === 'active') {
-                    statusNotice.innerHTML = `<span>🎉</span><span class="text-emerald-400">API Key Aktif! Owner: <b>${data.data.owner}</b></span>`;
+                    statusNotice.innerHTML = `<span>🎉</span><span class="text-emerald-400">API Key Aktif! Owner: <b>${data.data.owner}</b> (${data.data.remaining_days})</span>`;
                     statusNotice.className = 'text-[11px] font-bold text-emerald-400 flex items-center space-x-1.5 pt-1';
                     
                     controlPanel.classList.remove('opacity-40', 'pointer-events-none');
                     lockedMsg.classList.add('hidden');
                 } else {
-                    statusNotice.innerHTML = `<span>❌</span><span class="text-rose-400">API Key tidak valid atau sudah kadaluarsa.</span>`;
+                    statusNotice.innerHTML = `<span>❌</span><span class="text-rose-400">${data.error || 'API Key tidak valid atau bukan milik akun Anda.'}</span>`;
                     statusNotice.className = 'text-[11px] font-bold text-rose-400 flex items-center space-x-1.5 pt-1';
                     
                     controlPanel.classList.add('opacity-40', 'pointer-events-none');
@@ -465,7 +469,7 @@
             await checkApiKeyLive();
             const controlPanel = document.getElementById('bulkControlPanel');
             if (controlPanel.classList.contains('pointer-events-none')) {
-                showQrisModal('API Key yang Anda masukkan tidak aktif atau kedaluarsa.');
+                showQrisModal('API Key yang Anda masukkan tidak aktif, kedaluarsa, atau bukan milik akun Anda.');
             }
         }
 
@@ -651,7 +655,7 @@
                         bulkResultsList.appendChild(itemDiv);
                     });
                 } else {
-                    showQrisModal(data.error || 'API Key Bulk tidak valid atau sudah kadaluarsa.');
+                    showQrisModal(data.error || 'API Key Bulk tidak valid atau bukan milik Anda.');
                 }
             } catch (err) {
                 showModernModal('Kesalahan', 'Kesalahan koneksi: ' + err.message, 'error');

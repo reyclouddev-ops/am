@@ -335,7 +335,6 @@
                 const res = await fetch(`/api/otp/services?user=${encodeURIComponent(currentUsername)}`);
                 const json = await res.json();
                 
-                // Mendukung berbagai format struktur respons API (array langsung atau di dalam .data)
                 const servicesData = Array.isArray(json) ? json : (json.data || json.services || []);
 
                 if (servicesData.length > 0) {
@@ -438,10 +437,19 @@
                     document.getElementById('orderResultContainer').classList.remove('hidden');
                     fetchUserProfileAndBalance();
                 } else {
-                    showCustomAlert('Gagal Memesan', json.error || 'Stok habis / Saldo tidak cukup', 'error');
+                    // Penanganan aman agar error tidak tercetak [object Object]
+                    let errMessage = 'Stok habis / Saldo tidak cukup';
+                    if (json.error) {
+                        if (typeof json.error === 'object') {
+                            errMessage = json.error.message || json.error.error || JSON.stringify(json.error);
+                        } else {
+                            errMessage = json.error;
+                        }
+                    }
+                    showCustomAlert('Gagal Memesan', errMessage, 'error');
                 }
             } catch (err) {
-                showCustomAlert('Error', 'Terjadi kesalahan koneksi server.', 'error');
+                showCustomAlert('Error', 'Terjadi kesalahan koneksi server: ' + err.message, 'error');
             }
         }
 
@@ -527,7 +535,11 @@
 
                     depositInterval = setInterval(checkDepositStatusSilent, 5000);
                 } else {
-                    showCustomAlert('Gagal QRIS', json.error || 'Kesalahan sistem', 'error');
+                    let errMessage = 'Gagal membuat QRIS';
+                    if (json.error) {
+                        errMessage = typeof json.error === 'object' ? (json.error.message || JSON.stringify(json.error)) : json.error;
+                    }
+                    showCustomAlert('Gagal QRIS', errMessage, 'error');
                 }
             } catch (err) {
                 showCustomAlert('Error', 'Terjadi kesalahan koneksi.', 'error');
