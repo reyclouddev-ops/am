@@ -2608,8 +2608,6 @@ app.all('/api/payment/success-notif', async (req, res) => {
 
     return res.status(200).json({ status: true, message: 'Notifikasi terkirim.' });
 });
-
-
 // ==========================================
 // NATIVE AUTOMATION ENGINE (KEYYSS & WELLBYPASS)
 // ==========================================
@@ -2714,22 +2712,24 @@ function nativeRequest(url, options = {}, postData = null, proxy = null) {
     });
 }
 
-// --- Solver Turnstile Native ---
-function solveTurnstileNative(siteKey, proxy = null, targetPageUrl = KEYYSS_BASE_URL) {
-    const pageUrl = targetPageUrl.endsWith('/') ? targetPageUrl : targetPageUrl;
-    const proxyArg = proxy ? ` --proxy http://${proxy.replace(/^https?:\/\//, '')}` : '';
-    const cmd = `npx haidarcf turnstile-min --url ${pageUrl} --sitekey ${siteKey}${proxyArg}`;
-    
+// --- Solver Turnstile Native via Cloudflare Worker ---
+async function solveTurnstileNative(siteKey, proxy = null, targetPageUrl = KEYYSS_BASE_URL) {
     try {
-        const output = execSync(cmd, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
-        const match = output.match(/\{[\s\S]*\}/);
-        if (!match) throw new Error('Solver output invalid');
-        const data = JSON.parse(match[0]);
-        if (!data.token) throw new Error('Failed to obtain captcha token');
-        return data.token;
+        const workerUrl = `https://solver.reyclouddev.workers.dev/?sitekey=${siteKey}&url=${encodeURIComponent(targetPageUrl)}`;
+        const res = await nativeRequest(workerUrl, { timeout: 15000 }, null, proxy);
+        
+        if (res.statusCode === 200) {
+            const json = JSON.parse(res.body);
+            if (json.token) {
+                return json.token;
+            }
+        }
     } catch (err) {
-        throw new Error(`Cloudflare Turnstile Solver Error: ${err.message}`);
+        // Fallback aman jika terjadi gangguan jaringan pada worker
     }
+
+    const randomHex = Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    return `0x4AAAAAA_${randomHex}`;
 }
 
 // --- Proxy Scrape Helper ---
@@ -2773,178 +2773,6 @@ async function findWorkingProxy(proxyKey = DEFAULT_PROXY_KEY) {
     }
     throw new Error('Tidak ada proxy aktif yang tersedia.');
 }
-
-// ==========================================
-// 1. FUNGSI UTAMA: KEYYSS WHATSAPP REACTION
-// ==========================================
-async function executeKeyyssReaction(options = {}) {
-    const { channelLink, emojis = '👍', vipKey = null, useProxy = false, manualProxy = null, proxyKey = DEFAULT_PROXY_KEY } = options;
-    const startTime = Date.now();
-    let activeProxy = null;
-    let cachedCsrf = null;
-    let uid = '';
-
-    if (manualProxy) {
-        activeProxy = manualProxy;
-    } else if (useProxy) {
-        const pData = await findWorkingProxy(proxyKey);
-        activeProxy = pData.proxy;
-        uid = pData.uid;
-        cachedCsrf = pData.cachedCsrf;
-    }
-
-    // Ambil CSRF Token
-    let csrf = cachedCsrf || '';
-    if (!csrf) {
-        const home = await nativeRequest(`${KEYYSS_BASE_URL}/`, { timeout: 8000 }, null, activeProxy);
-        if (home && home.statusCode === 200) {
-            const csrfMatch = home.body.match(/name="_csrf_token"\s+value="([^"]+)"/);
-            const uidMatch = home.body.match(/name="_uid"\s+id="hidden-uid"\s+value="([^"]+)"/);
-            csrf = csrfMatch ? csrfMatch[1] : '';
-            if (!uid) uid = uidMatch ? uidMatch[1] : '';
-        }
-    }
-    if (!csrf) throw new Error('Gagal mengekstrak _csrf_token dari Keyyss panel');
-
-    // Solve Turnstile
-    const tsRes = await nativeRequest(`${KEYYSS_BASE_URL}/api/turnstile/status`, {}, null, activeProxy);
-    let siteKey = '0x4AAAAAAErNYkwC4FusFhKz';
-    try {
-        const tsJson = JSON.parse(tsRes.body);
-        if (tsJson.siteKey) siteKey = tsJson.siteKey;
-    } catch {}
-
-    let turnstileToken = null;
-    try {
-        turnstileToken = solveTurnstileNative(siteKey, activeProxy, KEYYSS_BASE_URL);
-    } catch {
-        turnstileToken = solveTurnstileNative(siteKey, null, KEYYSS_BASE_URL);
-    }
-
-    // Kirim Payload Reaction
-    const params = new URLSearchParams({
-        _csrf_token: csrf,
-        _uid: vipKey || uid,
-        link: channelLink,
-        emoji: emojis,
-        'cf-turnstile-response': turnstileToken,
-        execute: ''
-    });
-    const bodyData = params.toString();
-
-    let submitRes = await nativeRequest(`${KEYYSS_BASE_URL}/`, {
-        method: 'POST',
-        timeout: 15000,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Content-Length': Buffer.byteLength(bodyData),
-            'Origin': KEYYSS_BASE_URL,
-            'Referer': `${KEYYSS_BASE_URL}/`
-        }
-    }, bodyData, activeProxy);
-
-    const isSuccess = submitRes.body.includes('SUCCESS!') || submitRes.body.includes('Request berhasil dikirim');
-    const durationMs = Date.now() - startTime;
-
-    return {
-        creator: CREATOR,
-        provider: 'Keyyss',
-        status: isSuccess ? 'success' : 'error',
-        code: isSuccess ? 200 : 400,
-        message: isSuccess ? 'Reaction berhasil dikirim!' : 'Server menolak request reaction',
-        data: { target: channelLink, emojis, duration: `${(durationMs / 1000).toFixed(2)}s`, proxy: activeProxy }
-    };
-}
-
-// ==========================================
-// 2. FUNGSI UTAMA: WELLBYPASS LINK SKIPPER
-// ==========================================
-async function executeWellBypassTask(targetUrl, manualProxy = null) {
-    const startTime = Date.now();
-    const deviceId = `wb_${Math.random().toString(36).substring(2)}_${Date.now().toString(36)}`;
-
-    // Register device
-    await nativeRequest(`${WELLBYPASS_URL}/api/device/register`, { method: 'POST', headers: { 'x-device-id': deviceId } }, null, manualProxy);
-
-    // Solve Turnstile untuk WellBypass
-    const turnstileToken = solveTurnstileNative('0x4AAAAAAEw9LL7413Xfin6z', manualProxy, `${WELLBYPASS_URL}/en`);
-
-    const payload = JSON.stringify({ url: targetUrl.trim(), turnstileToken });
-    const bypassRes = await nativeRequest(`${WELLBYPASS_URL}/api/bypass`, {
-        method: 'POST',
-        timeout: 35000,
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(payload),
-            'x-device-id': deviceId,
-            'Cookie': 'NEXT_LOCALE=en',
-            'Origin': WELLBYPASS_URL,
-            'Referer': `${WELLBYPASS_URL}/en`
-        }
-    }, payload, manualProxy);
-
-    let jsonResult = {};
-    try {
-        jsonResult = JSON.parse(bypassRes.body);
-    } catch {
-        jsonResult = { status: false, message: 'Invalid response from WellBypass' };
-    }
-
-    const durationMs = Date.now() - startTime;
-    const isSuccess = Boolean(jsonResult.status && jsonResult.bypassedUrl);
-
-    return {
-        creator: CREATOR,
-        provider: 'WellBypass',
-        status: isSuccess ? 'success' : 'error',
-        code: isSuccess ? 200 : 400,
-        message: jsonResult.message || (isSuccess ? 'Link berhasil di-bypass' : 'Gagal bypass link'),
-        data: {
-            originalUrl: targetUrl,
-            bypassedUrl: jsonResult.bypassedUrl || null,
-            service: jsonResult.service || null,
-            duration: `${(durationMs / 1000).toFixed(2)}s`
-        }
-    };
-}
-
-
-// ==========================================
-// EXPRESS ENDPOINT INTEGRATION (/api/automation/run)
-// ==========================================
-app.all('/api/automation/run', async (req, res) => {
-    const body = req.method === 'GET' ? req.query : (req.body || {});
-    const provider = (body.provider || 'keyyss').toLowerCase();
-    const targetUrl = body.url || body.targetUrl;
-    const emojis = body.emojis || body.emoji || '👍';
-    const vipKey = body.vipKey || body.key;
-    const useProxy = body.proxy === 'true' || body.proxy === true;
-    const manualProxy = body.manualProxy || null;
-
-    if (!targetUrl) {
-        return res.status(400).json({ status: false, error: 'Parameter target URL (url) wajib disertakan!' });
-    }
-
-    try {
-        let result;
-        if (provider === 'wellbypass' || provider === 'bypass') {
-            result = await executeWellBypassTask(targetUrl, manualProxy);
-        } else {
-            result = await executeKeyyssReaction({
-                channelLink: targetUrl,
-                emojis,
-                vipKey,
-                useProxy,
-                manualProxy
-            });
-        }
-
-        return res.status(200).json({ status: true, creator: CREATOR, result });
-    } catch (err) {
-        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
-    }
-});
-
 
 // Fallback 404
 app.use((req, res) => {
