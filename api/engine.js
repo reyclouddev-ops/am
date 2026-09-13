@@ -2613,42 +2613,35 @@ app.all('/api/payment/success-notif', async (req, res) => {
     return res.status(200).json({ status: true, message: 'Notifikasi terkirim.' });
 });
 // ==========================================
-// ENDPOINT INTEGRASI DARI api/react.js
+// ENDPOINT PROXY KE CLOUDFLARE WORKER
 // ==========================================
 app.all('/api/react', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const targetUrl = body.url || body.targetUrl;
-    const emojis = body.emojis || body.emoji || '👍';
-    const vipKey = body.vipKey || body.key || null;
 
     if (!targetUrl) {
         return res.status(400).json({ status: false, error: 'Parameter target URL (url) wajib disertakan!' });
     }
 
     try {
-        // Memanggil fungsi 'run' atau 'executeReaction' yang diexport dari api/react.js
-        let result;
-        if (typeof reactModule.run === 'function') {
-            result = await reactModule.run(targetUrl, emojis, vipKey);
-        } else if (typeof reactModule.executeReaction === 'function') {
-            result = await reactModule.executeReaction({
-                channelLink: targetUrl,
-                emojis,
-                vipKey
-            });
-        } else {
-            throw new Error('Fungsi eksekusi pada api/react.js tidak ditemukan.');
-        }
+        const WORKER_URL = 'https://react-crack.reyclouddev.workers.dev';
 
-        return res.status(200).json({ status: true, creator: CREATOR, result });
+        const workerResponse = await axios.post(WORKER_URL, body, {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 30000,
+            validateStatus: () => true
+        });
+
+        return res.status(workerResponse.status).json(workerResponse.data);
     } catch (err) {
-        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+        return res.status(500).json({ 
+            status: false, 
+            creator: CREATOR, 
+            error: 'Gagal menghubungi Cloudflare Worker: ' + err.message 
+        });
     }
-});
-
-// Fallback 404
-app.use((req, res) => {
-    res.status(404).json({ status: false, error: 'Endpoint API tidak ditemukan' });
 });
 
 module.exports = app;
