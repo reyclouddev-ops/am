@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080a0f">
+<title>410 — Gone | ReyCloud</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100vh;background:#080a0f;color:#f8fafc;display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden;transition:.3s}
+body:before{content:"";position:fixed;inset:0;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:32px 32px;pointer-events:none}
+body:after{content:"";position:fixed;width:300px;height:300px;border-radius:50%;background:#eab30818;filter:blur(90px);pointer-events:none}
+.theme{position:fixed;top:18px;right:18px;width:40px;height:40px;border:1px solid #ffffff15;border-radius:13px;background:#ffffff08;color:#fff;cursor:pointer;font-size:16px;z-index:5}
+.card{position:relative;z-index:2;width:100%;max-width:470px;padding:34px 25px;text-align:center;background:#10141ce8;border:1px solid #ffffff12;border-radius:30px;backdrop-filter:blur(18px);box-shadow:0 30px 90px #0009}
+.brand{font-size:12px;font-weight:950;letter-spacing:3px;margin-bottom:18px}
+.brand span{color:#eab308}
+.robot{width:145px;height:145px;margin:0 auto 15px;display:block;animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-7px)}}
+.head{fill:#e2e8f0;stroke:#eab308;stroke-width:3}
+.body{fill:#cbd5e1;stroke:#eab308;stroke-width:3}
+.eye{fill:#111827}
+.yellow{fill:#eab308}
+.line{stroke:#eab308;stroke-width:3;stroke-linecap:round;fill:none}
+.trash{fill:#eab308}
+.status{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:#eab30812;border:1px solid #eab30844;color:#fde68a;font:700 10px monospace;margin-bottom:10px}
+.dot{width:7px;height:7px;border-radius:50%;background:#eab308;box-shadow:0 0 10px #eab308}
+.code{font-size:62px;font-weight:1000;line-height:1;color:#eab308;letter-spacing:-3px}
+.title{font-size:22px;font-weight:900;margin-top:10px}
+.desc{max-width:370px;margin:9px auto 23px;color:#94a3b8;font-size:12px;line-height:1.7}
+.notice{display:flex;align-items:center;gap:10px;text-align:left;padding:12px 13px;margin-bottom:18px;border:1px solid #ffffff0e;background:#ffffff05;border-radius:14px;color:#cbd5e1;font-size:11px;line-height:1.5}
+.notice b{color:#fde68a}
+.notice-icon{width:28px;height:28px;display:grid;place-items:center;flex:none;border-radius:9px;background:#eab30815}
+.actions{display:flex;gap:10px}
+.btn{flex:1;padding:12px 14px;border-radius:13px;text-decoration:none;border:0;background:#eab308;color:#171717;font-size:11px;font-weight:900;cursor:pointer}
+.secondary{background:#ffffff07;color:#cbd5e1;border:1px solid #ffffff12}
+.light{background:#f1f5f9;color:#0f172a}
+.light .card{background:#ffffffee;border-color:#cbd5e1;box-shadow:0 25px 70px #64748b33}
+.light .theme{background:#fff;color:#0f172a;border-color:#cbd5e1}
+.light .desc{color:#64748b}
+.light .secondary{background:#f8fafc;color:#334155;border-color:#cbd5e1}
+.light .notice{background:#f8fafc;border-color:#e2e8f0;color:#475569}
+.light .notice b{color:#a16207}
+.light .head{fill:#1e293b}
+.light .body{fill:#334155}
+@media(max-width:430px){
+.card{padding:28px 18px;border-radius:25px}
+.robot{width:125px;height:125px}
+.code{font-size:52px}
+.title{font-size:20px}
+.actions{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<button class="theme" id="theme" onclick="toggleTheme()">☀️</button>
+
+<main class="card">
+<div class="brand">REY<span>CLOUD</span></div>
+
+<svg class="robot" viewBox="0 0 150 150">
+<rect class="body" x="45" y="87" width="60" height="38" rx="12"/>
+<rect class="head" x="30" y="37" width="90" height="62" rx="19"/>
+<circle class="eye" cx="57" cy="60" r="7"/>
+<circle class="eye" cx="93" cy="60" r="7"/>
+<path class="line" d="M57 80h36"/>
+<path class="line" d="M75 37V24"/>
+<circle class="yellow" cx="75" cy="18" r="6"/>
+<path class="line" d="M52 106v12"/>
+<path class="line" d="M98 106v12"/>
+<path class="trash" d="M65 101h20l-2 17H67z"/>
+<path d="M63 99h24M70 96h10" stroke="#eab308" stroke-width="3" stroke-linecap="round"/>
+</svg>
+
+<div class="status">
+<span class="dot"></span>
+GET → 410
+</div>
+
+<div class="code">410</div>
+
+<div class="title">Gone</div>
+
+<div class="desc">
+Resource yang kamu cari sudah tidak tersedia dan telah dihapus secara permanen dari server.
+</div>
+
+<div class="notice">
+<div class="notice-icon">🗑️</div>
+<div>
+Resource ini <b>tidak lagi tersedia</b>. Coba kembali ke dashboard untuk menemukan layanan atau halaman yang masih aktif.
+</div>
+</div>
+
+<div class="actions">
+<a class="btn" href="/dashboard">Dashboard</a>
+<button class="btn secondary" onclick="history.back()">Kembali</button>
+</div>
+</main>
+
+<script>
+let mode=localStorage.getItem("rey_status_theme")||"dark";
+const body=document.body;
+const theme=document.getElementById("theme");
+
+function applyTheme(){
+body.classList.toggle("light",mode==="light");
+theme.textContent=mode==="light"?"🌙":"☀️";
+}
+
+function toggleTheme(){
+mode=mode==="dark"?"light":"dark";
+localStorage.setItem("rey_status_theme",mode);
+applyTheme();
+}
+
+applyTheme();
+</script>
+</body>
+</html>

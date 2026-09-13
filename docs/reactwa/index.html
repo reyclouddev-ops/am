@@ -4,238 +4,617 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#05070a">
-    <title>ReactWA & Bypass Suite — Automation Console</title>
+    <title>ReyCode — Service Permanently Closed</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        base: "#05070a",
-                        surface: "#0b1017",
-                        surface2: "#101722",
-                        line: "#1b2635"
-                    },
-                    fontFamily: {
-                        sans: ["Plus Jakarta Sans", "sans-serif"],
-                        mono: ["JetBrains Mono", "monospace"]
-                    }
-                }
-            }
-        }
-    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: "Plus Jakarta Sans", sans-serif; background: radial-gradient(circle at 15% 0%, rgba(244,63,94,.08), transparent 28%), radial-gradient(circle at 90% 15%, rgba(168,85,247,.07), transparent 25%), #05070a; }
-        .mono { font-family: "JetBrains Mono", monospace; }
-        .glass { background: rgba(11,16,23,.78); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        .grid-bg { background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px); background-size: 32px 32px; }
-        
-        /* Robot Animasi */
-        .robot-container { position: relative; width: 110px; height: 95px; margin: 0 auto; display: flex; align-items: center; justify-content: center; animation: robotFloat 4s ease-in-out infinite; }
-        .robot-head { width: 70px; height: 55px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid rgba(244, 63, 94, 0.4); border-radius: 16px; position: relative; box-shadow: 0 0 20px rgba(244, 63, 94, 0.2); }
-        .robot-antenna { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 3px; height: 14px; background: #475569; }
-        .robot-antenna-ball { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 10px; height: 10px; background: #f43f5e; border-radius: 50%; box-shadow: 0 0 10px #f43f5e; animation: antennaBlink 1.5s ease-in-out infinite; }
-        .robot-eyes-container { position: absolute; top: 14px; left: 0; right: 0; display: flex; justify-content: space-around; padding: 0 10px; }
-        .robot-eye { width: 12px; height: 12px; background: #020617; border: 2px solid #f43f5e; border-radius: 3px; }
-        .robot-mouth { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 24px; height: 4px; background: #020617; border: 1px solid rgba(244, 63, 94, 0.4); border-radius: 2px; }
-        @keyframes robotFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-        @keyframes antennaBlink { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            background: #05070a;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Plus Jakarta Sans", sans-serif;
+            color: #e2e8f0;
+            background:
+                radial-gradient(circle at 15% 5%, rgba(239, 68, 68, .09), transparent 28%),
+                radial-gradient(circle at 85% 10%, rgba(59, 130, 246, .08), transparent 28%),
+                radial-gradient(circle at 50% 100%, rgba(239, 68, 68, .05), transparent 35%),
+                #05070a;
+            overflow-x: hidden;
+        }
+
+        .mono {
+            font-family: "JetBrains Mono", monospace;
+        }
+
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .55;
+            background-image:
+                linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+            background-size: 34px 34px;
+            mask-image: linear-gradient(to bottom, black, transparent 90%);
+        }
+
+        .scan-line {
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(239,68,68,.45), transparent);
+            box-shadow: 0 0 18px rgba(239,68,68,.25);
+            animation: scan 6s linear infinite;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @keyframes scan {
+            0% {
+                top: -5%;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 105%;
+                opacity: 0;
+            }
+        }
+
+        .glass {
+            background: rgba(9, 13, 18, .78);
+            border: 1px solid rgba(255,255,255,.07);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+        }
+
+        .status-light {
+            animation: statusPulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% {
+                opacity: .45;
+                transform: scale(.9);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .police-light {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 78px;
+            height: 13px;
+            transform: translateX(-50%);
+            border-radius: 999px 999px 5px 5px;
+            background: linear-gradient(90deg, #ef4444 0 48%, #2563eb 52% 100%);
+            box-shadow:
+                -28px 0 35px rgba(239,68,68,.25),
+                28px 0 35px rgba(37,99,235,.25);
+            animation: siren 1s ease-in-out infinite;
+        }
+
+        @keyframes siren {
+            0%, 100% {
+                filter: brightness(.7);
+                box-shadow:
+                    -25px 0 28px rgba(239,68,68,.18),
+                    25px 0 28px rgba(37,99,235,.18);
+            }
+
+            50% {
+                filter: brightness(1.5);
+                box-shadow:
+                    -40px 0 50px rgba(239,68,68,.5),
+                    40px 0 50px rgba(37,99,235,.5);
+            }
+        }
+
+        .officer {
+            position: relative;
+            width: 210px;
+            height: 250px;
+            margin: 0 auto;
+            animation: officerFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes officerFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-7px);
+            }
+        }
+
+        .officer-halo {
+            position: absolute;
+            width: 190px;
+            height: 190px;
+            left: 50%;
+            top: 38px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            border: 1px solid rgba(148,163,184,.08);
+            box-shadow:
+                0 0 80px rgba(59,130,246,.08),
+                inset 0 0 60px rgba(239,68,68,.04);
+        }
+
+        .head {
+            position: absolute;
+            top: 38px;
+            left: 50%;
+            width: 78px;
+            height: 82px;
+            transform: translateX(-50%);
+            border-radius: 25px 25px 30px 30px;
+            background: linear-gradient(145deg, #334155, #111827);
+            border: 2px solid rgba(148,163,184,.18);
+            box-shadow: 0 15px 35px rgba(0,0,0,.4);
+            z-index: 3;
+        }
+
+        .face {
+            position: absolute;
+            inset: 13px 10px 12px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, #475569, #1e293b);
+        }
+
+        .eye {
+            position: absolute;
+            top: 30px;
+            width: 9px;
+            height: 5px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            box-shadow: 0 0 9px rgba(226,232,240,.35);
+        }
+
+        .eye.left {
+            left: 17px;
+        }
+
+        .eye.right {
+            right: 17px;
+        }
+
+        .mouth {
+            position: absolute;
+            left: 50%;
+            bottom: 19px;
+            width: 22px;
+            height: 3px;
+            transform: translateX(-50%);
+            border-radius: 5px;
+            background: #0f172a;
+        }
+
+        .cap {
+            position: absolute;
+            top: 23px;
+            left: 50%;
+            width: 94px;
+            height: 25px;
+            transform: translateX(-50%);
+            border-radius: 18px 18px 7px 7px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 2px solid rgba(148,163,184,.2);
+            z-index: 4;
+        }
+
+        .cap-badge {
+            position: absolute;
+            left: 50%;
+            top: 5px;
+            width: 18px;
+            height: 11px;
+            transform: translateX(-50%);
+            border-radius: 4px;
+            background: #f8fafc;
+            box-shadow: 0 0 8px rgba(255,255,255,.15);
+        }
+
+        .body {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 150px;
+            height: 130px;
+            transform: translateX(-50%);
+            border-radius: 40px 40px 20px 20px;
+            background: linear-gradient(145deg, #1e293b, #0f172a 65%);
+            border: 2px solid rgba(148,163,184,.15);
+            box-shadow: 0 20px 45px rgba(0,0,0,.45);
+            z-index: 2;
+        }
+
+        .body-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            transform: translateX(-50%);
+            background: rgba(148,163,184,.08);
+        }
+
+        .badge {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            width: 30px;
+            height: 34px;
+            transform: translateX(-50%);
+            clip-path: polygon(50% 0%, 90% 24%, 80% 76%, 50% 100%, 20% 76%, 10% 24%);
+            background: linear-gradient(145deg, #e2e8f0, #64748b);
+            box-shadow: 0 0 15px rgba(226,232,240,.15);
+        }
+
+        .badge:after {
+            content: "★";
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0f172a;
+            font-size: 11px;
+        }
+
+        .shoulder {
+            position: absolute;
+            top: 43px;
+            width: 30px;
+            height: 9px;
+            border-radius: 5px;
+            background: #475569;
+        }
+
+        .shoulder.left {
+            left: 8px;
+            transform: rotate(-18deg);
+        }
+
+        .shoulder.right {
+            right: 8px;
+            transform: rotate(18deg);
+        }
+
+        .arm {
+            position: absolute;
+            bottom: 7px;
+            width: 34px;
+            height: 82px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, #334155, #111827);
+            border: 2px solid rgba(148,163,184,.12);
+        }
+
+        .arm.left {
+            left: -25px;
+            transform: rotate(12deg);
+        }
+
+        .arm.right {
+            right: -25px;
+            transform: rotate(-12deg);
+        }
+
+        .lock-ring {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            border-radius: 50%;
+            border: 1px solid rgba(239,68,68,.18);
+            background: radial-gradient(circle, rgba(239,68,68,.1), rgba(239,68,68,.02) 65%, transparent 66%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 50px rgba(239,68,68,.08);
+        }
+
+        .permanent {
+            letter-spacing: .2em;
+        }
+
+        .warning-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(239,68,68,.35), transparent);
+        }
+
+        .corner {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-color: rgba(239,68,68,.35);
+        }
+
+        .corner.tl {
+            top: 16px;
+            left: 16px;
+            border-top: 1px solid;
+            border-left: 1px solid;
+        }
+
+        .corner.tr {
+            top: 16px;
+            right: 16px;
+            border-top: 1px solid;
+            border-right: 1px solid;
+        }
+
+        .corner.bl {
+            bottom: 16px;
+            left: 16px;
+            border-bottom: 1px solid;
+            border-left: 1px solid;
+        }
+
+        .corner.br {
+            bottom: 16px;
+            right: 16px;
+            border-bottom: 1px solid;
+            border-right: 1px solid;
+        }
+
+        @media (max-width: 640px) {
+            .officer {
+                transform: scale(.9);
+                margin-top: -10px;
+                margin-bottom: -15px;
+            }
+
+            .officer:hover {
+                transform: scale(.9);
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen text-slate-200 grid-bg">
-    <div class="min-h-screen flex flex-col justify-between">
-        
-        <header class="sticky top-0 z-50 border-b border-white/[.06] glass">
+
+<body>
+    <div class="grid-bg"></div>
+    <div class="scan-line"></div>
+
+    <div class="min-h-screen flex flex-col relative z-10">
+
+        <header class="sticky top-0 z-50 glass border-x-0 border-t-0">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 h-[68px] flex items-center justify-between">
+
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-[13px] flex items-center justify-center bg-gradient-to-br from-rose-500/15 to-purple-500/15 border border-rose-500/20">
-                        <i class="fa-solid fa-terminal text-rose-400"></i>
+                    <div class="relative w-10 h-10 rounded-xl flex items-center justify-center bg-white/[.03] border border-white/[.08]">
+                        <i class="fa-solid fa-shield-halved text-slate-300"></i>
+                        <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500 status-light"></span>
                     </div>
+
                     <div>
                         <div class="flex items-center gap-2">
-                            <h1 class="text-sm font-extrabold tracking-tight text-white">ReactWA & Bypass</h1>
-                            <span class="text-[9px] px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 font-bold">ONLINE</span>
+                            <h1 class="text-sm font-extrabold text-white tracking-tight">
+                                REYCODE SECURITY
+                            </h1>
+                            <span class="hidden sm:inline-flex text-[8px] px-2 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 font-bold tracking-wider">
+                                CLOSED
+                            </span>
                         </div>
-                        <p class="text-[10px] text-slate-500 mt-0.5">Unified Automation Suite</p>
+                        <p class="text-[10px] text-slate-500 mt-0.5">
+                            Service Enforcement System
+                        </p>
                     </div>
                 </div>
-                <a href="/dashboard" class="group flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-white/[.07] bg-white/[.025] hover:bg-white/[.05] transition">
-                    <i class="fa-solid fa-arrow-left text-[10px] text-slate-500 group-hover:text-rose-400 transition"></i>
-                    <span class="hidden sm:block text-[11px] font-semibold text-slate-300">Dashboard</span>
+
+                <a href="/dashboard" class="group flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/[.025] border border-white/[.07] hover:bg-white/[.06] transition">
+                    <i class="fa-solid fa-arrow-left text-[10px] text-slate-500 group-hover:text-white transition"></i>
+                    <span class="hidden sm:block text-[11px] font-semibold text-slate-300">
+                        Dashboard
+                    </span>
                 </a>
+
             </div>
         </header>
 
-        <main class="flex-1 w-full max-w-xl mx-auto px-4 py-8 flex items-center justify-center">
-            <section class="w-full text-center">
-                <div class="relative overflow-hidden rounded-[28px] border border-white/[.07] bg-[#0b1017]/90 shadow-2xl p-6 sm:p-8">
-                    
-                    <div class="robot-container mb-3">
-                        <div class="robot-head">
-                            <div class="robot-antenna"></div>
-                            <div class="robot-antenna-ball"></div>
-                            <div class="robot-eyes-container"><div class="robot-eye"></div><div class="robot-eye"></div></div>
-                            <div class="robot-mouth"></div>
-                        </div>
-                    </div>
+        <main class="flex-1 flex items-center justify-center px-4 py-10">
 
-                    <h2 class="text-xl sm:text-2xl font-extrabold text-white mb-4">
-                        Eksekusi <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-purple-400">ReactWA & Bypass</span>
-                    </h2>
+            <section class="w-full max-w-xl">
 
-                    <!-- KOTAK INFO & CARA PENGGUNAAN -->
-                    <div class="mb-6 p-4 rounded-2xl bg-gradient-to-br from-rose-500/10 via-purple-500/5 to-transparent border border-rose-500/20 text-left space-y-2">
-                        <div class="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider">
-                            <i class="fa-solid fa-circle-info"></i>
-                            <span>Panduan & Cara Penggunaan</span>
-                        </div>
-                        <ol class="list-decimal list-inside text-[11px] text-slate-300 space-y-1 pl-1 leading-relaxed">
-                            <li><strong class="text-white">Target URL:</strong> Masukkan tautan lengkap postingan channel WhatsApp.</li>
-                            <li><strong class="text-white">Provider Engine:</strong> Pilih <code class="text-rose-300">Keyyss</code> untuk spam reaksi atau <code class="text-rose-300">WellBypass</code> untuk melewati shortlink.</li>
-                            <li><strong class="text-white">Emoji Reaction:</strong> Ketik emoji yang diinginkan (bisa dipisah koma untuk banyak emoji).</li>
-                            <li><strong class="text-white">KEY-VIP (Opsional):</strong> Masukkan kunci VIP jika memilikinya untuk bypass antrean/limit server.</li>
-                        </ol>
-                    </div>
+                <div class="glass rounded-[30px] overflow-hidden relative shadow-2xl">
 
-                    <!-- FORM UTAMA -->
-                    <div class="w-full text-left space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Target URL (WhatsApp Channel / Link)</label>
-                            <input type="text" id="targetUrl" placeholder="https://whatsapp.com/channel/..." class="w-full h-11 px-3.5 rounded-xl bg-base border border-white/[.08] text-xs text-white focus:outline-none focus:border-rose-500 transition mono">
-                        </div>
+                    <div class="corner tl"></div>
+                    <div class="corner tr"></div>
+                    <div class="corner bl"></div>
+                    <div class="corner br"></div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <!-- CUSTOM DROPDOWN TANPA BAWAAN HP/BROWSER -->
-                            <div class="relative">
-                                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Provider Engine</label>
-                                <div id="customSelectBtn" onclick="toggleDropdown()" class="w-full h-11 px-3.5 rounded-xl bg-base border border-white/[.08] text-xs text-white flex items-center justify-between cursor-pointer transition focus:border-rose-500">
-                                    <span id="selectedText">Keyyss Reaction</span>
-                                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition" id="dropdownArrow"></i>
-                                </div>
-                                <!-- Dropdown Menu Custom -->
-                                <div id="dropdownMenu" class="hidden absolute left-0 right-0 mt-1.5 rounded-xl bg-[#101722] border border-white/[.1] shadow-2xl z-50 overflow-hidden">
-                                    <div onclick="selectOption('keyyss', 'Keyyss Reaction')" class="px-3.5 py-2.5 text-xs text-slate-200 hover:bg-rose-500/20 hover:text-white cursor-pointer transition flex items-center justify-between">
-                                        <span>Keyyss Reaction</span>
-                                        <i class="fa-solid fa-check text-rose-400 text-[10px]" id="check-keyyss"></i>
-                                    </div>
-                                    <div onclick="selectOption('wellbypass', 'WellBypass Skipper')" class="px-3.5 py-2.5 text-xs text-slate-200 hover:bg-rose-500/20 hover:text-white cursor-pointer transition flex items-center justify-between border-t border-white/[.05]">
-                                        <span>WellBypass Skipper</span>
-                                        <i class="fa-solid fa-check text-rose-400 text-[10px] hidden" id="check-wellbypass"></i>
-                                    </div>
-                                </div>
-                                <input type="hidden" id="provider" value="keyyss">
+                    <div class="px-5 py-8 sm:px-9 sm:py-10 text-center">
+
+                        <div class="flex items-center justify-center gap-3 mb-7">
+                            <div class="h-px w-12 bg-gradient-to-r from-transparent to-red-500/40"></div>
+
+                            <div class="flex items-center gap-2 text-[9px] font-bold tracking-[.18em] text-red-400 uppercase">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 status-light"></span>
+                                Enforcement Notice
                             </div>
 
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Emoji Reaction</label>
-                                <input type="text" id="emojis" value="👍,🔥,❤️" placeholder="👍,🔥,❤️" class="w-full h-11 px-3.5 rounded-xl bg-base border border-white/[.08] text-xs text-white focus:outline-none focus:border-rose-500 transition mono">
+                            <div class="h-px w-12 bg-gradient-to-l from-transparent to-red-500/40"></div>
+                        </div>
+
+                        <div class="relative mb-5">
+
+                            <div class="police-light"></div>
+
+                            <div class="officer">
+
+                                <div class="officer-halo"></div>
+
+                                <div class="cap">
+                                    <div class="cap-badge"></div>
+                                </div>
+
+                                <div class="head">
+                                    <div class="face">
+                                        <div class="eye left"></div>
+                                        <div class="eye right"></div>
+                                        <div class="mouth"></div>
+                                    </div>
+                                </div>
+
+                                <div class="body">
+                                    <div class="body-line"></div>
+                                    <div class="badge"></div>
+                                    <div class="shoulder left"></div>
+                                    <div class="shoulder right"></div>
+                                </div>
+
+                                <div class="arm left"></div>
+                                <div class="arm right"></div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="lock-ring mb-5">
+                            <i class="fa-solid fa-lock text-2xl text-red-400"></i>
+                        </div>
+
+                        <div class="mono text-[9px] text-red-400/80 font-semibold permanent uppercase mb-3">
+                            SYSTEM STATUS // PERMANENT
+                        </div>
+
+                        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
+                            Layanan Ini Telah
+                            <span class="block text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-rose-400 to-slate-300">
+                                Ditutup Permanen
+                            </span>
+                        </h2>
+
+                        <p class="text-xs sm:text-sm text-slate-400 leading-6 max-w-md mx-auto mt-4">
+                            Akses ke <span class="text-slate-200 font-semibold">ReactWA & Bypass Suite</span>
+                            telah dihentikan secara permanen dan tidak lagi tersedia untuk penggunaan publik.
+                        </p>
+
+                        <div class="warning-line my-7"></div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-left">
+
+                            <div class="rounded-2xl bg-white/[.025] border border-white/[.06] p-3.5">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="fa-solid fa-ban text-red-400 text-xs"></i>
+                                    <span class="text-[9px] font-bold text-slate-300 uppercase tracking-wider">
+                                        Access
+                                    </span>
+                                </div>
+                                <div class="mono text-[10px] text-red-400">
+                                    REVOKED
+                                </div>
+                            </div>
+
+                            <div class="rounded-2xl bg-white/[.025] border border-white/[.06] p-3.5">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="fa-solid fa-server text-slate-400 text-xs"></i>
+                                    <span class="text-[9px] font-bold text-slate-300 uppercase tracking-wider">
+                                        Service
+                                    </span>
+                                </div>
+                                <div class="mono text-[10px] text-slate-300">
+                                    OFFLINE
+                                </div>
+                            </div>
+
+                            <div class="rounded-2xl bg-white/[.025] border border-white/[.06] p-3.5">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="fa-solid fa-shield-halved text-blue-400 text-xs"></i>
+                                    <span class="text-[9px] font-bold text-slate-300 uppercase tracking-wider">
+                                        Status
+                                    </span>
+                                </div>
+                                <div class="mono text-[10px] text-slate-300">
+                                    PERMANENT
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="mt-6 rounded-2xl bg-red-500/[.045] border border-red-500/[.12] px-4 py-3.5 text-left">
+                            <div class="flex gap-3">
+                                <div class="mt-0.5 w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/15 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-triangle-exclamation text-red-400 text-[11px]"></i>
+                                </div>
+
+                                <div>
+                                    <p class="text-[10px] font-bold text-red-300 mb-1">
+                                        ACCESS RESTRICTED
+                                    </p>
+                                    <p class="text-[10px] leading-5 text-slate-500">
+                                        Endpoint automation dan seluruh fungsi layanan terkait telah dinonaktifkan.
+                                        Permintaan baru tidak akan diproses.
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-400 mb-1">KEY-VIP (Opsional)</label>
-                            <input type="text" id="vipKey" placeholder="Masukkan VIP Key jika ada..." class="w-full h-11 px-3.5 rounded-xl bg-base border border-white/[.08] text-xs text-white focus:outline-none focus:border-rose-500 transition mono">
-                        </div>
+                        <a href="/dashboard" class="mt-6 w-full h-11 rounded-xl bg-white text-slate-950 hover:bg-slate-200 transition flex items-center justify-center gap-2 text-xs font-extrabold">
+                            <i class="fa-solid fa-house"></i>
+                            KEMBALI KE DASHBOARD
+                        </a>
 
-                        <button onclick="runAutomation()" id="submitBtn" class="w-full h-11 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-rose-500/20 mt-3">
-                            <i class="fa-solid fa-play"></i>
-                            <span>EXECUTE</span>
-                        </button>
                     </div>
 
-                    <div id="outputArea" class="hidden w-full text-left p-3.5 rounded-xl bg-base border border-white/[.05] mono text-[11px] text-slate-300 overflow-x-auto max-h-40 mt-4"></div>
+                    <div class="px-5 py-3.5 border-t border-white/[.05] bg-black/20">
+                        <div class="flex items-center justify-between gap-3">
+
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 status-light"></span>
+                                <span class="mono text-[8px] text-slate-600 uppercase tracking-wider">
+                                    REYCODE // SECURITY
+                                </span>
+                            </div>
+
+                            <span class="mono text-[8px] text-slate-700">
+                                RC-SEC-2026
+                            </span>
+
+                        </div>
+                    </div>
 
                 </div>
+
             </section>
+
         </main>
 
-        <footer class="border-t border-white/[.05] glass">
-            <div class="max-w-6xl mx-auto px-4 py-4 text-center text-[10px] text-slate-600">
-                © 2026 ReyCode Enterprise • ReactWA Suite
+        <footer class="border-t border-white/[.05]">
+            <div class="max-w-6xl mx-auto px-4 py-4 text-center">
+                <p class="text-[9px] text-slate-700">
+                    © 2026 ReyCode Enterprise • Service Permanently Closed
+                </p>
             </div>
         </footer>
+
     </div>
-
-    <script>
-        // Logika Custom Dropdown
-        function toggleDropdown() {
-            const menu = document.getElementById('dropdownMenu');
-            const arrow = document.getElementById('dropdownArrow');
-            menu.classList.toggle('hidden');
-            arrow.classList.toggle('rotate-180');
-        }
-
-        function selectOption(value, label) {
-            document.getElementById('provider').value = value;
-            document.getElementById('selectedText').innerText = label;
-            document.getElementById('dropdownMenu').classList.add('hidden');
-            document.getElementById('dropdownArrow').classList.remove('rotate-180');
-
-            // Tandai centang aktif
-            document.getElementById('check-keyyss').classList.toggle('hidden', value !== 'keyyss');
-            document.getElementById('check-wellbypass').classList.toggle('hidden', value !== 'wellbypass');
-        }
-
-        // Tutup dropdown kalau klik di luar
-        window.addEventListener('click', function(e) {
-            const btn = document.getElementById('customSelectBtn');
-            const menu = document.getElementById('dropdownMenu');
-            const arrow = document.getElementById('dropdownArrow');
-            if (!btn.contains(e.target) && !menu.contains(e.target)) {
-                menu.classList.add('hidden');
-                arrow.classList.remove('rotate-180');
-            }
-        });
-
-        // Eksekusi Automation
-        async function runAutomation() {
-            const url = document.getElementById('targetUrl').value.trim();
-            const provider = document.getElementById('provider').value;
-            const emojis = document.getElementById('emojis').value.trim();
-            const vipKey = document.getElementById('vipKey').value.trim();
-            const outputArea = document.getElementById('outputArea');
-            const submitBtn = document.getElementById('submitBtn');
-
-            if (!url) {
-                Swal.fire('Error', 'Target URL wajib diisi!', 'error');
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> MEMPROSES...`;
-            outputArea.classList.remove('hidden');
-            outputArea.innerHTML = 'Menghubungkan ke server automation...';
-
-            try {
-                const response = await fetch('/api/react', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ provider, url, emojis: emojis || '👍', vipKey: vipKey || null })
-                });
-
-                const result = await response.json();
-                outputArea.innerHTML = JSON.stringify(result, null, 2);
-
-                if (result.status) {
-                    Swal.fire('Berhasil', 'Automation berhasil dieksekusi!', 'success');
-                } else {
-                    Swal.fire('Gagal', result.error || 'Terjadi kesalahan sistem', 'error');
-                }
-            } catch (err) {
-                outputArea.innerHTML = `Error: ${err.message}`;
-                Swal.fire('Error', err.message, 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fa-solid fa-play"></i> EXECUTE`;
-            }
-        }
-    </script>
 </body>
 </html>

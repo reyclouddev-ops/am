@@ -1,142 +1,651 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full overflow-hidden">
+<html lang="id" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#05070a">
-    <title>ReyCloud - Panel SMM & OTP (Maintenance)</title>
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>ReyCloud • System Maintenance</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
     <style>
-        * { touch-action: manipulation; }
-        body { background-color: #08090c; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; position: fixed; width: 100%; height: 100%; overflow: hidden; }
-        .glass-panel {
-            background: rgba(21, 25, 34, 0.95);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-        }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-up { animation: fadeUp .45s ease both; }
-        
-        /* Cyberpunk Core / Shield Maintenance Animation */
-        .cyber-core-container {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .core-ring {
-            position: absolute;
-            inset: 0;
-            border: 2px dashed rgba(245, 158, 11, 0.35);
-            border-radius: 50%;
-            animation: spinRing 12s linear infinite;
-        }
-        .core-ring-inner {
-            position: absolute;
-            inset: 12px;
-            border: 2px solid rgba(245, 158, 11, 0.2);
-            border-radius: 50%;
-            animation: spinRingReverse 8s linear infinite;
-        }
-        .core-shield {
-            position: relative;
-            width: 56px;
-            height: 64px;
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(15, 23, 42, 0.8));
-            border: 2px solid #f59e0b;
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 25px rgba(245, 158, 11, 0.3);
-            animation: shieldPulse 3s ease-in-out infinite;
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        @keyframes spinRing {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
         }
-        @keyframes spinRingReverse {
-            0% { transform: rotate(360deg); }
-            100% { transform: rotate(0deg); }
+
+        body {
+            background:
+                radial-gradient(circle at 50% -10%, rgba(255,255,255,.07), transparent 35%),
+                radial-gradient(circle at 100% 50%, rgba(59,130,246,.06), transparent 30%),
+                #050505;
+            color: #f5f5f5;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            overflow-x: hidden;
         }
-        @keyframes shieldPulse {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(245,158,11,0.4)); }
-            50% { transform: scale(1.06); filter: drop-shadow(0 0 18px rgba(245,158,11,0.7)); }
+
+        .noise {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .025;
+            z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        .glass {
+            background: rgba(15, 15, 17, .78);
+            border: 1px solid rgba(255,255,255,.08);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow:
+                0 25px 80px rgba(0,0,0,.45),
+                inset 0 1px 0 rgba(255,255,255,.025);
+        }
+
+        .glass-soft {
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.07);
+        }
+
+        .logo-box {
+            background: linear-gradient(145deg, #ffffff, #8d8d8d);
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,.15),
+                0 8px 30px rgba(255,255,255,.08);
+        }
+
+        .robot-shell {
+            position: relative;
+            width: 142px;
+            height: 142px;
+            margin: auto;
+        }
+
+        .robot-orbit {
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 50%;
+            animation: rotate 14s linear infinite;
+        }
+
+        .robot-orbit::before,
+        .robot-orbit::after {
+            content: "";
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 16px rgba(255,255,255,.8);
+        }
+
+        .robot-orbit::before {
+            top: 9px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .robot-orbit::after {
+            bottom: 20px;
+            right: 5px;
+            opacity: .45;
+        }
+
+        .robot-orbit-two {
+            position: absolute;
+            inset: 13px;
+            border: 1px dashed rgba(96,165,250,.3);
+            border-radius: 50%;
+            animation: rotateReverse 9s linear infinite;
+        }
+
+        .robot-core {
+            position: absolute;
+            inset: 30px;
+            border-radius: 35px;
+            background:
+                linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.025)),
+                #101012;
+            border: 1px solid rgba(255,255,255,.14);
+            box-shadow:
+                0 0 50px rgba(59,130,246,.1),
+                inset 0 0 30px rgba(255,255,255,.025);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: floatRobot 3s ease-in-out infinite;
+        }
+
+        .robot-face {
+            width: 64px;
+            height: 49px;
+            border-radius: 17px;
+            background: #050505;
+            border: 1px solid rgba(255,255,255,.13);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 11px;
+            box-shadow: inset 0 0 20px rgba(59,130,246,.08);
+        }
+
+        .robot-eye {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #60a5fa;
+            box-shadow: 0 0 13px rgba(96,165,250,.9);
+            animation: blink 4s infinite;
+        }
+
+        .robot-eye:nth-child(2) {
+            animation-delay: .2s;
+        }
+
+        .scan-line {
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(96,165,250,.8), transparent);
+            animation: scan 2.8s ease-in-out infinite;
+            opacity: .5;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #fbbf24;
+            box-shadow: 0 0 12px rgba(251,191,36,.7);
+            animation: pulseDot 1.5s infinite;
+        }
+
+        .progress-track {
+            height: 5px;
+            background: rgba(255,255,255,.06);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #64748b, #60a5fa, #ffffff);
+            box-shadow: 0 0 15px rgba(96,165,250,.35);
+            transition: width .7s cubic-bezier(.4,0,.2,1);
+        }
+
+        .log-line {
+            animation: logIn .3s ease both;
+        }
+
+        .fade-up {
+            animation: fadeUp .7s cubic-bezier(.2,.8,.2,1) both;
+        }
+
+        .fade-delay-1 {
+            animation-delay: .08s;
+        }
+
+        .fade-delay-2 {
+            animation-delay: .16s;
+        }
+
+        .fade-delay-3 {
+            animation-delay: .24s;
+        }
+
+        .fade-delay-4 {
+            animation-delay: .32s;
+        }
+
+        .wa-button {
+            background: linear-gradient(135deg, #ffffff, #d9d9d9);
+            color: #050505;
+            transition: .25s ease;
+        }
+
+        .wa-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 35px rgba(255,255,255,.12);
+        }
+
+        .dashboard-button {
+            background: rgba(255,255,255,.045);
+            border: 1px solid rgba(255,255,255,.08);
+            transition: .25s ease;
+        }
+
+        .dashboard-button:hover {
+            background: rgba(255,255,255,.08);
+            border-color: rgba(255,255,255,.14);
+        }
+
+        @keyframes rotate {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes rotateReverse {
+            to {
+                transform: rotate(-360deg);
+            }
+        }
+
+        @keyframes floatRobot {
+            0%,100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+
+        @keyframes blink {
+            0%, 44%, 48%, 100% {
+                opacity: 1;
+            }
+            46% {
+                opacity: .1;
+            }
+        }
+
+        @keyframes scan {
+            0%,100% {
+                top: 15px;
+            }
+            50% {
+                top: 127px;
+            }
+        }
+
+        @keyframes pulseDot {
+            0%,100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(.65);
+                opacity: .45;
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes logIn {
+            from {
+                opacity: 0;
+                transform: translateX(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 380px) {
+            .robot-shell {
+                width: 125px;
+                height: 125px;
+            }
+
+            .robot-core {
+                inset: 27px;
+            }
+
+            .robot-face {
+                transform: scale(.9);
+            }
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-4 relative">
 
-    <!-- Ambient Glow Background -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[180px] bg-amber-500/15 blur-[120px] pointer-events-none rounded-full"></div>
-    <div class="absolute top-1/3 -right-20 w-[250px] h-[250px] bg-cyan-500/10 blur-[140px] pointer-events-none rounded-full"></div>
+<body class="min-h-screen flex items-center justify-center px-4 py-6">
 
-    <div class="w-full max-w-sm flex flex-col space-y-4 relative z-10 my-auto fade-up">
-        
-        <!-- Top Navbar Header -->
-        <div class="flex items-center justify-between glass-panel border border-[#232936] rounded-2xl px-4 py-3 shadow-2xl">
-            <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 p-[1px] shadow-lg shadow-amber-500/10">
-                    <div class="w-full h-full bg-[#0a0d12] rounded-[10px] flex items-center justify-center text-amber-400 font-black text-xs">
-                        ⚡
-                    </div>
+    <div class="noise"></div>
+
+    <div class="fixed top-[-100px] left-1/2 -translate-x-1/2 w-[360px] h-[260px] rounded-full bg-white/[.025] blur-[100px] pointer-events-none"></div>
+    <div class="fixed bottom-[-120px] right-[-80px] w-[280px] h-[280px] rounded-full bg-blue-500/[.045] blur-[110px] pointer-events-none"></div>
+
+    <main class="w-full max-w-[430px] relative z-10">
+
+        <header class="glass rounded-2xl px-4 py-3 flex items-center justify-between fade-up">
+
+            <div class="flex items-center gap-3">
+
+                <div class="logo-box w-9 h-9 rounded-xl flex items-center justify-center">
+                    <span class="text-black font-black text-sm">R</span>
                 </div>
+
                 <div>
-                    <div class="flex items-center space-x-1.5">
-                        <span class="font-black text-xs tracking-wider text-white">REY<span class="text-amber-400">CLOUD</span></span>
-                        <span class="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase">Pro</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[13px] font-black tracking-tight">
+                            Rey<span class="text-blue-400">Cloud</span>
+                        </span>
+
+                        <span class="text-[7px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-white/[.06] border border-white/[.08] text-slate-400">
+                            Core
+                        </span>
                     </div>
-                    <span class="text-[8px] tracking-widest text-slate-400 font-semibold uppercase">PANEL SMM & OTP</span>
-                </div>
-            </div>
-            
-            <span class="px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[10px] font-mono font-bold text-amber-400 uppercase">
-                Locked
-            </span>
-        </div>
 
-        <!-- Maintenance Card -->
-        <div class="bg-[#0e1117]/95 backdrop-blur-xl border border-[#1e2637] rounded-3xl p-6 shadow-2xl text-center space-y-5 relative overflow-hidden">
-            <div class="absolute -top-20 -right-20 w-40 h-40 bg-amber-500/5 blur-3xl rounded-full pointer-events-none"></div>
-
-            <!-- Cyberpunk Core / Shield Icon -->
-            <div class="cyber-core-container">
-                <div class="core-ring"></div>
-                <div class="core-ring-inner"></div>
-                <div class="core-shield">
-                    <i class="fa-solid fa-lock text-amber-400 text-lg"></i>
+                    <p class="text-[8px] text-slate-500 uppercase tracking-[.18em] mt-0.5">
+                        Secure Service Gateway
+                    </p>
                 </div>
+
             </div>
 
-            <div class="space-y-2">
-                <span class="inline-block px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[9px] font-mono font-bold text-amber-400 uppercase tracking-widest">
-                    System Maintenance
+            <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl glass-soft">
+                <span class="status-dot"></span>
+                <span class="text-[8px] font-bold uppercase tracking-wider text-amber-300">
+                    Maintenance
                 </span>
-                <h3 class="text-lg font-black text-white tracking-wide uppercase">Fitur Sedang Dikunci</h3>
-                <p class="text-[11px] text-slate-400 leading-relaxed px-2">
-                    Panel SMM & OTP sedang dalam peningkatan sistem dan pemeliharaan server pusat. Silakan kembali beberapa saat lagi.
+            </div>
+
+        </header>
+
+        <section class="glass rounded-[28px] mt-3 overflow-hidden fade-up fade-delay-1">
+
+            <div class="px-5 pt-7 pb-5 text-center">
+
+                <div class="robot-shell mb-5">
+
+                    <div class="robot-orbit"></div>
+                    <div class="robot-orbit-two"></div>
+
+                    <div class="robot-core">
+
+                        <div class="robot-face">
+                            <span class="robot-eye"></span>
+                            <span class="robot-eye"></span>
+                        </div>
+
+                        <div class="scan-line"></div>
+
+                    </div>
+
+                </div>
+
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/[.06] border border-blue-400/[.12] text-blue-300 text-[8px] font-bold uppercase tracking-[.16em]">
+                    <i class="fa-solid fa-robot text-[8px]"></i>
+                    ReyBot Repair System
+                </div>
+
+                <h1 class="text-[23px] font-black tracking-tight mt-4 text-white">
+                    Sistem Sedang
+                    <span class="text-slate-400">Dipulihkan</span>
+                </h1>
+
+                <p class="text-[11px] text-slate-500 leading-relaxed max-w-[330px] mx-auto mt-2">
+                    Akses sementara dikunci untuk menjaga keamanan sistem.
+                    Robot maintenance ReyCloud sedang melakukan pemeriksaan dan pemulihan otomatis.
                 </p>
+
             </div>
 
-            <div class="pt-2">
-                <a href="/dashboard" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-2 cursor-pointer">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Kembali ke Dashboard Utama</span>
-                </a>
+            <div class="px-5 pb-5">
+
+                <div class="glass-soft rounded-2xl p-4">
+
+                    <div class="flex items-center justify-between mb-3">
+
+                        <div>
+                            <p class="text-[8px] text-slate-500 uppercase tracking-widest font-bold">
+                                Repair Process
+                            </p>
+
+                            <p id="repairStatus" class="text-[11px] font-bold text-slate-200 mt-1">
+                                Menginisialisasi sistem...
+                            </p>
+                        </div>
+
+                        <div class="text-right">
+                            <span id="progressText" class="text-sm font-black text-white">
+                                0%
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div class="progress-track">
+                        <div id="progressBar" class="progress-bar"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-2">
+                        <span id="systemState" class="text-[8px] text-slate-600">
+                            SYSTEM LOCKED
+                        </span>
+
+                        <span class="text-[8px] text-slate-600">
+                            AUTO RECOVERY
+                        </span>
+                    </div>
+
+                </div>
+
             </div>
-        </div>
 
-        <!-- Footer Info -->
-        <div class="text-center text-[9px] text-slate-500 font-semibold tracking-wider">
-            © 2026 ReyCloud • Secure Automated Gateway
-        </div>
+            <div class="px-5 pb-5">
 
-    </div>
+                <div class="glass-soft rounded-2xl overflow-hidden">
+
+                    <div class="px-4 py-3 border-b border-white/[.06] flex items-center justify-between">
+
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-terminal text-[9px] text-slate-500"></i>
+                            <span class="text-[8px] uppercase tracking-widest font-bold text-slate-500">
+                                System Log
+                            </span>
+                        </div>
+
+                        <span class="flex items-center gap-1.5 text-[7px] uppercase tracking-wider text-slate-600">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                            Live
+                        </span>
+
+                    </div>
+
+                    <div id="systemLogs" class="px-4 py-3 space-y-2 min-h-[105px] max-h-[125px] overflow-hidden">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="px-5 pb-6">
+
+                <div class="grid grid-cols-2 gap-2.5">
+
+                    <a
+                        href="/dashboard"
+                        class="dashboard-button rounded-xl py-3.5 flex items-center justify-center gap-2 text-[10px] font-bold text-slate-300"
+                    >
+                        <i class="fa-solid fa-house text-[9px]"></i>
+                        Dashboard
+                    </a>
+
+                    <a
+                        id="contactAdmin"
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="wa-button rounded-xl py-3.5 flex items-center justify-center gap-2 text-[10px] font-black"
+                    >
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                        Hubungi Admin
+                    </a>
+
+                </div>
+
+                <div class="mt-4 text-center">
+
+                    <p class="text-[8px] text-slate-600 leading-relaxed">
+                        Jangan melakukan request berulang selama maintenance.
+                        Sistem akan membuka akses kembali setelah pemeriksaan selesai.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <footer class="text-center mt-4 fade-up fade-delay-4">
+            <p class="text-[8px] text-slate-600 tracking-[.16em] uppercase">
+                © 2026 ReyCloud
+            </p>
+            <p class="text-[7px] text-slate-700 mt-1">
+                Secure Automated Infrastructure
+            </p>
+        </footer>
+
+    </main>
+
+    <script>
+        const progressBar = document.getElementById("progressBar");
+        const progressText = document.getElementById("progressText");
+        const repairStatus = document.getElementById("repairStatus");
+        const systemState = document.getElementById("systemState");
+        const systemLogs = document.getElementById("systemLogs");
+
+        const repairSteps = [
+            {
+                progress: 12,
+                status: "Menghubungkan ke maintenance core...",
+                log: "Maintenance core berhasil diinisialisasi."
+            },
+            {
+                progress: 27,
+                status: "Memeriksa kesehatan server...",
+                log: "Server health check sedang berjalan."
+            },
+            {
+                progress: 43,
+                status: "Memeriksa service gateway...",
+                log: "Gateway service sedang dianalisis."
+            },
+            {
+                progress: 59,
+                status: "Memvalidasi database service...",
+                log: "Database integrity check selesai."
+            },
+            {
+                progress: 74,
+                status: "Membersihkan proses bermasalah...",
+                log: "Proses tidak responsif sedang ditangani."
+            },
+            {
+                progress: 88,
+                status: "Mengoptimalkan sistem...",
+                log: "System optimization sedang berjalan."
+            },
+            {
+                progress: 100,
+                status: "Pemulihan sistem selesai.",
+                log: "Maintenance check selesai. Sistem siap digunakan."
+            }
+        ];
+
+        let currentStep = 0;
+
+        function addLog(message) {
+            const line = document.createElement("div");
+
+            line.className = "log-line flex items-start gap-2 text-[8px] font-mono";
+
+            line.innerHTML = `
+                <span class="text-slate-700 shrink-0">›</span>
+                <span class="text-slate-500">${escapeHtml(message)}</span>
+            `;
+
+            systemLogs.appendChild(line);
+
+            while (systemLogs.children.length > 5) {
+                systemLogs.removeChild(systemLogs.firstChild);
+            }
+        }
+
+        function updateRepair() {
+            if (currentStep >= repairSteps.length) {
+                setTimeout(() => {
+                    currentStep = 0;
+                    systemLogs.innerHTML = "";
+                    progressBar.style.width = "0%";
+                    progressText.textContent = "0%";
+                    systemState.textContent = "SYSTEM LOCKED";
+                    updateRepair();
+                }, 5000);
+
+                return;
+            }
+
+            const step = repairSteps[currentStep];
+
+            progressBar.style.width = step.progress + "%";
+            progressText.textContent = step.progress + "%";
+            repairStatus.textContent = step.status;
+
+            if (step.progress >= 100) {
+                systemState.textContent = "RECOVERY COMPLETE";
+                systemState.className = "text-[8px] text-emerald-400";
+            } else {
+                systemState.textContent = "SYSTEM LOCKED";
+                systemState.className = "text-[8px] text-slate-600";
+            }
+
+            addLog(step.log);
+
+            currentStep++;
+
+            setTimeout(updateRepair, 1800);
+        }
+
+        function escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        const message = encodeURIComponent(
+            "Halo Admin ReyCloud, saya ingin menanyakan layanan ReyCloud. Saat ini sistem sedang maintenance dan saya ingin mendapatkan informasi lebih lanjut dengan sopan. Terima kasih, Admin."
+        );
+
+        document.getElementById("contactAdmin").href =
+            "https://wa.me/6281260512743?text=" + message;
+
+        addLog("ReyBot Repair System online.");
+        addLog("Security lock berhasil diaktifkan.");
+        addLog("Menunggu proses pemeriksaan otomatis...");
+
+        setTimeout(updateRepair, 900);
+    </script>
 
 </body>
 </html>

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07090d">
+<title>404 — ReyCloud</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+    --bg:#07090d;
+    --panel:#0d1118;
+    --panel2:#111722;
+    --border:#202936;
+    --text:#f5f7fb;
+    --muted:#8994a7;
+    --muted2:#5e6878;
+    --accent:#69a7ff;
+    --accent2:#8b7cff;
+    --robot:#f4f7fb;
+    --robot-dark:#dce3ed;
+    --robot-eye:#18202d;
+    --shadow:rgba(0,0,0,.35);
+}
+body.light{
+    --bg:#f4f6fa;
+    --panel:#ffffff;
+    --panel2:#eef2f7;
+    --border:#d8dee8;
+    --text:#111827;
+    --muted:#687386;
+    --muted2:#8b95a5;
+    --accent:#3478e5;
+    --accent2:#735be8;
+    --robot:#151a22;
+    --robot-dark:#303846;
+    --robot-eye:#f7f9fc;
+    --shadow:rgba(15,23,42,.12);
+}
+html,body{min-height:100%}
+body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    overflow-x:hidden;
+    transition:background .35s ease,color .35s ease;
+}
+body:before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.35;
+    background-image:
+        linear-gradient(rgba(120,140,180,.045) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(120,140,180,.045) 1px,transparent 1px);
+    background-size:34px 34px;
+    mask-image:linear-gradient(to bottom,black,transparent 85%);
+}
+.ambient{
+    position:fixed;
+    width:300px;
+    height:300px;
+    border-radius:50%;
+    filter:blur(100px);
+    pointer-events:none;
+    opacity:.12;
+}
+.ambient.one{top:-140px;left:50%;transform:translateX(-50%);background:#568fff}
+.ambient.two{bottom:-150px;right:-100px;background:#805dff}
+.wrapper{
+    width:min(100%,520px);
+    min-height:100vh;
+    margin:auto;
+    padding:24px 18px 26px;
+    display:flex;
+    flex-direction:column;
+}
+.topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 13px;
+    border:1px solid var(--border);
+    background:color-mix(in srgb,var(--panel) 92%,transparent);
+    border-radius:18px;
+    box-shadow:0 14px 40px var(--shadow);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+}
+.brand{
+    display:flex;
+    align-items:center;
+    gap:11px;
+}
+.logo{
+    width:39px;
+    height:39px;
+    border-radius:12px;
+    display:grid;
+    place-items:center;
+    color:#fff;
+    background:#090c12;
+    border:1px solid #43516a;
+    box-shadow:0 0 22px rgba(80,130,255,.2);
+    font-size:18px;
+}
+.brand-title{
+    font-size:13px;
+    font-weight:900;
+    letter-spacing:.08em;
+}
+.brand-title span{color:var(--accent)}
+.brand-sub{
+    margin-top:2px;
+    color:var(--muted2);
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:.18em;
+}
+.theme{
+    width:39px;
+    height:39px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:var(--panel2);
+    color:var(--text);
+    display:grid;
+    place-items:center;
+    font-size:17px;
+    cursor:pointer;
+    transition:.25s;
+}
+.theme:hover{transform:translateY(-2px)}
+.hero{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:38px 0 28px;
+}
+.robot-box{
+    position:relative;
+    width:100%;
+    max-width:350px;
+    height:285px;
+    margin:0 auto 4px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.robot-glow{
+    position:absolute;
+    width:190px;
+    height:190px;
+    border-radius:50%;
+    background:var(--accent);
+    opacity:.07;
+    filter:blur(55px);
+    animation:glow 4s ease-in-out infinite;
+}
+.robot{
+    width:255px;
+    height:255px;
+    position:relative;
+    z-index:2;
+    color:var(--robot);
+    animation:float 4s ease-in-out infinite;
+    filter:drop-shadow(0 18px 28px var(--shadow));
+}
+.robot *{vector-effect:non-scaling-stroke}
+.robot-line{
+    fill:none;
+    stroke:var(--robot-dark);
+    stroke-width:2;
+}
+.robot-fill{fill:var(--robot)}
+.robot-dark{fill:var(--robot-dark)}
+.robot-eye{fill:var(--robot-eye)}
+.signal{
+    position:absolute;
+    right:24px;
+    top:48px;
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+    align-items:center;
+}
+.signal span{
+    display:block;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 12px var(--accent);
+    animation:signal 1.8s infinite;
+}
+.signal span:nth-child(2){animation-delay:.3s}
+.signal span:nth-child(3){animation-delay:.6s}
+.error-code{
+    font-size:76px;
+    line-height:.9;
+    font-weight:950;
+    letter-spacing:-.075em;
+    text-align:center;
+    background:linear-gradient(110deg,var(--text),var(--accent),var(--accent2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+}
+.kicker{
+    margin-top:15px;
+    text-align:center;
+    color:var(--accent);
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+}
+.title{
+    margin-top:10px;
+    text-align:center;
+    font-size:24px;
+    line-height:1.25;
+    font-weight:900;
+    letter-spacing:-.025em;
+}
+.description{
+    max-width:440px;
+    margin:12px auto 0;
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.75;
+}
+.route{
+    width:100%;
+    margin-top:22px;
+    padding:12px 14px;
+    border:1px dashed var(--border);
+    border-radius:13px;
+    background:var(--panel);
+    display:flex;
+    align-items:center;
+    gap:9px;
+    overflow:hidden;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:10px;
+}
+.route-dot{
+    width:7px;
+    height:7px;
+    flex:none;
+    border-radius:50%;
+    background:#ef6670;
+    box-shadow:0 0 12px rgba(239,102,112,.7);
+}
+.route-method{color:var(--muted)}
+.route-path{
+    color:var(--accent);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.route-arrow{color:var(--muted2)}
+.route-status{color:#ef6670;font-weight:900}
+.route-text{color:var(--muted2);white-space:nowrap}
+.actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:14px;
+}
+.btn{
+    min-height:47px;
+    padding:0 15px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font-size:11px;
+    font-weight:850;
+    text-decoration:none;
+    cursor:pointer;
+    transition:transform .25s,box-shadow .25s,background .25s;
+}
+.btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 24px var(--shadow);
+}
+.btn-back{
+    background:var(--panel);
+    color:var(--text);
+}
+.btn-home{
+    color:#fff;
+    border-color:transparent;
+    background:linear-gradient(110deg,#3e82ed,#7566eb);
+    box-shadow:0 9px 25px rgba(72,110,235,.18);
+}
+.system{
+    margin-top:24px;
+    padding:13px 14px;
+    border:1px solid var(--border);
+    border-radius:15px;
+    background:var(--panel);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+}
+.system-left{
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+.system-icon{
+    width:29px;
+    height:29px;
+    border-radius:9px;
+    display:grid;
+    place-items:center;
+    background:rgba(74,222,128,.09);
+    color:#4ade80;
+    font-size:12px;
+}
+.system-title{
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+}
+.system-sub{
+    margin-top:3px;
+    color:var(--muted2);
+    font-size:8px;
+}
+.online{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:#4ade80;
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:.08em;
+}
+.online i{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#4ade80;
+    box-shadow:0 0 10px rgba(74,222,128,.8);
+}
+.footer{
+    text-align:center;
+    color:var(--muted2);
+    font-size:8px;
+    font-weight:700;
+    letter-spacing:.1em;
+    padding-top:20px;
+}
+@keyframes float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-8px)}
+}
+@keyframes glow{
+    0%,100%{transform:scale(.9);opacity:.05}
+    50%{transform:scale(1.08);opacity:.1}
+}
+@keyframes signal{
+    0%,100%{opacity:.25;transform:translateY(0)}
+    50%{opacity:1;transform:translateY(3px)}
+}
+@media(max-width:390px){
+    .wrapper{padding:17px 14px 22px}
+    .hero{padding-top:30px}
+    .robot-box{height:245px}
+    .robot{width:225px;height:225px}
+    .error-code{font-size:66px}
+    .title{font-size:21px}
+    .description{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){
+    *,*:before,*:after{
+        animation:none!important;
+        transition:none!important;
+    }
+}
+</style>
+</head>
+<body>
+<div class="ambient one"></div>
+<div class="ambient two"></div>
+
+<main class="wrapper">
+    <header class="topbar">
+        <div class="brand">
+            <div class="logo">⚡</div>
+            <div>
+                <div class="brand-title">REY<span>CLOUD</span></div>
+                <div class="brand-sub">NEXT-GEN ECOSYSTEM</div>
+            </div>
+        </div>
+        <button class="theme" id="themeBtn" aria-label="Ganti tema">🌙</button>
+    </header>
+
+    <section class="hero">
+        <div class="robot-box">
+            <div class="robot-glow"></div>
+
+            <div class="signal">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <svg class="robot" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" aria-label="ReyCloud Robot">
+                <defs>
+                    <linearGradient id="bodyGradient" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="currentColor" stop-opacity="1"/>
+                        <stop offset="1" stop-color="currentColor" stop-opacity=".78"/>
+                    </linearGradient>
+                    <linearGradient id="antennaGradient" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#69a7ff"/>
+                        <stop offset="1" stop-color="#8b7cff"/>
+                    </linearGradient>
+                </defs>
+
+                <ellipse cx="150" cy="273" rx="77" ry="11" fill="#000" opacity=".16"/>
+
+                <line x1="150" y1="39" x2="150" y2="24" stroke="url(#antennaGradient)" stroke-width="5" stroke-linecap="round"/>
+                <circle cx="150" cy="18" r="7" fill="url(#antennaGradient)"/>
+
+                <rect x="99" y="40" width="102" height="78" rx="27" fill="url(#bodyGradient)" stroke="var(--robot-dark)" stroke-width="3"/>
+                <rect x="112" y="53" width="76" height="50" rx="19" fill="var(--robot-dark)" opacity=".9"/>
+
+                <rect x="128" y="71" width="17" height="8" rx="4" class="robot-eye"/>
+                <rect x="155" y="71" width="17" height="8" rx="4" class="robot-eye"/>
+
+                <circle cx="133" cy="75" r="2" fill="var(--accent)"/>
+                <circle cx="167" cy="75" r="2" fill="var(--accent)"/>
+
+                <rect x="108" y="124" width="84" height="12" rx="6" class="robot-dark"/>
+
+                <path d="M85 137C65 139 54 153 56 174L61 226C63 246 78 258 96 258H204C222 258 237 246 239 226L244 174C246 153 235 139 215 137Z" fill="url(#bodyGradient)" stroke="var(--robot-dark)" stroke-width="3"/>
+
+                <path d="M112 153C126 145 174 145 188 153V215C188 229 177 240 163 240H137C123 240 112 229 112 215Z" class="robot-dark" opacity=".7"/>
+
+                <path d="M135 168L150 158L165 168V193L150 201L135 193Z" fill="var(--robot-eye)" opacity=".95"/>
+                <path d="M150 166V193" stroke="var(--robot)" stroke-width="2" opacity=".5"/>
+
+                <rect x="52" y="156" width="27" height="82" rx="13.5" fill="url(#bodyGradient)" stroke="var(--robot-dark)" stroke-width="3" transform="rotate(10 52 156)"/>
+                <rect x="221" y="156" width="27" height="82" rx="13.5" fill="url(#bodyGradient)" stroke="var(--robot-dark)" stroke-width="3" transform="rotate(-10 221 156)"/>
+
+                <circle cx="150" cy="111" r="4" fill="#69a7ff" opacity=".8"/>
+
+                <path d="M112 258H188" stroke="var(--robot-dark)" stroke-width="6" stroke-linecap="round"/>
+                <path d="M121 265H179" stroke="var(--robot-dark)" stroke-width="4" stroke-linecap="round" opacity=".65"/>
+            </svg>
+        </div>
+
+        <div class="error-code">404</div>
+
+        <div class="kicker">System Response // Not Found</div>
+
+        <h1 class="title">Halaman Tidak Ditemukan</h1>
+
+        <p class="description">
+            Halaman yang kamu cari mungkin sudah dipindahkan, dihapus,
+            atau alamat URL yang kamu masukkan tidak tersedia.
+        </p>
+
+        <div class="route">
+            <span class="route-dot"></span>
+            <span class="route-method">GET</span>
+            <span class="route-path" id="routePath">/requested-path</span>
+            <span class="route-arrow">→</span>
+            <span class="route-status">404</span>
+            <span class="route-text">not_found</span>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-back" onclick="goBack()">← Kembali</button>
+            <a class="btn btn-home" href="/dashboard">⚡ Dashboard</a>
+        </div>
+
+        <div class="system">
+            <div class="system-left">
+                <div class="system-icon">✓</div>
+                <div>
+                    <div class="system-title">ReyCloud System</div>
+                    <div class="system-sub">Gateway masih beroperasi normal</div>
+                </div>
+            </div>
+            <div class="online">
+                <i></i>
+                ONLINE
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        © 2026 REYCLOUD • SYSTEM 404
+    </footer>
+</main>
+
+<script>
+const body=document.body;
+const themeBtn=document.getElementById("themeBtn");
+const routePath=document.getElementById("routePath");
+
+function applyTheme(theme){
+    body.classList.toggle("light",theme==="light");
+    themeBtn.textContent=theme==="light"?"☀️":"🌙";
+    localStorage.setItem("reycloud_404_theme",theme);
+    const meta=document.querySelector('meta[name="theme-color"]');
+    if(meta) meta.content=theme==="light"?"#f4f6fa":"#07090d";
+}
+
+const savedTheme=localStorage.getItem("reycloud_404_theme");
+const initialTheme=savedTheme||(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");
+applyTheme(initialTheme);
+
+themeBtn.addEventListener("click",()=>{
+    applyTheme(body.classList.contains("light")?"dark":"light");
+});
+
+routePath.textContent=window.location.pathname+(window.location.search||"");
+
+function goBack(){
+    if(document.referrer){
+        history.back();
+    }else{
+        window.location.href="/dashboard";
+    }
+}
+</script>
+</body>
+</html>

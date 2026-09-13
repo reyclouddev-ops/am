@@ -1,335 +1,814 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReyCloud - AI Tools, Enhancer & Deployer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#08090c">
+    <meta name="color-scheme" content="dark">
+    <title>ReyCode — AI Studio & Deploy</title>
+
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
     <style>
-        body { background-color: #0d0f12; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        :root {
+            --bg: #08090c;
+            --panel: rgba(18, 20, 25, .78);
+            --panel-2: rgba(13, 15, 19, .88);
+            --line: rgba(255,255,255,.075);
+            --muted: #8d95a3;
+            --cyan: #22d3ee;
+            --purple: #a78bfa;
+            --amber: #fbbf24;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 50% -10%, rgba(34,211,238,.09), transparent 34%),
+                radial-gradient(circle at 100% 40%, rgba(167,139,250,.06), transparent 30%),
+                var(--bg);
+            color: #f8fafc;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .22;
+            background-image:
+                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: linear-gradient(to bottom, black, transparent 80%);
+        }
+
+        ::selection {
+            background: rgba(34,211,238,.25);
+        }
+
+        .shell {
+            width: min(100%, 760px);
+            margin: 0 auto;
+            padding: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .glass {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            box-shadow:
+                0 20px 60px rgba(0,0,0,.28),
+                inset 0 1px 0 rgba(255,255,255,.025);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+
+        .header {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            right: -90px;
+            top: -100px;
+            border-radius: 999px;
+            background: rgba(34,211,238,.1);
+            filter: blur(35px);
+        }
+
+        .logo-box {
+            position: relative;
+            overflow: hidden;
+            background:
+                linear-gradient(145deg, rgba(34,211,238,.16), rgba(255,255,255,.025));
+            border: 1px solid rgba(34,211,238,.2);
+        }
+
+        .logo-box::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,.12), transparent);
+            transform: translateX(-120%);
+            animation: shine 5s infinite;
+        }
+
+        @keyframes shine {
+            0%, 65% {
+                transform: translateX(-120%);
+            }
+            85%, 100% {
+                transform: translateX(120%);
+            }
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: #34d399;
+            box-shadow: 0 0 12px rgba(52,211,153,.7);
+            animation: pulseDot 2s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%,100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .5; transform: scale(.8); }
+        }
+
+        .tool-nav {
+            scrollbar-width: none;
+        }
+
+        .tool-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tool-tab {
+            min-width: 108px;
+            transition: .22s ease;
+        }
+
+        .tool-tab.active {
+            background: linear-gradient(145deg, rgba(255,255,255,.1), rgba(255,255,255,.045));
+            border-color: rgba(255,255,255,.13);
+            color: white;
+            box-shadow:
+                0 8px 24px rgba(0,0,0,.2),
+                inset 0 1px 0 rgba(255,255,255,.05);
+        }
+
+        .tool-section {
+            animation: sectionIn .28s ease;
+        }
+
+        @keyframes sectionIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon-box {
+            background: linear-gradient(145deg, rgba(255,255,255,.065), rgba(255,255,255,.018));
+            border: 1px solid rgba(255,255,255,.075);
+        }
+
+        .field {
+            background: rgba(5,7,10,.72);
+            border: 1px solid rgba(255,255,255,.08);
+            transition: .2s ease;
+        }
+
+        .field:focus {
+            outline: none;
+            border-color: rgba(34,211,238,.42);
+            box-shadow: 0 0 0 3px rgba(34,211,238,.055);
+        }
+
+        .upload-zone {
+            border: 1px dashed rgba(255,255,255,.13);
+            background:
+                radial-gradient(circle at center, rgba(255,255,255,.035), transparent 65%),
+                rgba(5,7,10,.6);
+            transition: .2s ease;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: rgba(34,211,238,.42);
+            background: rgba(34,211,238,.035);
+        }
+
+        .primary-btn {
+            position: relative;
+            overflow: hidden;
+            transition: .2s ease;
+        }
+
+        .primary-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,.22), transparent 75%);
+            transform: translateX(-120%);
+            transition: .55s ease;
+        }
+
+        .primary-btn:hover::before {
+            transform: translateX(120%);
+        }
+
+        .primary-btn:active {
+            transform: scale(.985);
+        }
+
+        .result-card {
+            background:
+                linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
+                #080a0d;
+        }
+
+        .preview-frame {
+            background:
+                linear-gradient(45deg,#11151b 25%,transparent 25%),
+                linear-gradient(-45deg,#11151b 25%,transparent 25%),
+                linear-gradient(45deg,transparent 75%,#11151b 75%),
+                linear-gradient(-45deg,transparent 75%,#11151b 75%);
+            background-size: 18px 18px;
+            background-position: 0 0,0 9px,9px -9px,-9px 0;
+        }
+
+        .loader-ring {
+            width: 30px;
+            height: 30px;
+            border: 2px solid rgba(255,255,255,.1);
+            border-top-color: currentColor;
+            border-radius: 999px;
+            animation: spin  .75s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-line {
+            height: 3px;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 99px;
+            background: rgba(255,255,255,.06);
+        }
+
+        .progress-line span {
+            display: block;
+            width: 35%;
+            height: 100%;
+            border-radius: inherit;
+            background: currentColor;
+            animation: progressMove 1.3s ease-in-out infinite;
+        }
+
+        @keyframes progressMove {
+            0% { transform: translateX(-130%); }
+            100% { transform: translateX(310%); }
+        }
+
+        .choice {
+            transition: .18s ease;
+        }
+
+        .choice.active {
+            background: rgba(167,139,250,.12);
+            border-color: rgba(167,139,250,.38);
+            color: #ddd6fe;
+        }
+
+        .domain-choice.active {
+            background: rgba(251,191,36,.09);
+            border-color: rgba(251,191,36,.4);
+            color: #fcd34d;
+        }
+
+        .toast {
+            transition: .3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%,0);
+            pointer-events: auto;
+        }
+
+        .toast.hide {
+            opacity: 0;
+            transform: translate(-50%,-14px);
+            pointer-events: none;
+        }
+
+        @media (max-width: 520px) {
+            .shell {
+                padding: 10px;
+            }
+
+            .tool-tab {
+                min-width: 94px;
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 relative"><div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-4">
-    <div id="toastBox" class="bg-[#1e2330] border border-amber-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-medium">
-        <span id="toastIcon">⚠️</span>
-        <span id="toastMessage">Pesan notifikasi di sini</span>
+
+<body>
+
+<div id="toastContainer" class="toast hide fixed top-3 left-1/2 z-[100] w-[calc(100%-24px)] max-w-md">
+    <div id="toastBox" class="glass rounded-2xl px-4 py-3 flex items-center gap-3">
+        <span id="toastIcon" class="text-base">⚠️</span>
+        <span id="toastMessage" class="text-xs font-medium text-slate-100"></span>
     </div>
 </div>
 
-<div class="w-full max-w-md space-y-4">
+<main class="shell space-y-3">
 
-    <div class="flex items-center justify-between bg-[#151922] border border-[#232936] rounded-2xl p-4 shadow-lg relative">
-        <div class="flex items-center space-x-2.5">
-            <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
-                R
-            </div>
-            <div>
-                <div class="flex items-center space-x-1.5">
-                    <span class="font-extrabold text-sm tracking-wide text-white">REYCLOUD<span class="text-cyan-400">TOOLS</span></span>
+    <header class="header glass rounded-[24px] p-4 sm:p-5">
+        <div class="flex items-center justify-between gap-3 relative z-10">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="logo-box w-11 h-11 rounded-2xl flex items-center justify-center shrink-0">
+                    <span class="relative text-cyan-300 font-black text-lg tracking-tight">R</span>
                 </div>
-                <span class="text-[10px] tracking-widest text-slate-400 font-semibold uppercase">AI UTILITY SUITE</span>
+
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-sm sm:text-base font-black tracking-[.08em] text-white">
+                            REY<span class="text-cyan-400">CODE</span>
+                        </h1>
+
+                        <div class="hidden sm:flex items-center gap-1.5 text-[9px] text-emerald-300 font-semibold">
+                            <span class="status-dot"></span>
+                            ONLINE
+                        </div>
+                    </div>
+
+                    <p class="text-[9px] sm:text-[10px] text-slate-500 tracking-[.18em] uppercase mt-0.5">
+                        AI • CREATE • ENHANCE • DEPLOY
+                    </p>
+                </div>
             </div>
+
+            <a href="/dashboard"
+               class="shrink-0 px-3 py-2 rounded-xl bg-white/[.035] border border-white/[.07] text-[10px] sm:text-[11px] text-slate-300 hover:text-white hover:bg-white/[.07] transition">
+                Home
+            </a>
         </div>
 
-        <a href="/dashboard" class="px-3 py-1.5 rounded-xl bg-[#1e2330] border border-[#2b3344] text-[11px] text-slate-300 hover:text-white transition-all font-medium">
-            Kembali ke Home
-        </a>
-    </div>
+        <div class="mt-4 pt-3 border-t border-white/[.06] flex items-center justify-between gap-3">
+            <div>
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+                    ReyCode Studio
+                </p>
+                <p id="subTitleText" class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                    Tingkatkan gambar dengan AI secara cepat dan praktis.
+                </p>
+            </div>
 
-    <div class="space-y-1 px-1">
-        <div class="text-[11px] text-slate-400">ReyCloud <span class="text-cyan-400 font-bold tracking-wide">AI TOOLS, ENHANCER, IMAGEN & DEPLOY</span></div>
-        <p id="subTitleText" class="text-[11px] text-slate-400 leading-relaxed">Tingkatkan gambar, enhance video, hapus background, generate AI image, atau deploy website instan.</p>
-    </div>
+            <div class="hidden sm:flex items-center gap-1.5 text-[9px] text-slate-500 shrink-0">
+                <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                READY
+            </div>
+        </div>
+    </header>
 
-    <div class="grid grid-cols-5 gap-1 bg-[#151922] p-1.5 rounded-2xl border border-[#232936]">
-        <button id="btnTabUpscale" onclick="switchToolTab('upscale')"
-            class="flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer">
-            <span>✨ Upscale</span>
+    <nav class="tool-nav glass rounded-2xl p-1.5 flex gap-1 overflow-x-auto">
+        <button id="btnTabUpscale" onclick="switchToolTab('upscale')" class="tool-tab active rounded-xl border border-transparent px-3 py-2.5 text-[10px] font-semibold shrink-0">
+            ✨ Upscale
         </button>
-        <button id="btnTabWink" onclick="switchToolTab('wink')"
-            class="flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-            <span>🎬 Wink</span>
-        </button>
-        <button id="btnTabRemoveBg" onclick="switchToolTab('removebg')"
-            class="flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-            <span>✂️ Remove</span>
-        </button>
-        <button id="btnTabImagen" onclick="switchToolTab('imagen')"
-            class="flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-            <span>🎨 Imagen</span>
-        </button>
-        <button id="btnTabDeploy" onclick="switchToolTab('deploy')"
-            class="flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-            <span>🚀 Deploy</span>
-        </button>
-    </div>
 
-    <div id="sectionUpscale" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-5">
-        <div class="flex items-start space-x-3.5">
-            <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-cyan-400 shrink-0">
+        <button id="btnTabWink" onclick="switchToolTab('wink')" class="tool-tab rounded-xl border border-transparent px-3 py-2.5 text-[10px] font-medium text-slate-500 shrink-0">
+            🎬 Wink
+        </button>
+
+        <button id="btnTabRemoveBg" onclick="switchToolTab('removebg')" class="tool-tab rounded-xl border border-transparent px-3 py-2.5 text-[10px] font-medium text-slate-500 shrink-0">
+            ✂️ Remove
+        </button>
+
+        <button id="btnTabImagen" onclick="switchToolTab('imagen')" class="tool-tab rounded-xl border border-transparent px-3 py-2.5 text-[10px] font-medium text-slate-500 shrink-0">
+            🎨 Imagen
+        </button>
+
+        <button id="btnTabDeploy" onclick="switchToolTab('deploy')" class="tool-tab rounded-xl border border-transparent px-3 py-2.5 text-[10px] font-medium text-slate-500 shrink-0">
+            🚀 Deploy
+        </button>
+    </nav>
+
+    <section id="sectionUpscale" class="tool-section glass rounded-[24px] p-4 sm:p-5 space-y-5">
+        <div class="flex items-start gap-3">
+            <div class="icon-box w-11 h-11 rounded-2xl flex items-center justify-center text-cyan-300 shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </div>
+
             <div>
-                <h2 class="text-sm font-bold text-white tracking-tight">AI Image Upscaler HD</h2>
-                <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Upload gambar Anda untuk proses peningkatan kejernihan.</p>
+                <div class="flex items-center gap-2">
+                    <h2 class="text-sm font-bold text-white">AI Image Upscaler</h2>
+                    <span class="text-[8px] px-1.5 py-0.5 rounded-md bg-cyan-400/10 text-cyan-300 border border-cyan-400/15">HD</span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                    Tingkatkan detail, ketajaman, dan resolusi gambar menggunakan AI.
+                </p>
             </div>
         </div>
 
         <div class="space-y-4">
-            <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">PILIH FILE GAMBAR</label>
-                <input type="file" id="imageFileInput" accept="image/*"
-                    class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-2.5 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/10 file:text-cyan-400 hover:file:bg-cyan-500/20 cursor-pointer">
-            </div>
+            <label class="upload-zone rounded-2xl p-5 block cursor-pointer text-center" id="upscaleDropZone">
+                <input type="file" id="imageFileInput" accept="image/*" class="hidden">
+
+                <div class="w-12 h-12 rounded-2xl mx-auto bg-cyan-400/8 border border-cyan-400/12 flex items-center justify-center text-xl">
+                    🖼️
+                </div>
+
+                <p id="upscaleFileLabel" class="text-xs text-slate-300 font-semibold mt-3">
+                    Pilih gambar
+                </p>
+
+                <p class="text-[10px] text-slate-600 mt-1">
+                    PNG, JPG, WEBP • Drag & Drop tersedia
+                </p>
+            </label>
+
             <button onclick="processUpscale()" id="btnProcessUpscale"
-                class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
-                Mulai Upscale Gambar
+                class="primary-btn w-full bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black py-3.5 rounded-xl text-xs shadow-[0_8px_30px_rgba(34,211,238,.12)]">
+                Mulai Upscale
             </button>
         </div>
 
-        <div id="upscaleLoading" class="hidden text-center py-6 space-y-3">
-            <div class="inline-block w-7 h-7 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-xs text-cyan-400 animate-pulse font-medium">Sedang memproses & menjernihkan gambar...</p>
+        <div id="upscaleLoading" class="hidden py-5 text-center space-y-3 text-cyan-400">
+            <div class="loader-ring mx-auto"></div>
+            <p class="text-[11px] font-medium animate-pulse">AI sedang meningkatkan kualitas gambar...</p>
+            <div class="progress-line"><span></span></div>
         </div>
 
-        <div id="upscaleResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-cyan-500/30 rounded-2xl p-4 text-center">
-            <div class="flex items-center justify-center space-x-2 text-cyan-400 font-bold text-xs">
-                <span>✨</span>
-                <span>Upscale Berhasil!</span>
+        <div id="upscaleResultBox" class="result-card hidden rounded-2xl border border-cyan-400/15 p-3 space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] text-cyan-300 font-bold">✨ UPSCALE COMPLETE</span>
+                <span class="text-[9px] text-emerald-300">SUCCESS</span>
             </div>
-            <img id="upscaleResultImg" src="" alt="Upscaled" class="w-full rounded-xl border border-[#232936] max-h-60 object-contain mx-auto">
-            <a id="upscaleDownloadBtn" href="" target="_blank" class="inline-block w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition-all">
+
+            <img id="upscaleResultImg" src="" alt="Upscaled" class="w-full rounded-xl max-h-80 object-contain">
+
+            <a id="upscaleDownloadBtn" href="" target="_blank"
+               class="block text-center bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black py-2.5 rounded-xl text-xs">
                 Unduh Gambar HD
             </a>
         </div>
-    </div>
+    </section>
 
-    <div id="sectionWink" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-5 hidden">
-        <div class="flex items-start space-x-3.5">
-            <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-amber-400 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
+    <section id="sectionWink" class="tool-section glass rounded-[24px] p-4 sm:p-5 space-y-5 hidden">
+        <div class="flex items-start gap-3">
+            <div class="icon-box w-11 h-11 rounded-2xl flex items-center justify-center text-amber-300 shrink-0">
+                🎬
             </div>
+
             <div>
-                <h2 class="text-sm font-bold text-white tracking-tight">Wink Video Enhancer Ultra HD</h2>
-                <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Tingkatkan kualitas video blur menjadi jernih beresolusi tinggi.</p>
+                <div class="flex items-center gap-2">
+                    <h2 class="text-sm font-bold text-white">Wink Video Enhancer</h2>
+                    <span class="text-[8px] px-1.5 py-0.5 rounded-md bg-amber-400/10 text-amber-300 border border-amber-400/15">ULTRA HD</span>
+                </div>
+
+                <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                    Tingkatkan kejernihan video dengan proses enhancement berbasis AI.
+                </p>
             </div>
         </div>
 
         <div class="space-y-4">
-            <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">PILIH FILE VIDEO</label>
-                <input type="file" id="videoFileInput" accept="video/*"
-                    class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-2.5 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500/10 file:text-amber-400 hover:file:bg-amber-500/20 cursor-pointer">
-            </div>
+            <label class="upload-zone rounded-2xl p-5 block cursor-pointer text-center">
+                <input type="file" id="videoFileInput" accept="video/*" class="hidden">
+
+                <div class="w-12 h-12 rounded-2xl mx-auto bg-amber-400/8 border border-amber-400/12 flex items-center justify-center text-xl">
+                    🎞️
+                </div>
+
+                <p id="winkFileLabel" class="text-xs text-slate-300 font-semibold mt-3">
+                    Pilih video
+                </p>
+
+                <p class="text-[10px] text-slate-600 mt-1">
+                    MP4, MOV, WEBM
+                </p>
+            </label>
+
             <button onclick="processWink()" id="btnProcessWink"
-                class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
-                Mulai Enhance Video
+                class="primary-btn w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black py-3.5 rounded-xl text-xs">
+                Enhance Video
             </button>
         </div>
 
-        <div id="winkLoading" class="hidden text-center py-6 space-y-3">
-            <div class="inline-block w-7 h-7 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-xs text-amber-400 animate-pulse font-medium">Sedang memproses video via Wink AI (Mohon tunggu beberapa saat)...</p>
+        <div id="winkLoading" class="hidden py-5 text-center space-y-3 text-amber-300">
+            <div class="loader-ring mx-auto"></div>
+            <p class="text-[11px] font-medium animate-pulse">Wink AI sedang memproses video...</p>
+            <div class="progress-line"><span></span></div>
         </div>
 
-        <div id="winkResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-amber-500/30 rounded-2xl p-4 text-center">
-            <div class="flex items-center justify-center space-x-2 text-amber-400 font-bold text-xs">
-                <span>🎉</span>
-                <span>Video Enhance Berhasil!</span>
+        <div id="winkResultBox" class="result-card hidden rounded-2xl border border-amber-400/15 p-3 space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] text-amber-300 font-bold">🎬 VIDEO ENHANCED</span>
+                <span class="text-[9px] text-emerald-300">SUCCESS</span>
             </div>
-            <video id="winkResultVideo" controls class="w-full rounded-xl border border-[#232936] max-h-60 object-contain mx-auto"></video>
-            <a id="winkDownloadBtn" href="" target="_blank" class="inline-block w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition-all">
+
+            <video id="winkResultVideo" controls class="w-full rounded-xl max-h-80"></video>
+
+            <a id="winkDownloadBtn" href="" target="_blank"
+               class="block text-center bg-amber-400 hover:bg-amber-300 text-slate-950 font-black py-2.5 rounded-xl text-xs">
                 Unduh Video HD
             </a>
         </div>
-    </div>
+    </section>
 
-    <div id="sectionRemoveBg" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-5 hidden">
-        <div class="flex items-start space-x-3.5">
-            <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-pink-400 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
+    <section id="sectionRemoveBg" class="tool-section glass rounded-[24px] p-4 sm:p-5 space-y-5 hidden">
+        <div class="flex items-start gap-3">
+            <div class="icon-box w-11 h-11 rounded-2xl flex items-center justify-center text-pink-300 shrink-0">
+                ✂️
             </div>
+
             <div>
-                <h2 class="text-sm font-bold text-white tracking-tight">AI Remove Background</h2>
-                <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Hapus latar belakang foto secara otomatis dengan akurat.</p>
+                <h2 class="text-sm font-bold text-white">AI Background Remover</h2>
+                <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                    Hapus background foto secara otomatis dan hasilkan PNG transparan.
+                </p>
             </div>
         </div>
 
         <div class="space-y-4">
-            <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">PILIH FILE GAMBAR</label>
-                <input type="file" id="removeBgFileInput" accept="image/*"
-                    class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-2.5 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-pink-500/10 file:text-pink-400 hover:file:bg-pink-500/20 cursor-pointer">
-            </div>
+            <label class="upload-zone rounded-2xl p-5 block cursor-pointer text-center">
+                <input type="file" id="removeBgFileInput" accept="image/*" class="hidden">
+
+                <div class="w-12 h-12 rounded-2xl mx-auto bg-pink-400/8 border border-pink-400/12 flex items-center justify-center text-xl">
+                    ✂️
+                </div>
+
+                <p id="removeBgFileLabel" class="text-xs text-slate-300 font-semibold mt-3">
+                    Pilih gambar
+                </p>
+
+                <p class="text-[10px] text-slate-600 mt-1">
+                    PNG, JPG, WEBP
+                </p>
+            </label>
+
             <button onclick="processRemoveBg()" id="btnProcessRemoveBg"
-                class="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
-                Hapus Background Sekarang
+                class="primary-btn w-full bg-pink-500 hover:bg-pink-400 text-white font-black py-3.5 rounded-xl text-xs">
+                Hapus Background
             </button>
         </div>
 
-        <div id="removeBgLoading" class="hidden text-center py-6 space-y-3">
-            <div class="inline-block w-7 h-7 border-2 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-xs text-pink-400 animate-pulse font-medium">Sedang menghapus background gambar...</p>
+        <div id="removeBgLoading" class="hidden py-5 text-center space-y-3 text-pink-300">
+            <div class="loader-ring mx-auto"></div>
+            <p class="text-[11px] font-medium animate-pulse">AI sedang menghapus background...</p>
+            <div class="progress-line"><span></span></div>
         </div>
 
-        <div id="removeBgResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-pink-500/30 rounded-2xl p-4 text-center">
-            <div class="flex items-center justify-center space-x-2 text-pink-400 font-bold text-xs">
-                <span>✂️</span>
-                <span>Background Berhasil Dihapus!</span>
+        <div id="removeBgResultBox" class="result-card hidden rounded-2xl border border-pink-400/15 p-3 space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] text-pink-300 font-bold">✂️ BACKGROUND REMOVED</span>
+                <span class="text-[9px] text-emerald-300">PNG</span>
             </div>
-            <img id="removeBgResultImg" src="" alt="RemoveBG Result" class="w-full rounded-xl border border-[#232936] max-h-60 object-contain mx-auto bg-[linear-gradient(45deg,#1f2937_25%,transparent_25%),linear-gradient(-45deg,#1f2937_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#1f2937_75%),linear-gradient(-45deg,transparent_75%,#1f2937_75%)] bg-[size:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0px]">
-            <a id="removeBgDownloadBtn" href="" download="removebg.png" class="inline-block w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all">
-                Unduh Gambar Transparan (PNG)
+
+            <div class="preview-frame rounded-xl p-2">
+                <img id="removeBgResultImg" src="" alt="RemoveBG Result" class="w-full rounded-lg max-h-80 object-contain">
+            </div>
+
+            <a id="removeBgDownloadBtn" href="" download="removebg.png"
+               class="block text-center bg-pink-500 hover:bg-pink-400 text-white font-black py-2.5 rounded-xl text-xs">
+                Unduh PNG Transparan
             </a>
         </div>
-    </div>
+    </section>
 
-    <div id="sectionImagen" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-4 hidden">
-        <div class="flex items-start space-x-3.5">
-            <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-purple-400 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+    <section id="sectionImagen" class="tool-section glass rounded-[24px] p-4 sm:p-5 space-y-5 hidden">
+        <div class="flex items-start gap-3">
+            <div class="icon-box w-11 h-11 rounded-2xl flex items-center justify-center text-purple-300 shrink-0">
+                🎨
             </div>
+
             <div>
-                <h2 class="text-sm font-bold text-white tracking-tight">AI Image Generator (Imagen)</h2>
-                <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Buat gambar kreatif dengan Flux AI atau edit gambar via NanoBanana.</p>
+                <div class="flex items-center gap-2">
+                    <h2 class="text-sm font-bold text-white">Imagen AI Studio</h2>
+                    <span class="text-[8px] px-1.5 py-0.5 rounded-md bg-purple-400/10 text-purple-300 border border-purple-400/15">AI</span>
+                </div>
+
+                <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                    Generate gambar dari prompt atau edit gambar dengan NanoBanana.
+                </p>
             </div>
         </div>
 
-        <div class="space-y-3">
-            <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">MODE IMAGEN</label>
-                <div class="grid grid-cols-2 gap-1.5">
-                    <button type="button" onclick="switchImagenMode('generate')" id="imagenModeGen" class="py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer">✨ Text to Image</button>
-                    <button type="button" onclick="switchImagenMode('edit')" id="imagenModeEdit" class="py-2 rounded-xl text-xs font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">🖼️ Image to Image</button>
-                </div>
+        <div class="space-y-4">
+
+            <div class="grid grid-cols-2 gap-1.5 bg-black/20 p-1 rounded-2xl border border-white/[.05]">
+                <button type="button" onclick="switchImagenMode('generate')" id="imagenModeGen"
+                    class="choice active py-2.5 rounded-xl text-[10px] font-bold border border-transparent">
+                    ✨ Text to Image
+                </button>
+
+                <button type="button" onclick="switchImagenMode('edit')" id="imagenModeEdit"
+                    class="choice py-2.5 rounded-xl text-[10px] font-semibold text-slate-500 border border-transparent">
+                    🖼️ Image to Image
+                </button>
             </div>
 
             <div id="imagenEditBox" class="hidden space-y-2">
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">UPLOAD GAMBAR REFERENSI</label>
-                <input type="file" id="imagenFileInput" accept="image/*"
-                    class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3 py-2 text-xs text-slate-300 file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-500/10 file:text-purple-400 hover:file:bg-purple-500/20 cursor-pointer">
+                <label class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
+                    Reference Image
+                </label>
+
+                <label class="upload-zone rounded-2xl p-4 block cursor-pointer text-center">
+                    <input type="file" id="imagenFileInput" accept="image/*" class="hidden">
+
+                    <div class="text-lg">🖼️</div>
+                    <p id="imagenFileLabel" class="text-[10px] text-slate-300 font-semibold mt-1">
+                        Pilih gambar referensi
+                    </p>
+                </label>
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PROMPT GAMBAR</label>
-                <textarea id="imagenPrompt" rows="2" placeholder="Contoh: a cute cat wearing cyberpunk sunglasses..."
-                    class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-colors resize-none"></textarea>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
+                        Prompt
+                    </label>
+
+                    <span id="promptCount" class="text-[9px] text-slate-600">0</span>
+                </div>
+
+                <textarea id="imagenPrompt" rows="4" maxlength="1000"
+                    placeholder="Describe the image you want to create..."
+                    class="field w-full rounded-2xl px-3.5 py-3 text-xs text-slate-100 placeholder:text-slate-700 resize-none"></textarea>
             </div>
 
             <div id="imagenStyleContainer">
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PILIH STYLE</label>
+                <label class="text-[9px] text-slate-500 font-bold uppercase tracking-widest block mb-2">
+                    Visual Style
+                </label>
+
                 <div class="grid grid-cols-3 gap-1.5">
-                    <button type="button" onclick="selectImagenStyle('Realistic')" id="styleBtn_Realistic" class="py-2 px-2 rounded-xl text-[10px] font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer">Realistic</button>
-                    <button type="button" onclick="selectImagenStyle('Anime')" id="styleBtn_Anime" class="py-2 px-2 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">Anime</button>
-                    <button type="button" onclick="selectImagenStyle('Digital Art')" id="styleBtn_Digital Art" class="py-2 px-2 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">Digital Art</button>
-                    <button type="button" onclick="selectImagenStyle('Cyberpunk')" id="styleBtn_Cyberpunk" class="py-2 px-2 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">Cyberpunk</button>
-                    <button type="button" onclick="selectImagenStyle('Cinematic')" id="styleBtn_Cinematic" class="py-2 px-2 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">Cinematic</button>
-                    <button type="button" onclick="selectImagenStyle('No Style')" id="styleBtn_No Style" class="py-2 px-2 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">No Style</button>
+                    <button type="button" onclick="selectImagenStyle('Realistic')" id="styleBtn_Realistic" class="choice active py-2.5 rounded-xl text-[9px] font-bold border">Realistic</button>
+                    <button type="button" onclick="selectImagenStyle('Anime')" id="styleBtn_Anime" class="choice py-2.5 rounded-xl text-[9px] font-semibold text-slate-500 border border-white/[.07]">Anime</button>
+                    <button type="button" onclick="selectImagenStyle('Digital Art')" id="styleBtn_Digital Art" class="choice py-2.5 rounded-xl text-[9px] font-semibold text-slate-500 border border-white/[.07]">Digital Art</button>
+                    <button type="button" onclick="selectImagenStyle('Cyberpunk')" id="styleBtn_Cyberpunk" class="choice py-2.5 rounded-xl text-[9px] font-semibold text-slate-500 border border-white/[.07]">Cyberpunk</button>
+                    <button type="button" onclick="selectImagenStyle('Cinematic')" id="styleBtn_Cinematic" class="choice py-2.5 rounded-xl text-[9px] font-semibold text-slate-500 border border-white/[.07]">Cinematic</button>
+                    <button type="button" onclick="selectImagenStyle('No Style')" id="styleBtn_No Style" class="choice py-2.5 rounded-xl text-[9px] font-semibold text-slate-500 border border-white/[.07]">No Style</button>
                 </div>
+
                 <input type="hidden" id="selectedImagenStyle" value="Realistic">
             </div>
 
             <div id="imagenRatioContainer">
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PILIH RASIO (RATIO)</label>
+                <label class="text-[9px] text-slate-500 font-bold uppercase tracking-widest block mb-2">
+                    Aspect Ratio
+                </label>
+
                 <div class="grid grid-cols-3 gap-1.5">
-                    <button type="button" onclick="selectImagenRatio('1:1')" id="ratioBtn_1:1" class="py-2 px-1 rounded-xl text-[10px] font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer">1:1 Square</button>
-                    <button type="button" onclick="selectImagenRatio('3:4')" id="ratioBtn_3:4" class="py-2 px-1 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">3:4 Portrait</button>
-                    <button type="button" onclick="selectImagenRatio('4:3')" id="ratioBtn_4:3" class="py-2 px-1 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">4:3 Landscape</button>
-                    <button type="button" onclick="selectImagenRatio('16:9')" id="ratioBtn_16:9" class="py-2 px-1 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">16:9 Widescreen</button>
-                    <button type="button" onclick="selectImagenRatio('9:16')" id="ratioBtn_9:16" class="py-2 px-1 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer">9:16 Story</button>
+                    <button type="button" onclick="selectImagenRatio('1:1')" id="ratioBtn_1:1" class="choice active py-2.5 rounded-xl text-[9px] font-bold border">1:1</button>
+                    <button type="button" onclick="selectImagenRatio('3:4')" id="ratioBtn_3:4" class="choice py-2.5 rounded-xl text-[9px] font-semibold text-slate-500 border border-white/[.07]">3:4</button>
+                    <button type="button" onclick="selectImagenRatio('4:3')" id="ratioBtn_4:3" class="choice py-2.5 rounded-xl text-[9px] font-semibold text-slate-500 border border-white/[.07]">4:3</button>
+                    <button type="button" onclick="selectImagenRatio('16:9')" id="ratioBtn_16:9" class="choice py-2.5 rounded-xl text-[9px] font-semibold text-slate-500 border border-white/[.07]">16:9</button>
+                    <button type="button" onclick="selectImagenRatio('9:16')" id="ratioBtn_9:16" class="choice py-2.5 rounded-xl text-[9px] font-semibold text-slate-500 border border-white/[.07]">9:16</button>
                 </div>
+
                 <input type="hidden" id="selectedImagenRatio" value="1:1">
             </div>
 
             <button onclick="processImagen()" id="btnProcessImagen"
-                class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl text-xs transition-all shadow cursor-pointer mt-2">
-                Generate / Edit AI Image
+                class="primary-btn w-full bg-purple-500 hover:bg-purple-400 text-white font-black py-3.5 rounded-xl text-xs">
+                Generate AI Image
             </button>
         </div>
 
-        <div id="imagenLoading" class="hidden text-center py-4 space-y-2">
-            <div class="inline-block w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
-            <p id="imagenLoadingText" class="text-[11px] text-purple-400 animate-pulse font-medium">Sedang merender gambar AI...</p>
+        <div id="imagenLoading" class="hidden py-5 text-center space-y-3 text-purple-300">
+            <div class="loader-ring mx-auto"></div>
+            <p id="imagenLoadingText" class="text-[11px] font-medium animate-pulse">
+                Sedang merender gambar AI...
+            </p>
+            <div class="progress-line"><span></span></div>
         </div>
 
-        <div id="imagenResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-purple-500/30 rounded-2xl p-3 text-center">
-            <div class="flex items-center justify-center space-x-1.5 text-purple-400 font-bold text-xs">
-                <span>🎨</span>
-                <span>Proses Berhasil!</span>
+        <div id="imagenResultBox" class="result-card hidden rounded-2xl border border-purple-400/15 p-3 space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] text-purple-300 font-bold">🎨 AI RESULT</span>
+                <span class="text-[9px] text-emerald-300">READY</span>
             </div>
-            <img id="imagenResultImg" src="" alt="Imagen Result" class="w-full rounded-xl border border-[#232936] max-h-52 object-contain mx-auto">
-            <a id="imagenDownloadBtn" href="" target="_blank" class="inline-block w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl text-xs transition-all">
+
+            <img id="imagenResultImg" src="" alt="Imagen Result" class="w-full rounded-xl max-h-[420px] object-contain">
+
+            <a id="imagenDownloadBtn" href="" target="_blank"
+               class="block text-center bg-purple-500 hover:bg-purple-400 text-white font-black py-2.5 rounded-xl text-xs">
                 Buka / Unduh Gambar
             </a>
         </div>
-    </div>
+    </section>
 
-    <div id="sectionDeploy" class="bg-[#151922] border border-[#232936] rounded-2xl p-5 shadow-xl space-y-5 hidden">
-        <div class="flex items-start space-x-3.5">
-            <div class="w-10 h-10 rounded-xl bg-[#1e2330] border border-[#2b3344] flex items-center justify-center text-amber-400 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+    <section id="sectionDeploy" class="tool-section glass rounded-[24px] p-4 sm:p-5 space-y-5 hidden">
+        <div class="flex items-start gap-3">
+            <div class="icon-box w-11 h-11 rounded-2xl flex items-center justify-center text-amber-300 shrink-0">
+                🚀
             </div>
+
             <div>
-                <h2 class="text-sm font-bold text-white tracking-tight">ReyCloud Web Deployer</h2>
-                <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Upload file ZIP atau HTML untuk deploy instan ke Vercel dengan pilihan domain.</p>
+                <div class="flex items-center gap-2">
+                    <h2 class="text-sm font-bold text-white">ReyCode Web Deployer</h2>
+                    <span class="text-[8px] px-1.5 py-0.5 rounded-md bg-amber-400/10 text-amber-300 border border-amber-400/15">VERCEL</span>
+                </div>
+
+                <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                    Deploy ZIP atau HTML menjadi website secara instan.
+                </p>
             </div>
         </div>
 
         <div class="space-y-4">
+
             <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">NAMA PROJECT (SUBDOMAIN)</label>
-                <input type="text" id="deployProjectName" placeholder="Contoh: reyshop" oninput="updateDomainPreview()"
-                    class="w-full bg-[#0d0f12] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 font-mono transition-colors">
+                <label class="text-[9px] text-slate-500 font-bold uppercase tracking-widest block mb-2">
+                    Project Name
+                </label>
+
+                <input type="text" id="deployProjectName"
+                    placeholder="contoh: reyshop"
+                    oninput="updateDomainPreview()"
+                    class="field w-full rounded-xl px-3.5 py-3 text-xs text-slate-100 placeholder:text-slate-700 font-mono">
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PILIH DOMAIN TUJUAN</label>
-                <div class="grid grid-cols-1 gap-1.5">
-                    <button type="button" onclick="selectDeployDomain('reycode.my.id')" id="domainBtn_reycode.my.id" class="py-2.5 px-3 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/40 flex items-center justify-between transition-all cursor-local">
-                        <span class="font-mono">reycode.my.id</span>
-                        <span class="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-md">Primary</span>
+                <label class="text-[9px] text-slate-500 font-bold uppercase tracking-widest block mb-2">
+                    Deployment Domain
+                </label>
+
+                <div class="space-y-1.5">
+                    <button type="button" onclick="selectDeployDomain('reycode.my.id')" id="domainBtn_reycode.my.id"
+                        class="domain-choice active w-full rounded-xl border px-3 py-3 flex items-center justify-between text-left">
+                        <span>
+                            <span class="block text-[10px] font-bold font-mono">reycode.my.id</span>
+                            <span class="block text-[8px] opacity-50 mt-0.5">Primary</span>
+                        </span>
+                        <span>●</span>
                     </button>
-                    <button type="button" onclick="selectDeployDomain('legionteknologi.my.id')" id="domainBtn_legionteknologi.my.id" class="py-2.5 px-3 rounded-xl text-xs font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-amber-500/40 flex items-center justify-between transition-all cursor-local">
-                        <span class="font-mono">legionteknologi.my.id</span>
-                        <span class="text-[10px] text-slate-500">Engine</span>
+
+                    <button type="button" onclick="selectDeployDomain('legionteknologi.my.id')" id="domainBtn_legionteknologi.my.id"
+                        class="domain-choice w-full rounded-xl border border-white/[.07] bg-black/20 px-3 py-3 flex items-center justify-between text-left text-slate-400">
+                        <span>
+                            <span class="block text-[10px] font-semibold font-mono">legionteknologi.my.id</span>
+                            <span class="block text-[8px] opacity-50 mt-0.5">Engine</span>
+                        </span>
+                        <span>○</span>
                     </button>
-                    <button type="button" onclick="selectDeployDomain('reycode.web.id')" id="domainBtn_reycode.web.id" class="py-2.5 px-3 rounded-xl text-xs font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-amber-500/40 flex items-center justify-between transition-all cursor-local">
-                        <span class="font-mono">reycode.web.id</span>
-                        <span class="text-[10px] text-slate-500">Hosting</span>
+
+                    <button type="button" onclick="selectDeployDomain('reycode.web.id')" id="domainBtn_reycode.web.id"
+                        class="domain-choice w-full rounded-xl border border-white/[.07] bg-black/20 px-3 py-3 flex items-center justify-between text-left text-slate-400">
+                        <span>
+                            <span class="block text-[10px] font-semibold font-mono">reycode.web.id</span>
+                            <span class="block text-[8px] opacity-50 mt-0.5">Hosting</span>
+                        </span>
+                        <span>○</span>
                     </button>
                 </div>
+
                 <input type="hidden" id="selectedDeployDomain" value="reycode.my.id">
 
-                <div class="mt-2 bg-[#0d0f12] border border-[#232936] rounded-xl px-3 py-2 flex items-center justify-between text-[11px]">
-                    <span class="text-slate-500">Live Preview:</span>
-                    <span id="liveDomainPreview" class="text-cyan-400 font-mono font-bold">https://yourproject.reycode.my.id</span>
+                <div class="mt-2 rounded-xl bg-black/20 border border-white/[.06] px-3 py-2.5 flex items-center justify-between gap-3">
+                    <span class="text-[9px] text-slate-600 shrink-0">LIVE URL</span>
+                    <span id="liveDomainPreview" class="text-[9px] text-cyan-300 font-mono font-bold truncate">
+                        https://yourproject.reycode.my.id
+                    </span>
                 </div>
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">PILIH FILE PROJECT (.ZIP / .HTML)</label>
-                <div class="border-2 border-dashed border-[#232936] hover:border-amber-400/50 rounded-2xl p-5 text-center cursor-pointer transition-colors bg-[#0d0f12]" onclick="document.getElementById('deployFileInput').click()">
+                <label class="text-[9px] text-slate-500 font-bold uppercase tracking-widest block mb-2">
+                    Project File
+                </label>
+
+                <label id="deployDropZone" class="upload-zone rounded-2xl p-6 block cursor-pointer text-center">
                     <input type="file" id="deployFileInput" accept=".zip,.html,.htm" class="hidden" onchange="updateDeployFileName(this)">
-                    <div id="deployFileLabel" class="text-xs text-slate-400 space-y-1">
-                        <span class="text-xl block">📦</span>
-                        <strong class="text-white">Klik untuk pilih file</strong> atau seret ke sini
+
+                    <div class="w-12 h-12 rounded-2xl mx-auto bg-amber-400/8 border border-amber-400/12 flex items-center justify-center text-xl">
+                        📦
                     </div>
-                </div>
+
+                    <p id="deployFileLabel" class="text-xs text-slate-300 font-semibold mt-3">
+                        Pilih ZIP atau HTML
+                    </p>
+
+                    <p class="text-[10px] text-slate-600 mt-1">
+                        Klik atau drag & drop project
+                    </p>
+                </label>
             </div>
 
-            <div class="bg-[#0d0f12] border border-[#232936] rounded-xl p-3 flex justify-center overflow-hidden">
-                <div
-                    class="cf-turnstile"
+            <div class="rounded-2xl bg-black/20 border border-white/[.06] p-3 flex justify-center overflow-hidden">
+                <div class="cf-turnstile"
                     data-sitekey="0x4AAAAAAExLYYLD3676zLoS"
                     data-theme="dark"
                     data-size="flexible">
@@ -337,45 +816,65 @@
             </div>
 
             <button onclick="processDeploy()" id="btnProcessDeploy"
-                class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black py-3.5 rounded-xl text-xs transition-all shadow cursor-pointer">
-                🚀 Mulai Deploy Sekarang
+                class="primary-btn w-full bg-gradient-to-r from-amber-300 to-orange-500 hover:from-amber-200 hover:to-orange-400 text-slate-950 font-black py-3.5 rounded-xl text-xs shadow-[0_8px_30px_rgba(251,191,36,.1)]">
+                🚀 Deploy Project
             </button>
         </div>
 
-        <div id="deployLoading" class="hidden text-center py-4 space-y-2">
-            <div class="inline-block w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-            <p id="deployLoadingText" class="text-[11px] text-amber-400 animate-pulse font-medium">Memulai proses deployment ke Vercel...</p>
+        <div id="deployLoading" class="hidden py-5 text-center space-y-3 text-amber-300">
+            <div class="loader-ring mx-auto"></div>
+            <p id="deployLoadingText" class="text-[11px] font-medium animate-pulse">
+                Memulai deployment...
+            </p>
+            <div class="progress-line"><span></span></div>
         </div>
 
-        <div id="deployResultBox" class="hidden space-y-3 bg-[#0d0f12] border border-amber-500/30 rounded-2xl p-4">
-            <div class="flex items-center space-x-2 text-amber-400 font-bold text-xs">
-                <span>🎉</span>
-                <span>Deployment Berhasil!</span>
+        <div id="deployResultBox" class="result-card hidden rounded-2xl border border-emerald-400/15 p-3 space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] text-emerald-300 font-bold">🚀 DEPLOYMENT COMPLETE</span>
+                <span class="text-[9px] text-emerald-300">LIVE</span>
             </div>
-            <div class="bg-[#151922] border border-[#232936] rounded-xl p-3 space-y-2 text-xs font-mono">
-                <div class="flex justify-between border-b border-[#232936] pb-1.5">
-                    <span class="text-slate-400 font-sans">Framework:</span>
-                    <span id="resFramework" class="text-cyan-400 font-bold">Static</span>
+
+            <div class="space-y-2">
+                <div class="rounded-xl bg-black/25 border border-white/[.06] p-3 flex justify-between gap-3">
+                    <span class="text-[9px] text-slate-500">Framework</span>
+                    <span id="resFramework" class="text-[9px] text-cyan-300 font-bold">Static</span>
                 </div>
-                <div class="flex justify-between border-b border-[#232936] pb-1.5">
-                    <span class="text-slate-400 font-sans">Vercel URL:</span>
-                    <a id="resVercelUrl" href="#" target="_blank" class="text-cyan-400 underline truncate max-w-[180px]"></a>
+
+                <div class="rounded-xl bg-black/25 border border-white/[.06] p-3 flex justify-between gap-3">
+                    <span class="text-[9px] text-slate-500">Vercel URL</span>
+                    <a id="resVercelUrl" href="#" target="_blank" rel="noopener noreferrer"
+                       class="text-[9px] text-cyan-300 underline truncate max-w-[220px]"></a>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400 font-sans">Custom Domain:</span>
-                    <a id="resCustomDomain" href="#" target="_blank" class="text-amber-400 underline font-bold truncate max-w-[180px]"></a>
+
+                <div class="rounded-xl bg-black/25 border border-white/[.06] p-3 flex justify-between gap-3">
+                    <span class="text-[9px] text-slate-500">Custom Domain</span>
+                    <a id="resCustomDomain" href="#" target="_blank" rel="noopener noreferrer"
+                       class="text-[9px] text-amber-300 underline truncate max-w-[220px]"></a>
                 </div>
             </div>
+
+            <a id="openDeployedSite" href="#" target="_blank" rel="noopener noreferrer"
+               class="block text-center bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black py-2.5 rounded-xl text-xs">
+                Buka Website
+            </a>
         </div>
-    </div>
+    </section>
 
-    <div class="pt-2 text-center text-[11px] text-slate-400">
-        <span>ReyCloudSHP AI Tools & Deployer Engine</span>
-    </div>
+    <footer class="glass rounded-2xl px-4 py-3 text-center">
+        <p class="text-[9px] text-slate-600 tracking-[.16em] uppercase">
+            ReyCode Studio
+        </p>
+        <p class="text-[9px] text-slate-700 mt-1">
+            AI Tools • Image Studio • Video Enhancement • Web Deployment
+        </p>
+    </footer>
 
-</div>
+</main>
 
 <script>
+    let imagenMode = 'generate';
+
     function showToast(message, type = 'warning') {
         const toast = document.getElementById('toastContainer');
         const box = document.getElementById('toastBox');
@@ -384,45 +883,265 @@
 
         msg.textContent = message;
 
-        if (type === 'error') {
-            box.className = "bg-[#1e2330] border border-red-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-medium";
-            icon.textContent = "❌";
-        } else if (type === 'success') {
-            box.className = "bg-[#1e2330] border border-emerald-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-medium";
-            icon.textContent = "✅";
-        } else {
-            box.className = "bg-[#1e2330] border border-amber-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-medium";
-            icon.textContent = "⚠️";
-        }
+        const styles = {
+            success: {
+                border: 'border-emerald-400/25',
+                icon: '✅'
+            },
+            error: {
+                border: 'border-red-400/25',
+                icon: '❌'
+            },
+            warning: {
+                border: 'border-amber-400/25',
+                icon: '⚠️'
+            }
+        };
 
-        toast.classList.remove('opacity-0', '-translate-y-4', 'pointer-events-none');
-        toast.classList.add('opacity-100', 'translate-y-0');
+        const config = styles[type] || styles.warning;
 
-        setTimeout(() => {
-            toast.classList.remove('opacity-100', 'translate-y-0');
-            toast.classList.add('opacity-0', '-translate-y-4', 'pointer-events-none');
-        }, 3000);
+        box.className = `glass rounded-2xl px-4 py-3 flex items-center gap-3 ${config.border}`;
+        icon.textContent = config.icon;
+
+        toast.classList.remove('hide');
+        toast.classList.add('show');
+
+        clearTimeout(window.toastTimer);
+
+        window.toastTimer = setTimeout(() => {
+            toast.classList.remove('show');
+            toast.classList.add('hide');
+        }, 3200);
     }
 
-    function updateDeployFileName(input) {
-        const label = document.getElementById('deployFileLabel');
+    function updateFileLabel(input, id, prefix) {
+        const label = document.getElementById(id);
+
         if (input.files && input.files[0]) {
-            label.innerHTML = `<strong class="text-amber-400">File dipilih:</strong> ${input.files[0].name}`;
+            label.textContent = `${prefix}: ${input.files[0].name}`;
+            label.classList.add('text-cyan-300');
+        }
+    }
+
+    document.getElementById('imageFileInput').addEventListener('change', function() {
+        updateFileLabel(this, 'upscaleFileLabel', 'File');
+    });
+
+    document.getElementById('videoFileInput').addEventListener('change', function() {
+        updateFileLabel(this, 'winkFileLabel', 'File');
+    });
+
+    document.getElementById('removeBgFileInput').addEventListener('change', function() {
+        updateFileLabel(this, 'removeBgFileLabel', 'File');
+    });
+
+    document.getElementById('imagenFileInput').addEventListener('change', function() {
+        updateFileLabel(this, 'imagenFileLabel', 'File');
+    });
+
+    function setupDropZone(zoneId, inputId, labelId, prefix) {
+        const zone = document.getElementById(zoneId);
+        const input = document.getElementById(inputId);
+
+        if (!zone || !input) return;
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            zone.addEventListener(eventName, e => {
+                e.preventDefault();
+                zone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            zone.addEventListener(eventName, e => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+            });
+        });
+
+        zone.addEventListener('drop', e => {
+            const files = e.dataTransfer.files;
+
+            if (!files.length) return;
+
+            try {
+                input.files = files;
+            } catch {
+                return;
+            }
+
+            updateFileLabel(input, labelId, prefix);
+        });
+    }
+
+    setupDropZone('upscaleDropZone', 'imageFileInput', 'upscaleFileLabel', 'File');
+    setupDropZone('deployDropZone', 'deployFileInput', 'deployFileLabel', 'File');
+
+    document.getElementById('imagenPrompt').addEventListener('input', function() {
+        document.getElementById('promptCount').textContent = this.value.length;
+    });
+
+    function selectToolButton(active) {
+        const buttons = [
+            document.getElementById('btnTabUpscale'),
+            document.getElementById('btnTabWink'),
+            document.getElementById('btnTabRemoveBg'),
+            document.getElementById('btnTabImagen'),
+            document.getElementById('btnTabDeploy')
+        ];
+
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.add('text-slate-500');
+        });
+
+        active.classList.add('active');
+        active.classList.remove('text-slate-500');
+    }
+
+    function switchToolTab(tab) {
+        const mapping = {
+            upscale: ['btnTabUpscale', 'sectionUpscale', 'Tingkatkan resolusi dan kejernihan gambar secara otomatis menggunakan teknologi AI.'],
+            wink: ['btnTabWink', 'sectionWink', 'Tingkatkan kualitas video blur menjadi jernih dengan Wink AI.'],
+            removebg: ['btnTabRemoveBg', 'sectionRemoveBg', 'Hapus latar belakang foto secara otomatis dengan hasil PNG transparan.'],
+            imagen: ['btnTabImagen', 'sectionImagen', 'Buat gambar kreatif dengan Imagen atau edit gambar via NanoBanana.'],
+            deploy: ['btnTabDeploy', 'sectionDeploy', 'Upload ZIP atau HTML untuk deploy website instan dengan ReyCode.']
+        };
+
+        const sections = [
+            'sectionUpscale',
+            'sectionWink',
+            'sectionRemoveBg',
+            'sectionImagen',
+            'sectionDeploy'
+        ];
+
+        sections.forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+
+        const config = mapping[tab];
+
+        if (!config) return;
+
+        const button = document.getElementById(config[0]);
+        const section = document.getElementById(config[1]);
+
+        selectToolButton(button);
+
+        section.classList.remove('hidden');
+        document.getElementById('subTitleText').textContent = config[2];
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    function setChoiceActive(containerSelector, activeId) {
+        document.querySelectorAll(containerSelector).forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        const active = document.getElementById(activeId);
+
+        if (active) {
+            active.classList.add('active');
+        }
+    }
+
+    function selectImagenStyle(style) {
+        document.getElementById('selectedImagenStyle').value = style;
+
+        const styles = [
+            'Realistic',
+            'Anime',
+            'Digital Art',
+            'Cyberpunk',
+            'Cinematic',
+            'No Style'
+        ];
+
+        styles.forEach(item => {
+            const btn = document.getElementById(`styleBtn_${item}`);
+
+            if (!btn) return;
+
+            btn.classList.toggle('active', item === style);
+        });
+    }
+
+    function selectImagenRatio(ratio) {
+        document.getElementById('selectedImagenRatio').value = ratio;
+
+        const ratios = [
+            '1:1',
+            '3:4',
+            '4:3',
+            '16:9',
+            '9:16'
+        ];
+
+        ratios.forEach(item => {
+            const btn = document.getElementById(`ratioBtn_${item}`);
+
+            if (!btn) return;
+
+            btn.classList.toggle('active', item === ratio);
+        });
+    }
+
+    function switchImagenMode(mode) {
+        imagenMode = mode;
+
+        const genBtn = document.getElementById('imagenModeGen');
+        const editBtn = document.getElementById('imagenModeEdit');
+        const editBox = document.getElementById('imagenEditBox');
+        const styleContainer = document.getElementById('imagenStyleContainer');
+        const ratioContainer = document.getElementById('imagenRatioContainer');
+        const prompt = document.getElementById('imagenPrompt');
+        const processBtn = document.getElementById('btnProcessImagen');
+
+        genBtn.classList.toggle('active', mode === 'generate');
+        editBtn.classList.toggle('active', mode === 'edit');
+
+        if (mode === 'edit') {
+            editBox.classList.remove('hidden');
+            styleContainer.classList.add('hidden');
+            ratioContainer.classList.add('hidden');
+            prompt.placeholder = 'Contoh: enhance image, change background to cyberpunk...';
+            processBtn.textContent = 'Edit Image with NanoBanana';
+        } else {
+            editBox.classList.add('hidden');
+            styleContainer.classList.remove('hidden');
+            ratioContainer.classList.remove('hidden');
+            prompt.placeholder = 'Describe the image you want to create...';
+            processBtn.textContent = 'Generate AI Image';
         }
     }
 
     function selectDeployDomain(domain) {
         document.getElementById('selectedDeployDomain').value = domain;
-        const domains = ['reycode.my.id', 'legionteknologi.my.id', 'reycode.web.id'];
 
-        domains.forEach(d => {
-            const btn = document.getElementById(`domainBtn_${d}`);
-            if (btn) {
-                if (d === domain) {
-                    btn.className = "py-2.5 px-3 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/40 flex items-center justify-between transition-all cursor-local";
-                } else {
-                    btn.className = "py-2.5 px-3 rounded-xl text-xs font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-amber-500/40 flex items-center justify-between transition-all cursor-local";
-                }
+        const domains = [
+            'reycode.my.id',
+            'legionteknologi.my.id',
+            'reycode.web.id'
+        ];
+
+        domains.forEach(item => {
+            const btn = document.getElementById(`domainBtn_${item}`);
+
+            if (!btn) return;
+
+            const active = item === domain;
+
+            btn.classList.toggle('active', active);
+
+            const indicator = btn.querySelector('span:last-child');
+
+            if (indicator) {
+                indicator.textContent = active ? '●' : '○';
             }
         });
 
@@ -430,140 +1149,80 @@
     }
 
     function updateDomainPreview() {
-        const nameInput = document.getElementById('deployProjectName').value.trim().toLowerCase() || 'yourproject';
-        const domain = document.getElementById('selectedDeployDomain').value;
-        const cleanName = nameInput.replace(/[^a-z0-9-]/g, '');
-        document.getElementById('liveDomainPreview').textContent = `https://${cleanName || 'yourproject'}.${domain}`;
+        const nameInput = document.getElementById('deployProjectName');
+        const domainInput = document.getElementById('selectedDeployDomain');
+        const preview = document.getElementById('liveDomainPreview');
+
+        if (!nameInput || !domainInput || !preview) return;
+
+        const rawName = nameInput.value.trim().toLowerCase();
+        const cleanName = rawName
+            .replace(/[^a-z0-9-]/g, '')
+            .replace(/^-+|-+$/g, '');
+
+        const name = cleanName || 'yourproject';
+        preview.textContent = `https://${name}.${domainInput.value}`;
     }
 
-    function selectImagenStyle(style) {
-        document.getElementById('selectedImagenStyle').value = style;
-        const styles = ['Realistic', 'Anime', 'Digital Art', 'Cyberpunk', 'Cinematic', 'No Style'];
+    function updateDeployFileName(input) {
+        const label = document.getElementById('deployFileLabel');
 
-        styles.forEach(s => {
-            const btn = document.getElementById(`styleBtn_${s}`);
-
-            if (s === style) {
-                btn.className = "py-2 px-2 rounded-xl text-[10px] font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer";
-            } else {
-                btn.className = "py-2 px-2 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer";
-            }
-        });
-    }
-
-    function selectImagenRatio(ratio) {
-        document.getElementById('selectedImagenRatio').value = ratio;
-        const ratios = ['1:1', '3:4', '4:3', '16:9', '9:16'];
-
-        ratios.forEach(r => {
-            const btn = document.getElementById(`ratioBtn_${r}`);
-
-            if (r === ratio) {
-                btn.className = "py-2 px-1 rounded-xl text-[10px] font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer";
-            } else {
-                btn.className = "py-2 px-1 rounded-xl text-[10px] font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer";
-            }
-        });
-    }
-
-    function switchImagenMode(mode) {
-        const genBtn = document.getElementById('imagenModeGen');
-        const editBtn = document.getElementById('imagenModeEdit');
-        const editBox = document.getElementById('imagenEditBox');
-        const styleContainer = document.getElementById('imagenStyleContainer');
-        const ratioContainer = document.getElementById('imagenRatioContainer');
-
-        if (mode === 'edit') {
-            editBtn.className = "py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer";
-            genBtn.className = "py-2 rounded-xl text-xs font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer";
-            editBox.classList.remove('hidden');
-            styleContainer.classList.add('hidden');
-            ratioContainer.classList.add('hidden');
-            document.getElementById('imagenPrompt').placeholder = "Contoh: enhance image, change background to cyberpunk...";
-        } else {
-            genBtn.className = "py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white border border-purple-500 transition-all cursor-pointer";
-            editBtn.className = "py-2 rounded-xl text-xs font-medium bg-[#0d0f12] text-slate-300 border border-[#232936] hover:border-purple-500 transition-all cursor-pointer";
-            editBox.classList.add('hidden');
-            styleContainer.classList.remove('hidden');
-            ratioContainer.classList.remove('hidden');
-            document.getElementById('imagenPrompt').placeholder = "Contoh: a cute cat wearing cyberpunk sunglasses...";
+        if (input.files && input.files[0]) {
+            label.textContent = `File: ${input.files[0].name}`;
+            label.classList.add('text-amber-300');
         }
     }
 
-    function switchToolTab(tab) {
-        const btnUpscale = document.getElementById('btnTabUpscale');
-        const btnWink = document.getElementById('btnTabWink');
-        const btnRemoveBg = document.getElementById('btnTabRemoveBg');
-        const btnImagen = document.getElementById('btnTabImagen');
-        const btnDeploy = document.getElementById('btnTabDeploy');
+    async function readJsonResponse(res) {
+        const text = await res.text();
 
-        const sectionUpscale = document.getElementById('sectionUpscale');
-        const sectionWink = document.getElementById('sectionWink');
-        const sectionRemoveBg = document.getElementById('sectionRemoveBg');
-        const sectionImagen = document.getElementById('sectionImagen');
-        const sectionDeploy = document.getElementById('sectionDeploy');
-        const subTitleText = document.getElementById('subTitleText');
+        let json;
 
-        [btnUpscale, btnWink, btnRemoveBg, btnImagen, btnDeploy].forEach(b => {
-            b.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
-        });
-
-        [sectionUpscale, sectionWink, sectionRemoveBg, sectionImagen, sectionDeploy].forEach(s => {
-            s.classList.add('hidden');
-        });
-
-        if (tab === 'upscale') {
-            btnUpscale.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
-            sectionUpscale.classList.remove('hidden');
-            subTitleText.textContent = "Tingkatkan resolusi dan kejernihan gambar secara otomatis menggunakan teknologi AI.";
-        } else if (tab === 'wink') {
-            btnWink.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
-            sectionWink.classList.remove('hidden');
-            subTitleText.textContent = "Tingkatkan kualitas video blur menjadi jernih beresolusi tinggi dengan Wink AI.";
-        } else if (tab === 'removebg') {
-            btnRemoveBg.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
-            sectionRemoveBg.classList.remove('hidden');
-            subTitleText.textContent = "Hapus latar belakang foto secara otomatis dengan akurat.";
-        } else if (tab === 'imagen') {
-            btnImagen.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
-            sectionImagen.classList.remove('hidden');
-            subTitleText.textContent = "Buat gambar kreatif dengan Flux AI atau edit gambar via NanoBanana.";
-        } else if (tab === 'deploy') {
-            btnDeploy.className = "flex items-center justify-center py-2.5 rounded-xl text-[9px] font-semibold bg-[#212838] text-white border border-[#2d374b] shadow transition-all cursor-pointer";
-            sectionDeploy.classList.remove('hidden');
-            subTitleText.textContent = "Upload file ZIP atau HTML untuk deploy instan ke Vercel dengan pilihan domain.";
+        try {
+            json = JSON.parse(text);
+        } catch {
+            throw new Error(text || `Server mengembalikan HTTP ${res.status}`);
         }
+
+        if (!res.ok) {
+            throw new Error(json.error || json.message || `Request gagal (${res.status})`);
+        }
+
+        return json;
     }
 
     async function processUpscale() {
         const fileInput = document.getElementById('imageFileInput');
-        const btnProcess = document.getElementById('btnProcessUpscale');
+        const btn = document.getElementById('btnProcessUpscale');
         const loading = document.getElementById('upscaleLoading');
-        const resultBox = document.getElementById('upscaleResultBox');
+        const result = document.getElementById('upscaleResultBox');
 
-        if (!fileInput.files || fileInput.files.length === 0) {
-            return showToast('Pilih file gambar terlebih dahulu!', 'warning');
+        if (!fileInput.files?.length) {
+            return showToast('Pilih gambar terlebih dahulu!');
         }
 
         const file = fileInput.files[0];
-        btnProcess.classList.add('hidden');
+
+        btn.classList.add('hidden');
         loading.classList.remove('hidden');
-        resultBox.classList.add('hidden');
+        result.classList.add('hidden');
 
         const reader = new FileReader();
-        reader.readAsDataURL(file);
 
-        reader.onload = async function () {
+        reader.onload = async function() {
             try {
-                const base64Image = reader.result;
-
                 const res = await fetch('/api/upscale', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ base64Image, filename: file.name })
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        base64Image: reader.result,
+                        filename: file.name
+                    })
                 });
 
-                const json = await res.json();
+                const json = await readJsonResponse(res);
 
                 if (!json.status || !json.url) {
                     throw new Error(json.error || 'Gagal melakukan upscale gambar.');
@@ -573,157 +1232,194 @@
                 document.getElementById('upscaleDownloadBtn').href = json.url;
 
                 loading.classList.add('hidden');
-                btnProcess.classList.remove('hidden');
-                resultBox.classList.remove('hidden');
+                btn.classList.remove('hidden');
+                result.classList.remove('hidden');
 
+                showToast('Upscale berhasil!', 'success');
             } catch (err) {
-                showToast('Error: ' + err.message, 'error');
                 loading.classList.add('hidden');
-                btnProcess.classList.remove('hidden');
+                btn.classList.remove('hidden');
+                showToast(err.message, 'error');
             }
         };
+
+        reader.onerror = function() {
+            loading.classList.add('hidden');
+            btn.classList.remove('hidden');
+            showToast('Gagal membaca file gambar.', 'error');
+        };
+
+        reader.readAsDataURL(file);
     }
 
     async function processWink() {
         const fileInput = document.getElementById('videoFileInput');
-        const btnProcess = document.getElementById('btnProcessWink');
+        const btn = document.getElementById('btnProcessWink');
         const loading = document.getElementById('winkLoading');
-        const resultBox = document.getElementById('winkResultBox');
+        const result = document.getElementById('winkResultBox');
 
-        if (!fileInput.files || fileInput.files.length === 0) {
-            return showToast('Pilih file video terlebih dahulu!', 'warning');
+        if (!fileInput.files?.length) {
+            return showToast('Pilih video terlebih dahulu!');
         }
 
         const file = fileInput.files[0];
-        btnProcess.classList.add('hidden');
+
+        btn.classList.add('hidden');
         loading.classList.remove('hidden');
-        resultBox.classList.add('hidden');
+        result.classList.add('hidden');
 
         const reader = new FileReader();
-        reader.readAsDataURL(file);
 
-        reader.onload = async function () {
+        reader.onload = async function() {
             try {
-                const base64Video = reader.result;
-
                 const res = await fetch('/api/wink', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ base64Video, filename: file.name })
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        base64Video: reader.result,
+                        filename: file.name
+                    })
                 });
 
-                const json = await res.json();
+                const json = await readJsonResponse(res);
 
                 if (!json.status || !json.resultUrl) {
                     throw new Error(json.error || 'Gagal melakukan enhance video Wink.');
                 }
 
-                document.getElementById('winkResultVideo').src = json.resultUrl;
+                const video = document.getElementById('winkResultVideo');
+
+                video.src = json.resultUrl;
+                video.load();
+
                 document.getElementById('winkDownloadBtn').href = json.resultUrl;
 
                 loading.classList.add('hidden');
-                btnProcess.classList.remove('hidden');
-                resultBox.classList.remove('hidden');
+                btn.classList.remove('hidden');
+                result.classList.remove('hidden');
 
+                showToast('Video berhasil di-enhance!', 'success');
             } catch (err) {
-                showToast('Error: ' + err.message, 'error');
                 loading.classList.add('hidden');
-                btnProcess.classList.remove('hidden');
+                btn.classList.remove('hidden');
+                showToast(err.message, 'error');
             }
         };
+
+        reader.onerror = function() {
+            loading.classList.add('hidden');
+            btn.classList.remove('hidden');
+            showToast('Gagal membaca file video.', 'error');
+        };
+
+        reader.readAsDataURL(file);
     }
 
     async function processRemoveBg() {
         const fileInput = document.getElementById('removeBgFileInput');
-        const btnProcess = document.getElementById('btnProcessRemoveBg');
+        const btn = document.getElementById('btnProcessRemoveBg');
         const loading = document.getElementById('removeBgLoading');
-        const resultBox = document.getElementById('removeBgResultBox');
+        const result = document.getElementById('removeBgResultBox');
 
-        if (!fileInput.files || fileInput.files.length === 0) {
-            return showToast('Pilih file gambar terlebih dahulu!', 'warning');
+        if (!fileInput.files?.length) {
+            return showToast('Pilih gambar terlebih dahulu!');
         }
 
         const file = fileInput.files[0];
-        btnProcess.classList.add('hidden');
+
+        btn.classList.add('hidden');
         loading.classList.remove('hidden');
-        resultBox.classList.add('hidden');
+        result.classList.add('hidden');
 
         const reader = new FileReader();
-        reader.readAsDataURL(file);
 
-        reader.onload = async function () {
+        reader.onload = async function() {
             try {
-                const base64Image = reader.result;
-
                 const res = await fetch('/api/removebg', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ base64Image })
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        base64Image: reader.result
+                    })
                 });
 
-                const json = await res.json();
+                const json = await readJsonResponse(res);
 
                 if (!json.status || !json.result) {
-                    throw new Error(json.error || 'Gagal menghapus background gambar.');
+                    throw new Error(json.error || 'Gagal menghapus background.');
                 }
 
                 document.getElementById('removeBgResultImg').src = json.result;
                 document.getElementById('removeBgDownloadBtn').href = json.result;
 
                 loading.classList.add('hidden');
-                btnProcess.classList.remove('hidden');
-                resultBox.classList.remove('hidden');
+                btn.classList.remove('hidden');
+                result.classList.remove('hidden');
 
+                showToast('Background berhasil dihapus!', 'success');
             } catch (err) {
-                showToast('Error: ' + err.message, 'error');
                 loading.classList.add('hidden');
-                btnProcess.classList.remove('hidden');
+                btn.classList.remove('hidden');
+                showToast(err.message, 'error');
             }
         };
+
+        reader.onerror = function() {
+            loading.classList.add('hidden');
+            btn.classList.remove('hidden');
+            showToast('Gagal membaca file gambar.', 'error');
+        };
+
+        reader.readAsDataURL(file);
     }
 
     async function processImagen() {
         const prompt = document.getElementById('imagenPrompt').value.trim();
-        const isEditMode = !document.getElementById('imagenEditBox').classList.contains('hidden');
-        const btnProcess = document.getElementById('btnProcessImagen');
+        const btn = document.getElementById('btnProcessImagen');
         const loading = document.getElementById('imagenLoading');
         const loadingText = document.getElementById('imagenLoadingText');
-        const resultBox = document.getElementById('imagenResultBox');
+        const result = document.getElementById('imagenResultBox');
 
         if (!prompt) {
-            return showToast('Masukkan prompt terlebih dahulu!', 'warning');
+            return showToast('Masukkan prompt terlebih dahulu!');
         }
 
-        btnProcess.classList.add('hidden');
+        btn.classList.add('hidden');
         loading.classList.remove('hidden');
-        resultBox.classList.add('hidden');
+        result.classList.add('hidden');
 
-        if (isEditMode) {
+        if (imagenMode === 'edit') {
             const fileInput = document.getElementById('imagenFileInput');
 
-            if (!fileInput.files || fileInput.files.length === 0) {
-                btnProcess.classList.remove('hidden');
+            if (!fileInput.files?.length) {
+                btn.classList.remove('hidden');
                 loading.classList.add('hidden');
-                return showToast('Pilih gambar referensi untuk mode edit terlebih dahulu!', 'warning');
+                return showToast('Pilih gambar referensi terlebih dahulu!');
             }
 
             const file = fileInput.files[0];
             const reader = new FileReader();
-            reader.readAsDataURL(file);
 
-            reader.onload = async function () {
+            reader.onload = async function() {
                 try {
-                    loadingText.textContent = "Memproses edit gambar via NanoBanana AI...";
-
-                    const base64Image = reader.result;
+                    loadingText.textContent = 'Memproses edit via NanoBanana AI...';
 
                     const res = await fetch('/api/nanobanana', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ base64Image, prompt })
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            base64Image: reader.result,
+                            prompt
+                        })
                     });
 
-                    const json = await res.json();
+                    const json = await readJsonResponse(res);
 
                     if (!json.status || !json.result) {
                         throw new Error(json.error || 'Gagal memproses edit gambar.');
@@ -733,50 +1429,63 @@
                     document.getElementById('imagenDownloadBtn').href = json.result;
 
                     loading.classList.add('hidden');
-                    btnProcess.classList.remove('hidden');
-                    resultBox.classList.remove('hidden');
+                    btn.classList.remove('hidden');
+                    result.classList.remove('hidden');
 
                     showToast('Edit gambar berhasil!', 'success');
-
                 } catch (err) {
-                    showToast('Error: ' + err.message, 'error');
                     loading.classList.add('hidden');
-                    btnProcess.classList.remove('hidden');
+                    btn.classList.remove('hidden');
+                    showToast(err.message, 'error');
                 }
             };
-        } else {
+
+            reader.onerror = function() {
+                loading.classList.add('hidden');
+                btn.classList.remove('hidden');
+                showToast('Gagal membaca gambar referensi.', 'error');
+            };
+
+            reader.readAsDataURL(file);
+            return;
+        }
+
+        try {
+            loadingText.textContent = 'Merender gambar AI & menyiapkan hasil...';
+
             const style = document.getElementById('selectedImagenStyle').value;
             const ratio = document.getElementById('selectedImagenRatio').value;
 
-            try {
-                loadingText.textContent = "Sedang merender gambar AI & Upload ke ImgBB...";
+            const res = await fetch('/api/imagen', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    prompt,
+                    style,
+                    ratio
+                })
+            });
 
-                const res = await fetch('/api/imagen', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt, style, ratio })
-                });
+            const json = await readJsonResponse(res);
 
-                const json = await res.json();
-
-                if (!json.status || !json.result) {
-                    throw new Error(json.error || 'Gagal merender gambar AI.');
-                }
-
-                document.getElementById('imagenResultImg').src = json.result;
-                document.getElementById('imagenDownloadBtn').href = json.result;
-
-                loading.classList.add('hidden');
-                btnProcess.classList.remove('hidden');
-                resultBox.classList.remove('hidden');
-
-                showToast('Generate gambar berhasil!', 'success');
-
-            } catch (err) {
-                showToast('Error: ' + err.message, 'error');
-                loading.classList.add('hidden');
-                btnProcess.classList.remove('hidden');
+            if (!json.status || !json.result) {
+                throw new Error(json.error || 'Gagal merender gambar AI.');
             }
+
+            document.getElementById('imagenResultImg').src = json.result;
+            document.getElementById('imagenDownloadBtn').href = json.result;
+
+            loading.classList.add('hidden');
+            btn.classList.remove('hidden');
+            result.classList.remove('hidden');
+
+            showToast('Generate gambar berhasil!', 'success');
+        } catch (err) {
+            loading.classList.add('hidden');
+            btn.classList.remove('hidden');
+            showToast(err.message, 'error');
         }
     }
 
@@ -784,23 +1493,24 @@
         const name = document.getElementById('deployProjectName').value.trim();
         const domain = document.getElementById('selectedDeployDomain').value;
         const fileInput = document.getElementById('deployFileInput');
-        const btnProcess = document.getElementById('btnProcessDeploy');
+        const btn = document.getElementById('btnProcessDeploy');
         const loading = document.getElementById('deployLoading');
         const loadingText = document.getElementById('deployLoadingText');
-        const resultBox = document.getElementById('deployResultBox');
+        const result = document.getElementById('deployResultBox');
 
         if (!name) {
-            return showToast('Masukkan nama project terlebih dahulu!', 'warning');
+            return showToast('Masukkan nama project terlebih dahulu!');
         }
 
-        if (!fileInput.files || fileInput.files.length === 0) {
-            return showToast('Pilih file ZIP atau HTML terlebih dahulu!', 'warning');
+        if (!fileInput.files?.length) {
+            return showToast('Pilih ZIP atau HTML terlebih dahulu!');
         }
 
-        const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value || '';
+        const turnstileToken =
+            document.querySelector('[name="cf-turnstile-response"]')?.value || '';
 
         if (!turnstileToken) {
-            return showToast('Selesaikan verifikasi Turnstile terlebih dahulu!', 'warning');
+            return showToast('Selesaikan verifikasi Turnstile terlebih dahulu!');
         }
 
         const file = fileInput.files[0];
@@ -811,10 +1521,11 @@
         formData.append('file', file);
         formData.append('cf-turnstile-response', turnstileToken);
 
-        btnProcess.classList.add('hidden');
+        btn.classList.add('hidden');
         loading.classList.remove('hidden');
-        resultBox.classList.add('hidden');
-        loadingText.textContent = "Mengunggah & mendeteksi framework project...";
+        result.classList.add('hidden');
+
+        loadingText.textContent = 'Mengunggah project...';
 
         try {
             const res = await fetch('/api/deploy', {
@@ -822,38 +1533,62 @@
                 body: formData
             });
 
-            const json = await res.json();
+            loadingText.textContent = 'Mendeteksi framework project...';
+
+            const json = await readJsonResponse(res);
 
             if (!json.status) {
                 throw new Error(json.error || 'Gagal melakukan deployment.');
             }
 
-            document.getElementById('resFramework').textContent = json.framework || 'Static';
-            document.getElementById('resVercelUrl').href = json.vercelUrl;
-            document.getElementById('resVercelUrl').textContent = json.vercelUrl;
-            document.getElementById('resCustomDomain').href = `https://${json.customDomain}`;
-            document.getElementById('resCustomDomain').textContent = `https://${json.customDomain}`;
+            const vercelUrl = json.vercelUrl || '#';
+            const customDomain = json.customDomain || '';
+
+            document.getElementById('resFramework').textContent =
+                json.framework || 'Static';
+
+            document.getElementById('resVercelUrl').href = vercelUrl;
+            document.getElementById('resVercelUrl').textContent = vercelUrl;
+
+            document.getElementById('resCustomDomain').href =
+                customDomain ? `https://${customDomain}` : '#';
+
+            document.getElementById('resCustomDomain').textContent =
+                customDomain ? `https://${customDomain}` : '-';
+
+            const openSite = document.getElementById('openDeployedSite');
+
+            openSite.href =
+                customDomain
+                    ? `https://${customDomain}`
+                    : vercelUrl;
 
             loading.classList.add('hidden');
-            btnProcess.classList.remove('hidden');
-            resultBox.classList.remove('hidden');
+            btn.classList.remove('hidden');
+            result.classList.remove('hidden');
 
             if (window.turnstile) {
-                turnstile.reset();
+                try {
+                    turnstile.reset();
+                } catch {}
             }
 
             showToast('Deployment berhasil!', 'success');
-
         } catch (err) {
-            showToast('Error: ' + err.message, 'error');
             loading.classList.add('hidden');
-            btnProcess.classList.remove('hidden');
+            btn.classList.remove('hidden');
 
             if (window.turnstile) {
-                turnstile.reset();
+                try {
+                    turnstile.reset();
+                } catch {}
             }
+
+            showToast(err.message, 'error');
         }
     }
+
+    updateDomainPreview();
 </script>
 
 </body>

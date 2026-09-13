@@ -15,13 +15,13 @@ const os = require('node:os');
 const fsp = require('node:fs/promises');
 const https = require('https');
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const FormData = require('form-data');
 const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
 const http = require('http');
 const tls = require('tls');
 const { execSync } = require('child_process');
-
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -1562,17 +1562,38 @@ async function generateFreeFireGuest() {
         access_token: grantRes.data.data.access_token
     };
 }
-
-// ==========================================
-// 6. EXPRESS ROUTER & API ENDPOINT MAPPING
-// ==========================================
+// Router
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-apikey, x-admin-token');
-    if (req.method === 'OPTIONS') return res.status(200).end();
+
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
     next();
+});
+
+const MAINTENANCE_MODE = false;
+
+app.use((req, res, next) => {
+    if (!MAINTENANCE_MODE) {
+        return next();
+    }
+
+    if (
+        req.path.startsWith('/api/') ||
+        req.path === '/maintenance' ||
+        req.path.startsWith('/docs/maintenance')
+    ) {
+        return next();
+    }
+
+    return res.status(503).sendFile(
+        path.join(__dirname, '../docs/maintenance/index.html')
+    );
 });
 
 app.use('/docs', express.static(path.join(__dirname, '../docs')));
@@ -1583,9 +1604,26 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/engine', (req, res) => {
-    res.status(200).json({ status: true, creator: CREATOR, message: 'Alight Motion Ultimate Unified Master Engine Active in /api/' });
+    res.status(200).json({
+        status: true,
+        creator: CREATOR,
+        message: 'Alight Motion Ultimate Unified Master Engine Active in /api/'
+    });
 });
 
+app.use((req, res) => {
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({
+            status: false,
+            creator: CREATOR,
+            error: 'API endpoint tidak ditemukan.'
+        });
+    }
+
+    return res.status(404).sendFile(
+        path.join(__dirname, '../docs/404/index.html')
+    );
+});
 // --- AM Engine ---
 app.all('/api/amgen', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});

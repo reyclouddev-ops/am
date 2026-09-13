@@ -2,146 +2,584 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReyCloud - EXELITE AI Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#08090c">
+    <title>EXELITE AI — ReyCloud</title>
+
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style>
-        body { background-color: #08090c; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #232936; border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: #333f55; }
 
-        /* Markdown Styles */
-        .markdown-content p { margin-bottom: 0.75rem; line-height: 1.6; }
-        .markdown-content p:last-child { margin-bottom: 0; }
-        .markdown-content ul { list-style-type: disc; margin-left: 1.25rem; margin-bottom: 0.75rem; }
-        .markdown-content ol { list-style-type: decimal; margin-left: 1.25rem; margin-bottom: 0.75rem; }
-        .markdown-content li { margin-bottom: 0.375rem; }
-        .markdown-content strong { color: #fbbf24; font-weight: 700; }
-        .markdown-content code:not(pre code) { background: #0d0f12; padding: 0.15rem 0.35rem; border-radius: 0.375rem; font-family: monospace; font-size: 0.85em; border: 1px solid #232936; color: #38bdf8; }
-        
-        /* Code Block Wrapper & Copy Button */
-        .code-block-wrapper {
-            position: relative;
-            margin: 0.85rem 0;
-            background: #050608;
-            border: 1px solid #232936;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    <style>
+        * {
+            box-sizing: border-box;
         }
-        .code-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #11151d;
-            padding: 0.4rem 0.85rem;
-            font-size: 10px;
-            color: #94a3b8;
-            border-bottom: 1px solid #232936;
-            font-family: monospace;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
         }
-        .copy-btn {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.25);
+
+        body {
+            background:
+                radial-gradient(circle at 15% -10%, rgba(251,191,36,.11), transparent 30%),
+                radial-gradient(circle at 100% 20%, rgba(245,158,11,.06), transparent 25%),
+                #08090c;
+            color: #f8fafc;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: linear-gradient(to bottom, black, transparent 90%);
+        }
+
+        ::selection {
+            background: rgba(251,191,36,.28);
+            color: white;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #252a35;
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #394150;
+        }
+
+        .glass {
+            background: rgba(15,17,23,.76);
+            border: 1px solid rgba(255,255,255,.07);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+
+        .glass-soft {
+            background: rgba(20,22,29,.62);
+            border: 1px solid rgba(255,255,255,.055);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .shadow-premium {
+            box-shadow:
+                0 25px 80px rgba(0,0,0,.38),
+                0 0 0 1px rgba(255,255,255,.015);
+        }
+
+        .logo-glow {
+            box-shadow:
+                0 0 30px rgba(251,191,36,.12),
+                inset 0 0 18px rgba(251,191,36,.05);
+        }
+
+        .online-dot {
+            box-shadow: 0 0 12px rgba(52,211,153,.75);
+            animation: onlinePulse 2s infinite;
+        }
+
+        @keyframes onlinePulse {
+            0%,100% {
+                opacity: .65;
+                transform: scale(.9);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .message-enter {
+            animation: messageEnter .28s ease both;
+        }
+
+        @keyframes messageEnter {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .typing-dot {
+            animation: typing 1.25s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: .15s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: .3s;
+        }
+
+        @keyframes typing {
+            0%,60%,100% {
+                transform: translateY(0);
+                opacity: .35;
+            }
+            30% {
+                transform: translateY(-4px);
+                opacity: 1;
+            }
+        }
+
+        .send-button {
+            background: linear-gradient(135deg,#fbbf24,#f59e0b);
+            box-shadow:
+                0 10px 30px rgba(245,158,11,.14),
+                inset 0 1px rgba(255,255,255,.3);
+            transition: .2s ease;
+        }
+
+        .send-button:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                0 14px 36px rgba(245,158,11,.23),
+                inset 0 1px rgba(255,255,255,.4);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .send-button:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chat-input {
+            background: rgba(7,9,12,.82);
+            border: 1px solid rgba(255,255,255,.075);
+            transition: .2s ease;
+        }
+
+        .chat-input:focus {
+            border-color: rgba(251,191,36,.55);
+            box-shadow: 0 0 0 3px rgba(251,191,36,.055);
+        }
+
+        .markdown-content {
+            color: #dbe2ea;
+            font-size: 12px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .markdown-content p {
+            margin: 0 0 .75rem;
+        }
+
+        .markdown-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .markdown-content h1,
+        .markdown-content h2,
+        .markdown-content h3 {
+            color: #fff;
+            font-weight: 800;
+            line-height: 1.3;
+            margin: 1rem 0 .55rem;
+        }
+
+        .markdown-content h1 {
+            font-size: 1.1rem;
+        }
+
+        .markdown-content h2 {
+            font-size: 1rem;
+        }
+
+        .markdown-content h3 {
+            font-size: .92rem;
+        }
+
+        .markdown-content ul {
+            list-style: disc;
+            padding-left: 1.2rem;
+            margin: .5rem 0 .8rem;
+        }
+
+        .markdown-content ol {
+            list-style: decimal;
+            padding-left: 1.2rem;
+            margin: .5rem 0 .8rem;
+        }
+
+        .markdown-content li {
+            margin-bottom: .3rem;
+        }
+
+        .markdown-content strong {
             color: #fbbf24;
-            padding: 2.5px 8px;
-            border-radius: 0.375rem;
+            font-weight: 750;
+        }
+
+        .markdown-content em {
+            color: #cbd5e1;
+        }
+
+        .markdown-content blockquote {
+            margin: .8rem 0;
+            padding: .6rem .8rem;
+            border-left: 2px solid #fbbf24;
+            background: rgba(251,191,36,.045);
+            color: #94a3b8;
+            border-radius: 0 .6rem .6rem 0;
+        }
+
+        .markdown-content a {
+            color: #fbbf24;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .markdown-content code:not(pre code) {
+            background: #0a0c10;
+            color: #7dd3fc;
+            border: 1px solid #252b36;
+            padding: .13rem .36rem;
+            border-radius: .35rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: .88em;
+        }
+
+        .code-block-wrapper {
+            margin: .9rem 0;
+            overflow: hidden;
+            border-radius: .9rem;
+            border: 1px solid rgba(255,255,255,.08);
+            background: #06070a;
+            box-shadow: 0 12px 30px rgba(0,0,0,.25);
+        }
+
+        .code-header {
+            min-height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 6px 9px 6px 12px;
+            background: rgba(255,255,255,.035);
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+
+        .code-language {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: #64748b;
+            font-size: 9px;
+            font-family: ui-monospace, monospace;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .code-language::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #fbbf24;
+            box-shadow: 0 0 8px rgba(251,191,36,.5);
+        }
+
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 8px;
+            border-radius: 7px;
+            background: rgba(251,191,36,.06);
+            border: 1px solid rgba(251,191,36,.15);
+            color: #fbbf24;
             font-size: 9px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: .2s ease;
         }
+
         .copy-btn:hover {
-            background: rgba(251, 191, 36, 0.2);
-            border-color: rgba(251, 191, 36, 0.5);
+            background: rgba(251,191,36,.12);
+            border-color: rgba(251,191,36,.3);
         }
+
         .markdown-content pre {
             margin: 0;
-            padding: 0.85rem;
+            padding: 13px;
             overflow-x: auto;
-            background: transparent;
-            border: none;
         }
+
         .markdown-content pre code {
+            color: #dbe4ee;
             background: transparent;
+            border: 0;
             padding: 0;
-            border: none;
-            color: #e2e8f0;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 11.5px;
-            line-height: 1.5;
+            font-size: 11px;
+            line-height: 1.65;
+        }
+
+        .welcome-card {
+            background:
+                radial-gradient(circle at 50% 0%, rgba(251,191,36,.08), transparent 45%),
+                rgba(17,19,25,.42);
+        }
+
+        .suggestion {
+            transition: .2s ease;
+        }
+
+        .suggestion:hover {
+            transform: translateY(-1px);
+            background: rgba(251,191,36,.06);
+            border-color: rgba(251,191,36,.2);
+            color: #fcd34d;
+        }
+
+        .char-counter {
+            transition: color .2s ease;
+        }
+
+        .hidden-force {
+            display: none !important;
+        }
+
+        @media (max-width: 640px) {
+            .markdown-content {
+                font-size: 11.5px;
+            }
+
+            .chat-area {
+                border-radius: 20px;
+            }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-2 sm:p-4 relative">
 
-    <!-- Ambient Glow Background -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[150px] bg-amber-500/10 blur-[100px] pointer-events-none rounded-full"></div>
+<body class="min-h-screen">
 
-    <div class="w-full max-w-lg flex flex-col h-[94vh] space-y-3 relative z-10">
-        
-        <!-- Top Navbar Header -->
-        <div class="flex items-center justify-between bg-[#11151d]/90 backdrop-blur-md border border-[#232936] rounded-2xl px-4 py-3 shadow-xl shrink-0">
-            <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 p-[1px] shadow-lg shadow-amber-500/10">
-                    <div class="w-full h-full bg-[#0d0f12] rounded-[11px] flex items-center justify-center text-amber-400 font-black text-sm">
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[360px] h-[220px] bg-amber-500/[.07] blur-[110px] rounded-full pointer-events-none"></div>
+
+    <main class="relative z-10 w-full max-w-4xl mx-auto h-[100dvh] p-2 sm:p-4 flex flex-col gap-2 sm:gap-3">
+
+        <header class="glass shadow-premium rounded-2xl px-3.5 py-3 sm:px-5 sm:py-3.5 shrink-0">
+            <div class="flex items-center justify-between gap-3">
+
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl p-[1px] bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-700 logo-glow shrink-0">
+                        <div class="w-full h-full rounded-[11px] bg-[#0b0d11] flex items-center justify-center text-lg">
+                            ⚡
+                        </div>
+                    </div>
+
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-sm sm:text-base font-black tracking-tight text-white">
+                                EXELITE<span class="text-amber-400">AI</span>
+                            </h1>
+
+                            <span class="px-1.5 py-[3px] rounded-md bg-amber-400/[.08] border border-amber-400/15 text-[7px] sm:text-[8px] font-bold text-amber-300 tracking-[.12em]">
+                                PRO
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 online-dot"></span>
+                            <span class="text-[8px] sm:text-[9px] text-slate-500 font-medium tracking-wider uppercase">
+                                Advanced Intelligence
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                    <button
+                        onclick="newChat()"
+                        class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[.035] border border-white/[.07] text-[9px] font-semibold text-slate-400 hover:text-white hover:bg-white/[.07] transition cursor-pointer">
+                        <span>＋</span>
+                        New Chat
+                    </button>
+
+                    <a
+                        href="/dashboard"
+                        class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[.035] border border-white/[.07] text-[9px] sm:text-[10px] font-semibold text-slate-400 hover:text-white hover:bg-white/[.07] transition">
+                        <span>←</span>
+                        Home
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <section
+            id="chatContainer"
+            class="chat-area glass shadow-premium rounded-2xl flex-1 min-h-0 overflow-y-auto px-3 py-4 sm:px-5 sm:py-5 space-y-5">
+
+            <div id="welcomeMessage" class="welcome-card rounded-2xl border border-white/[.05] p-5 sm:p-7 text-center max-w-2xl mx-auto message-enter">
+
+                <div class="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-300/15 to-amber-500/5 border border-amber-400/15 flex items-center justify-center text-2xl logo-glow">
+                    ⚡
+                </div>
+
+                <div class="mt-4 text-lg sm:text-xl font-black text-white">
+                    Welcome to <span class="text-amber-400">EXELITE AI</span>
+                </div>
+
+                <p class="mt-2 text-[10px] sm:text-xs text-slate-500 leading-relaxed max-w-md mx-auto">
+                    Asisten AI untuk coding, analisis, brainstorming,
+                    troubleshooting, dan berbagai kebutuhan kreatif kamu.
+                </p>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-5">
+
+                    <button onclick="useSuggestion('Bantu saya membuat website modern')"
+                        class="suggestion glass-soft rounded-xl p-3 text-left cursor-pointer">
+                        <div class="text-sm">🌐</div>
+                        <div class="text-[9px] font-bold text-slate-300 mt-2">Website</div>
+                    </button>
+
+                    <button onclick="useSuggestion('Bantu saya debug kode JavaScript')"
+                        class="suggestion glass-soft rounded-xl p-3 text-left cursor-pointer">
+                        <div class="text-sm">💻</div>
+                        <div class="text-[9px] font-bold text-slate-300 mt-2">Coding</div>
+                    </button>
+
+                    <button onclick="useSuggestion('Jelaskan konsep ini dengan sederhana')"
+                        class="suggestion glass-soft rounded-xl p-3 text-left cursor-pointer">
+                        <div class="text-sm">🧠</div>
+                        <div class="text-[9px] font-bold text-slate-300 mt-2">Explain</div>
+                    </button>
+
+                    <button onclick="useSuggestion('Bantu saya mencari ide project AI')"
+                        class="suggestion glass-soft rounded-xl p-3 text-left cursor-pointer">
+                        <div class="text-sm">🚀</div>
+                        <div class="text-[9px] font-bold text-slate-300 mt-2">Ideas</div>
+                    </button>
+
+                </div>
+            </div>
+
+            <div id="initialGreeting" class="flex items-start gap-2.5 message-enter">
+
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-300 to-amber-600 p-[1px] shrink-0 logo-glow">
+                    <div class="w-full h-full rounded-[10px] bg-[#0b0d11] flex items-center justify-center text-amber-400 text-xs">
                         ⚡
                     </div>
                 </div>
-                <div>
-                    <div class="flex items-center space-x-1.5">
-                        <span class="font-black text-xs tracking-wider text-white">EXELITE<span class="text-amber-400">AI</span></span>
-                        <span class="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase">PRO</span>
+
+                <div class="glass-soft rounded-2xl rounded-tl-sm px-3.5 py-3 max-w-[88%] sm:max-w-[80%]">
+                    <div class="flex items-center gap-2 mb-1.5">
+                        <span class="text-[9px] font-bold text-amber-400">EXELITE AI</span>
+                        <span class="text-[8px] text-slate-600">•</span>
+                        <span class="text-[8px] text-slate-600">Online</span>
                     </div>
-                    <span class="text-[9px] tracking-widest text-slate-400 font-semibold uppercase">Advanced Intelligence</span>
-                </div>
-            </div>
-            
-            <a href="/dashboard" class="px-3 py-1.5 rounded-xl bg-[#181d28] hover:bg-[#202736] border border-[#2b3344] text-[11px] text-slate-300 hover:text-white transition-all font-semibold flex items-center space-x-1">
-                <span>← Home</span>
-            </a>
-        </div>
 
-        <!-- Chat Container -->
-        <div id="chatContainer" class="flex-1 bg-[#11151d]/70 backdrop-blur-md border border-[#232936] rounded-2xl p-4 overflow-y-auto space-y-4 shadow-2xl">
-            <!-- Initial AI Greeting Message -->
-            <div class="flex items-start space-x-3">
-                <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 p-[1px] shrink-0 shadow-md">
-                    <div class="w-full h-full bg-[#0d0f12] rounded-[10px] flex items-center justify-center text-amber-400 text-xs font-bold">⚡</div>
+                    <div class="markdown-content">
+                        Halo! Saya <strong>EXELITE AI</strong>. Ada yang bisa saya bantu hari ini?
+                        Kirim pertanyaan, kode, ide, atau masalah yang sedang kamu kerjakan.
+                    </div>
                 </div>
-                <div class="bg-[#181d28] border border-[#2b3344] rounded-2xl rounded-tl-sm px-4 py-3 text-xs text-slate-200 max-w-[88%] leading-relaxed markdown-content shadow-sm">
-                    Halo! Saya <strong>EXELITE AI</strong>. Ada yang bisa saya bantu hari ini? Tuliskan pertanyaan, analisis logika, atau kode program yang ingin Anda buat.
-                </div>
-            </div>
-        </div>
 
-        <!-- Input Area / Bottom Bar -->
-        <div class="bg-[#11151d]/90 backdrop-blur-md border border-[#232936] rounded-2xl p-2.5 shadow-2xl shrink-0">
-            <div class="flex items-center space-x-2">
-                <input type="text" id="userInput" placeholder="Ketik pesan atau tanyakan sesuatu..." 
-                    class="flex-1 bg-[#08090c] border border-[#232936] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400/70 transition-all font-medium"
-                    onkeypress="handleKeyPress(event)">
-                <button onclick="sendMessage()" id="sendBtn"
-                    class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-4 py-3 rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 cursor-pointer flex items-center justify-center">
-                    <span>Kirim</span>
+            </div>
+
+        </section>
+
+        <section class="glass shadow-premium rounded-2xl p-2 sm:p-2.5 shrink-0">
+
+            <div class="flex items-end gap-2">
+
+                <div class="relative flex-1">
+                    <textarea
+                        id="userInput"
+                        rows="1"
+                        maxlength="5000"
+                        placeholder="Tulis pesan untuk EXELITE AI..."
+                        class="chat-input w-full resize-none rounded-xl px-4 py-3.5 pr-14 text-xs sm:text-sm text-slate-100 placeholder:text-slate-600 outline-none leading-relaxed max-h-36 overflow-y-auto"
+                    ></textarea>
+
+                    <span
+                        id="charCounter"
+                        class="char-counter absolute right-3 bottom-2 text-[8px] text-slate-700">
+                        0/5000
+                    </span>
+                </div>
+
+                <button
+                    onclick="sendMessage()"
+                    id="sendBtn"
+                    class="send-button shrink-0 w-11 h-11 sm:w-auto sm:px-5 rounded-xl text-slate-950 font-black text-xs flex items-center justify-center gap-2 cursor-pointer">
+
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path
+                            d="M22 2L11 13"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"/>
+                        <path
+                            d="M22 2L15 22L11 13L2 9L22 2Z"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"/>
+                    </svg>
+
+                    <span class="hidden sm:inline">Send</span>
                 </button>
-            </div>
-        </div>
 
-    </div>
+            </div>
+
+            <div class="flex items-center justify-between px-1 pt-2">
+
+                <div class="text-[8px] text-slate-700">
+                    EXELITE AI
+                    <span class="mx-1">•</span>
+                    Powered by ReyCloud
+                </div>
+
+                <div class="text-[8px] text-slate-700">
+                    Enter untuk kirim
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
 
     <script>
         let chatHistory = [];
+        let isSending = false;
 
-        // Perbaikan renderer Marked.js agar parameter terbaca dengan benar dan tidak [object Object]
+        const input = document.getElementById('userInput');
+        const container = document.getElementById('chatContainer');
+        const sendBtn = document.getElementById('sendBtn');
+        const charCounter = document.getElementById('charCounter');
+
         const renderer = new marked.Renderer();
+
         renderer.code = function({ text, lang }) {
             const codeText = text || '';
             const validLang = lang || 'code';
@@ -150,134 +588,368 @@
             return `
                 <div class="code-block-wrapper">
                     <div class="code-header">
-                        <span>${validLang}</span>
-                        <button class="copy-btn" onclick="copyCodeSnippet(decodeURIComponent('${encodedCode}'), this)">📋 Salin</button>
+                        <span class="code-language">${escapeHtml(validLang)}</span>
+                        <button class="copy-btn" onclick="copyCodeSnippet(decodeURIComponent('${encodedCode}'), this)">
+                            📋 Copy
+                        </button>
                     </div>
                     <pre><code>${escapeHtml(codeText)}</code></pre>
                 </div>
             `;
         };
 
-        marked.use({ renderer });
+        marked.use({
+            renderer,
+            breaks: true,
+            gfm: true
+        });
 
-        function copyCodeSnippet(codeText, btnElement) {
-            navigator.clipboard.writeText(codeText).then(() => {
-                const originalText = btnElement.textContent;
-                btnElement.textContent = "✔ Tersalin!";
-                btnElement.style.color = "#34d399";
-                btnElement.style.borderColor = "rgba(52, 211, 153, 0.4)";
-                btnElement.style.background = "rgba(52, 211, 153, 0.15)";
-                
+        function escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        async function copyCodeSnippet(codeText, button) {
+            try {
+                await navigator.clipboard.writeText(codeText);
+
+                const old = button.innerHTML;
+
+                button.innerHTML = "✓ Copied";
+                button.style.color = "#34d399";
+                button.style.borderColor = "rgba(52,211,153,.3)";
+                button.style.background = "rgba(52,211,153,.08)";
+
                 setTimeout(() => {
-                    btnElement.textContent = originalText;
-                    btnElement.style.color = "#fbbf24";
-                    btnElement.style.borderColor = "rgba(251, 191, 36, 0.25)";
-                    btnElement.style.background = "rgba(251, 191, 36, 0.1)";
-                }, 2000);
-            }).catch(err => {
-                console.error('Gagal menyalin:', err);
+                    button.innerHTML = old;
+                    button.style.color = "";
+                    button.style.borderColor = "";
+                    button.style.background = "";
+                }, 1600);
+
+            } catch {
+                alert("Gagal menyalin kode.");
+            }
+        }
+
+        function scrollBottom() {
+            requestAnimationFrame(() => {
+                container.scrollTop = container.scrollHeight;
             });
         }
 
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') sendMessage();
+        function autoResize() {
+            input.style.height = "auto";
+            input.style.height = Math.min(input.scrollHeight, 144) + "px";
+        }
+
+        function updateCounter() {
+            const length = input.value.length;
+
+            charCounter.textContent = `${length}/5000`;
+
+            if (length > 4500) {
+                charCounter.classList.remove("text-slate-700");
+                charCounter.classList.add("text-amber-400");
+            } else {
+                charCounter.classList.remove("text-amber-400");
+                charCounter.classList.add("text-slate-700");
+            }
+        }
+
+        input.addEventListener("input", () => {
+            autoResize();
+            updateCounter();
+        });
+
+        input.addEventListener("keydown", event => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function useSuggestion(text) {
+            input.value = text;
+            autoResize();
+            updateCounter();
+            input.focus();
+        }
+
+        function createUserMessage(text) {
+            const div = document.createElement("div");
+
+            div.className = "flex items-start justify-end gap-2.5 message-enter";
+
+            div.innerHTML = `
+                <div class="bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 rounded-2xl rounded-tr-sm px-3.5 py-3 max-w-[88%] sm:max-w-[80%] text-xs leading-relaxed font-semibold shadow-lg shadow-amber-500/[.07]">
+                    ${escapeHtml(text).replace(/\n/g, "<br>")}
+                </div>
+
+                <div class="w-8 h-8 rounded-xl bg-amber-400/[.08] border border-amber-400/15 text-amber-300 flex items-center justify-center text-[9px] font-black shrink-0">
+                    YOU
+                </div>
+            `;
+
+            return div;
+        }
+
+        function createLoadingMessage(id) {
+            const div = document.createElement("div");
+
+            div.id = id;
+            div.className = "flex items-start gap-2.5 message-enter";
+
+            div.innerHTML = `
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-300 to-amber-600 p-[1px] shrink-0 logo-glow">
+                    <div class="w-full h-full rounded-[10px] bg-[#0b0d11] flex items-center justify-center text-amber-400 text-xs">
+                        ⚡
+                    </div>
+                </div>
+
+                <div class="glass-soft rounded-2xl rounded-tl-sm px-3.5 py-3.5">
+                    <div class="flex items-center gap-1.5">
+                        <span class="typing-dot w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                        <span class="typing-dot w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                        <span class="typing-dot w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                        <span class="ml-1.5 text-[9px] text-slate-500">
+                            EXELITE sedang berpikir...
+                        </span>
+                    </div>
+                </div>
+            `;
+
+            return div;
+        }
+
+        function createAIMessage(text) {
+            const div = document.createElement("div");
+
+            div.className = "flex items-start gap-2.5 message-enter";
+
+            div.innerHTML = `
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-300 to-amber-600 p-[1px] shrink-0 logo-glow">
+                    <div class="w-full h-full rounded-[10px] bg-[#0b0d11] flex items-center justify-center text-amber-400 text-xs">
+                        ⚡
+                    </div>
+                </div>
+
+                <div class="glass-soft rounded-2xl rounded-tl-sm px-3.5 py-3 max-w-[92%] sm:max-w-[86%]">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-[9px] font-bold text-amber-400">
+                            EXELITE AI
+                        </span>
+                        <span class="text-[8px] text-slate-600">
+                            •
+                        </span>
+                        <span class="text-[8px] text-slate-600">
+                            Response
+                        </span>
+                    </div>
+
+                    <div class="markdown-content">
+                        ${marked.parse(text)}
+                    </div>
+                </div>
+            `;
+
+            return div;
+        }
+
+        function createErrorMessage(message) {
+            const div = document.createElement("div");
+
+            div.className = "flex items-start gap-2.5 message-enter";
+
+            div.innerHTML = `
+                <div class="w-8 h-8 rounded-xl bg-rose-500/[.08] border border-rose-500/15 text-rose-400 flex items-center justify-center text-xs font-black shrink-0">
+                    !
+                </div>
+
+                <div class="rounded-2xl rounded-tl-sm bg-rose-500/[.05] border border-rose-500/15 px-3.5 py-3 max-w-[88%] text-xs text-rose-300 leading-relaxed">
+                    ${escapeHtml(message)}
+                </div>
+            `;
+
+            return div;
         }
 
         async function sendMessage() {
-            const input = document.getElementById('userInput');
-            const container = document.getElementById('chatContainer');
+            if (isSending) return;
+
             const prompt = input.value.trim();
 
             if (!prompt) return;
 
-            chatHistory.push({ role: 'user', content: prompt });
+            isSending = true;
+            sendBtn.disabled = true;
 
-            // Render Bubble User
-            const userMsgDiv = document.createElement('div');
-            userMsgDiv.className = "flex items-start justify-end space-x-3";
-            userMsgDiv.innerHTML = `
-                <div class="bg-amber-400 text-slate-950 rounded-2xl rounded-tr-sm px-4 py-3 text-xs max-w-[88%] leading-relaxed font-semibold shadow-md">${escapeHtml(prompt)}</div>
-                <div class="w-7 h-7 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-xs shrink-0 border border-amber-400/30">You</div>
-            `;
-            container.appendChild(userMsgDiv);
-            input.value = '';
-            container.scrollTop = container.scrollHeight;
+            const welcome = document.getElementById("welcomeMessage");
 
-            // Indikator Loading / Mengetik
-            const loadingId = 'load-' + Date.now();
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = loadingId;
-            loadingDiv.className = "flex items-start space-x-3";
-            loadingDiv.innerHTML = `
-                <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 p-[1px] shrink-0 shadow-md">
-                    <div class="w-full h-full bg-[#0d0f12] rounded-[10px] flex items-center justify-center text-amber-400 text-xs font-bold">⚡</div>
-                </div>
-                <div class="bg-[#181d28] border border-[#2b3344] rounded-2xl rounded-tl-sm px-4 py-3 text-xs text-amber-400 flex items-center space-x-1.5">
-                    <span class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 0s;"></span>
-                    <span class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></span>
-                    <span class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 0.4s;"></span>
-                    <span class="ml-1 text-[11px] font-medium text-slate-400 tracking-wide">EXELITE AI sedang berpikir...</span>
-                </div>
-            `;
-            container.appendChild(loadingDiv);
-            container.scrollTop = container.scrollHeight;
+            if (welcome) {
+                welcome.remove();
+            }
+
+            const greeting = document.getElementById("initialGreeting");
+
+            if (greeting && chatHistory.length === 0) {
+                greeting.remove();
+            }
+
+            chatHistory.push({
+                role: "user",
+                content: prompt
+            });
+
+            container.appendChild(createUserMessage(prompt));
+
+            input.value = "";
+            autoResize();
+            updateCounter();
+            scrollBottom();
+
+            const loadingId = "loading-" + Date.now();
+            const loadingMessage = createLoadingMessage(loadingId);
+
+            container.appendChild(loadingMessage);
+            scrollBottom();
 
             try {
-                const res = await fetch('https://reycloud-ai.reyclouddev.workers.dev/api/ai/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt, history: chatHistory })
-                });
+                const res = await fetch(
+                    "https://reycloud-ai.reyclouddev.workers.dev/api/ai/chat",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            prompt,
+                            history: chatHistory
+                        })
+                    }
+                );
 
-                const responseTextRaw = await res.text();
+                const raw = await res.text();
+
                 let json;
+
                 try {
-                    json = JSON.parse(responseTextRaw);
-                } catch (e) {
-                    throw res.ok ? new Error('Respons bukan format JSON valid: ' + responseTextRaw) : new Error('Server Error (' + res.status + '): ' + responseTextRaw);
+                    json = JSON.parse(raw);
+                } catch {
+                    throw new Error(
+                        res.ok
+                            ? "Respons server bukan JSON yang valid."
+                            : `Server Error (${res.status})`
+                    );
                 }
 
-                document.getElementById(loadingId).remove();
+                const loading = document.getElementById(loadingId);
 
-                const responseText = json.result || json.response || json.message || json.error || JSON.stringify(json);
-                chatHistory.push({ role: 'assistant', content: responseText });
+                if (loading) {
+                    loading.remove();
+                }
 
-                const parsedMarkdown = marked.parse(responseText);
+                if (!res.ok) {
+                    throw new Error(
+                        json.error ||
+                        json.message ||
+                        `Server Error (${res.status})`
+                    );
+                }
 
-                // Render Bubble AI
-                const aiMsgDiv = document.createElement('div');
-                aiMsgDiv.className = "flex items-start space-x-3";
-                aiMsgDiv.innerHTML = `
-                    <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 p-[1px] shrink-0 shadow-md">
-                        <div class="w-full h-full bg-[#0d0f12] rounded-[10px] flex items-center justify-center text-amber-400 text-xs font-bold">⚡</div>
-                    </div>
-                    <div class="bg-[#181d28] border border-[#2b3344] rounded-2xl rounded-tl-sm px-4 py-3 text-xs text-slate-200 max-w-[88%] leading-relaxed markdown-content shadow-sm">
-                        ${parsedMarkdown}
-                    </div>
-                `;
-                container.appendChild(aiMsgDiv);
-                container.scrollTop = container.scrollHeight;
+                const responseText =
+                    json.result ||
+                    json.response ||
+                    json.message ||
+                    json.error ||
+                    JSON.stringify(json);
 
-            } catch (err) {
-                document.getElementById(loadingId).remove();
-                console.error('CHAT ERROR:', err);
-                
-                const errDiv = document.createElement('div');
-                errDiv.className = "flex items-start space-x-3";
-                errDiv.innerHTML = `
-                    <div class="w-7 h-7 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-xs shrink-0 border border-rose-500/30">!</div>
-                    <div class="bg-rose-500/10 border border-rose-500/30 rounded-2xl px-4 py-3 text-xs text-rose-300 max-w-[88%]">
-                        Gagal terhubung ke worker AI: ${escapeHtml(err.message)}
-                    </div>
-                `;
-                container.appendChild(errDiv);
-                container.scrollTop = container.scrollHeight;
+                chatHistory.push({
+                    role: "assistant",
+                    content: responseText
+                });
+
+                container.appendChild(
+                    createAIMessage(responseText)
+                );
+
+                scrollBottom();
+
+            } catch (error) {
+                const loading = document.getElementById(loadingId);
+
+                if (loading) {
+                    loading.remove();
+                }
+
+                console.error("EXELITE AI ERROR:", error);
+
+                container.appendChild(
+                    createErrorMessage(
+                        "Gagal terhubung ke EXELITE AI: " +
+                        error.message
+                    )
+                );
+
+                scrollBottom();
+
+            } finally {
+                isSending = false;
+                sendBtn.disabled = false;
+                input.focus();
             }
         }
 
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        function newChat() {
+            if (isSending) return;
+
+            chatHistory = [];
+
+            container.innerHTML = `
+                <div id="welcomeMessage" class="welcome-card rounded-2xl border border-white/[.05] p-5 sm:p-7 text-center message-enter max-w-2xl mx-auto">
+
+                    <div class="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-300/15 to-amber-500/5 border border-amber-400/15 flex items-center justify-center text-2xl logo-glow">
+                        ⚡
+                    </div>
+
+                    <div class="mt-4 text-lg sm:text-xl font-black text-white">
+                        New conversation
+                    </div>
+
+                    <p class="mt-2 text-[10px] sm:text-xs text-slate-500">
+                        Mulai percakapan baru bersama EXELITE AI.
+                    </p>
+
+                    <div class="mt-5 flex flex-wrap justify-center gap-2">
+
+                        <button onclick="useSuggestion('Bantu saya membuat website modern')" class="suggestion glass-soft rounded-xl px-3 py-2 text-[9px] text-slate-400 cursor-pointer">
+                            🌐 Website
+                        </button>
+
+                        <button onclick="useSuggestion('Bantu saya debug kode JavaScript')" class="suggestion glass-soft rounded-xl px-3 py-2 text-[9px] text-slate-400 cursor-pointer">
+                            💻 Coding
+                        </button>
+
+                        <button onclick="useSuggestion('Jelaskan konsep ini dengan sederhana')" class="suggestion glass-soft rounded-xl px-3 py-2 text-[9px] text-slate-400 cursor-pointer">
+                            🧠 Explain
+                        </button>
+
+                    </div>
+                </div>
+            `;
+
+            input.value = "";
+            autoResize();
+            updateCounter();
+            input.focus();
         }
+
+        autoResize();
+        updateCounter();
     </script>
 </body>
 </html>

@@ -3,116 +3,497 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReyCloudSHP - Pembayaran Berhasil</title>
+    <title>ReyCloudSHP - Payment Success</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { background-color: #0d0f12; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: #07090d;
+            color: #f8fafc;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .28;
+            background-image:
+                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+            background-size: 32px 32px;
+            mask-image: linear-gradient(to bottom, black, transparent 90%);
+        }
+
+        .glow {
+            position: fixed;
+            width: 420px;
+            height: 420px;
+            border-radius: 999px;
+            background: rgba(16,185,129,.12);
+            filter: blur(120px);
+            pointer-events: none;
+            top: 42%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .glass {
+            background: rgba(15, 19, 27, .82);
+            border: 1px solid rgba(255,255,255,.075);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow:
+                0 30px 80px rgba(0,0,0,.45),
+                inset 0 1px 0 rgba(255,255,255,.035);
+        }
+
+        .success-ring {
+            position: relative;
+            width: 88px;
+            height: 88px;
+            margin: auto;
+        }
+
+        .success-ring::before {
+            content: "";
+            position: absolute;
+            inset: -8px;
+            border-radius: 28px;
+            border: 1px solid rgba(52,211,153,.18);
+            animation: pulseRing 2s ease-out infinite;
+        }
+
+        .success-ring::after {
+            content: "";
+            position: absolute;
+            inset: -18px;
+            border-radius: 34px;
+            border: 1px solid rgba(52,211,153,.08);
+            animation: pulseRing 2s ease-out 1s infinite;
+        }
+
+        .success-icon {
+            width: 88px;
+            height: 88px;
+            border-radius: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, rgba(16,185,129,.18), rgba(16,185,129,.05));
+            border: 1px solid rgba(52,211,153,.32);
+            box-shadow:
+                0 0 40px rgba(16,185,129,.12),
+                inset 0 1px 0 rgba(255,255,255,.06);
+            animation: successPop .65s cubic-bezier(.2,.8,.2,1);
+        }
+
+        .check {
+            width: 34px;
+            height: 34px;
+            stroke-dasharray: 80;
+            stroke-dashoffset: 80;
+            animation: drawCheck .7s .35s ease forwards;
+        }
+
+        @keyframes successPop {
+            0% {
+                transform: scale(.5);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.08);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes drawCheck {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes pulseRing {
+            0% {
+                transform: scale(.8);
+                opacity: 0;
+            }
+            35% {
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.25);
+                opacity: 0;
+            }
+        }
+
+        .shine {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shine::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 70%;
+            height: 100%;
+            transform: skewX(-20deg);
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,.09),
+                transparent
+            );
+            animation: shine 4s infinite;
+        }
+
+        @keyframes shine {
+            0%, 65% {
+                left: -120%;
+            }
+            100% {
+                left: 150%;
+            }
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: #34d399;
+            box-shadow: 0 0 12px rgba(52,211,153,.8);
+            animation: statusPulse 1.8s infinite;
+        }
+
+        @keyframes statusPulse {
+            50% {
+                opacity: .45;
+                transform: scale(.8);
+            }
+        }
+
+        .step-line {
+            width: 1px;
+            height: 24px;
+            background: linear-gradient(to bottom, rgba(52,211,153,.35), transparent);
+            margin-left: 9px;
+        }
+
+        .floating {
+            animation: floating 5s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-6px);
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
 
-    <!-- Ambient Glow Background -->
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-emerald-500/10 blur-[150px] pointer-events-none rounded-full"></div>
+<body class="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-x-hidden">
 
-    <div class="w-full max-w-sm bg-[#151922] border border-[#232936] rounded-2xl p-6 shadow-2xl space-y-5 text-center relative z-10">
-        
-        <!-- Success Icon Animation -->
-        <div class="mx-auto w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-3xl shadow-lg animate-bounce">
-            🎉
+    <div class="bg-grid"></div>
+    <div class="glow"></div>
+
+    <main class="w-full max-w-md relative z-10">
+
+        <div class="flex items-center justify-between mb-4 px-1">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-white/[.035] border border-white/[.07] shadow-lg">
+                    <span class="text-lg font-black text-white">R</span>
+                </div>
+
+                <div>
+                    <div class="text-[13px] font-black tracking-wide text-white">
+                        REYCLOUD<span class="text-emerald-400">SHP</span>
+                    </div>
+                    <div class="text-[9px] uppercase tracking-[.22em] text-slate-500 font-bold">
+                        Secure Payment
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/[.06] border border-emerald-500/15">
+                <span class="status-dot"></span>
+                <span class="text-[9px] uppercase tracking-wider font-bold text-emerald-400">
+                    Verified
+                </span>
+            </div>
         </div>
 
-        <div class="space-y-1.5">
-            <h1 class="text-base font-black tracking-wide text-white uppercase">
-                Pembayaran <span class="text-emerald-400">Berhasil!</span>
-            </h1>
-            <p id="descText" class="text-xs text-slate-400 leading-relaxed">
-                Memuat status pembayaran...
+        <section class="glass rounded-[28px] p-5 sm:p-6 relative overflow-hidden">
+
+            <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent"></div>
+
+            <div class="text-center pt-5">
+
+                <div class="success-ring floating">
+                    <div class="success-icon">
+                        <svg class="check" viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M5 12.5L9.2 16.5L19 7"
+                                stroke="currentColor"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="text-emerald-400"
+                            />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="mt-8 space-y-2">
+                    <div class="text-[10px] uppercase tracking-[.28em] text-emerald-400 font-black">
+                        Transaction Completed
+                    </div>
+
+                    <h1 class="text-2xl sm:text-[27px] font-black tracking-tight text-white">
+                        Pembayaran
+                        <span class="text-emerald-400">Berhasil</span>
+                    </h1>
+
+                    <p id="descText" class="text-[12px] leading-relaxed text-slate-400 max-w-[310px] mx-auto">
+                        Memuat status pembayaran...
+                    </p>
+                </div>
+
+                <div class="mt-6 flex items-center justify-center gap-2">
+                    <div class="h-px w-12 bg-white/[.06]"></div>
+                    <span class="text-[9px] uppercase tracking-[.2em] text-slate-600 font-bold">
+                        ReyCode Payment
+                    </span>
+                    <div class="h-px w-12 bg-white/[.06]"></div>
+                </div>
+
+            </div>
+
+            <div class="mt-6 rounded-2xl bg-black/20 border border-white/[.055] overflow-hidden">
+
+                <div class="px-4 py-3 border-b border-white/[.05] flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-white/[.035] flex items-center justify-center text-slate-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6.5L19 8.5V19a2 2 0 01-2 2Z"/>
+                            </svg>
+                        </div>
+
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            Transaction Status
+                        </span>
+                    </div>
+
+                    <span class="px-2 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/15 text-[9px] font-bold text-emerald-400">
+                        SUCCESS
+                    </span>
+                </div>
+
+                <div class="p-4">
+
+                    <div class="flex gap-3">
+                        <div class="flex flex-col items-center pt-1">
+                            <div class="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center">
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center">
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 space-y-4">
+                            <div>
+                                <div class="text-[11px] font-bold text-white">
+                                    Pembayaran diterima
+                                </div>
+                                <div class="text-[9px] text-slate-500 mt-0.5">
+                                    Transaksi berhasil diproses oleh sistem.
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="text-[11px] font-bold text-white">
+                                    Pesanan dikonfirmasi
+                                </div>
+                                <div class="text-[9px] text-slate-500 mt-0.5">
+                                    Pesanan Anda siap untuk langkah berikutnya.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="instructionBox" class="mt-3 rounded-2xl bg-black/20 border border-white/[.055] p-4">
+
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-7 h-7 rounded-lg bg-cyan-500/[.07] border border-cyan-500/10 flex items-center justify-center">
+                        <span class="text-sm">⚡</span>
+                    </div>
+
+                    <div>
+                        <div class="text-[10px] uppercase tracking-wider font-bold text-slate-300">
+                            Langkah Berikutnya
+                        </div>
+                        <div class="text-[9px] text-slate-600">
+                            Ikuti instruksi di bawah
+                        </div>
+                    </div>
+                </div>
+
+                <ul id="instructionList" class="space-y-2.5 text-[11px] text-slate-400">
+                </ul>
+
+            </div>
+
+            <div class="mt-4 space-y-2.5">
+
+                <a
+                    id="waConfirmBtn"
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="hidden shine w-full rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3.5 text-[11px] transition-all shadow-[0_12px_35px_rgba(16,185,129,.12)] flex items-center justify-center gap-2"
+                >
+                    <span class="text-base">💬</span>
+                    <span>Konfirmasi ke WhatsApp Admin</span>
+                </a>
+
+                <a
+                    id="dashboardLink"
+                    href="/dashboard"
+                    class="w-full rounded-2xl bg-white/[.035] hover:bg-white/[.06] border border-white/[.065] text-slate-300 hover:text-white font-bold py-3.5 text-[11px] transition-all flex items-center justify-center gap-2"
+                >
+                    <span>⌂</span>
+                    <span>Kembali ke Dashboard</span>
+                </a>
+
+            </div>
+
+            <div class="mt-5 pt-4 border-t border-white/[.05] flex items-center justify-between">
+                <div class="text-[9px] text-slate-600 font-mono">
+                    REYCLOUDSHP
+                </div>
+
+                <div class="flex items-center gap-1.5 text-[9px] text-slate-600">
+                    <span>🔒</span>
+                    <span>Secure Transaction</span>
+                </div>
+            </div>
+
+        </section>
+
+        <div class="text-center mt-4 px-3">
+            <p class="text-[9px] text-slate-700 leading-relaxed">
+                Pembayaran diproses secara aman oleh ReyCloudSHP Payment Engine.
             </p>
         </div>
 
-        <!-- Instruksi Dinamis (Tampil Berbeda untuk Donasi & Bulk) -->
-        <div id="instructionBox" class="bg-[#0d0f12] border border-[#232936] rounded-xl p-3.5 text-left space-y-2">
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Langkah Selanjutnya:</div>
-            <ul id="instructionList" class="text-[11px] text-slate-300 space-y-1.5 list-disc list-inside">
-                <!-- Diisi via JavaScript -->
-            </ul>
-        </div>
-
-        <!-- Tombol Aksi (Tombol WA hanya muncul jika tipe transaksi 'bulk') -->
-        <div class="space-y-2.5 pt-1">
-            <a id="waConfirmBtn" href="#" target="_blank" class="hidden w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3.5 rounded-xl text-xs transition-all shadow-lg text-center text-white flex items-center justify-center space-x-2">
-                <span>💬 Konfirmasi ke WhatsApp Admin</span>
-            </a>
-
-            <a id="dashboardLink" href="/dashboard" class="block w-full bg-[#1e2330] hover:bg-[#2b3344] text-slate-300 font-bold py-3 rounded-xl text-xs transition-all text-center">
-                🏠 Kembali ke Beranda Dashboard
-            </a>
-        </div>
-
-        <div class="text-[10px] text-slate-500 font-mono pt-1">
-            ReyCloudSHP Secure Transaction
-        </div>
-
-    </div>
+    </main>
 
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const username = urlParams.get('user') || sessionStorage.getItem('reycloud_active_user') || 'Tamu';
-            
-            const txType = sessionStorage.getItem('pending_tx_type') || urlParams.get('type') || 'bulk';
-            
+
+            const username =
+                urlParams.get('user') ||
+                sessionStorage.getItem('reycloud_active_user') ||
+                'Tamu';
+
+            const txType =
+                sessionStorage.getItem('pending_tx_type') ||
+                urlParams.get('type') ||
+                'bulk';
+
             const descEl = document.getElementById('descText');
             const instructionList = document.getElementById('instructionList');
             const waBtn = document.getElementById('waConfirmBtn');
+            const dashLink = document.getElementById('dashboardLink');
+
+            const createStep = (icon, text) => {
+                return `
+                    <li class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-md bg-white/[.035] border border-white/[.055] flex items-center justify-center shrink-0 text-[9px]">
+                            ${icon}
+                        </span>
+                        <span class="leading-relaxed pt-0.5">${text}</span>
+                    </li>
+                `;
+            };
 
             if (txType === 'donasi') {
-                descEl.textContent = 'Terima kasih banyak atas dukungan donasi Anda untuk Reycode! Kontribusi Anda sangat berarti bagi pengembangan platform ini.';
-                
-                // Instruksi untuk donasi (Tanpa WA)
+
+                descEl.textContent =
+                    'Terima kasih atas dukungan Anda untuk ReyCode. Kontribusi Anda sangat berarti untuk pengembangan platform dan menjaga layanan tetap berjalan.';
+
                 instructionList.innerHTML = `
-                    <li>Donasi Anda telah berhasil tercatat.</li>
-                    <li>Dukungan Anda membantu server tetap aktif.</li>
-                    <li>Silakan kembali ke dashboard untuk melanjutkan.</li>
+                    ${createStep('✓', 'Donasi Anda telah berhasil tercatat di sistem.')}
+                    ${createStep('⚡', 'Dukungan Anda membantu pengembangan dan operasional server.')}
+                    ${createStep('⌂', 'Anda dapat kembali ke dashboard untuk melanjutkan aktivitas.')}
                 `;
-                
-                // Sembunyikan tombol WhatsApp untuk donasi
+
                 waBtn.classList.add('hidden');
+
             } else {
-                descEl.textContent = 'Pembayaran API Key Bulk Anda berhasil. Silakan konfirmasi ke WhatsApp admin untuk mendapatkan API Key Anda.';
-                
-                // Instruksi untuk bulk (Dengan WA)
+
+                descEl.textContent =
+                    'Pembayaran API Key Bulk Anda berhasil. Lanjutkan dengan konfirmasi melalui WhatsApp admin untuk menerima API Key Anda.';
+
                 instructionList.innerHTML = `
-                    <li>Klik tombol WhatsApp di bawah.</li>
-                    <li>Kirimkan bukti transfer / riwayat pembayaran.</li>
-                    <li>Admin akan segera mengirimkan API Key Bulk Anda.</li>
+                    ${createStep('1', 'Tekan tombol WhatsApp untuk menghubungi admin.')}
+                    ${createStep('2', 'Kirim bukti transfer atau riwayat pembayaran Anda.')}
+                    ${createStep('3', 'Admin akan memproses dan mengirimkan API Key Bulk Anda.')}
                 `;
-                
-                // Munculkan tombol WhatsApp untuk bulk
+
                 waBtn.classList.remove('hidden');
 
-                // Format pesan WhatsApp khusus Bulk
                 const now = new Date().toLocaleString('id-ID');
-                const waMessage = `Halo admin, saya (${username}) sudah menyelesaikan pembayaran untuk pembelian [API Key Bulk Pro] via Mustika Payment pada (${now}). Mohon bantuannya untuk mengirimkan API Key Bulk saya ya min. Terima kasih!`;
-                const whatsappNumber = "6281260512743"; 
-                waBtn.href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waMessage)}`;
+
+                const waMessage =
+                    `Halo admin, saya (${username}) sudah menyelesaikan pembayaran untuk pembelian [API Key Bulk Pro] via Mustika Payment pada (${now}). Mohon bantuannya untuk mengirimkan API Key Bulk saya ya min. Terima kasih!`;
+
+                const whatsappNumber = '6281260512743';
+
+                waBtn.href =
+                    `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waMessage)}`;
             }
 
-            // Update link kembali ke dashboard agar tetap membawa parameter user
-            const dashLink = document.getElementById('dashboardLink');
             if (username && username !== 'Tamu') {
-                dashLink.href = `/dashboard?user=${encodeURIComponent(username)}`;
+                dashLink.href =
+                    `/dashboard?user=${encodeURIComponent(username)}`;
             }
 
-            // Kirim notifikasi otomatis ke Telegram owner via backend
-            fetch(`/api/payment/success-notif?user=${encodeURIComponent(username)}&type=${encodeURIComponent(txType)}`)
+            fetch(
+                `/api/payment/success-notif?user=${encodeURIComponent(username)}&type=${encodeURIComponent(txType)}`
+            )
                 .then(res => res.json())
-                .then(data => console.log('Notif terkirim:', data))
-                .catch(err => console.error('Gagal kirim log:', err));
+                .then(data => {
+                    console.log('Notif terkirim:', data);
+                })
+                .catch(err => {
+                    console.error('Gagal kirim log:', err);
+                });
 
-            // Bersihkan memori setelah dibaca
             sessionStorage.removeItem('pending_tx_type');
         });
     </script>
+
 </body>
 </html>

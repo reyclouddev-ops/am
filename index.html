@@ -1,27 +1,399 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReyCloudSHP - Human Verification Portal</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <meta name="theme-color" content="#05070a">
+    <title>ReyCloudSHP — Security Verification</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            background: #05070a;
+        }
+
         body {
-            background-color: #050608;
-            color: #f8fafc;
-            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            color: #e2e8f0;
+            font-family: "Plus Jakarta Sans", sans-serif;
+            background:
+                radial-gradient(circle at 15% 5%, rgba(239,68,68,.08), transparent 28%),
+                radial-gradient(circle at 85% 5%, rgba(37,99,235,.08), transparent 28%),
+                radial-gradient(circle at 50% 100%, rgba(14,165,233,.05), transparent 35%),
+                #05070a;
+            overflow-x: hidden;
         }
 
-        .glass-card {
-            background: rgba(14, 18, 27, 0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .mono {
+            font-family: "JetBrains Mono", monospace;
         }
 
-        .turnstile-container {
-            width: 100%;
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .5;
+            background-image:
+                linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+            background-size: 34px 34px;
+            mask-image: linear-gradient(to bottom, black, transparent 90%);
+        }
+
+        .scan-line {
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(59,130,246,.45),
+                rgba(239,68,68,.4),
+                transparent
+            );
+            box-shadow: 0 0 18px rgba(59,130,246,.2);
+            animation: scan 6s linear infinite;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @keyframes scan {
+            0% {
+                top: -5%;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 105%;
+                opacity: 0;
+            }
+        }
+
+        .glass {
+            background: rgba(9,13,18,.8);
+            border: 1px solid rgba(255,255,255,.07);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+        }
+
+        .status-dot {
+            animation: statusPulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%,100% {
+                opacity: .45;
+                transform: scale(.9);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .police-light {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 78px;
+            height: 13px;
+            transform: translateX(-50%);
+            border-radius: 999px 999px 5px 5px;
+            background: linear-gradient(
+                90deg,
+                #ef4444 0 48%,
+                #2563eb 52% 100%
+            );
+            animation: siren 1s ease-in-out infinite;
+        }
+
+        @keyframes siren {
+            0%,100% {
+                filter: brightness(.7);
+                box-shadow:
+                    -25px 0 28px rgba(239,68,68,.16),
+                    25px 0 28px rgba(37,99,235,.16);
+            }
+
+            50% {
+                filter: brightness(1.5);
+                box-shadow:
+                    -40px 0 50px rgba(239,68,68,.48),
+                    40px 0 50px rgba(37,99,235,.48);
+            }
+        }
+
+        .officer {
+            position: relative;
+            width: 210px;
+            height: 250px;
+            margin: 0 auto;
+            animation: officerFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes officerFloat {
+            0%,100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-7px);
+            }
+        }
+
+        .officer-halo {
+            position: absolute;
+            width: 190px;
+            height: 190px;
+            left: 50%;
+            top: 38px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            border: 1px solid rgba(148,163,184,.08);
+            box-shadow:
+                0 0 80px rgba(59,130,246,.08),
+                inset 0 0 60px rgba(239,68,68,.04);
+        }
+
+        .head {
+            position: absolute;
+            top: 38px;
+            left: 50%;
+            width: 78px;
+            height: 82px;
+            transform: translateX(-50%);
+            border-radius: 25px 25px 30px 30px;
+            background: linear-gradient(145deg,#334155,#111827);
+            border: 2px solid rgba(148,163,184,.18);
+            box-shadow: 0 15px 35px rgba(0,0,0,.4);
+            z-index: 3;
+        }
+
+        .face {
+            position: absolute;
+            inset: 13px 10px 12px;
+            border-radius: 18px;
+            background: linear-gradient(145deg,#475569,#1e293b);
+        }
+
+        .eye {
+            position: absolute;
+            top: 30px;
+            width: 9px;
+            height: 5px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            box-shadow: 0 0 9px rgba(226,232,240,.35);
+        }
+
+        .eye.left {
+            left: 17px;
+        }
+
+        .eye.right {
+            right: 17px;
+        }
+
+        .mouth {
+            position: absolute;
+            left: 50%;
+            bottom: 19px;
+            width: 22px;
+            height: 3px;
+            transform: translateX(-50%);
+            border-radius: 5px;
+            background: #0f172a;
+        }
+
+        .cap {
+            position: absolute;
+            top: 23px;
+            left: 50%;
+            width: 94px;
+            height: 25px;
+            transform: translateX(-50%);
+            border-radius: 18px 18px 7px 7px;
+            background: linear-gradient(135deg,#1e293b,#0f172a);
+            border: 2px solid rgba(148,163,184,.2);
+            z-index: 4;
+        }
+
+        .cap-badge {
+            position: absolute;
+            left: 50%;
+            top: 5px;
+            width: 18px;
+            height: 11px;
+            transform: translateX(-50%);
+            border-radius: 4px;
+            background: #f8fafc;
+            box-shadow: 0 0 8px rgba(255,255,255,.15);
+        }
+
+        .body {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 150px;
+            height: 130px;
+            transform: translateX(-50%);
+            border-radius: 40px 40px 20px 20px;
+            background: linear-gradient(145deg,#1e293b,#0f172a 65%);
+            border: 2px solid rgba(148,163,184,.15);
+            box-shadow: 0 20px 45px rgba(0,0,0,.45);
+            z-index: 2;
+        }
+
+        .body-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            transform: translateX(-50%);
+            background: rgba(148,163,184,.08);
+        }
+
+        .badge {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            width: 30px;
+            height: 34px;
+            transform: translateX(-50%);
+            clip-path: polygon(
+                50% 0%,
+                90% 24%,
+                80% 76%,
+                50% 100%,
+                20% 76%,
+                10% 24%
+            );
+            background: linear-gradient(145deg,#e2e8f0,#64748b);
+        }
+
+        .badge::after {
+            content: "★";
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0f172a;
+            font-size: 11px;
+        }
+
+        .shoulder {
+            position: absolute;
+            top: 43px;
+            width: 30px;
+            height: 9px;
+            border-radius: 5px;
+            background: #475569;
+        }
+
+        .shoulder.left {
+            left: 8px;
+            transform: rotate(-18deg);
+        }
+
+        .shoulder.right {
+            right: 8px;
+            transform: rotate(18deg);
+        }
+
+        .arm {
+            position: absolute;
+            bottom: 7px;
+            width: 34px;
+            height: 82px;
+            border-radius: 18px;
+            background: linear-gradient(145deg,#334155,#111827);
+            border: 2px solid rgba(148,163,184,.12);
+        }
+
+        .arm.left {
+            left: -25px;
+            transform: rotate(12deg);
+        }
+
+        .arm.right {
+            right: -25px;
+            transform: rotate(-12deg);
+        }
+
+        .corner {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-color: rgba(59,130,246,.3);
+        }
+
+        .corner.tl {
+            top: 16px;
+            left: 16px;
+            border-top: 1px solid;
+            border-left: 1px solid;
+        }
+
+        .corner.tr {
+            top: 16px;
+            right: 16px;
+            border-top: 1px solid;
+            border-right: 1px solid;
+        }
+
+        .corner.bl {
+            bottom: 16px;
+            left: 16px;
+            border-bottom: 1px solid;
+            border-left: 1px solid;
+        }
+
+        .corner.br {
+            bottom: 16px;
+            right: 16px;
+            border-bottom: 1px solid;
+            border-right: 1px solid;
+        }
+
+        .verify-button {
+            transition: .25s ease;
+        }
+
+        .verify-button:not(:disabled):hover {
+            transform: translateY(-2px);
+        }
+
+        .verify-button:disabled {
+            cursor: not-allowed;
+            opacity: .45;
+            filter: grayscale(.3);
+        }
+
+        .turnstile-box {
             min-height: 65px;
             display: flex;
             align-items: center;
@@ -29,268 +401,381 @@
             overflow: hidden;
         }
 
-        .turnstile-container > div {
-            max-width: 100%;
+        .success-glow {
+            animation: successGlow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes successGlow {
+            0%,100% {
+                box-shadow: 0 0 0 rgba(16,185,129,0);
+            }
+
+            50% {
+                box-shadow: 0 0 28px rgba(16,185,129,.12);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .officer {
+                transform: scale(.9);
+                margin-top: -10px;
+                margin-bottom: -15px;
+            }
         }
     </style>
 </head>
 
-<body class="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-x-hidden">
+<body>
 
-    <div class="absolute top-10 left-1/2 -translate-x-1/2 w-[280px] h-[140px] bg-amber-500/10 blur-[130px] pointer-events-none rounded-full"></div>
-    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-[280px] h-[140px] bg-cyan-500/10 blur-[130px] pointer-events-none rounded-full"></div>
+    <div class="grid-bg"></div>
+    <div class="scan-line"></div>
 
-    <div class="w-full max-w-sm space-y-3.5 relative z-10">
+    <div class="min-h-screen flex flex-col relative z-10">
 
-        <div class="flex items-center space-x-3 bg-gradient-to-r from-white/[0.04] to-transparent p-3 rounded-2xl border border-white/5">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-cyan-400 p-[1.5px] shadow-md shadow-amber-500/20 flex items-center justify-center shrink-0">
-                <div class="w-full h-full bg-[#0d0f12] rounded-[10px] flex items-center justify-center text-amber-400 font-black text-base">
-                    ⚡
-                </div>
-            </div>
+        <header class="sticky top-0 z-50 glass border-x-0 border-t-0">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 h-[68px] flex items-center justify-between">
 
-            <div>
-                <h1 class="text-xs font-black tracking-widest text-white uppercase">
-                    REYCLOUD<span class="text-amber-400">SHP</span>
-                </h1>
-                <p class="text-[9px] font-mono text-slate-400 tracking-wider">
-                    HUMAN VERIFICATION GATEWAY
-                </p>
-            </div>
-        </div>
+                <div class="flex items-center gap-3">
 
-        <div class="relative w-full rounded-2xl overflow-hidden border border-white/10 bg-black aspect-[16/9] flex items-center justify-center shadow-xl group">
-            <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-85 transition-transform duration-700 group-hover:scale-105">
-                <source src="https://files.catbox.moe/zq1irh.mp4" type="video/mp4">
-            </video>
-
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
-
-            <div class="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[9px] font-mono text-amber-300 font-bold">
-                <span class="flex items-center space-x-1.5 drop-shadow">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                    <span>SECURITY CHECKPOINT</span>
-                </span>
-            </div>
-        </div>
-
-        <div class="glass-card rounded-2xl p-2.5 flex items-center space-x-2.5 border-l-4 border-l-emerald-500 shadow-md">
-            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs shrink-0">
-                🛡️
-            </div>
-
-            <div class="text-left">
-                <div class="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">
-                    System Shield Active
-                </div>
-                <p class="text-[10px] text-slate-300 font-medium leading-tight">
-                    System Ini Di Jaga Ketat Oleh RoronoaZoro v2.5.0
-                </p>
-            </div>
-        </div>
-
-        <div class="glass-card rounded-3xl p-4.5 shadow-2xl space-y-3.5">
-
-            <form id="formVerify" onsubmit="handleVerification(event)" class="space-y-3">
-
-                <div class="space-y-0.5 text-left">
-                    <h2 class="text-xs font-black text-white tracking-wide uppercase">
-                        Verifikasi Manusia
-                    </h2>
-
-                    <p class="text-[10px] text-slate-400">
-                        Selesaikan tantangan di bawah untuk melanjutkan akses.
-                    </p>
-                </div>
-
-                <div class="space-y-2.5 pt-0.5">
-
-                    <div class="bg-[#050608] border border-white/10 rounded-xl p-2.5 space-y-1.5">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                Konfirmasi Keamanan
-                            </span>
-
-                            <span class="text-[9px] text-emerald-400 font-bold">
-                                CLOUDFLARE
-                            </span>
-                        </div>
-
-                        <div class="turnstile-container">
-                            <div
-                                id="turnstileVerify"
-                                class="cf-turnstile"
-                                data-sitekey="0x4AAAAAAExLYYLD3676zLoS"
-                                data-theme="dark"
-                                data-size="flexible"
-                            ></div>
-                        </div>
+                    <div class="relative w-10 h-10 rounded-xl flex items-center justify-center bg-white/[.03] border border-white/[.08]">
+                        <i class="fa-solid fa-shield-halved text-slate-300"></i>
+                        <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 status-dot"></span>
                     </div>
 
-                    <button
-                        type="submit"
-                        id="btnVerifySubmit"
-                        class="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 cursor-pointer transform hover:-translate-y-0.5 mt-1"
-                    >
-                        Lanjutkan ke Portal 🚀
-                    </button>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-sm font-extrabold text-white tracking-tight">
+                                REYCLOUD<span class="text-amber-400">SHP</span>
+                            </h1>
+
+                            <span class="hidden sm:inline-flex text-[8px] px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold tracking-wider">
+                                SECURE
+                            </span>
+                        </div>
+
+                        <p class="text-[10px] text-slate-500 mt-0.5">
+                            Human Verification Gateway
+                        </p>
+                    </div>
 
                 </div>
-            </form>
 
-        </div>
+                <div class="flex items-center gap-2">
 
-        <div class="text-center space-y-1 pt-1">
+                    <span class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[.025] border border-white/[.06]">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 status-dot"></span>
+                        <span class="mono text-[8px] text-slate-500">
+                            PROTECTED
+                        </span>
+                    </span>
 
-            <a
-                href="https://wa.me/6281260512743?text=Halo%20Admin,%20saya%20butuh%20bantuan%20terkait%20verifikasi%20ReyCloudSHP."
-                target="_blank"
-                class="text-[11px] text-cyan-400 hover:underline font-medium inline-flex items-center space-x-1.5"
-            >
-                <span>💬 Bantuan WhatsApp Admin</span>
-            </a>
+                </div>
 
-            <div class="text-[9px] font-semibold text-slate-500 tracking-wider">
-                © 2026 ReyCloudSHP • All Rights Reserved
+            </div>
+        </header>
+
+        <main class="flex-1 flex items-center justify-center px-4 py-8">
+
+            <section class="w-full max-w-xl">
+
+                <div class="glass rounded-[30px] overflow-hidden relative shadow-2xl">
+
+                    <div class="corner tl"></div>
+                    <div class="corner tr"></div>
+                    <div class="corner bl"></div>
+                    <div class="corner br"></div>
+
+                    <div class="px-5 py-7 sm:px-9 sm:py-9 text-center">
+
+                        <div class="flex items-center justify-center gap-3 mb-5">
+
+                            <div class="h-px w-10 bg-gradient-to-r from-transparent to-red-500/40"></div>
+
+                            <div class="flex items-center gap-2 text-[9px] font-bold tracking-[.18em] text-red-400 uppercase">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 status-dot"></span>
+                                Security Checkpoint
+                            </div>
+
+                            <div class="h-px w-10 bg-gradient-to-l from-transparent to-blue-500/40"></div>
+
+                        </div>
+
+                        <div class="relative mb-3">
+
+                            <div class="police-light"></div>
+
+                            <div class="officer">
+
+                                <div class="officer-halo"></div>
+
+                                <div class="cap">
+                                    <div class="cap-badge"></div>
+                                </div>
+
+                                <div class="head">
+
+                                    <div class="face">
+                                        <div class="eye left"></div>
+                                        <div class="eye right"></div>
+                                        <div class="mouth"></div>
+                                    </div>
+
+                                </div>
+
+                                <div class="body">
+
+                                    <div class="body-line"></div>
+
+                                    <div class="badge"></div>
+
+                                    <div class="shoulder left"></div>
+                                    <div class="shoulder right"></div>
+
+                                </div>
+
+                                <div class="arm left"></div>
+                                <div class="arm right"></div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="mono text-[9px] text-amber-400/80 font-semibold tracking-[.2em] uppercase mb-3">
+                            REYCLOUD SECURITY PROTOCOL
+                        </div>
+
+                        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
+                            Verifikasi
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-cyan-400">
+                                Keamanan
+                            </span>
+                        </h2>
+
+                        <p class="text-xs sm:text-sm text-slate-400 leading-6 max-w-md mx-auto mt-3">
+                            Selesaikan pemeriksaan keamanan Cloudflare untuk memastikan bahwa akses dilakukan oleh pengguna yang valid.
+                        </p>
+
+                        <div class="mt-6 rounded-2xl bg-white/[.025] border border-white/[.07] p-4 text-left">
+
+                            <div class="flex items-center justify-between mb-3">
+
+                                <div class="flex items-center gap-2">
+
+                                    <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/15 flex items-center justify-center">
+                                        <i class="fa-solid fa-fingerprint text-amber-400 text-[11px]"></i>
+                                    </div>
+
+                                    <div>
+                                        <p class="text-[10px] font-bold text-slate-200">
+                                            Human Verification
+                                        </p>
+
+                                        <p class="text-[8px] text-slate-600 mono">
+                                            CLOUDFLARE TURNSTILE
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                                <span id="verifyStatus" class="text-[8px] mono font-bold text-amber-400">
+                                    WAITING
+                                </span>
+
+                            </div>
+
+                            <div class="turnstile-box rounded-xl bg-[#050608] border border-white/[.06]">
+
+                                <div
+                                    id="turnstileVerify"
+                                    class="cf-turnstile"
+                                    data-sitekey="0x4AAAAAAExLYYLD3676zLoS"
+                                    data-theme="dark"
+                                    data-size="flexible"
+                                    data-callback="onTurnstileSuccess"
+                                    data-expired-callback="onTurnstileExpired"
+                                    data-error-callback="onTurnstileError"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+                        <div
+                            id="verifiedBox"
+                            class="hidden mt-3 rounded-xl bg-emerald-500/[.06] border border-emerald-500/[.15] p-3 success-glow"
+                        >
+
+                            <div class="flex items-center justify-center gap-2">
+
+                                <div class="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                    <i class="fa-solid fa-check text-emerald-400 text-[10px]"></i>
+                                </div>
+
+                                <div class="text-left">
+                                    <p class="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">
+                                        Verification Passed
+                                    </p>
+
+                                    <p class="text-[8px] text-slate-500">
+                                        Akses aman. Silakan lanjutkan.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <form id="formVerify" onsubmit="handleVerification(event)" class="mt-4">
+
+                            <button
+                                type="submit"
+                                id="btnVerifySubmit"
+                                disabled
+                                class="verify-button w-full h-12 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10"
+                            >
+                                <i class="fa-solid fa-lock text-[11px]"></i>
+                                <span>SELESAIKAN VERIFIKASI</span>
+                            </button>
+
+                        </form>
+
+                        <div class="warning-line mt-6 mb-4 h-px bg-gradient-to-r from-transparent via-white/[.06] to-transparent"></div>
+
+                        <div class="flex items-center justify-center gap-2 text-[8px] text-slate-600 mono">
+                            <i class="fa-solid fa-shield-halved text-emerald-500/60"></i>
+                            <span>SECURE CONNECTION</span>
+                            <span>•</span>
+                            <span>REYCLOUDSHP</span>
+                        </div>
+
+                    </div>
+
+                    <div class="px-5 py-3.5 border-t border-white/[.05] bg-black/20">
+
+                        <div class="flex items-center justify-between">
+
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 status-dot"></span>
+                                <span class="mono text-[8px] text-slate-600 uppercase tracking-wider">
+                                    SECURITY ACTIVE
+                                </span>
+                            </div>
+
+                            <a
+                                href="https://wa.me/6281260512743?text=Halo%20Admin,%20saya%20butuh%20bantuan%20terkait%20verifikasi%20ReyCloudSHP."
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="text-[8px] text-cyan-500/80 hover:text-cyan-400 transition"
+                            >
+                                <i class="fa-brands fa-whatsapp mr-1"></i>
+                                BANTUAN
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+        <footer class="border-t border-white/[.05]">
+
+            <div class="max-w-6xl mx-auto px-4 py-4 text-center">
+
+                <p class="text-[9px] text-slate-700">
+                    © 2026 ReyCloudSHP • Protected Security Gateway
+                </p>
+
             </div>
 
-        </div>
+        </footer>
 
-    </div>
-
-    <div id="customModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="glass-card border border-white/10 rounded-2xl p-5 max-w-xs w-full space-y-3.5 shadow-2xl text-center">
-
-            <div id="modalIcon" class="mx-auto w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-lg">
-                ⚠️
-            </div>
-
-            <div class="space-y-1">
-                <h3 id="modalTitle" class="text-xs font-black text-white uppercase tracking-wider">
-                    Pemberitahuan Sistem
-                </h3>
-
-                <p id="modalMessage" class="text-[11px] text-slate-300 leading-relaxed"></p>
-            </div>
-
-            <button
-                onclick="closeModal()"
-                class="w-full bg-[#1e2535] hover:bg-[#2f3b52] text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow cursor-pointer"
-            >
-                Mengerti
-            </button>
-
-        </div>
     </div>
 
     <script>
-        function showModal(title, message, type = 'error') {
-            const modal = document.getElementById('customModal');
-            const titleEl = document.getElementById('modalTitle');
-            const msgEl = document.getElementById('modalMessage');
-            const iconEl = document.getElementById('modalIcon');
+        let turnstileVerified = false;
 
-            titleEl.textContent = title;
-            msgEl.textContent = message;
+        function onTurnstileSuccess(token) {
+            turnstileVerified = Boolean(token);
 
-            if (type === 'success') {
-                iconEl.className = "mx-auto w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl shadow-lg";
-                iconEl.textContent = "🎉";
-            } else {
-                iconEl.className = "mx-auto w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl shadow-lg";
-                iconEl.textContent = "🛡️";
-            }
+            const btn = document.getElementById('btnVerifySubmit');
+            const status = document.getElementById('verifyStatus');
+            const verifiedBox = document.getElementById('verifiedBox');
 
-            modal.classList.remove('hidden');
-        }
+            btn.disabled = !turnstileVerified;
 
-        let modalCallback = null;
+            if (turnstileVerified) {
+                btn.innerHTML = `
+                    <i class="fa-solid fa-arrow-right"></i>
+                    <span>MASUK KE DASHBOARD</span>
+                `;
 
-        function showModalWithAction(title, message, type = 'error', callback) {
-            showModal(title, message, type);
-            modalCallback = callback;
-        }
+                status.textContent = 'VERIFIED';
+                status.className = 'text-[8px] mono font-bold text-emerald-400';
 
-        function closeModal() {
-            document.getElementById('customModal').classList.add('hidden');
-
-            if (modalCallback) {
-                modalCallback();
-                modalCallback = null;
+                verifiedBox.classList.remove('hidden');
             }
         }
 
-        function getTurnstileToken(containerId) {
-            const container = document.getElementById(containerId);
+        function onTurnstileExpired() {
+            turnstileVerified = false;
 
-            if (!container) {
-                return '';
-            }
+            const btn = document.getElementById('btnVerifySubmit');
+            const status = document.getElementById('verifyStatus');
+            const verifiedBox = document.getElementById('verifiedBox');
 
-            const input = container.querySelector('input[name="cf-turnstile-response"]');
+            btn.disabled = true;
 
-            return input ? input.value : '';
+            btn.innerHTML = `
+                <i class="fa-solid fa-lock text-[11px]"></i>
+                <span>SELESAIKAN VERIFIKASI</span>
+            `;
+
+            status.textContent = 'EXPIRED';
+            status.className = 'text-[8px] mono font-bold text-red-400';
+
+            verifiedBox.classList.add('hidden');
         }
 
-        function resetTurnstile(containerId) {
-            if (!window.turnstile) {
-                return;
-            }
+        function onTurnstileError() {
+            turnstileVerified = false;
 
-            const container = document.getElementById(containerId);
+            const btn = document.getElementById('btnVerifySubmit');
+            const status = document.getElementById('verifyStatus');
+            const verifiedBox = document.getElementById('verifiedBox');
 
-            if (!container) {
-                return;
-            }
+            btn.disabled = true;
 
-            try {
-                const widget = container.querySelector('iframe');
+            status.textContent = 'ERROR';
+            status.className = 'text-[8px] mono font-bold text-red-400';
 
-                if (widget) {
-                    const allWidgets = document.querySelectorAll('.cf-turnstile');
-
-                    allWidgets.forEach(element => {
-                        if (element === container) {
-                            try {
-                                window.turnstile.reset(element);
-                            } catch {}
-                        }
-                    });
-                }
-            } catch {}
+            verifiedBox.classList.add('hidden');
         }
 
         function handleVerification(event) {
             event.preventDefault();
 
-            const btn = document.getElementById('btnVerifySubmit');
-            const turnstileToken = getTurnstileToken('turnstileVerify');
-
-            if (!turnstileToken) {
-                showModal(
-                    'Verifikasi Diperlukan',
-                    'Silakan selesaikan verifikasi Cloudflare Turnstile terlebih dahulu.',
-                    'error'
-                );
+            if (!turnstileVerified) {
                 return;
             }
 
+            const btn = document.getElementById('btnVerifySubmit');
+
             btn.disabled = true;
-            btn.textContent = 'Memverifikasi...';
+
+            btn.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <span>MEMBUKA DASHBOARD...</span>
+            `;
 
             setTimeout(() => {
-                showModalWithAction(
-                    'Verifikasi Berhasil!',
-                    'Akses diberikan. Mengalihkan ke halaman utama...',
-                    'success',
-                    () => {
-                        window.location.href = '/dashboard';
-                    }
-                );
-                btn.disabled = false;
-                btn.textContent = 'Lanjutkan ke Portal 🚀';
-            }, 1000);
+                window.location.href = '/dashboard';
+            }, 350);
         }
     </script>
+
 </body>
 </html>

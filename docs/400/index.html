@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080a0f">
+<title>400 — Bad Request | ReyCloud</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#080a0f;color:#f8fafc;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;transition:.3s}.grid{position:fixed;inset:0;background-image:linear-gradient(#fff1 1px,transparent 1px),linear-gradient(90deg,#fff1 1px,transparent 1px);background-size:32px 32px;opacity:.35;pointer-events:none}.glow{position:fixed;width:260px;height:260px;background:#f59e0b22;filter:blur(90px);border-radius:50%;pointer-events:none}.card{position:relative;width:100%;max-width:460px;text-align:center;padding:32px 24px;border:1px solid #ffffff12;background:#10141ccc;backdrop-filter:blur(18px);border-radius:28px;box-shadow:0 25px 80px #0008}.brand{font-size:12px;font-weight:900;letter-spacing:3px;margin-bottom:24px}.brand span{color:#f59e0b}.robot{width:130px;height:130px;margin:auto auto 20px;animation:float 3s ease-in-out infinite}.head{fill:#e2e8f0;stroke:#f59e0b;stroke-width:3}.eye{fill:#0f172a}.screen{fill:#f59e0b}.body{fill:#cbd5e1;stroke:#f59e0b;stroke-width:3}@keyframes float{50%{transform:translateY(-7px)}}.code{font-size:58px;font-weight:1000;line-height:1;background:linear-gradient(90deg,#fbbf24,#f97316);color:transparent;background-clip:text}.title{font-size:21px;font-weight:900;margin:12px 0 8px}.desc{font-size:12px;line-height:1.7;color:#94a3b8;margin-bottom:24px}.status{display:inline-flex;gap:8px;align-items:center;padding:7px 12px;border:1px solid #f59e0b44;background:#f59e0b12;color:#fbbf24;border-radius:99px;font:700 10px monospace;margin-bottom:20px}.dot{width:7px;height:7px;border-radius:50%;background:#f59e0b;box-shadow:0 0 10px #f59e0b}.actions{display:flex;gap:10px}.btn{flex:1;text-decoration:none;border:0;border-radius:13px;padding:12px;font-size:11px;font-weight:800;cursor:pointer;background:#f59e0b;color:#111827}.secondary{background:#ffffff08;color:#cbd5e1;border:1px solid #ffffff12}body.light{background:#f1f5f9;color:#0f172a}.light .card{background:#fffffff0;border-color:#cbd5e1}.light .desc{color:#64748b}.light .secondary{color:#334155;background:#f8fafc;border-color:#cbd5e1}.light .head{fill:#1e293b}.light .body{fill:#334155}.theme{position:fixed;top:18px;right:18px;width:38px;height:38px;border-radius:12px;border:1px solid #ffffff15;background:#ffffff08;color:#fff;cursor:pointer}@media(max-width:420px){.card{padding:28px 18px}.code{font-size:48px}.actions{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="grid"></div><div class="glow"></div>
+<button class="theme" onclick="toggleTheme()" id="theme">☀️</button>
+<main class="card">
+<div class="brand">REY<span>CLOUD</span></div>
+<svg class="robot" viewBox="0 0 140 140">
+<rect class="body" x="42" y="78" width="56" height="38" rx="12"/>
+<rect class="head" x="30" y="35" width="80" height="55" rx="17"/>
+<rect class="screen" x="48" y="50" width="13" height="13" rx="4"/>
+<rect class="screen" x="79" y="50" width="13" height="13" rx="4"/>
+<rect class="eye" x="57" y="52" width="5" height="7"/>
+<rect class="eye" x="78" y="52" width="5" height="7"/>
+<path d="M58 74Q70 82 82 74" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+<path d="M70 35V23" stroke="#f59e0b" stroke-width="3"/><circle class="screen" cx="70" cy="18" r="6"/>
+</svg>
+<div class="status"><span class="dot"></span>GET → 400</div>
+<div class="code">400</div>
+<div class="title">Bad Request</div>
+<div class="desc">Server menerima permintaan, tetapi format atau parameter yang dikirim tidak dapat diproses.</div>
+<div class="actions"><a class="btn" href="/dashboard">Dashboard</a><button class="btn secondary" onclick="location.reload()">Coba Lagi</button></div>
+</main>
+<script>
+const b=document.body,t=document.getElementById('theme');let m=localStorage.getItem('rey_status_theme')||'dark';function apply(){b.classList.toggle('light',m==='light');t.textContent=m==='light'?'🌙':'☀️'}function toggleTheme(){m=m==='dark'?'light':'dark';localStorage.setItem('rey_status_theme',m);apply()}apply();
+</script>
+</body>
+</html>

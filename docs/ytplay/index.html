@@ -2,304 +2,1172 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReyTube - YouTube Player & Seamless Mini Player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f0f0f">
+    <title>ReyTube — Watch Everything</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { background-color: #0f0f0f; color: #f1f1f1; font-family: system-ui, -apple-system, sans-serif; }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #3f3f3f; border-radius: 9999px; }
-        
-        /* State Mode Mini Player */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            background: #0f0f0f;
+            color: #f1f1f1;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            outline: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3f3f3f;
+            border-radius: 999px;
+        }
+
+        .app-shell {
+            width: 100%;
+            max-width: 520px;
+            height: 100dvh;
+            margin: 0 auto;
+            background: #0f0f0f;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .top-header {
+            background: rgba(15, 15, 15, .94);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border-bottom: 1px solid rgba(255, 255, 255, .055);
+        }
+
+        .search-wrap {
+            background: #121212;
+            border: 1px solid #303030;
+            transition: .2s ease;
+        }
+
+        .search-wrap:focus-within {
+            border-color: #555;
+            background: #181818;
+        }
+
+        .search-input::placeholder {
+            color: #777;
+        }
+
+        .video-card {
+            transition: background .18s ease;
+        }
+
+        .video-card:active {
+            background: #181818;
+        }
+
+        .thumbnail-wrap {
+            position: relative;
+            overflow: hidden;
+            background: #181818;
+        }
+
+        .thumbnail-wrap img {
+            transition: transform .35s ease;
+        }
+
+        .video-card:hover .thumbnail-wrap img {
+            transform: scale(1.025);
+        }
+
+        .duration {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            background: rgba(0, 0, 0, .88);
+            color: white;
+            padding: 3px 6px;
+            border-radius: 5px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .2px;
+        }
+
+        .channel-avatar {
+            background: linear-gradient(135deg, #272727, #404040);
+        }
+
+        .bottom-nav {
+            background: rgba(15, 15, 15, .96);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid rgba(255, 255, 255, .07);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-button {
+            color: #8a8a8a;
+            transition: .18s ease;
+        }
+
+        .nav-button.active {
+            color: #fff;
+        }
+
+        .nav-button.active .nav-icon {
+            background: #272727;
+        }
+
+        .nav-icon {
+            width: 38px;
+            height: 28px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: .18s ease;
+        }
+
+        .home-logo {
+            background: linear-gradient(135deg, #ff0033, #ff1744);
+            box-shadow: 0 6px 20px rgba(255, 0, 51, .18);
+        }
+
+        .player-page {
+            background: #0f0f0f;
+        }
+
+        .player-box {
+            background: #000;
+            aspect-ratio: 16 / 9;
+        }
+
+        .player-control {
+            background: rgba(0, 0, 0, .72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        .recommendation-item {
+            transition: background .18s ease;
+        }
+
+        .recommendation-item:active {
+            background: #181818;
+        }
+
+        .mini-player {
+            position: fixed;
+            left: 50%;
+            bottom: calc(58px + env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            width: min(calc(100% - 20px), 500px);
+            height: 74px;
+            background: rgba(28, 28, 28, .97);
+            border: 1px solid #3b3b3b;
+            border-radius: 15px;
+            z-index: 100;
+            box-shadow: 0 16px 45px rgba(0, 0, 0, .7);
+            display: flex;
+            align-items: center;
+            padding: 7px;
+            gap: 9px;
+            animation: miniIn .22s ease;
+        }
+
+        .mini-thumbnail {
+            width: 104px;
+            height: 59px;
+            border-radius: 9px;
+            overflow: hidden;
+            background: #222;
+            flex-shrink: 0;
+        }
+
+        .mini-thumbnail iframe {
+            pointer-events: none;
+        }
+
+        .mini-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .mini-actions {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .mini-action {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #272727;
+            color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes miniIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 15px) scale(.97);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0) scale(1);
+            }
+        }
+
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                #181818 25%,
+                #222 37%,
+                #181818 63%
+            );
+            background-size: 400% 100%;
+            animation: skeleton 1.4s ease infinite;
+        }
+
+        @keyframes skeleton {
+            0% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0 50%;
+            }
+        }
+
+        .fade-up {
+            animation: fadeUp .3s ease both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(7px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .empty-icon {
+            background: radial-gradient(circle at center, #272727, #181818);
+            border: 1px solid #303030;
+        }
+
+        .chip {
+            white-space: nowrap;
+            background: #272727;
+            color: #ddd;
+            border: 1px solid #303030;
+            transition: .18s ease;
+        }
+
+        .chip:active {
+            background: #3a3a3a;
+        }
+
         body.mini-active #activeWatchView {
             position: fixed;
-            bottom: 56px; /* Di atas navbar bawah */
-            left: 12px;
-            right: 12px;
-            height: 72px;
-            background: #1e1e1e;
-            border: 1px solid #3f3f3f;
-            border-radius: 12px;
+            left: 50%;
+            bottom: calc(58px + env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            width: min(calc(100% - 20px), 500px);
+            height: 74px;
+            background: rgba(28, 28, 28, .97);
+            border: 1px solid #3b3b3b;
+            border-radius: 15px;
             z-index: 100;
+            padding: 7px;
             display: flex !important;
-            flex-direction: row !important;
             align-items: center;
-            padding: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-            backdrop-blur: 10px;
+            gap: 9px;
+            box-shadow: 0 16px 45px rgba(0, 0, 0, .7);
+            animation: miniIn .22s ease;
         }
+
+        body.mini-active #activeWatchView .player-box-wrapper {
+            width: 104px !important;
+            height: 59px !important;
+            aspect-ratio: auto !important;
+            border-radius: 9px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
         body.mini-active #activeWatchView .hide-on-mini {
             display: none !important;
         }
-        body.mini-active #activeWatchView .player-box-wrapper {
-            width: 110px !important;
-            height: 62px !important;
-            border-radius: 8px;
-            overflow: hidden;
-            flex-shrink: 0;
-            position: relative;
-        }
+
         body.mini-active #activeWatchView .mini-controls {
             display: flex !important;
         }
+
+        body.mini-active #activeWatchView iframe {
+            pointer-events: none;
+        }
+
+        body.mini-active #appContainer {
+            padding-bottom: 145px;
+        }
+
+        @media (min-width: 640px) {
+            .app-shell {
+                border-left: 1px solid #202020;
+                border-right: 1px solid #202020;
+                box-shadow: 0 0 80px rgba(0, 0, 0, .45);
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between relative overflow-hidden">
 
-    <div class="w-full max-w-md flex flex-col h-screen relative z-10 bg-[#0f0f0f]">
-        
-        <!-- YouTube Header Navbar -->
-        <div class="flex items-center justify-between bg-[#0f0f0f]/95 backdrop-blur-md px-4 py-3 border-b border-[#272727] shrink-0 sticky top-0 z-50">
-            <div class="flex items-center space-x-2 cursor-pointer" onclick="resetHome()">
-                <div class="w-7 h-5 bg-red-600 rounded-md flex items-center justify-center text-white font-black text-[10px] tracking-tighter shadow-sm">
-                    ▶
+<body>
+    <div class="app-shell">
+
+        <header class="top-header sticky top-0 z-50">
+
+            <div class="flex items-center justify-between px-4 pt-3 pb-2">
+                <button
+                    onclick="resetHome()"
+                    class="flex items-center gap-2.5 cursor-pointer"
+                >
+                    <div class="home-logo w-8 h-8 rounded-[10px] flex items-center justify-center text-white font-black text-xs">
+                        ▶
+                    </div>
+
+                    <div class="text-left">
+                        <div class="text-[15px] font-black tracking-tight text-white leading-none">
+                            Rey<span class="text-red-500">Tube</span>
+                        </div>
+
+                        <div class="text-[8px] text-[#777] font-bold tracking-[.16em] uppercase mt-1">
+                            Watch Everything
+                        </div>
+                    </div>
+                </button>
+
+                <div class="flex items-center gap-2">
+                    <button
+                        onclick="focusSearch()"
+                        class="w-9 h-9 rounded-full flex items-center justify-center text-[#bbb] hover:bg-[#272727] transition cursor-pointer"
+                    >
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/>
+                        </svg>
+                    </button>
+
+                    <a
+                        href="/dashboard"
+                        class="w-9 h-9 rounded-full bg-[#272727] flex items-center justify-center text-[#ccc] hover:bg-[#333] transition"
+                    >
+                        <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18M3 6h18M3 18h18"/>
+                        </svg>
+                    </a>
                 </div>
-                <span class="font-extrabold text-sm tracking-tight text-white">Rey<span class="text-red-500">Tube</span></span>
             </div>
 
-            <div class="flex items-center space-x-3">
-                <a href="/dashboard" class="px-3 py-1 bg-[#272727] hover:bg-[#3f3f3f] text-slate-200 text-[11px] rounded-full font-medium transition-colors">
-                    Home
-                </a>
-            </div>
-        </div>
+            <div class="px-4 pb-3">
+                <div class="flex items-center gap-2">
 
-        <!-- Search Bar Header -->
-        <div class="px-4 py-2.5 bg-[#0f0f0f] border-b border-[#272727] shrink-0">
-            <div class="flex items-center space-x-2">
-                <div class="flex-1 flex items-center bg-[#121212] border border-[#3f3f3f] rounded-full px-3.5 py-1.5 focus-within:border-blue-500 transition-colors">
-                    <input type="text" id="searchInput" placeholder="Telusuri ReyTube..." 
-                        class="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none"
-                        onkeypress="handleKeyPress(event)">
+                    <div class="search-wrap flex-1 h-10 rounded-full flex items-center px-4">
+                        <svg
+                            class="w-4 h-4 text-[#777] mr-2 shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"
+                            />
+                        </svg>
+
+                        <input
+                            id="searchInput"
+                            type="text"
+                            placeholder="Telusuri video..."
+                            autocomplete="off"
+                            class="search-input w-full bg-transparent outline-none text-[12px] text-white"
+                            onkeypress="handleKeyPress(event)"
+                        />
+
+                        <button
+                            id="clearSearch"
+                            onclick="clearSearch()"
+                            class="hidden text-[#777] hover:text-white cursor-pointer"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-width="2" d="M6 6l12 12M18 6 6 18"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <button
+                        onclick="searchYouTube()"
+                        id="searchBtn"
+                        class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-[#ddd] active:scale-95 transition cursor-pointer shrink-0"
+                    >
+                        <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                stroke-linecap="round"
+                                stroke-width="2"
+                                d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"
+                            />
+                        </svg>
+                    </button>
                 </div>
-                <button onclick="searchYouTube()" id="searchBtn"
-                    class="bg-[#272727] hover:bg-[#3f3f3f] text-white p-2 rounded-full transition-colors shrink-0 cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
+            </div>
+
+            <div class="flex gap-2 overflow-x-auto px-4 pb-3">
+                <button
+                    onclick="quickSearch('musik terbaru')"
+                    class="chip px-3 py-1.5 rounded-lg text-[10px] font-semibold cursor-pointer"
+                >
+                    Musik
+                </button>
+
+                <button
+                    onclick="quickSearch('podcast')"
+                    class="chip px-3 py-1.5 rounded-lg text-[10px] font-semibold cursor-pointer"
+                >
+                    Podcast
+                </button>
+
+                <button
+                    onclick="quickSearch('gaming')"
+                    class="chip px-3 py-1.5 rounded-lg text-[10px] font-semibold cursor-pointer"
+                >
+                    Gaming
+                </button>
+
+                <button
+                    onclick="quickSearch('viral indonesia')"
+                    class="chip px-3 py-1.5 rounded-lg text-[10px] font-semibold cursor-pointer"
+                >
+                    Trending
+                </button>
+
+                <button
+                    onclick="quickSearch('tutorial')"
+                    class="chip px-3 py-1.5 rounded-lg text-[10px] font-semibold cursor-pointer"
+                >
+                    Tutorial
                 </button>
             </div>
-        </div>
+        </header>
 
-        <!-- Main Content Container -->
-        <div id="appContainer" class="flex-1 overflow-y-auto pb-24 relative">
-            <!-- Default Home State -->
-            <div id="homeState" class="flex flex-col items-center justify-center h-full p-6 text-center space-y-3">
-                <div class="w-14 h-14 bg-[#272727] rounded-full flex items-center justify-center text-red-500 text-2xl shadow-inner">
-                    ▶
+        <main
+            id="appContainer"
+            class="h-[calc(100dvh-145px)] overflow-y-auto pb-24 relative"
+        >
+            <div
+                id="homeState"
+                class="min-h-[calc(100dvh-220px)] flex flex-col items-center justify-center px-7 text-center"
+            >
+                <div class="empty-icon w-20 h-20 rounded-[26px] flex items-center justify-center mb-5">
+                    <div class="home-logo w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg">
+                        ▶
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-xs font-bold text-slate-200">Selamat Datang di ReyTube</h3>
-                    <p class="text-[11px] text-slate-400 mt-1">Cari video musik, podcast, atau hiburan favoritmu sekarang.</p>
-                </div>
+
+                <h1 class="text-[16px] font-bold text-white">
+                    Selamat datang di ReyTube
+                </h1>
+
+                <p class="text-[11px] text-[#777] leading-relaxed max-w-[290px] mt-2">
+                    Cari musik, podcast, gaming, tutorial, dan berbagai video favoritmu.
+                </p>
+
+                <button
+                    onclick="focusSearch()"
+                    class="mt-5 px-5 py-2.5 rounded-full bg-[#272727] hover:bg-[#333] text-[11px] font-bold text-white transition cursor-pointer"
+                >
+                    Mulai mencari
+                </button>
             </div>
-        </div>
+        </main>
 
-        <!-- Bottom Navigation Bar ala YouTube Mobile -->
-        <div class="flex items-center justify-around bg-[#0f0f0f] border-t border-[#272727] py-2 shrink-0 absolute bottom-0 left-0 right-0 z-40">
-            <button onclick="resetHome()" class="flex flex-col items-center text-red-500 space-y-0.5 cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                <span class="text-[9px] font-medium">Beranda</span>
+        <nav class="bottom-nav absolute bottom-0 left-0 right-0 z-50 h-[62px] flex items-center justify-around">
+
+            <button
+                onclick="resetHome()"
+                class="nav-button active flex flex-col items-center justify-center w-20 h-full cursor-pointer"
+            >
+                <div class="nav-icon">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 3 2.5 10.5V21h7v-6h5v6h7V10.5L12 3Z"/>
+                    </svg>
+                </div>
+                <span class="text-[9px] font-semibold mt-0.5">
+                    Beranda
+                </span>
             </button>
-            <div class="flex flex-col items-center text-slate-400 space-y-0.5 cursor-pointer hover:text-white" onclick="document.getElementById('searchInput').focus()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <span class="text-[9px] font-medium">Pencarian</span>
-            </div>
-        </div>
 
+            <button
+                onclick="focusSearch()"
+                class="nav-button flex flex-col items-center justify-center w-20 h-full cursor-pointer"
+            >
+                <div class="nav-icon">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                            stroke-linecap="round"
+                            stroke-width="2"
+                            d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"
+                        />
+                    </svg>
+                </div>
+                <span class="text-[9px] font-semibold mt-0.5">
+                    Cari
+                </span>
+            </button>
+
+            <a
+                href="/dashboard"
+                class="nav-button flex flex-col items-center justify-center w-20 h-full cursor-pointer"
+            >
+                <div class="nav-icon">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                            stroke-linecap="round"
+                            stroke-width="2"
+                            d="M3 12h18M3 6h18M3 18h18"
+                        />
+                    </svg>
+                </div>
+                <span class="text-[9px] font-semibold mt-0.5">
+                    Menu
+                </span>
+            </a>
+        </nav>
     </div>
 
     <script>
         let currentVideos = [];
-        let activeVideo = { id: '', title: '', channel: '' };
+        let activeVideo = {
+            id: '',
+            title: '',
+            channel: ''
+        };
 
         function handleKeyPress(e) {
-            if (e.key === 'Enter') searchYouTube();
+            if (e.key === 'Enter') {
+                searchYouTube();
+            }
         }
+
+        function focusSearch() {
+            const input = document.getElementById('searchInput');
+            input.focus();
+
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            document.getElementById('clearSearch').classList.add('hidden');
+            input.focus();
+        }
+
+        function quickSearch(query) {
+            const input = document.getElementById('searchInput');
+            input.value = query;
+            document.getElementById('clearSearch').classList.remove('hidden');
+            searchYouTube();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', function() {
+            document
+                .getElementById('clearSearch')
+                .classList.toggle('hidden', !this.value);
+        });
 
         function resetHome() {
             closeMiniPlayer();
+
             const container = document.getElementById('appContainer');
+
             container.innerHTML = `
-                <div id="homeState" class="flex flex-col items-center justify-center h-full p-6 text-center space-y-3">
-                    <div class="w-14 h-14 bg-[#272727] rounded-full flex items-center justify-center text-red-500 text-2xl shadow-inner">
-                        ▶
+                <div
+                    id="homeState"
+                    class="min-h-[calc(100dvh-220px)] flex flex-col items-center justify-center px-7 text-center fade-up"
+                >
+                    <div class="empty-icon w-20 h-20 rounded-[26px] flex items-center justify-center mb-5">
+                        <div class="home-logo w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg">
+                            ▶
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-xs font-bold text-slate-200">Selamat Datang di ReyTube</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">Cari video musik, podcast, atau hiburan favoritmu sekarang.</p>
-                    </div>
+
+                    <h1 class="text-[16px] font-bold text-white">
+                        Selamat datang di ReyTube
+                    </h1>
+
+                    <p class="text-[11px] text-[#777] leading-relaxed max-w-[290px] mt-2">
+                        Cari musik, podcast, gaming, tutorial, dan berbagai video favoritmu.
+                    </p>
+
+                    <button
+                        onclick="focusSearch()"
+                        class="mt-5 px-5 py-2.5 rounded-full bg-[#272727] hover:bg-[#333] text-[11px] font-bold text-white transition cursor-pointer"
+                    >
+                        Mulai mencari
+                    </button>
                 </div>
             `;
+
             document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearch').classList.add('hidden');
         }
 
         function getYouTubeId(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            if (!url) return null;
+
+            const regExp =
+                /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+
             const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
+
+            return match && match[2] && match[2].length === 11
+                ? match[2]
+                : null;
+        }
+
+        function renderLoading() {
+            const container = document.getElementById('appContainer');
+
+            container.innerHTML = `
+                <div class="p-3 space-y-5 fade-up">
+
+                    <div class="space-y-3">
+                        <div class="skeleton w-full aspect-video rounded-xl"></div>
+
+                        <div class="flex gap-3">
+                            <div class="skeleton w-9 h-9 rounded-full shrink-0"></div>
+
+                            <div class="flex-1 space-y-2">
+                                <div class="skeleton h-3 rounded w-[85%]"></div>
+                                <div class="skeleton h-2.5 rounded w-[55%]"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="skeleton w-full aspect-video rounded-xl"></div>
+
+                        <div class="flex gap-3">
+                            <div class="skeleton w-9 h-9 rounded-full shrink-0"></div>
+
+                            <div class="flex-1 space-y-2">
+                                <div class="skeleton h-3 rounded w-[78%]"></div>
+                                <div class="skeleton h-2.5 rounded w-[48%]"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center py-3">
+                        <div class="flex items-center gap-2 text-[#777] text-[10px]">
+                            <div class="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                            Memuat video...
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderError(message) {
+            const container = document.getElementById('appContainer');
+
+            container.innerHTML = `
+                <div class="min-h-[calc(100dvh-220px)] flex flex-col items-center justify-center px-7 text-center fade-up">
+
+                    <div class="w-16 h-16 rounded-full bg-[#272727] border border-[#333] flex items-center justify-center mb-4">
+                        <svg class="w-7 h-7 text-[#888]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-width="1.7" d="M12 9v4m0 4h.01M10.3 3.9 2.9 17a2 2 0 0 0 1.75 3h14.7a2 2 0 0 0 1.75-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
+                        </svg>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-white">
+                        Terjadi kesalahan
+                    </h3>
+
+                    <p class="text-[10px] text-[#777] mt-2 max-w-[280px] leading-relaxed">
+                        ${escapeHtml(message)}
+                    </p>
+
+                    <button
+                        onclick="searchYouTube()"
+                        class="mt-5 px-5 py-2.5 rounded-full bg-white text-black text-[10px] font-bold cursor-pointer"
+                    >
+                        Coba lagi
+                    </button>
+                </div>
+            `;
         }
 
         async function searchYouTube() {
             const input = document.getElementById('searchInput');
-            const container = document.getElementById('appContainer');
             const query = input.value.trim();
 
-            if (!query) return;
+            if (!query) {
+                focusSearch();
+                return;
+            }
 
-            // Jika sedang ada mini player aktif, jangan reset total, biarkan mengambang
-            const existingWatchView = document.getElementById('activeWatchView');
+            const existingWatchView =
+                document.getElementById('activeWatchView');
+
             if (!existingWatchView) {
-                container.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-64 space-y-2">
-                        <div class="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-                        <span class="text-xs text-slate-400">Memuat video...</span>
-                    </div>
-                `;
+                renderLoading();
             }
 
             try {
-                const res = await fetch(`https://v2.api-varhad.my.id/search/youtube?q=${encodeURIComponent(query)}`, {
-                    headers: { 'Accept': 'application/json' }
-                });
+                const res = await fetch(
+                    `https://v2.api-varhad.my.id/search/youtube?q=${encodeURIComponent(query)}`,
+                    {
+                        headers: {
+                            Accept: 'application/json'
+                        }
+                    }
+                );
+
+                if (!res.ok) {
+                    throw new Error('Server pencarian tidak dapat diakses.');
+                }
+
                 const json = await res.json();
 
-                if (!json.status || !json.result || json.result.length === 0) {
-                    if (!existingWatchView) container.innerHTML = `<div class="text-center text-slate-400 text-xs py-16">Tidak ada video yang ditemukan.</div>`;
+                if (
+                    !json.status ||
+                    !Array.isArray(json.result) ||
+                    json.result.length === 0
+                ) {
+                    if (!existingWatchView) {
+                        const container =
+                            document.getElementById('appContainer');
+
+                        container.innerHTML = `
+                            <div class="min-h-[calc(100dvh-220px)] flex flex-col items-center justify-center px-7 text-center fade-up">
+
+                                <div class="w-16 h-16 rounded-full bg-[#272727] border border-[#333] flex items-center justify-center mb-4">
+                                    <svg class="w-7 h-7 text-[#777]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-width="1.7" d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/>
+                                    </svg>
+                                </div>
+
+                                <h3 class="text-sm font-bold text-white">
+                                    Video tidak ditemukan
+                                </h3>
+
+                                <p class="text-[10px] text-[#777] mt-2">
+                                    Coba gunakan kata pencarian yang berbeda.
+                                </p>
+                            </div>
+                        `;
+                    }
+
                     return;
                 }
 
                 currentVideos = json.result;
+
                 renderVideoFeed(currentVideos);
 
             } catch (err) {
                 console.error(err);
+
+                if (!existingWatchView) {
+                    renderError(
+                        err.message ||
+                        'Tidak dapat mengambil hasil pencarian.'
+                    );
+                }
             }
         }
 
         function renderVideoFeed(videos) {
-            const container = document.getElementById('appContainer');
-            
-            // Simpan watch view jika ada di dalam container
-            const watchView = document.getElementById('activeWatchView');
+            const container =
+                document.getElementById('appContainer');
+
+            const watchView =
+                document.getElementById('activeWatchView');
+
             container.innerHTML = '';
-            if (watchView) container.appendChild(watchView);
 
-            videos.forEach((v) => {
-                const ytId = getYouTubeId(v.link);
-                const card = document.createElement('div');
-                card.className = "flex flex-col mb-4 cursor-pointer group bg-[#0f0f0f] border-b border-[#272727] pb-3";
-                card.onclick = () => watchVideo(ytId, v.title, v.channel);
-                
-                card.innerHTML = `
-                    <div class="relative w-full aspect-video bg-[#272727] overflow-hidden">
-                        <img src="${v.imageUrl}" alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
-                        <div class="absolute bottom-1.5 right-1.5 bg-black/80 px-1.5 py-0.5 rounded text-[9px] font-mono text-white font-bold">
-                            ${v.duration}
-                        </div>
-                    </div>
-                    <div class="flex px-3 pt-3 space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-[#3f3f3f] flex items-center justify-center text-white font-bold text-xs shrink-0">
-                            ${v.channel.charAt(0).toUpperCase()}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-xs font-semibold text-white line-clamp-2 leading-snug">${escapeHtml(v.title)}</h3>
-                            <p class="text-[10px] text-slate-400 mt-1">${escapeHtml(v.channel)}</p>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function watchVideo(ytId, title, channel) {
-            activeVideo = { id: ytId, title: title, channel: channel };
-            document.body.classList.remove('mini-active');
-
-            let watchView = document.getElementById('activeWatchView');
-            if (!watchView) {
-                watchView = document.createElement('div');
-                watchView.id = 'activeWatchView';
-                document.getElementById('appContainer').prepend(watchView);
+            if (watchView) {
+                container.appendChild(watchView);
             }
 
-            watchView.innerHTML = `
-                <!-- Player Box Wrapper -->
-                <div class="player-box-wrapper relative w-full aspect-video bg-black shrink-0">
-                    <iframe id="persistentIframe" src="https://www.youtube.com/embed/${ytId}?autoplay=1" 
-                        class="w-full h-full border-0" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen>
-                    </iframe>
-                    <!-- Tombol Minimize (Panah Bawah) -->
-                    <button onclick="minimizePlayer(event)" class="hide-on-mini absolute top-2 left-2 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full backdrop-blur-sm cursor-pointer shadow transition-all z-20">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </button>
-                </div>
+            const heading = document.createElement('div');
 
-                <!-- Info Video (Hidden saat mini) -->
-                <div class="hide-on-mini p-3 border-b border-[#272727]">
-                    <h2 class="text-xs font-bold text-white leading-snug">${escapeHtml(title)}</h2>
-                    <div class="flex items-center space-x-2 mt-2.5">
-                        <div class="w-7 h-7 rounded-full bg-[#3f3f3f] flex items-center justify-center text-white font-bold text-xs">
-                            ${channel.charAt(0).toUpperCase()}
-                        </div>
-                        <span class="text-[11px] font-medium text-slate-300">${escapeHtml(channel)}</span>
+            heading.className =
+                'px-4 pt-4 pb-3 flex items-center justify-between fade-up';
+
+            heading.innerHTML = `
+                <div>
+                    <div class="text-sm font-bold text-white">
+                        Hasil pencarian
+                    </div>
+
+                    <div class="text-[9px] text-[#777] mt-1">
+                        ${videos.length} video ditemukan
                     </div>
                 </div>
 
-                <!-- Konten Mini Player (Hanya muncul saat mini) -->
-                <div class="mini-controls hidden flex-1 min-w-0 px-2.5 items-center justify-between">
-                    <div class="min-w-0 flex-1 pr-2" onclick="expandPlayer()">
-                        <h4 class="text-[11px] font-semibold text-white truncate leading-tight">${escapeHtml(title)}</h4>
-                        <p class="text-[9px] text-slate-400 truncate mt-0.5">${escapeHtml(channel)}</p>
-                    </div>
-                    <div class="flex items-center space-x-2 shrink-0">
-                        <button onclick="expandPlayer()" class="w-7 h-7 rounded-full bg-[#272727] text-white flex items-center justify-center text-xs">🗖</button>
-                        <button onclick="closeMiniPlayer()" class="w-7 h-7 rounded-full bg-[#272727] text-slate-300 flex items-center justify-center text-xs">✕</button>
-                    </div>
-                </div>
-
-                <!-- Rekomendasi (Hidden saat mini) -->
-                <div class="hide-on-mini flex flex-col">
-                    <div class="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Video Lainnya</div>
-                    <div id="recommendationsList" class="space-y-3 px-3 pb-6"></div>
+                <div class="text-[9px] text-[#777] font-medium">
+                    ReyTube
                 </div>
             `;
 
-            if (currentVideos.length > 0) {
-                const recList = watchView.querySelector('#recommendationsList');
-                if (recList) {
-                    currentVideos.forEach(v => {
-                        const id = getYouTubeId(v.link);
-                        if (id === ytId) return;
+            container.appendChild(heading);
 
-                        const recItem = document.createElement('div');
-                        recItem.className = "flex space-x-2.5 cursor-pointer group";
-                        recItem.onclick = () => watchVideo(id, v.title, v.channel);
-                        recItem.innerHTML = `
-                            <div class="relative w-32 aspect-video bg-[#272727] rounded-md overflow-hidden shrink-0">
-                                <img src="${v.imageUrl}" alt="Thumb" class="w-full h-full object-cover">
-                                <div class="absolute bottom-1 right-1 bg-black/80 px-1 py-0.2 rounded text-[8px] font-mono text-white font-bold">
-                                    ${v.duration}
+            videos.forEach((v, index) => {
+                const ytId = getYouTubeId(v.link);
+
+                if (!ytId) return;
+
+                const card =
+                    document.createElement('div');
+
+                card.className =
+                    'video-card px-3 pb-4 mb-1 cursor-pointer fade-up';
+
+                card.style.animationDelay =
+                    `${Math.min(index * 35, 300)}ms`;
+
+                card.onclick = () =>
+                    watchVideo(
+                        ytId,
+                        v.title || 'Untitled',
+                        v.channel || 'Unknown'
+                    );
+
+                const title =
+                    v.title || 'Video tanpa judul';
+
+                const channel =
+                    v.channel || 'Unknown Channel';
+
+                const image =
+                    v.imageUrl ||
+                    `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`;
+
+                card.innerHTML = `
+                    <div class="thumbnail-wrap w-full aspect-video rounded-xl">
+
+                        <img
+                            src="${escapeAttribute(image)}"
+                            alt=""
+                            loading="lazy"
+                            class="w-full h-full object-cover"
+                            onerror="this.src='https://i.ytimg.com/vi/${ytId}/hqdefault.jpg'"
+                        >
+
+                        <div class="duration">
+                            ${escapeHtml(v.duration || '')}
+                        </div>
+
+                        <div class="absolute inset-0 bg-black/0 hover:bg-black/5 transition"></div>
+                    </div>
+
+                    <div class="flex gap-3 pt-3 px-1">
+
+                        <div class="channel-avatar w-9 h-9 rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+                            ${escapeHtml(channel.charAt(0).toUpperCase())}
+                        </div>
+
+                        <div class="flex-1 min-w-0">
+
+                            <h3 class="text-[12px] font-semibold text-white leading-[1.45] line-clamp-2">
+                                ${escapeHtml(title)}
+                            </h3>
+
+                            <p class="text-[10px] text-[#888] mt-1.5 truncate">
+                                ${escapeHtml(channel)}
+                            </p>
+                        </div>
+
+                        <button
+                            onclick="event.stopPropagation()"
+                            class="w-7 h-7 rounded-full flex items-center justify-center text-[#777] hover:text-white hover:bg-[#272727] shrink-0 cursor-pointer"
+                        >
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <circle cx="12" cy="5" r="1.5"/>
+                                <circle cx="12" cy="12" r="1.5"/>
+                                <circle cx="12" cy="19" r="1.5"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            document.getElementById('appContainer').scrollTop = 0;
+        }
+
+        function watchVideo(ytId, title, channel) {
+            activeVideo = {
+                id: ytId,
+                title,
+                channel
+            };
+
+            document.body.classList.remove('mini-active');
+
+            let watchView =
+                document.getElementById('activeWatchView');
+
+            if (!watchView) {
+                watchView =
+                    document.createElement('div');
+
+                watchView.id =
+                    'activeWatchView';
+
+                document
+                    .getElementById('appContainer')
+                    .prepend(watchView);
+            }
+
+            watchView.className =
+                'player-page fade-up';
+
+            watchView.innerHTML = `
+                <div class="player-box-wrapper relative w-full aspect-video bg-black">
+
+                    <iframe
+                        id="persistentIframe"
+                        src="https://www.youtube.com/embed/${encodeURIComponent(ytId)}?autoplay=1&rel=0"
+                        class="w-full h-full border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                    ></iframe>
+
+                    <button
+                        onclick="minimizePlayer(event)"
+                        class="hide-on-mini player-control absolute top-3 left-3 w-9 h-9 rounded-full flex items-center justify-center text-white cursor-pointer z-20"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-width="2" d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="hide-on-mini px-4 pt-4 pb-5 border-b border-[#272727]">
+
+                    <h1 class="text-[14px] font-bold text-white leading-[1.45]">
+                        ${escapeHtml(title)}
+                    </h1>
+
+                    <div class="flex items-center justify-between mt-4">
+
+                        <div class="flex items-center gap-3 min-w-0">
+
+                            <div class="channel-avatar w-9 h-9 rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+                                ${escapeHtml(channel.charAt(0).toUpperCase())}
+                            </div>
+
+                            <div class="min-w-0">
+                                <div class="text-[11px] text-white font-semibold truncate">
+                                    ${escapeHtml(channel)}
+                                </div>
+
+                                <div class="text-[9px] text-[#777] mt-0.5">
+                                    ReyTube
                                 </div>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="text-[11px] font-semibold text-white line-clamp-2 leading-snug">${escapeHtml(v.title)}</h4>
-                                <p class="text-[10px] text-slate-400 mt-1">${escapeHtml(v.channel)}</p>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+
+                            <button
+                                onclick="copyVideoLink('${escapeAttribute(ytId)}')"
+                                class="w-9 h-9 rounded-full bg-[#272727] flex items-center justify-center text-[#ccc] hover:bg-[#333] cursor-pointer"
+                            >
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-width="1.8" d="M8 12V8a4 4 0 0 1 8 0v8a4 4 0 0 1-8 0m0-4h8"/>
+                                </svg>
+                            </button>
+
+                            <a
+                                href="https://www.youtube.com/watch?v=${encodeURIComponent(ytId)}"
+                                target="_blank"
+                                class="w-9 h-9 rounded-full bg-[#272727] flex items-center justify-center text-[#ccc] hover:bg-[#333]"
+                            >
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-width="1.8" d="M14 5h5v5M19 5l-8 8M19 13v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mini-controls hidden flex-1 min-w-0">
+
+                    <div
+                        class="mini-info cursor-pointer"
+                        onclick="expandPlayer()"
+                    >
+                        <div class="text-[11px] text-white font-semibold truncate">
+                            ${escapeHtml(title)}
+                        </div>
+
+                        <div class="text-[9px] text-[#888] truncate mt-1">
+                            ${escapeHtml(channel)}
+                        </div>
+                    </div>
+
+                    <div class="mini-actions">
+
+                        <button
+                            onclick="expandPlayer()"
+                            class="mini-action cursor-pointer"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-width="1.8" d="M8 16H5v3m0-3 4 4m7-16h3v3m0-3-4-4"/>
+                            </svg>
+                        </button>
+
+                        <button
+                            onclick="closeMiniPlayer()"
+                            class="mini-action cursor-pointer"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-width="2" d="M6 6l12 12M18 6 6 18"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="hide-on-mini">
+
+                    <div class="px-4 pt-4 pb-3 flex items-center justify-between">
+                        <div>
+                            <div class="text-[13px] font-bold text-white">
+                                Video lainnya
                             </div>
-                        `;
-                        recList.appendChild(recItem);
-                    });
-                }
+
+                            <div class="text-[9px] text-[#777] mt-1">
+                                Rekomendasi dari hasil pencarian
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        id="recommendationsList"
+                        class="px-4 pb-8 space-y-1"
+                    ></div>
+                </div>
+            `;
+
+            const recList =
+                watchView.querySelector(
+                    '#recommendationsList'
+                );
+
+            if (recList && currentVideos.length) {
+                currentVideos.forEach(v => {
+                    const id =
+                        getYouTubeId(v.link);
+
+                    if (!id || id === ytId) return;
+
+                    const recItem =
+                        document.createElement('div');
+
+                    recItem.className =
+                        'recommendation-item flex gap-3 p-2 -mx-2 rounded-xl cursor-pointer';
+
+                    recItem.onclick = () =>
+                        watchVideo(
+                            id,
+                            v.title || 'Untitled',
+                            v.channel || 'Unknown'
+                        );
+
+                    const image =
+                        v.imageUrl ||
+                        `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+
+                    recItem.innerHTML = `
+                        <div class="relative w-[132px] aspect-video rounded-lg overflow-hidden bg-[#222] shrink-0">
+
+                            <img
+                                src="${escapeAttribute(image)}"
+                                alt=""
+                                loading="lazy"
+                                class="w-full h-full object-cover"
+                                onerror="this.src='https://i.ytimg.com/vi/${id}/hqdefault.jpg'"
+                            >
+
+                            <div class="duration right-1.5 bottom-1.5">
+                                ${escapeHtml(v.duration || '')}
+                            </div>
+                        </div>
+
+                        <div class="flex-1 min-w-0 py-0.5">
+
+                            <h3 class="text-[11px] font-semibold text-white line-clamp-2 leading-[1.45]">
+                                ${escapeHtml(v.title || 'Video tanpa judul')}
+                            </h3>
+
+                            <p class="text-[9px] text-[#777] mt-1.5 truncate">
+                                ${escapeHtml(v.channel || 'Unknown Channel')}
+                            </p>
+                        </div>
+                    `;
+
+                    recList.appendChild(recItem);
+                });
             }
 
             document.getElementById('appContainer').scrollTop = 0;
         }
 
         function minimizePlayer(e) {
-            e.stopPropagation();
+            if (e) {
+                e.stopPropagation();
+            }
+
             document.body.classList.add('mini-active');
         }
 
@@ -309,13 +1177,73 @@
 
         function closeMiniPlayer() {
             document.body.classList.remove('mini-active');
-            const watchView = document.getElementById('activeWatchView');
-            if (watchView) watchView.remove();
-            activeVideo = { id: '', title: '', channel: '' };
+
+            const watchView =
+                document.getElementById('activeWatchView');
+
+            if (watchView) {
+                watchView.remove();
+            }
+
+            activeVideo = {
+                id: '',
+                title: '',
+                channel: ''
+            };
+        }
+
+        async function copyVideoLink(id) {
+            const url =
+                `https://www.youtube.com/watch?v=${id}`;
+
+            try {
+                await navigator.clipboard.writeText(url);
+
+                showToast('Link video berhasil disalin');
+            } catch {
+                showToast('Gagal menyalin link');
+            }
+        }
+
+        function showToast(message) {
+            const old =
+                document.getElementById('reyToast');
+
+            if (old) old.remove();
+
+            const toast =
+                document.createElement('div');
+
+            toast.id = 'reyToast';
+
+            toast.className =
+                'fixed left-1/2 bottom-[82px] -translate-x-1/2 z-[200] bg-[#272727] border border-[#3a3a3a] text-white px-4 py-2.5 rounded-full text-[10px] font-semibold shadow-2xl fade-up';
+
+            toast.textContent = message;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 2200);
         }
 
         function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return String(text ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function escapeAttribute(text) {
+            return String(text ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
         }
     </script>
 </body>
