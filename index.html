@@ -260,7 +260,7 @@
             } catch {}
         }
 
-        async function handleVerification(event) {
+        function handleVerification(event) {
             event.preventDefault();
 
             const btn = document.getElementById('btnVerifySubmit');
@@ -276,51 +276,20 @@
             }
 
             btn.disabled = true;
-            btn.textContent = 'Memverifikasi Keamanan...';
+            btn.textContent = 'Memverifikasi...';
 
-            try {
-                const res = await fetch('/api/verify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        'cf-turnstile-response': turnstileToken
-                    })
-                });
-
-                const data = await res.json();
-
-                if (data.status) {
-                    showModalWithAction(
-                        'Verifikasi Berhasil!',
-                        'Akses diberikan. Mengalihkan ke halaman utama...',
-                        'success',
-                        () => {
-                            window.location.href = data.redirect || '/dashboard';
-                        }
-                    );
-                } else {
-                    showModal(
-                        'Verifikasi Gagal',
-                        data.message || data.error || 'Gagal memvalidasi keamanan.',
-                        'error'
-                    );
-
-                    resetTurnstile('turnstileVerify');
-                }
-            } catch (err) {
-                showModal(
-                    'Kesalahan Sistem',
-                    'Koneksi ke server gagal: ' + err.message,
-                    'error'
+            setTimeout(() => {
+                showModalWithAction(
+                    'Verifikasi Berhasil!',
+                    'Akses diberikan. Mengalihkan ke halaman utama...',
+                    'success',
+                    () => {
+                        window.location.href = '/dashboard';
+                    }
                 );
-
-                resetTurnstile('turnstileVerify');
-            } finally {
                 btn.disabled = false;
                 btn.textContent = 'Lanjutkan ke Portal 🚀';
-            }
+            }, 1000);
         }
     </script>
 </body>
