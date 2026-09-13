@@ -6,247 +6,609 @@
     <title>AlightFree - Dashboard Aktivasi Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { background-color: #080a0f; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        body {
+            background-color: #080a0f;
+            color: #f8fafc;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
         .glass-card {
             background: rgba(18, 22, 31, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.06);
         }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #232d3f; border-radius: 9999px; }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #232d3f;
+            border-radius: 9999px;
+        }
     </style>
 </head>
+
 <body class="min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 relative overflow-x-hidden">
 
-    <!-- Ambient Dynamic Glows -->
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-cyan-500/10 blur-[140px] pointer-events-none rounded-full"></div>
     <div class="absolute top-1/3 -right-20 w-[300px] h-[300px] bg-amber-500/10 blur-[150px] pointer-events-none rounded-full"></div>
 
     <div class="w-full max-w-4xl space-y-4 relative z-10">
-        
-        <!-- Top Navbar -->
+
         <div class="flex items-center justify-between glass-card rounded-2xl p-4 shadow-2xl">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-black shadow-inner">
                     ⚡
                 </div>
+
                 <div>
                     <div class="flex items-center space-x-1.5">
-                        <span class="font-black text-sm tracking-wider text-white">ALIGHT<span class="text-cyan-400">FREE</span></span>
-                        <span class="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase">Pro</span>
+                        <span class="font-black text-sm tracking-wider text-white">
+                            ALIGHT<span class="text-cyan-400">FREE</span>
+                        </span>
+
+                        <span class="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase">
+                            Pro
+                        </span>
                     </div>
-                    <span class="text-[9px] tracking-widest text-slate-400 font-extrabold uppercase">ACTIVATION ENGINE</span>
+
+                    <span class="text-[9px] tracking-widest text-slate-400 font-extrabold uppercase">
+                        ACTIVATION ENGINE
+                    </span>
                 </div>
             </div>
-            
-            <a id="dashboardLink" href="#" class="px-3.5 py-2 rounded-xl bg-[#141a26] hover:bg-[#1d2638] border border-[#222c42] text-[11px] text-slate-300 hover:text-white transition-all font-bold shadow-sm flex items-center space-x-1.5 cursor-pointer">
-                <span>←</span><span>Menu Utama</span>
+
+            <a
+                id="dashboardLink"
+                href="#"
+                class="px-3.5 py-2 rounded-xl bg-[#141a26] hover:bg-[#1d2638] border border-[#222c42] text-[11px] text-slate-300 hover:text-white transition-all font-bold shadow-sm flex items-center space-x-1.5 cursor-pointer"
+            >
+                <span>←</span>
+                <span>Menu Utama</span>
             </a>
         </div>
 
-        <!-- Header Intro -->
         <div class="space-y-1 px-1">
-            <div class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">PORTAL UTAMA <span class="text-cyan-400 font-extrabold">АКTIVASI KREATIF</span></div>
-            <p class="text-[11px] text-slate-400 leading-relaxed">Pilih metode aktivasi yang kamu inginkan: Manual Wizard, Auto 1 Click (Gratis), atau Mode Bulk (Custom Jumlah Akun dengan API Key).</p>
+            <div class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">
+                PORTAL UTAMA
+                <span class="text-cyan-400 font-extrabold">АКТIVASI KREATIF</span>
+            </div>
+
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+                Pilih metode aktivasi yang kamu inginkan: Manual Wizard, Auto 1 Click (Gratis), atau Mode Bulk (Custom Jumlah Akun dengan API Key).
+            </p>
         </div>
 
-        <!-- Method Switcher -->
         <div class="grid grid-cols-3 gap-2 glass-card p-1.5 rounded-2xl shadow-lg border border-[#1f293d]">
-            <button id="btnTabManual" onclick="switchMethod('manual')" class="py-2.5 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center space-x-1.5">
-                <span>✍️</span><span>Manual</span>
+            <button
+                id="btnTabManual"
+                onclick="switchMethod('manual')"
+                class="py-2.5 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+            >
+                <span>✍️</span>
+                <span>Manual</span>
             </button>
-            <button id="btnTabAuto" onclick="switchMethod('auto')" class="py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5">
-                <span>⚡</span><span>Auto 1 Click</span>
+
+            <button
+                id="btnTabAuto"
+                onclick="switchMethod('auto')"
+                class="py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+            >
+                <span>⚡</span>
+                <span>Auto 1 Click</span>
             </button>
-            <button id="btnTabBulk" onclick="switchMethod('bulk')" class="py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5">
-                <span>📦</span><span>AM Bulk</span>
+
+            <button
+                id="btnTabBulk"
+                onclick="switchMethod('bulk')"
+                class="py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+            >
+                <span>📦</span>
+                <span>AM Bulk</span>
             </button>
         </div>
 
-        <!-- GRID SECTION -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            <!-- SECTION KIRI: MANUAL WIZARD -->
-            <div id="sectionManual" class="glass-card rounded-2xl p-5 shadow-2xl space-y-4">
+
+            <div
+                id="sectionManual"
+                class="glass-card rounded-2xl p-5 shadow-2xl space-y-4"
+            >
                 <div class="flex items-start space-x-3.5">
                     <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 font-bold">
                         ✍️
                     </div>
+
                     <div>
-                        <h2 class="text-xs font-black text-white tracking-wide uppercase">Manual Wizard Aktivasi</h2>
-                        <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Masukkan email pribadi untuk menerima magic link verifikasi.</p>
+                        <h2 class="text-xs font-black text-white tracking-wide uppercase">
+                            Manual Wizard Aktivasi
+                        </h2>
+
+                        <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+                            Masukkan email pribadi untuk menerima magic link verifikasi.
+                        </p>
                     </div>
                 </div>
 
                 <div id="form-step-1" class="space-y-3">
-                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">ALAMAT EMAIL PRIBADI</label>
-                    <input type="email" id="emailInput" placeholder="user@example.com" 
-                        class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors">
-                    <button onclick="sendLink()" id="btnSend"
-                        class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 cursor-pointer">
+                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                        ALAMAT EMAIL PRIBADI
+                    </label>
+
+                    <input
+                        type="email"
+                        id="emailInput"
+                        placeholder="user@example.com"
+                        class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors"
+                    >
+
+                    <button
+                        onclick="sendLink()"
+                        id="btnSend"
+                        class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
+                    >
                         Kirim Tautan Magic
                     </button>
                 </div>
 
-                <div id="form-step-loading" class="hidden text-center py-6 space-y-3">
+                <div
+                    id="form-step-loading"
+                    class="hidden text-center py-6 space-y-3"
+                >
                     <div class="inline-block w-7 h-7 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-                    <p class="text-xs text-amber-400 animate-pulse font-bold">Mengirim tautan verifikasi...</p>
+
+                    <p class="text-xs text-amber-400 animate-pulse font-bold">
+                        Mengirim tautan verifikasi...
+                    </p>
                 </div>
 
                 <div id="form-step-2" class="space-y-3 hidden">
                     <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-[10px] text-amber-300 leading-relaxed font-medium">
                         ⚠️ Cek email kamu, salin magic link yang masuk, lalu tempel di bawah ini.
                     </div>
-                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">MAGIC LINK VERIFIKASI</label>
-                    <input type="text" id="linkInput" placeholder="Tempel URL magic link di sini..." 
-                        class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors font-mono">
-                    <button onclick="verifyLink()" id="btnVerify"
-                        class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-emerald-500/20 cursor-pointer">
+
+                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                        MAGIC LINK VERIFIKASI
+                    </label>
+
+                    <input
+                        type="text"
+                        id="linkInput"
+                        placeholder="Tempel URL magic link di sini..."
+                        class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors font-mono"
+                    >
+
+                    <button
+                        onclick="verifyLink()"
+                        id="btnVerify"
+                        class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-emerald-500/20 cursor-pointer"
+                    >
                         Verifikasi & Ambil Akun
                     </button>
                 </div>
 
-                <div id="resultBoxManual" class="hidden space-y-3 bg-[#080a0f] border border-emerald-500/30 rounded-2xl p-4 shadow-inner">
+                <div
+                    id="resultBoxManual"
+                    class="hidden space-y-3 bg-[#080a0f] border border-emerald-500/30 rounded-2xl p-4 shadow-inner"
+                >
                     <div class="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
                         <span>🎉</span>
                         <span>Manual Berhasil Diaktifkan!</span>
                     </div>
+
                     <div class="glass-card rounded-xl p-3 space-y-2 text-xs font-mono border border-[#222c42]">
                         <div class="flex justify-between border-b border-[#222c42] pb-1.5">
                             <span class="text-slate-400 font-sans">Email:</span>
                             <span id="resManualEmail" class="text-cyan-400 select-all font-bold"></span>
                         </div>
+
                         <div class="flex justify-between border-b border-[#222c42] pb-1.5">
                             <span class="text-slate-400 font-sans">Order ID:</span>
                             <span id="resManualOrder" class="text-slate-300 select-all text-[10px]"></span>
                         </div>
+
                         <div class="flex justify-between">
                             <span class="text-slate-400 font-sans">Status:</span>
-                            <span class="text-emerald-400 font-bold">PREMIUM_ACTIVE</span>
+                            <span class="text-emerald-400 font-bold">
+                                PREMIUM_ACTIVE
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- SECTION KANAN: AUTO 1 CLICK -->
-            <div id="sectionAuto" class="glass-card rounded-2xl p-5 shadow-2xl space-y-4 flex flex-col justify-between hidden">
+            <div
+                id="sectionAuto"
+                class="glass-card rounded-2xl p-5 shadow-2xl space-y-4 flex flex-col justify-between hidden"
+            >
                 <div class="space-y-4">
+
                     <div class="flex items-start space-x-3.5">
                         <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0 font-bold">
                             ⚡
                         </div>
+
                         <div>
-                            <h2 class="text-xs font-black text-white tracking-wide uppercase">Auto 1 Click Activation</h2>
-                            <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Sistem otomatis membuat email sementara dan mengambil verifikasi.</p>
+                            <h2 class="text-xs font-black text-white tracking-wide uppercase">
+                                Auto 1 Click Activation
+                            </h2>
+
+                            <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+                                Sistem otomatis membuat email sementara dan mengambil verifikasi.
+                            </p>
                         </div>
                     </div>
 
                     <div class="space-y-3">
-                        <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">CUSTOM USERNAME (OPSIONAL)</label>
-                        <input type="text" id="autoUsernameInput" placeholder="kosongkan untuk auto-generate" 
-                            class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 transition-colors font-mono">
-                        
-                        <button onclick="runAutoActivation()" id="btnAutoRun"
-                            class="w-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-cyan-500/20 cursor-pointer">
+                        <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                            CUSTOM USERNAME (OPSIONAL)
+                        </label>
+
+                        <input
+                            type="text"
+                            id="autoUsernameInput"
+                            placeholder="kosongkan untuk auto-generate"
+                            class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 transition-colors font-mono"
+                        >
+
+                        <button
+                            onclick="runAutoActivation()"
+                            id="btnAutoRun"
+                            class="w-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-cyan-500/20 cursor-pointer"
+                        >
                             🚀 Jalankan Auto Aktivasi
                         </button>
                     </div>
 
-                    <div id="autoLoading" class="hidden text-center py-4 space-y-2">
+                    <div
+                        id="autoLoading"
+                        class="hidden text-center py-4 space-y-2"
+                    >
                         <div class="inline-block w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-                        <p class="text-[11px] text-cyan-400 animate-pulse font-bold">Membuat email & menunggu magic link...</p>
+
+                        <p class="text-[11px] text-cyan-400 animate-pulse font-bold">
+                            Membuat email & menunggu magic link...
+                        </p>
                     </div>
                 </div>
 
-                <div id="resultBoxAuto" class="hidden space-y-3 bg-[#080a0f] border border-cyan-500/30 rounded-2xl p-4 mt-3 shadow-inner">
+                <div
+                    id="resultBoxAuto"
+                    class="hidden space-y-3 bg-[#080a0f] border border-cyan-500/30 rounded-2xl p-4 mt-3 shadow-inner"
+                >
                     <div class="flex items-center space-x-2 text-cyan-400 font-bold text-xs border-b border-[#222c42] pb-2">
                         <span>🎉</span>
                         <span>Auto 1 Click Berhasil!</span>
                     </div>
 
                     <div class="glass-card rounded-xl p-3 space-y-2 text-xs font-mono border border-[#222c42]">
+
                         <div class="flex flex-col border-b border-[#222c42] pb-1.5">
-                            <span class="text-slate-400 font-sans text-[10px] font-bold">Email:</span>
-                            <span id="resAutoEmail" class="text-cyan-300 select-all font-bold"></span>
+                            <span class="text-slate-400 font-sans text-[10px] font-bold">
+                                Email:
+                            </span>
+
+                            <span
+                                id="resAutoEmail"
+                                class="text-cyan-300 select-all font-bold"
+                            ></span>
                         </div>
+
                         <div class="flex flex-col border-b border-[#222c42] pb-1.5">
-                            <span class="text-slate-400 font-sans text-[10px] font-bold">Web Login / Inbox:</span>
-                            <a id="resAutoWebLogin" href="#" target="_blank" class="text-cyan-400 hover:underline truncate text-[11px]"></a>
+                            <span class="text-slate-400 font-sans text-[10px] font-bold">
+                                Web Login / Inbox:
+                            </span>
+
+                            <a
+                                id="resAutoWebLogin"
+                                href="#"
+                                target="_blank"
+                                class="text-cyan-400 hover:underline truncate text-[11px]"
+                            ></a>
                         </div>
+
                         <div class="flex justify-between border-b border-[#222c42] pb-1.5">
-                            <span class="text-slate-400 font-sans">Animal Hoki:</span>
-                            <span id="resAutoAnimal" class="text-amber-400 font-bold"></span>
+                            <span class="text-slate-400 font-sans">
+                                Animal Hoki:
+                            </span>
+
+                            <span
+                                id="resAutoAnimal"
+                                class="text-amber-400 font-bold"
+                            ></span>
                         </div>
+
                         <div class="flex justify-between">
-                            <span class="text-slate-400 font-sans">Status Akun:</span>
-                            <span class="text-emerald-400 font-bold">PREMIUM_ACTIVE</span>
+                            <span class="text-slate-400 font-sans">
+                                Status Akun:
+                            </span>
+
+                            <span class="text-emerald-400 font-bold">
+                                PREMIUM_ACTIVE
+                            </span>
                         </div>
                     </div>
 
                     <div class="glass-card rounded-xl p-3 space-y-1.5 text-[11px] text-slate-300 border border-[#222c42]">
-                        <div class="font-black text-cyan-400 text-[10px] uppercase tracking-wider">📚 Cara Login & Panduan:</div>
-                        <ol id="resAutoGuide" class="list-decimal list-inside space-y-1 text-[11px] text-slate-400"></ol>
+                        <div class="font-black text-cyan-400 text-[10px] uppercase tracking-wider">
+                            📚 Cara Login & Panduan:
+                        </div>
+
+                        <ol
+                            id="resAutoGuide"
+                            class="list-decimal list-inside space-y-1 text-[11px] text-slate-400"
+                        ></ol>
                     </div>
                 </div>
 
                 <div class="pt-3 border-t border-[#222c42] text-[11px] text-slate-400 flex items-center justify-between">
-                    <span class="text-slate-500 font-semibold">Sistem Instan</span>
+                    <span class="text-slate-500 font-semibold">
+                        Sistem Instan
+                    </span>
+
                     <span class="text-emerald-400 font-bold flex items-center space-x-1.5">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                         <span>100% Operational</span>
                     </span>
                 </div>
             </div>
-
         </div>
 
-        <!-- SECTION: AM BULK (TERKUNCI / MAINTENANCE TOTAL) -->
-        <div id="sectionBulk" class="glass-card rounded-2xl p-5 shadow-2xl space-y-4 hidden">
+        <div
+            id="sectionBulk"
+            class="glass-card rounded-2xl p-5 shadow-2xl space-y-4 hidden"
+        >
             <div class="flex items-start space-x-3.5">
                 <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0 font-bold">
                     📦
                 </div>
+
                 <div>
-                    <h2 class="text-xs font-black text-white tracking-wide uppercase">AM Bulk Activation Engine</h2>
-                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">Fitur generator akun massal otomatis dengan sistem custom jumlah.</p>
+                    <h2 class="text-xs font-black text-white tracking-wide uppercase">
+                        AM Bulk Activation Engine
+                    </h2>
+
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+                        Fitur generator akun massal otomatis dengan sistem custom jumlah.
+                    </p>
                 </div>
             </div>
 
-            <!-- KOTAK GEMBOK / MAINTENANCE -->
-            <div class="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-6 text-center space-y-3.5 shadow-xl">
-                <div class="text-4xl animate-bounce">🔒</div>
-                <div class="space-y-1.5">
-                    <h3 class="text-xs font-black text-rose-400 uppercase tracking-widest">Fitur Dalam Pemeliharaan (Maintenance)</h3>
-                    <p class="text-[11px] text-slate-300 leading-relaxed max-w-md mx-auto">
-                        Modul AM Bulk sedang dikunci sementara oleh sistem untuk peningkatan infrastruktur dan pembaruan server. Silakan gunakan metode <b>Manual</b> atau <b>Auto 1 Click</b> terlebih dahulu.
+            <div
+                id="bulkAuthBox"
+                class="bg-[#080a0f] border border-purple-500/30 rounded-2xl p-5 space-y-4"
+            >
+                <div class="text-center space-y-2">
+                    <div class="text-4xl">
+                        🔐
+                    </div>
+
+                    <h3 class="text-xs font-black text-purple-400 uppercase tracking-widest">
+                        AM Bulk Terproteksi
+                    </h3>
+
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        Masukkan API Key dan Password untuk membuka akses AM Bulk.
                     </p>
                 </div>
-                <div class="pt-2">
-                    <span class="inline-block px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-[10px] font-mono font-bold text-rose-300 uppercase tracking-wider">
-                        Status: Locked By System
+
+                <div class="space-y-3">
+
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                            API KEY
+                        </label>
+
+                        <input
+                            type="text"
+                            id="bulkApiKey"
+                            autocomplete="off"
+                            placeholder="reycoder_xxxxx"
+                            class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-400 transition-colors font-mono"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                            PASSWORD
+                        </label>
+
+                        <input
+                            type="password"
+                            id="bulkApiPassword"
+                            autocomplete="off"
+                            placeholder="Masukkan password API Key"
+                            class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-400 transition-colors font-mono"
+                        >
+                    </div>
+
+                    <button
+                        onclick="unlockBulk()"
+                        id="btnUnlockBulk"
+                        class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-black py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-purple-500/20 cursor-pointer"
+                    >
+                        🔓 Buka AM Bulk
+                    </button>
+                </div>
+
+                <div class="text-center">
+                    <span class="text-[9px] text-slate-500">
+                        🔒 Kredensial hanya digunakan untuk validasi akses.
                     </span>
                 </div>
             </div>
+
+            <div
+                id="bulkPanel"
+                class="hidden space-y-4"
+            >
+
+                <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between gap-3">
+                    <div>
+                        <div class="text-[10px] text-emerald-400 font-black uppercase tracking-wider">
+                            🔓 AM Bulk Terbuka
+                        </div>
+
+                        <div
+                            id="bulkOwnerInfo"
+                            class="text-[10px] text-slate-400 mt-1"
+                        >
+                            Akses berhasil diverifikasi.
+                        </div>
+                    </div>
+
+                    <button
+                        onclick="lockBulk()"
+                        class="px-3 py-2 rounded-xl bg-[#141a26] hover:bg-[#1d2638] border border-[#222c42] text-[10px] text-slate-300 hover:text-white font-bold transition-all"
+                    >
+                        🔒 Kunci
+                    </button>
+                </div>
+
+                <div class="bg-[#080a0f] border border-[#222c42] rounded-2xl p-4 space-y-3">
+
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                            USERNAME
+                        </label>
+
+                        <input
+                            type="text"
+                            id="bulkUsername"
+                            placeholder="Username / owner"
+                            class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-400 transition-colors font-mono"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                            JUMLAH AKUN
+                        </label>
+
+                        <input
+                            type="number"
+                            id="bulkCount"
+                            value="1"
+                            min="1"
+                            max="10"
+                            placeholder="1 - 10"
+                            class="w-full bg-[#080a0f] border border-[#222c42] rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-400 transition-colors font-mono"
+                        >
+                    </div>
+
+                    <button
+                        onclick="runBulkActivation()"
+                        id="btnBulkRun"
+                        class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-black py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-purple-500/20 cursor-pointer"
+                    >
+                        🚀 Generate Akun Bulk
+                    </button>
+                </div>
+
+                <div
+                    id="bulkLoading"
+                    class="hidden text-center py-5 space-y-2"
+                >
+                    <div class="inline-block w-7 h-7 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+
+                    <p class="text-[11px] text-purple-400 animate-pulse font-bold">
+                        Membuat akun secara massal...
+                    </p>
+                </div>
+
+                <div
+                    id="bulkResultBox"
+                    class="hidden bg-[#080a0f] border border-purple-500/30 rounded-2xl p-4 space-y-3"
+                >
+                    <div class="flex items-center space-x-2 text-purple-400 font-bold text-xs border-b border-[#222c42] pb-2">
+                        <span>🎉</span>
+                        <span>Bulk Generation Berhasil</span>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-3 space-y-2 text-xs font-mono border border-[#222c42]">
+
+                        <div class="flex justify-between border-b border-[#222c42] pb-1.5">
+                            <span class="text-slate-400 font-sans">
+                                Owner:
+                            </span>
+
+                            <span
+                                id="bulkResultOwner"
+                                class="text-cyan-400 font-bold"
+                            ></span>
+                        </div>
+
+                        <div class="flex justify-between border-b border-[#222c42] pb-1.5">
+                            <span class="text-slate-400 font-sans">
+                                Total:
+                            </span>
+
+                            <span
+                                id="bulkResultTotal"
+                                class="text-purple-400 font-bold"
+                            ></span>
+                        </div>
+
+                        <div>
+                            <span class="text-slate-400 font-sans">
+                                Hasil:
+                            </span>
+
+                            <pre
+                                id="bulkResultData"
+                                class="mt-2 whitespace-pre-wrap break-all text-[10px] text-slate-300"
+                            ></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Footer Copyright -->
         <div class="text-center pt-2 pb-4">
-            <span class="text-[10px] font-semibold text-slate-500 tracking-wider">© 2026 ReyCloudSHP • All Rights Reserved</span>
+            <span class="text-[10px] font-semibold text-slate-500 tracking-wider">
+                © 2026 ReyCloudSHP • All Rights Reserved
+            </span>
         </div>
-
     </div>
 
-    <!-- MODERN CUSTOM MODAL NOTIFIKASI UMUM -->
-    <div id="customModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div
+        id="customModal"
+        class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden"
+    >
         <div class="glass-card border border-white/10 rounded-2xl p-5 max-w-xs w-full space-y-3.5 shadow-2xl text-center">
-            <div id="modalIcon" class="mx-auto w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-lg">⚠️</div>
-            <div class="space-y-1">
-                <h3 id="modalTitle" class="text-xs font-black text-white uppercase tracking-wider">Pemberitahuan Sistem</h3>
-                <p id="modalMessage" class="text-[11px] text-slate-300 leading-relaxed"></p>
+
+            <div
+                id="modalIcon"
+                class="mx-auto w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-lg"
+            >
+                ⚠️
             </div>
-            <button onclick="closeModal()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 font-black py-2.5 rounded-xl text-xs transition-all shadow-md cursor-pointer">
+
+            <div class="space-y-1">
+                <h3
+                    id="modalTitle"
+                    class="text-xs font-black text-white uppercase tracking-wider"
+                >
+                    Pemberitahuan Sistem
+                </h3>
+
+                <p
+                    id="modalMessage"
+                    class="text-[11px] text-slate-300 leading-relaxed"
+                ></p>
+            </div>
+
+            <button
+                onclick="closeModal()"
+                class="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 font-black py-2.5 rounded-xl text-xs transition-all shadow-md cursor-pointer"
+            >
                 Mengerti
             </button>
         </div>
@@ -254,13 +616,16 @@
 
     <script>
         let currentEmail = '';
+        let bulkUnlocked = false;
 
         function showModernModal(title, message, type = 'error') {
             const modal = document.getElementById('customModal');
+
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalMessage').textContent = message;
+
             const icon = document.getElementById('modalIcon');
-            
+
             if (type === 'success') {
                 icon.className = "mx-auto w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl shadow-lg";
                 icon.textContent = "🎉";
@@ -268,6 +633,7 @@
                 icon.className = "mx-auto w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl shadow-lg";
                 icon.textContent = "🛡️";
             }
+
             modal.classList.remove('hidden');
         }
 
@@ -278,10 +644,13 @@
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const usernameParam = urlParams.get('user');
+
             if (usernameParam) {
-                document.getElementById('dashboardLink').href = `/dashboard?user=${encodeURIComponent(usernameParam)}`;
+                document.getElementById('dashboardLink').href =
+                    `/dashboard?user=${encodeURIComponent(usernameParam)}`;
             } else {
-                document.getElementById('dashboardLink').href = '/dashboard';
+                document.getElementById('dashboardLink').href =
+                    '/dashboard';
             }
         });
 
@@ -289,146 +658,507 @@
             const btnManual = document.getElementById('btnTabManual');
             const btnAuto = document.getElementById('btnTabAuto');
             const btnBulk = document.getElementById('btnTabBulk');
-            
+
             const secManual = document.getElementById('sectionManual');
             const secAuto = document.getElementById('sectionAuto');
             const secBulk = document.getElementById('sectionBulk');
 
-            btnManual.className = "py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5";
-            btnAuto.className = "py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5";
-            btnBulk.className = "py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+            btnManual.className =
+                "py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+
+            btnAuto.className =
+                "py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+
+            btnBulk.className =
+                "py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center space-x-1.5";
 
             secManual.classList.add('hidden');
             secAuto.classList.add('hidden');
             secBulk.classList.add('hidden');
 
             if (method === 'manual') {
-                btnManual.className = "py-2.5 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+                btnManual.className =
+                    "py-2.5 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+
                 secManual.classList.remove('hidden');
+
             } else if (method === 'auto') {
-                btnAuto.className = "py-2.5 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+                btnAuto.className =
+                    "py-2.5 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+
                 secAuto.classList.remove('hidden');
+
             } else if (method === 'bulk') {
-                btnBulk.className = "py-2.5 rounded-xl text-xs font-bold bg-purple-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+                btnBulk.className =
+                    "py-2.5 rounded-xl text-xs font-bold bg-purple-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center space-x-1.5";
+
                 secBulk.classList.remove('hidden');
             }
         }
 
         async function sendLink() {
-            const email = document.getElementById('emailInput').value.trim();
+            const email =
+                document.getElementById('emailInput').value.trim();
+
             if (!email) {
-                showModernModal('Peringatan', 'Alamat email wajib diisi!', 'error');
+                showModernModal(
+                    'Peringatan',
+                    'Alamat email wajib diisi!',
+                    'error'
+                );
                 return;
             }
+
             currentEmail = email;
+
             document.getElementById('form-step-1').classList.add('hidden');
             document.getElementById('form-step-loading').classList.remove('hidden');
 
             try {
                 const res = await fetch('/api/amgen', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'send-link', email })
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'send-link',
+                        email
+                    })
                 });
+
                 const data = await res.json();
+
                 if (data.status) {
                     document.getElementById('form-step-loading').classList.add('hidden');
                     document.getElementById('form-step-2').classList.remove('hidden');
                 } else {
-                    showModernModal('Gagal', data.error || data.message, 'error');
+                    showModernModal(
+                        'Gagal',
+                        data.error || data.message,
+                        'error'
+                    );
+
                     document.getElementById('form-step-loading').classList.add('hidden');
                     document.getElementById('form-step-1').classList.remove('hidden');
                 }
+
             } catch (err) {
-                showModernModal('Kesalahan', 'Kesalahan koneksi: ' + err.message, 'error');
+                showModernModal(
+                    'Kesalahan',
+                    'Kesalahan koneksi: ' + err.message,
+                    'error'
+                );
+
                 document.getElementById('form-step-loading').classList.add('hidden');
                 document.getElementById('form-step-1').classList.remove('hidden');
             }
         }
 
         async function verifyLink() {
-            const magicLink = document.getElementById('linkInput').value.trim();
-            const btnVerify = document.getElementById('btnVerify');
-            const resultBox = document.getElementById('resultBoxManual');
+            const magicLink =
+                document.getElementById('linkInput').value.trim();
+
+            const btnVerify =
+                document.getElementById('btnVerify');
+
+            const resultBox =
+                document.getElementById('resultBoxManual');
 
             if (!magicLink) {
-                showModernModal('Peringatan', 'Magic link wajib diisi!', 'error');
+                showModernModal(
+                    'Peringatan',
+                    'Magic link wajib diisi!',
+                    'error'
+                );
                 return;
             }
+
             btnVerify.disabled = true;
             btnVerify.textContent = 'Memproses...';
 
             try {
                 const res = await fetch('/api/amgen', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'verify-link', email: currentEmail, magicLink })
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'verify-link',
+                        email: currentEmail,
+                        magicLink
+                    })
                 });
+
                 const data = await res.json();
+
                 if (data.status) {
                     resultBox.classList.remove('hidden');
-                    document.getElementById('resManualEmail').textContent = currentEmail;
-                    document.getElementById('resManualOrder').textContent = data.data.orderId || '-';
+
+                    document.getElementById('resManualEmail').textContent =
+                        currentEmail;
+
+                    document.getElementById('resManualOrder').textContent =
+                        data.data.orderId || '-';
+
                     document.getElementById('form-step-2').classList.add('hidden');
+
                 } else {
-                    showModernModal('Verifikasi Gagal', data.error || data.message, 'error');
+                    showModernModal(
+                        'Verifikasi Gagal',
+                        data.error || data.message,
+                        'error'
+                    );
                 }
+
             } catch (err) {
-                showModernModal('Kesalahan', 'Kesalahan koneksi: ' + err.message, 'error');
+                showModernModal(
+                    'Kesalahan',
+                    'Kesalahan koneksi: ' + err.message,
+                    'error'
+                );
+
             } finally {
                 btnVerify.disabled = false;
-                btnVerify.textContent = 'Verifikasi & Ambil Akun';
+                btnVerify.textContent =
+                    'Verifikasi & Ambil Akun';
             }
         }
 
         async function runAutoActivation() {
-            const username = document.getElementById('autoUsernameInput').value.trim();
-            const btnAutoRun = document.getElementById('btnAutoRun');
-            const autoLoading = document.getElementById('autoLoading');
-            const resultBoxAuto = document.getElementById('resultBoxAuto');
+            const username =
+                document.getElementById('autoUsernameInput').value.trim();
+
+            const btnAutoRun =
+                document.getElementById('btnAutoRun');
+
+            const autoLoading =
+                document.getElementById('autoLoading');
+
+            const resultBoxAuto =
+                document.getElementById('resultBoxAuto');
 
             btnAutoRun.disabled = true;
-            btnAutoRun.textContent = 'Memproses Aktivasi...';
+            btnAutoRun.textContent =
+                'Memproses Aktivasi...';
+
             autoLoading.classList.remove('hidden');
             resultBoxAuto.classList.add('hidden');
 
             try {
                 const res = await fetch('/api/amgen_auto', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'auto-activate', username })
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'auto-activate',
+                        username
+                    })
                 });
+
                 const data = await res.json();
 
                 if (data.status && data.card) {
                     resultBoxAuto.classList.remove('hidden');
-                    document.getElementById('resAutoEmail').textContent = data.card.email;
-                    
-                    const webLoginEl = document.getElementById('resAutoWebLogin');
-                    webLoginEl.href = data.card.weblogin;
-                    webLoginEl.textContent = data.card.weblogin;
 
-                    document.getElementById('resAutoAnimal').textContent = data.card.selamat_kamu_mendapatkan_animal;
+                    document.getElementById('resAutoEmail').textContent =
+                        data.card.email;
 
-                    const guideList = document.getElementById('resAutoGuide');
+                    const webLoginEl =
+                        document.getElementById('resAutoWebLogin');
+
+                    webLoginEl.href =
+                        data.card.weblogin;
+
+                    webLoginEl.textContent =
+                        data.card.weblogin;
+
+                    document.getElementById('resAutoAnimal').textContent =
+                        data.card.selamat_kamu_mendapatkan_animal;
+
+                    const guideList =
+                        document.getElementById('resAutoGuide');
+
                     guideList.innerHTML = '';
-                    if (data.card.panduan_dan_cara_login && Array.isArray(data.card.panduan_dan_cara_login)) {
+
+                    if (
+                        data.card.panduan_dan_cara_login &&
+                        Array.isArray(data.card.panduan_dan_cara_login)
+                    ) {
                         data.card.panduan_dan_cara_login.forEach(step => {
-                            const cleanStep = step.replace(/^\d+\.\s*/, '');
-                            const li = document.createElement('li');
-                            li.textContent = cleanStep;
+                            const cleanStep =
+                                step.replace(/^\d+\.\s*/, '');
+
+                            const li =
+                                document.createElement('li');
+
+                            li.textContent =
+                                cleanStep;
+
                             guideList.appendChild(li);
                         });
                     }
+
                 } else {
-                    showModernModal('Auto Aktivasi Gagal', data.error || data.message, 'error');
+                    showModernModal(
+                        'Auto Aktivasi Gagal',
+                        data.error || data.message,
+                        'error'
+                    );
                 }
+
             } catch (err) {
-                showModernModal('Kesalahan', 'Kesalahan koneksi: ' + err.message, 'error');
+                showModernModal(
+                    'Kesalahan',
+                    'Kesalahan koneksi: ' + err.message,
+                    'error'
+                );
+
             } finally {
                 btnAutoRun.disabled = false;
-                btnAutoRun.textContent = '🚀 Jalankan Auto Aktivasi';
+                btnAutoRun.textContent =
+                    '🚀 Jalankan Auto Aktivasi';
+
                 autoLoading.classList.add('hidden');
+            }
+        }
+
+        async function unlockBulk() {
+            const apiKey =
+                document.getElementById('bulkApiKey').value.trim();
+
+            const password =
+                document.getElementById('bulkApiPassword').value;
+
+            const btn =
+                document.getElementById('btnUnlockBulk');
+
+            if (!apiKey) {
+                showModernModal(
+                    'Peringatan',
+                    'API Key wajib diisi!',
+                    'error'
+                );
+                return;
+            }
+
+            if (!password) {
+                showModernModal(
+                    'Peringatan',
+                    'Password wajib diisi!',
+                    'error'
+                );
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent =
+                '🔐 Memverifikasi...';
+
+            try {
+                const res = await fetch('/api/amgen', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'bulk-generate',
+                        apikey: apiKey,
+                        password: password,
+                        count: 1
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.status) {
+                    bulkUnlocked = true;
+
+                    document.getElementById('bulkAuthBox')
+                        .classList.add('hidden');
+
+                    document.getElementById('bulkPanel')
+                        .classList.remove('hidden');
+
+                    document.getElementById('bulkOwnerInfo').textContent =
+                        `Akses aktif • ${data.owner || 'Authorized'}`;
+
+                    document.getElementById('bulkUsername').value =
+                        data.owner || '';
+
+                    showModernModal(
+                        'Akses Berhasil',
+                        'API Key dan Password valid. AM Bulk sekarang terbuka.',
+                        'success'
+                    );
+
+                } else {
+                    showModernModal(
+                        'Akses Ditolak',
+                        data.error ||
+                        data.message ||
+                        'API Key atau Password tidak valid.',
+                        'error'
+                    );
+                }
+
+            } catch (err) {
+                showModernModal(
+                    'Kesalahan',
+                    'Kesalahan koneksi: ' + err.message,
+                    'error'
+                );
+
+            } finally {
+                btn.disabled = false;
+                btn.textContent =
+                    '🔓 Buka AM Bulk';
+            }
+        }
+
+        function lockBulk() {
+            bulkUnlocked = false;
+
+            document.getElementById('bulkPanel')
+                .classList.add('hidden');
+
+            document.getElementById('bulkAuthBox')
+                .classList.remove('hidden');
+
+            document.getElementById('bulkApiPassword').value = '';
+
+            document.getElementById('bulkResultBox')
+                .classList.add('hidden');
+
+            showModernModal(
+                'AM Bulk Dikunci',
+                'Akses AM Bulk telah dikunci kembali.',
+                'error'
+            );
+        }
+
+        async function runBulkActivation() {
+            if (!bulkUnlocked) {
+                showModernModal(
+                    'Akses Ditolak',
+                    'Masukkan API Key dan Password terlebih dahulu.',
+                    'error'
+                );
+                return;
+            }
+
+            const apiKey =
+                document.getElementById('bulkApiKey').value.trim();
+
+            const password =
+                document.getElementById('bulkApiPassword').value;
+
+            const username =
+                document.getElementById('bulkUsername').value.trim();
+
+            const count =
+                parseInt(
+                    document.getElementById('bulkCount').value,
+                    10
+                ) || 1;
+
+            const btn =
+                document.getElementById('btnBulkRun');
+
+            const loading =
+                document.getElementById('bulkLoading');
+
+            const resultBox =
+                document.getElementById('bulkResultBox');
+
+            if (!apiKey || !password) {
+                lockBulk();
+                return;
+            }
+
+            if (count < 1 || count > 10) {
+                showModernModal(
+                    'Jumlah Tidak Valid',
+                    'Jumlah akun harus antara 1 sampai 10.',
+                    'error'
+                );
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent =
+                '⏳ Memproses...';
+
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/amgen', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'bulk-generate',
+                        apikey: apiKey,
+                        password: password,
+                        username: username,
+                        count: count
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.status) {
+                    resultBox.classList.remove('hidden');
+
+                    document.getElementById('bulkResultOwner').textContent =
+                        data.owner ||
+                        username ||
+                        '-';
+
+                    document.getElementById('bulkResultTotal').textContent =
+                        data.total_generated ||
+                        count;
+
+                    document.getElementById('bulkResultData').textContent =
+                        JSON.stringify(
+                            data.results ||
+                            data.data ||
+                            [],
+                            null,
+                            2
+                        );
+
+                    showModernModal(
+                        'Bulk Berhasil',
+                        `${data.total_generated || count} akun berhasil diproses.`,
+                        'success'
+                    );
+
+                } else {
+                    showModernModal(
+                        'Bulk Gagal',
+                        data.error ||
+                        data.message ||
+                        'Gagal melakukan bulk generation.',
+                        'error'
+                    );
+                }
+
+            } catch (err) {
+                showModernModal(
+                    'Kesalahan',
+                    'Kesalahan koneksi: ' + err.message,
+                    'error'
+                );
+
+            } finally {
+                btn.disabled = false;
+                btn.textContent =
+                    '🚀 Generate Akun Bulk';
+
+                loading.classList.add('hidden');
             }
         }
     </script>

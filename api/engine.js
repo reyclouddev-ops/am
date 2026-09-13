@@ -130,17 +130,56 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 const apiKeySchema = new mongoose.Schema({
-    apikey: { type: String, required: true, unique: true },
-    owner: { type: String, default: 'Client' },
-    package: { type: String, default: 'Bulk Alight Motion Pro' },
-    duration_days: { type: Number, default: 30 },
-    created_at: { type: Date, default: Date.now },
-    expired_at: { type: Date, required: true },
-    status: { type: String, default: 'active' }
+    apikey: {
+        type: String,
+        required: true,
+        unique: true
+    },
+
+    name: {
+        type: String,
+        required: true
+    },
+
+    password: {
+        type: String,
+        required: true
+    },
+
+    owner: {
+        type: String,
+        default: 'Client'
+    },
+
+    package: {
+        type: String,
+        default: 'Bulk Alight Motion Pro'
+    },
+
+    duration_days: {
+        type: Number,
+        default: 30
+    },
+
+    created_at: {
+        type: Date,
+        default: Date.now
+    },
+
+    expired_at: {
+        type: Date,
+        required: true
+    },
+
+    status: {
+        type: String,
+        default: 'active'
+    }
 });
-const ApiKey = mongoose.models.ApiKey || mongoose.model('ApiKey', apiKeySchema);
 
-
+const ApiKey =
+    mongoose.models.ApiKey ||
+    mongoose.model('ApiKey', apiKeySchema);
 // ==========================================
 // 2. INLINED AI HELPERS & SCRAPERS
 // ==========================================
@@ -1551,102 +1590,283 @@ app.get('/api/engine', (req, res) => {
 app.all('/api/amgen', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const action = body.action || '';
-    let apiKeyInput = req.headers['x-apikey'] || body.apikey;
-    const username = body.username || body.user || '';
 
-    if (action === 'bulk-generate' || (!action && apiKeyInput) || (username && !apiKeyInput)) {
+    const apiKeyInput =
+        req.headers['x-apikey'] ||
+        body.apikey ||
+        '';
+
+    const passwordInput =
+        req.headers['x-api-password'] ||
+        body.password ||
+        body.pass ||
+        '';
+
+    const username =
+        body.username ||
+        body.user ||
+        '';
+
+    if (action === 'bulk-generate') {
         try {
             await connectDB();
 
-            if (username && !apiKeyInput) {
-                const userData = await User.findOne({ username: username.toLowerCase() });
-                if (userData && userData.apikey) {
-                    apiKeyInput = userData.apikey;
-                }
-            }
-
             if (!apiKeyInput) {
-                return res.status(403).json({ status: false, creator: CREATOR, error: 'Akses ditolak! API Key tidak ditemukan untuk akun ini.' });
+                return res.status(403).json({
+                    status: false,
+                    creator: CREATOR,
+                    error: 'Akses ditolak! API Key wajib diisi.'
+                });
             }
 
-            const keyData = await ApiKey.findOne({ apikey: apiKeyInput });
-
-            if (!keyData || keyData.status !== 'active' || new Date() > new Date(keyData.expired_at)) {
-                return res.status(403).json({ status: false, creator: CREATOR, error: 'API Key tidak valid atau sudah kadaluarsa.' });
+            if (!passwordInput) {
+                return res.status(403).json({
+                    status: false,
+                    creator: CREATOR,
+                    error: 'Akses ditolak! Password API Key wajib diisi.'
+                });
             }
 
-            const count = parseInt(body.count || body.jumlah || 1, 10);
-            const maxCount = Math.min(Math.max(count, 1), 10);
+            const keyData = await ApiKey.findOne({
+                apikey: apiKeyInput
+            });
+
+            if (!keyData) {
+                return res.status(403).json({
+                    status: false,
+                    creator: CREATOR,
+                    error: 'API Key tidak ditemukan.'
+                });
+            }
+
+            if (keyData.status !== 'active') {
+                return res.status(403).json({
+                    status: false,
+                    creator: CREATOR,
+                    error: 'API Key tidak aktif.'
+                });
+            }
+
+            if (
+                !keyData.expired_at ||
+                new Date() > new Date(keyData.expired_at)
+            ) {
+                return res.status(403).json({
+                    status: false,
+                    creator: CREATOR,
+                    error: 'API Key sudah kadaluarsa.'
+                });
+            }
+
+            const passwordValid =
+                await bcrypt.compare(
+                    passwordInput,
+                    keyData.password
+                );
+
+            if (!passwordValid) {
+                return res.status(403).json({
+                    status: false,
+                    creator: CREATOR,
+                    error: 'Password API Key salah.'
+                });
+            }
+
+            const count =
+                parseInt(
+                    body.count ||
+                    body.jumlah ||
+                    1,
+                    10
+                );
+
+            const maxCount =
+                Math.min(
+                    Math.max(
+                        Number.isNaN(count)
+                            ? 1
+                            : count,
+                        1
+                    ),
+                    10
+                );
+
+            const generateUsername =
+                username ||
+                keyData.name ||
+                keyData.owner;
 
             const results = [];
-            for (let i = 0; i < maxCount; i++) {
+
+            for (
+                let i = 0;
+                i < maxCount;
+                i++
+            ) {
                 try {
-                    results.push(await processSingleAccount(username || keyData.owner));
+                    results.push(
+                        await processSingleAccount(
+                            generateUsername
+                        )
+                    );
                 } catch (err) {
-                    results.push({ success: false, error: err.message });
+                    results.push({
+                        success: false,
+                        error: err.message
+                    });
                 }
             }
 
             return res.status(200).json({
-                status: true, creator: CREATOR, owner: keyData.owner,
-                expired_at: keyData.expired_at, total_generated: maxCount, results
+                status: true,
+                creator: CREATOR,
+                owner: keyData.owner,
+                name: keyData.name,
+                apikey: keyData.apikey,
+                package: keyData.package,
+                expired_at: keyData.expired_at,
+                total_generated: maxCount,
+                results
             });
+
         } catch (err) {
-            return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+            return res.status(500).json({
+                status: false,
+                creator: CREATOR,
+                error: err.message
+            });
         }
     }
 
     if (action === 'send-link') {
         const email = body.email;
-        if (!email) return res.status(400).json({ status: false, creator: CREATOR, error: 'Alamat email wajib diisi!' });
+
+        if (!email) {
+            return res.status(400).json({
+                status: false,
+                creator: CREATOR,
+                error: 'Alamat email wajib diisi!'
+            });
+        }
+
         try {
-            return res.status(200).json({ status: true, creator: CREATOR, message: 'Tautan verifikasi berhasil dikirim!' });
+            return res.status(200).json({
+                status: true,
+                creator: CREATOR,
+                message: 'Tautan verifikasi berhasil dikirim!'
+            });
         } catch (err) {
-            return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+            return res.status(500).json({
+                status: false,
+                creator: CREATOR,
+                error: err.message
+            });
         }
     }
 
     if (action === 'verify-link') {
         const email = body.email;
         const magicLink = body.magicLink;
-        if (!email || !magicLink) return res.status(400).json({ status: false, creator: CREATOR, error: 'Data verifikasi tidak lengkap!' });
+
+        if (!email || !magicLink) {
+            return res.status(400).json({
+                status: false,
+                creator: CREATOR,
+                error: 'Data verifikasi tidak lengkap!'
+            });
+        }
+
         try {
-            const acc = await processSingleAccount(email);
-            return res.status(200).json({ status: true, creator: CREATOR, data: { orderId: acc.orderId || 'RCD-' + Math.floor(Math.random() * 1000000) } });
+            const acc =
+                await processSingleAccount(
+                    email
+                );
+
+            return res.status(200).json({
+                status: true,
+                creator: CREATOR,
+                data: {
+                    orderId:
+                        acc.orderId ||
+                        'RC-' +
+                        Math.floor(
+                            Math.random() *
+                            1000000
+                        )
+                }
+            });
         } catch (err) {
-            return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+            return res.status(500).json({
+                status: false,
+                creator: CREATOR,
+                error: err.message
+            });
         }
     }
 
-    return res.status(400).json({ status: false, creator: CREATOR, error: 'Aksi atau parameter tidak valid.' });
+    return res.status(400).json({
+        status: false,
+        creator: CREATOR,
+        error: 'Aksi atau parameter tidak valid.'
+    });
 });
 
 app.all('/api/amgen_auto', async (req, res) => {
-    const body = req.method === 'GET' ? req.query : (req.body || {});
+    const body =
+        req.method === 'GET'
+            ? req.query
+            : (req.body || {});
+
     try {
-        const acc = await processSingleAccount(body.username || body.user);
+        const acc =
+            await processSingleAccount(
+                body.username ||
+                body.user
+            );
+
         return res.status(200).json({
-            status: true, creator: CREATOR,
+            status: true,
+            creator: CREATOR,
             card: {
-                email: acc.email, weblogin: acc.weblogin,
-                selamat_kamu_mendapatkan_animal: acc.animal,
-                orderId: acc.orderId, validUntil: acc.validUntil,
-                panduan_dan_cara_login: ["1. Buka aplikasi Alight Motion.", "2. Sign in dengan email: " + acc.email]
+                email: acc.email,
+                weblogin: acc.weblogin,
+                selamat_kamu_mendapatkan_animal:
+                    acc.animal,
+                orderId: acc.orderId,
+                validUntil: acc.validUntil,
+                panduan_dan_cara_login: [
+                    '1. Buka aplikasi Alight Motion.',
+                    '2. Sign in dengan email: ' +
+                        acc.email
+                ]
             }
         });
     } catch (err) {
-        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
+        return res.status(500).json({
+            status: false,
+            creator: CREATOR,
+            error: err.message
+        });
     }
 });
 
 app.all('/api/bulk-am', async (req, res) => {
-    if (req.method === 'POST' && req.body && !req.body.action) {
-        req.body.action = 'bulk-generate';
+    if (
+        req.method === 'POST' &&
+        req.body &&
+        !req.body.action
+    ) {
+        req.body.action =
+            'bulk-generate';
     }
-    req.url = '/api/amgen';
-    return app._router.handle(req, res);
-});
 
+    req.url = '/api/amgen';
+
+    return app._router.handle(
+        req,
+        res
+    );
+});
 // --- Downloader & Tools ---
 app.all('/api/igdl', async (req, res) => {
     const url = req.method === 'POST' ? req.body?.url : req.query?.url;
