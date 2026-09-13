@@ -26,10 +26,13 @@ const { execSync } = require('child_process');
 const app = express();
 
 app.use((req, res, next) => {
-    if (req.path === '/api/engine' && req.query.route) {
-        const route = String(req.query.route).replace(/^\/+/, '');
-        req.url = `/api/${route}`;
+    const route = req.query.route;
+
+    if (route) {
+        const target = `/api/${String(route).replace(/^\/+/, '')}`;
+        req.url = target;
     }
+
     next();
 });
 
@@ -1617,19 +1620,17 @@ app.get('/api/engine', (req, res) => {
     });
 });
 
-app.use((req, res) => {
-    if (req.path.startsWith('/api/')) {
-        return res.status(404).json({
-            status: false,
-            creator: CREATOR,
-            error: 'API endpoint tidak ditemukan.'
-        });
-    }
+app.use((req, res, next) => {
+    console.log('ROUTING DEBUG:', {
+        url: req.url,
+        originalUrl: req.originalUrl,
+        path: req.path,
+        query: req.query
+    });
 
-    return res.status(404).sendFile(
-        path.join(__dirname, '../docs/404/index.html')
-    );
+    next();
 });
+
 // --- AM Engine ---
 app.all('/api/amgen', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
@@ -1911,6 +1912,20 @@ app.all('/api/bulk-am', async (req, res) => {
         res
     );
 });
+app.use((req, res) => {
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({
+            status: false,
+            creator: CREATOR,
+            error: 'API endpoint tidak ditemukan.'
+        });
+    }
+
+    return res.status(404).sendFile(
+        path.join(__dirname, '../docs/404/index.html')
+    );
+});
+
 // --- Downloader & Tools ---
 app.all('/api/igdl', async (req, res) => {
     const url = req.method === 'POST' ? req.body?.url : req.query?.url;
