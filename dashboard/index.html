@@ -76,9 +76,9 @@
 
                 <!-- Dropdown Menu Navigasi Eksklusif -->
                 <div id="navDropdown" class="hidden absolute right-0 top-14 w-56 glass-panel border border-[#2b3344] rounded-2xl shadow-2xl py-2.5 space-y-1">
-                    <a id="profileMenuLink" href="/docs/profile/" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-amber-400 transition-colors font-semibold">
+                    <a id="profileMenuLink" href="#" class="flex items-center space-x-3 px-4 py-2.5 text-xs text-slate-200 hover:bg-white/5 hover:text-amber-400 transition-colors font-semibold">
                         <span class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 text-sm">👤</span>
-                        <span>Profil & Panel Akun</span>
+                        <span>Reyz4YouXGod (Admin)</span>
                     </a>
                     <div class="h-px bg-white/10 my-1 mx-3"></div>
                     
@@ -131,11 +131,6 @@
                         <span class="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-sm">💬</span>
                         <span>Kontak WhatsApp</span>
                     </a>
-                    <div class="h-px bg-white/10 my-1.5 mx-3"></div>
-                    <button onclick="handleLogout()" class="w-full flex items-center space-x-3 px-4 py-2.5 text-xs text-rose-400 hover:bg-rose-500/10 transition-colors font-semibold text-left cursor-pointer">
-                        <span class="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 text-sm">🚪</span>
-                        <span>Keluar (Logout)</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -164,7 +159,7 @@
             <!-- Live Clock Glass Widget -->
             <div class="absolute bottom-3 right-3 text-right bg-black/60 backdrop-blur-xl border border-white/15 px-4 py-2.5 rounded-2xl shadow-2xl">
                 <div id="liveClock" class="text-base font-black text-white tracking-widest font-mono drop-shadow-md">00.00.00</div>
-                <div id="liveDate" class="text-[9px] font-extrabold text-indigo-400 uppercase tracking-widest mt-0.5">12 SEPTEMBER 2026 • SABTU</div>
+                <div id="liveDate" class="text-[9px] font-extrabold text-indigo-400 uppercase tracking-widest mt-0.5">13 SEPTEMBER 2026 • MINGGU</div>
             </div>
         </div>
 
@@ -291,40 +286,6 @@
             event.preventDefault();
             sessionStorage.setItem('pending_tx_type', 'donasi');
             window.open('https://mustikapayment.com/l/donasi-reycoe', '_blank');
-        }
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            let usernameParam = urlParams.get('user');
-
-            if (!usernameParam) {
-                usernameParam = sessionStorage.getItem('reycloud_active_user');
-            }
-
-            if (!usernameParam) {
-                window.location.href = '/index.html';
-                return;
-            }
-
-            sessionStorage.setItem('reycloud_active_user', usernameParam);
-
-            try {
-                const res = await fetch(`/api/auth/session?username=${encodeURIComponent(usernameParam)}`);
-                const data = await res.json();
-
-                if (!data.status) {
-                    sessionStorage.removeItem('reycloud_active_user');
-                    window.location.href = '/index.html';
-                    return;
-                }
-            } catch (err) {
-                window.location.href = '/index.html';
-            }
-        });
-
-        function handleLogout() {
-            sessionStorage.removeItem('reycloud_active_user');
-            window.location.href = '/index.html';
         }
 
         function toggleMenu(event) {
