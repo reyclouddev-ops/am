@@ -839,7 +839,6 @@ class CapCut {
     return json;
   }
 }
-
 // ==========================================
 // 4. CORE ALIGHT MOTION & AKUNLAMA SCRAPER
 // ==========================================
@@ -1652,7 +1651,7 @@ app.all('/api/amgen', async (req, res) => {
         body.user ||
         '';
 
-    if (action === 'bulk-generate') {
+    if (action === 'bulk-generate' || (!action && apiKeyInput)) {
         try {
             await connectDB();
 
@@ -1912,6 +1911,7 @@ app.all('/api/bulk-am', async (req, res) => {
         res
     );
 });
+
 app.use((req, res) => {
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({
