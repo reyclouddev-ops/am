@@ -15,17 +15,11 @@
                         base: "#05070a",
                         surface: "#0b1017",
                         surface2: "#101722",
-                        line: "#1b2635",
-                        emeraldx: "#10b981",
-                        cyanx: "#06b6d4"
+                        line: "#1b2635"
                     },
                     fontFamily: {
                         sans: ["Plus Jakarta Sans", "sans-serif"],
                         mono: ["JetBrains Mono", "monospace"]
-                    },
-                    boxShadow: {
-                        soft: "0 20px 60px rgba(0,0,0,.35)",
-                        glow: "0 0 40px rgba(16,185,129,.12)"
                     }
                 }
             }
@@ -38,168 +32,36 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * { box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
         body { font-family: "Plus Jakarta Sans", sans-serif; background: radial-gradient(circle at 15% 0%, rgba(244,63,94,.08), transparent 28%), radial-gradient(circle at 90% 15%, rgba(168,85,247,.07), transparent 25%), #05070a; }
         .mono { font-family: "JetBrains Mono", monospace; }
         .glass { background: rgba(11,16,23,.78); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         .grid-bg { background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px); background-size: 32px 32px; }
-        .fade-up { animation: fadeUp .45s ease both; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Robot 2D Real & Terkunci Rapi */
-        .robot-container {
-            position: relative;
-            width: 130px;
-            height: 110px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: robotFloat 4s ease-in-out infinite;
-        }
-        .robot-head {
-            width: 80px;
-            height: 65px;
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border: 2px solid rgba(244, 63, 94, 0.4);
-            border-radius: 18px;
-            position: relative;
-            box-shadow: 0 0 25px rgba(244, 63, 94, 0.25), inset 0 0 12px rgba(244, 63, 94, 0.15);
-        }
-        .robot-antenna {
-            position: absolute;
-            top: -18px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 18px;
-            background: #475569;
-        }
-        .robot-antenna-ball {
-            position: absolute;
-            top: -26px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 12px;
-            height: 12px;
-            background: #f43f5e;
-            border-radius: 50%;
-            box-shadow: 0 0 12px #f43f5e;
-            animation: antennaBlink 1.5s ease-in-out infinite;
-        }
-        .robot-ears-left, .robot-ears-right {
-            position: absolute;
-            top: 20px;
-            width: 8px;
-            height: 18px;
-            background: #334155;
-            border-radius: 4px;
-        }
-        .robot-ears-left { left: -10px; }
-        .robot-ears-right { right: -10px; }
-
-        .robot-eyes-container {
-            position: absolute;
-            top: 18px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-around;
-            padding: 0 12px;
-        }
-        .robot-eye {
-            width: 16px;
-            height: 16px;
-            background: #020617;
-            border: 2px solid #f43f5e;
-            border-radius: 4px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 8px rgba(244, 63, 94, 0.5);
-        }
-        .robot-eye::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 6px;
-            height: 6px;
-            background: #f43f5e;
-            border-radius: 50%;
-            box-shadow: 0 0 6px #f43f5e;
-            animation: eyeScan 3s infinite;
-        }
-        .robot-mouth {
-            position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 32px;
-            height: 6px;
-            background: #020617;
-            border: 1px solid rgba(244, 63, 94, 0.4);
-            border-radius: 3px;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 4px;
-            align-items: center;
-        }
-        .mouth-line {
-            width: 3px;
-            height: 2px;
-            background: #f43f5e;
-            box-shadow: 0 0 4px #f43f5e;
-            animation: mouthSound 1s ease-in-out infinite alternate;
-        }
-        .robot-padlock-badge {
-            position: absolute;
-            bottom: -6px;
-            right: -6px;
-            width: 26px;
-            height: 26px;
-            background: #0f172a;
-            border: 2px solid #f43f5e;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: #f43f5e;
-            box-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
-        }
-
-        @keyframes robotFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(1deg); }
-        }
-        @keyframes antennaBlink {
-            0%, 100% { opacity: 0.4; box-shadow: 0 0 4px #f43f5e; }
-            50% { opacity: 1; box-shadow: 0 0 16px #f43f5e; }
-        }
-        @keyframes eyeScan {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(6px); }
-        }
-        @keyframes mouthSound {
-            0% { height: 2px; }
-            100% { height: 4px; }
-        }
+        /* Robot Animasi */
+        .robot-container { position: relative; width: 110px; height: 95px; margin: 0 auto; display: flex; align-items: center; justify-content: center; animation: robotFloat 4s ease-in-out infinite; }
+        .robot-head { width: 70px; height: 55px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid rgba(244, 63, 94, 0.4); border-radius: 16px; position: relative; box-shadow: 0 0 20px rgba(244, 63, 94, 0.2); }
+        .robot-antenna { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 3px; height: 14px; background: #475569; }
+        .robot-antenna-ball { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 10px; height: 10px; background: #f43f5e; border-radius: 50%; box-shadow: 0 0 10px #f43f5e; animation: antennaBlink 1.5s ease-in-out infinite; }
+        .robot-eyes-container { position: absolute; top: 14px; left: 0; right: 0; display: flex; justify-content: space-around; padding: 0 10px; }
+        .robot-eye { width: 12px; height: 12px; background: #020617; border: 2px solid #f43f5e; border-radius: 3px; }
+        .robot-mouth { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 24px; height: 4px; background: #020617; border: 1px solid rgba(244, 63, 94, 0.4); border-radius: 2px; }
+        @keyframes robotFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        @keyframes antennaBlink { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
     </style>
 </head>
 <body class="min-h-screen text-slate-200 grid-bg">
     <div class="min-h-screen flex flex-col justify-between">
         
-        <!-- Header -->
         <header class="sticky top-0 z-50 border-b border-white/[.06] glass">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 h-[68px] flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-[13px] flex items-center justify-center bg-gradient-to-br from-rose-500/15 to-purple-500/15 border border-rose-500/20">
-                        <i class="fa-solid fa-lock text-rose-400"></i>
+                        <i class="fa-solid fa-terminal text-rose-400"></i>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="text-sm font-extrabold tracking-tight text-white">ReactWA & Bypass</h1>
-                            <span class="text-[9px] px-2 py-0.5 rounded-full border border-rose-500/20 bg-rose-500/10 text-rose-400 font-bold">MAINTENANCE</span>
+                            <span class="text-[9px] px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 font-bold">ONLINE</span>
                         </div>
                         <p class="text-[10px] text-slate-500 mt-0.5">Unified Automation Suite</p>
                     </div>
@@ -211,74 +73,169 @@
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="flex-1 w-full max-w-xl mx-auto px-4 py-12 sm:py-16 flex items-center justify-center">
-            
-            <section class="w-full text-center fade-up">
-                <div class="main-card relative overflow-hidden rounded-[28px] border border-white/[.07] bg-[#0b1017]/90 shadow-soft p-8 sm:p-10">
-                    <div class="absolute -top-32 -right-32 w-64 h-64 bg-rose-500/[.05] rounded-full blur-3xl pointer-events-none"></div>
-                    <div class="absolute -bottom-32 -left-32 w-64 h-64 bg-purple-500/[.04] rounded-full blur-3xl pointer-events-none"></div>
+        <main class="flex-1 w-full max-w-xl mx-auto px-4 py-8 flex items-center justify-center">
+            <section class="w-full text-center">
+                <div class="relative overflow-hidden rounded-[28px] border border-white/[.07] bg-[#0b1017]/90 shadow-2xl p-6 sm:p-8">
+                    
+                    <div class="robot-container mb-3">
+                        <div class="robot-head">
+                            <div class="robot-antenna"></div>
+                            <div class="robot-antenna-ball"></div>
+                            <div class="robot-eyes-container"><div class="robot-eye"></div><div class="robot-eye"></div></div>
+                            <div class="robot-mouth"></div>
+                        </div>
+                    </div>
 
-                    <div class="relative z-10 flex flex-col items-center space-y-6">
-                        
-                        <!-- Real 2D Animated Tech Robot (Antena Menyatu) -->
-                        <div class="robot-container">
-                            <div class="robot-head">
-                                <div class="robot-antenna"></div>
-                                <div class="robot-antenna-ball"></div>
-                                <div class="robot-ears-left"></div>
-                                <div class="robot-ears-right"></div>
-                                <div class="robot-eyes-container">
-                                    <div class="robot-eye"></div>
-                                    <div class="robot-eye"></div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-white mb-4">
+                        Eksekusi <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-purple-400">ReactWA & Bypass</span>
+                    </h2>
+
+                    <!-- KOTAK INFO & CARA PENGGUNAAN -->
+                    <div class="mb-6 p-4 rounded-2xl bg-gradient-to-br from-rose-500/10 via-purple-500/5 to-transparent border border-rose-500/20 text-left space-y-2">
+                        <div class="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>Panduan & Cara Penggunaan</span>
+                        </div>
+                        <ol class="list-decimal list-inside text-[11px] text-slate-300 space-y-1 pl-1 leading-relaxed">
+                            <li><strong class="text-white">Target URL:</strong> Masukkan tautan lengkap postingan channel WhatsApp.</li>
+                            <li><strong class="text-white">Provider Engine:</strong> Pilih <code class="text-rose-300">Keyyss</code> untuk spam reaksi atau <code class="text-rose-300">WellBypass</code> untuk melewati shortlink.</li>
+                            <li><strong class="text-white">Emoji Reaction:</strong> Ketik emoji yang diinginkan (bisa dipisah koma untuk banyak emoji).</li>
+                            <li><strong class="text-white">KEY-VIP (Opsional):</strong> Masukkan kunci VIP jika memilikinya untuk bypass antrean/limit server.</li>
+                        </ol>
+                    </div>
+
+                    <!-- FORM UTAMA -->
+                    <div class="w-full text-left space-y-4">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Target URL (WhatsApp Channel / Link)</label>
+                            <input type="text" id="targetUrl" placeholder="https://whatsapp.com/channel/..." class="w-full h-11 px-3.5 rounded-xl bg-base border border-white/[.08] text-xs text-white focus:outline-none focus:border-rose-500 transition mono">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <!-- CUSTOM DROPDOWN TANPA BAWAAN HP/BROWSER -->
+                            <div class="relative">
+                                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Provider Engine</label>
+                                <div id="customSelectBtn" onclick="toggleDropdown()" class="w-full h-11 px-3.5 rounded-xl bg-base border border-white/[.08] text-xs text-white flex items-center justify-between cursor-pointer transition focus:border-rose-500">
+                                    <span id="selectedText">Keyyss Reaction</span>
+                                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition" id="dropdownArrow"></i>
                                 </div>
-                                <div class="robot-mouth">
-                                    <div class="mouth-line"></div>
-                                    <div class="mouth-line"></div>
-                                    <div class="mouth-line"></div>
+                                <!-- Dropdown Menu Custom -->
+                                <div id="dropdownMenu" class="hidden absolute left-0 right-0 mt-1.5 rounded-xl bg-[#101722] border border-white/[.1] shadow-2xl z-50 overflow-hidden">
+                                    <div onclick="selectOption('keyyss', 'Keyyss Reaction')" class="px-3.5 py-2.5 text-xs text-slate-200 hover:bg-rose-500/20 hover:text-white cursor-pointer transition flex items-center justify-between">
+                                        <span>Keyyss Reaction</span>
+                                        <i class="fa-solid fa-check text-rose-400 text-[10px]" id="check-keyyss"></i>
+                                    </div>
+                                    <div onclick="selectOption('wellbypass', 'WellBypass Skipper')" class="px-3.5 py-2.5 text-xs text-slate-200 hover:bg-rose-500/20 hover:text-white cursor-pointer transition flex items-center justify-between border-t border-white/[.05]">
+                                        <span>WellBypass Skipper</span>
+                                        <i class="fa-solid fa-check text-rose-400 text-[10px] hidden" id="check-wellbypass"></i>
+                                    </div>
                                 </div>
-                                <div class="robot-padlock-badge">
-                                    <i class="fa-solid fa-lock text-[10px]"></i>
-                                </div>
+                                <input type="hidden" id="provider" value="keyyss">
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Emoji Reaction</label>
+                                <input type="text" id="emojis" value="👍,🔥,❤️" placeholder="👍,🔥,❤️" class="w-full h-11 px-3.5 rounded-xl bg-base border border-white/[.08] text-xs text-white focus:outline-none focus:border-rose-500 transition mono">
                             </div>
                         </div>
 
-                        <div class="space-y-2">
-                            <span class="inline-block px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-[10px] font-mono font-bold text-rose-400 uppercase tracking-widest">
-                                System Maintenance
-                            </span>
-                            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                                Sedang Dalam <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-purple-400">Pemeliharaan</span>
-                            </h2>
-                            <p class="text-xs sm:text-sm leading-relaxed text-slate-400 max-w-md mx-auto pt-1">
-                                Layanan ReactWA & Link Skipper sedang dikunci sementara untuk pembaruan worker Cloudflare dan peningkatan performa sistem. Silakan kembali beberapa saat lagi.
-                            </p>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 mb-1">KEY-VIP (Opsional)</label>
+                            <input type="text" id="vipKey" placeholder="Masukkan VIP Key jika ada..." class="w-full h-11 px-3.5 rounded-xl bg-base border border-white/[.08] text-xs text-white focus:outline-none focus:border-rose-500 transition mono">
                         </div>
 
-                        <div class="w-full pt-4 border-t border-white/[.06]">
-                            <a href="/dashboard" class="w-full h-12 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-rose-500/20">
-                                <i class="fa-solid fa-house"></i>
-                                <span>KEMBALI KE DASHBOARD UTAMA</span>
-                            </a>
-                        </div>
+                        <button onclick="runAutomation()" id="submitBtn" class="w-full h-11 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-rose-500/20 mt-3">
+                            <i class="fa-solid fa-play"></i>
+                            <span>EXECUTE</span>
+                        </button>
                     </div>
+
+                    <div id="outputArea" class="hidden w-full text-left p-3.5 rounded-xl bg-base border border-white/[.05] mono text-[11px] text-slate-300 overflow-x-auto max-h-40 mt-4"></div>
+
                 </div>
             </section>
-
         </main>
 
-        <!-- Footer -->
         <footer class="border-t border-white/[.05] glass">
-            <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-                <p class="text-[10px] text-slate-600">© 2026 ReyCode Enterprise</p>
-                <div class="flex items-center gap-2 text-[10px] text-slate-600">
-                    <span>ReactWA Suite</span>
-                    <span>•</span>
-                    <span class="text-rose-500/70">Under Maintenance</span>
-                </div>
+            <div class="max-w-6xl mx-auto px-4 py-4 text-center text-[10px] text-slate-600">
+                © 2026 ReyCode Enterprise • ReactWA Suite
             </div>
         </footer>
-
     </div>
+
+    <script>
+        // Logika Custom Dropdown
+        function toggleDropdown() {
+            const menu = document.getElementById('dropdownMenu');
+            const arrow = document.getElementById('dropdownArrow');
+            menu.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
+        }
+
+        function selectOption(value, label) {
+            document.getElementById('provider').value = value;
+            document.getElementById('selectedText').innerText = label;
+            document.getElementById('dropdownMenu').classList.add('hidden');
+            document.getElementById('dropdownArrow').classList.remove('rotate-180');
+
+            // Tandai centang aktif
+            document.getElementById('check-keyyss').classList.toggle('hidden', value !== 'keyyss');
+            document.getElementById('check-wellbypass').classList.toggle('hidden', value !== 'wellbypass');
+        }
+
+        // Tutup dropdown kalau klik di luar
+        window.addEventListener('click', function(e) {
+            const btn = document.getElementById('customSelectBtn');
+            const menu = document.getElementById('dropdownMenu');
+            const arrow = document.getElementById('dropdownArrow');
+            if (!btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+                arrow.classList.remove('rotate-180');
+            }
+        });
+
+        // Eksekusi Automation
+        async function runAutomation() {
+            const url = document.getElementById('targetUrl').value.trim();
+            const provider = document.getElementById('provider').value;
+            const emojis = document.getElementById('emojis').value.trim();
+            const vipKey = document.getElementById('vipKey').value.trim();
+            const outputArea = document.getElementById('outputArea');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!url) {
+                Swal.fire('Error', 'Target URL wajib diisi!', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> MEMPROSES...`;
+            outputArea.classList.remove('hidden');
+            outputArea.innerHTML = 'Menghubungkan ke server automation...';
+
+            try {
+                const response = await fetch('/api/react', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provider, url, emojis: emojis || '👍', vipKey: vipKey || null })
+                });
+
+                const result = await response.json();
+                outputArea.innerHTML = JSON.stringify(result, null, 2);
+
+                if (result.status) {
+                    Swal.fire('Berhasil', 'Automation berhasil dieksekusi!', 'success');
+                } else {
+                    Swal.fire('Gagal', result.error || 'Terjadi kesalahan sistem', 'error');
+                }
+            } catch (err) {
+                outputArea.innerHTML = `Error: ${err.message}`;
+                Swal.fire('Error', err.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-play"></i> EXECUTE`;
+            }
+        }
+    </script>
 </body>
 </html>

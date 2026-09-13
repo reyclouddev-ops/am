@@ -28,6 +28,8 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const CREATOR = 'ReyCode';
+// Import modul automation dari api/react.js
+const reactModule = require('./react');
 
 // ==========================================
 // 0. TURNSTILE CLOUDFLARE PROTECTION
@@ -2611,405 +2613,36 @@ app.all('/api/payment/success-notif', async (req, res) => {
     return res.status(200).json({ status: true, message: 'Notifikasi terkirim.' });
 });
 // ==========================================
-// NATIVE AUTOMATION ENGINE (KEYYSS & WELLBYPASS) - FULL UPGRADED
+// ENDPOINT INTEGRASI DARI api/react.js
 // ==========================================
-
-const KEYYSS_BASE_URL = 'https://react.keyysspanel.web.id';
-const WELLBYPASS_URL = 'https://wellbypass.my.id';
-const DEFAULT_PROXY_KEY = process.env.PROXY_SCRAPE_KEY || '';
-
-// --- Helper Request Native ---
-function nativeRequest(url, options = {}, postData = null, proxy = null) {
-    return new Promise((resolve, reject) => {
-        const u = new URL(url);
-        const isHttps = u.protocol === 'https:';
-        const defaultPort = isHttps ? 443 : 80;
-        const targetPort = u.port || defaultPort;
-        const headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            Host: u.hostname,
-            ...options.headers
-        };
-
-        if (proxy) {
-            const [proxyHost, proxyPortStr] = proxy.replace(/^https?:\/\//, '').split(':');
-            const proxyPort = parseInt(proxyPortStr) || 8080;
-            const connectReq = http.request({
-                host: proxyHost,
-                port: proxyPort,
-                method: 'CONNECT',
-                path: `${u.hostname}:${targetPort}`,
-                headers: { Host: `${u.hostname}:${targetPort}` }
-            });
-
-            connectReq.setTimeout(options.timeout || 15000, () => {
-                connectReq.destroy();
-                reject(new Error(`Proxy CONNECT timeout (${proxyHost}:${proxyPort})`));
-            });
-
-            connectReq.on('connect', (res, socket) => {
-                if (res.statusCode !== 200) {
-                    socket.destroy();
-                    return reject(new Error(`Proxy CONNECT returned HTTP ${res.statusCode}`));
-                }
-
-                const proceedWithSocket = (networkSocket) => {
-                    const req = (isHttps ? https : http).request({
-                        hostname: u.hostname,
-                        port: targetPort,
-                        path: u.pathname + u.search,
-                        method: options.method || 'GET',
-                        createConnection: () => networkSocket,
-                        headers
-                    }, (response) => {
-                        let data = '';
-                        response.on('data', chunk => data += chunk);
-                        response.on('end', () => resolve({ statusCode: response.statusCode, headers: response.headers, body: data }));
-                    });
-
-                    req.setTimeout(options.timeout || 15000, () => {
-                        req.destroy();
-                        reject(new Error(`Request timeout via proxy: ${url}`));
-                    });
-                    req.on('error', reject);
-                    if (postData) req.write(postData);
-                    req.end();
-                };
-
-                if (isHttps) {
-                    const tlsSocket = tls.connect({ socket, servername: u.hostname, rejectUnauthorized: false }, () => {
-                        proceedWithSocket(tlsSocket);
-                    });
-                    tlsSocket.on('error', reject);
-                } else {
-                    proceedWithSocket(socket);
-                }
-            });
-
-            connectReq.on('error', reject);
-            connectReq.end();
-            return;
-        }
-
-        const client = isHttps ? https : http;
-        const reqOptions = {
-            hostname: u.hostname,
-            port: targetPort,
-            path: u.pathname + u.search,
-            method: options.method || 'GET',
-            timeout: options.timeout || 15000,
-            headers
-        };
-
-        const req = client.request(reqOptions, (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => resolve({ statusCode: res.statusCode, headers: res.headers, body: data }));
-        });
-
-        req.on('timeout', () => { req.destroy(); reject(new Error(`Request timeout: ${url}`)); });
-        req.on('error', reject);
-        if (postData) req.write(postData);
-        req.end();
-    });
-}
-
-// --- Solver Turnstile Native via Cloudflare Worker (Terkonfigurasi Sesuai Worker Terbaru) ---
-async function solveTurnstileNative(siteKey, proxy = null, targetPageUrl = KEYYSS_BASE_URL) {
-    try {
-        const workerUrl = `https://solver.reyclouddev.workers.dev/?sitekey=${siteKey}&url=${encodeURIComponent(targetPageUrl)}`;
-        
-        // Meneruskan IP proxy melalui header X-Custom-IP agar sinkron dengan Cloudflare Worker baru
-        const workerHeaders = proxy ? { 'X-Custom-IP': proxy.split(':')[0] } : {};
-        const res = await nativeRequest(workerUrl, { timeout: 15000, headers: workerHeaders }, null, proxy);
-        
-        if (res.statusCode === 200) {
-            const json = JSON.parse(res.body);
-            if (json.token) {
-                return json.token;
-            }
-        }
-    } catch (err) {
-        // Fallback aman jika terjadi gangguan jaringan pada worker
-    }
-
-    const randomHex1 = Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('');
-    const randomHex2 = Array.from({length: 16}, () => Math.floor(Math.random()*16).toString(16)).join('');
-    return `0x4AAAAAA_${randomHex1}_${randomHex2}`;
-}
-
-// --- Proxy Scrape Helper ---
-async function fetchProxyList(apiKey = DEFAULT_PROXY_KEY) {
-    const endpoint = `https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=2500&country=all&ssl=all&anonymity=elite&key=${apiKey}`;
-    const res = await nativeRequest(endpoint);
-    if (res.statusCode !== 200 || !res.body) {
-        throw new Error(`ProxyScrape API error (${res.statusCode})`);
-    }
-    return res.body.trim().split(/\r?\n/).map(p => p.trim()).filter(p => p && !p.includes('<') && !p.includes(' '));
-}
-
-async function findWorkingProxy(proxyKey = DEFAULT_PROXY_KEY) {
-    const proxies = await fetchProxyList(proxyKey);
-    if (!proxies.length) throw new Error('ProxyScrape tidak mengembalikan proxy aktif');
-
-    const chunkSize = 12;
-    const maxToTest = Math.min(proxies.length, 48);
-    for (let i = 0; i < maxToTest; i += chunkSize) {
-        const chunk = proxies.slice(i, i + chunkSize);
-        const testPromises = chunk.map(async (proxyAddr) => {
-            try {
-                const testRes = await nativeRequest(`${KEYYSS_BASE_URL}/api/free/status`, { timeout: 3000 }, null, proxyAddr);
-                if (testRes.statusCode === 200) {
-                    const statusData = JSON.parse(testRes.body);
-                    if (statusData.limit > 0 && !statusData.ipBlocked) {
-                        const pingHome = await nativeRequest(`${KEYYSS_BASE_URL}/`, { timeout: 3000 }, null, proxyAddr);
-                        if (pingHome.statusCode === 200 && pingHome.body.includes('_csrf_token')) {
-                            const csrfMatch = pingHome.body.match(/name="_csrf_token"\s+value="([^"]+)"/);
-                            return { proxy: proxyAddr, uid: statusData.uid, limit: statusData.limit, cachedCsrf: csrfMatch ? csrfMatch[1] : null };
-                        }
-                    }
-                }
-            } catch {}
-            return null;
-        });
-
-        const results = await Promise.all(testPromises);
-        const valid = results.find(r => r !== null);
-        if (valid) return valid;
-    }
-    throw new Error('Tidak ada proxy aktif yang tersedia.');
-}
-
-// ==========================================
-// VERCEL-OPTIMIZED AUTOMATION ENGINE (KEYYSS & WELLBYPASS)
-// ==========================================
-
-const KEYYSS_BASE_URL = 'https://react.keyysspanel.web.id';
-const WELLBYPASS_URL = 'https://wellbypass.my.id';
-
-// --- Helper Fetch Standar Vercel (Menggantikan http/https socket mentah) ---
-async function vercelFetch(url, options = {}, timeoutMs = 15000) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
-    const defaultHeaders = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        ...options.headers
-    };
-
-    try {
-        const response = await fetch(url, {
-            ...options,
-            headers: defaultHeaders,
-            signal: controller.signal
-        });
-
-        const body = await response.text();
-        return {
-            statusCode: response.status,
-            headers: response.headers,
-            body: body
-        };
-    } catch (err) {
-        if (err.name === 'AbortError') {
-            throw new Error(`Request timeout ke URL: ${url}`);
-        }
-        throw err;
-    } finally {
-        clearTimeout(timeout);
-    }
-}
-
-// --- Solver Turnstile Native via Cloudflare Worker ---
-async function solveTurnstileNative(siteKey, targetPageUrl = KEYYSS_BASE_URL) {
-    try {
-        const workerUrl = `https://solver.reyclouddev.workers.dev/?sitekey=${siteKey}&url=${encodeURIComponent(targetPageUrl)}`;
-        const res = await vercelFetch(workerUrl, { method: 'GET' }, 12000);
-        
-        if (res.statusCode === 200) {
-            const json = JSON.parse(res.body);
-            if (json.token) {
-                return json.token;
-            }
-        }
-    } catch (err) {
-        
-    }
-
-    const randomHex1 = Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('');
-    const randomHex2 = Array.from({length: 16}, () => Math.floor(Math.random()*16).toString(16)).join('');
-    return `0x4AAAAAA_${randomHex1}_${randomHex2}`;
-}
-
-// ==========================================
-// 1. FUNGSI UTAMA: KEYYSS WHATSAPP REACTION
-// ==========================================
-async function executeKeyyssReaction(options = {}) {
-    const { channelLink, emojis = '👍', vipKey = null } = options;
-    const startTime = Date.now();
-
-    // 1. Ambil halaman utama Keyyss untuk ekstrak _csrf_token dan _uid
-    const home = await vercelFetch(`${KEYYSS_BASE_URL}/`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9,id;q=0.8',
-            'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="8"',
-            'Sec-Ch-Ua-Mobile': '?0',
-            'Sec-Ch-Ua-Platform': '"Windows"',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Upgrade-Insecure-Requests': '1'
-        }
-    });
-
-    if (home.statusCode !== 200) {
-        throw new Error(`merespons dengan HTTP Status ${home.statusCode}. Kemungkinan terblokir WAF Cloudflare.`);
-    }
-
-    if (home.body.includes('cf-browser-verification') || home.body.includes('Attention Required') || home.body.includes('Just a moment...')) {
-        throw new Error('Gagal: Request dicegat oleh halaman Cloudflare Turnstile/WAF');
-    }
-
-    const csrfMatch = home.body.match(/name="_csrf_token"\s+value="([^"]+)"/);
-    const uidMatch = home.body.match(/name="_uid"\s+id="hidden-uid"\s+value="([^"]+)"/);
-    
-    const csrf = csrfMatch ? csrfMatch[1] : '';
-    const extractedUid = uidMatch ? uidMatch[1] : '';
-
-    if (!csrf) {
-        throw new Error('Gagal mengekstrak _csrf_token (Struktur HTML mungkin berubah).');
-    }
-
-    // 2. Ambil SiteKey Turnstile
-    let siteKey = '0x4AAAAAAErNYkwC4FusFhKz';
-    try {
-        const tsRes = await vercelFetch(`${KEYYSS_BASE_URL}/api/turnstile/status`, { method: 'GET' });
-        const tsJson = JSON.parse(tsRes.body);
-        if (tsJson.siteKey) siteKey = tsJson.siteKey;
-    } catch {}
-
-    // 3. Solve Turnstile lewat Worker Vercel-ready
-    const turnstileToken = await solveTurnstileNative(siteKey, KEYYSS_BASE_URL);
-
-    // 4. Kirim Payload Eksekusi Reaction ke Keyyss
-    const params = new URLSearchParams({
-        _csrf_token: csrf,
-        _uid: vipKey || extractedUid,
-        link: channelLink,
-        emoji: emojis,
-        'cf-turnstile-response': turnstileToken,
-        execute: ''
-    });
-    const bodyData = params.toString();
-
-    const submitRes = await vercelFetch(`${KEYYSS_BASE_URL}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Content-Length': Buffer.byteLength(bodyData),
-            'Origin': KEYYSS_BASE_URL,
-            'Referer': `${KEYYSS_BASE_URL}/`
-        },
-        body: bodyData
-    });
-
-    const isSuccess = submitRes.body.includes('SUCCESS!') || submitRes.body.includes('Request berhasil dikirim');
-    const durationMs = Date.now() - startTime;
-
-    return {
-        creator: 'ReyCode',
-        provider: '(Vercel Serverless)',
-        status: isSuccess ? 'success' : 'error',
-        code: isSuccess ? 200 : 400,
-        message: isSuccess ? 'Reaction berhasil dikirim!' : 'Server menolak request reaction',
-        data: { target: channelLink, emojis, duration: `${(durationMs / 1000).toFixed(2)}s`, proxy: 'Vercel Edge Network' }
-    };
-}
-
-// ==========================================
-// 2. FUNGSI UTAMA: WELLBYPASS LINK SKIPPER
-// ==========================================
-async function executeWellBypassTask(targetUrl) {
-    const startTime = Date.now();
-    const deviceId = `wb_${Math.random().toString(36).substring(2)}_${Date.now().toString(36)}`;
-
-    await vercelFetch(`${WELLBYPASS_URL}/api/device/register`, {
-        method: 'POST',
-        headers: { 'x-device-id': deviceId }
-    });
-
-    const turnstileToken = await solveTurnstileNative('0x4AAAAAAEw9LL7413Xfin6z', `${WELLBYPASS_URL}/en`);
-
-    const payload = JSON.stringify({ url: targetUrl.trim(), turnstileToken });
-    const bypassRes = await vercelFetch(`${WELLBYPASS_URL}/api/bypass`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(payload),
-            'x-device-id': deviceId,
-            'Cookie': 'NEXT_LOCALE=en',
-            'Origin': WELLBYPASS_URL,
-            'Referer': `${WELLBYPASS_URL}/en`
-        },
-        body: payload
-    }, 25000);
-
-    let jsonResult = {};
-    try {
-        jsonResult = JSON.parse(bypassRes.body);
-    } catch {
-        jsonResult = { status: false, message: 'Invalid response from WellBypass' };
-    }
-
-    const durationMs = Date.now() - startTime;
-    const isSuccess = Boolean(jsonResult.status && jsonResult.bypassedUrl);
-
-    return {
-        creator: 'ReyCode',
-        provider: 'WellBypass (Vercel Serverless)',
-        status: isSuccess ? 'success' : 'error',
-        code: isSuccess ? 200 : 400,
-        message: jsonResult.message || (isSuccess ? 'Link berhasil di-bypass' : 'Gagal bypass link'),
-        data: {
-            originalUrl: targetUrl,
-            bypassedUrl: jsonResult.bypassedUrl || null,
-            service: jsonResult.service || null,
-            duration: `${(durationMs / 1000).toFixed(2)}s`
-        }
-    };
-}
-
-// ==========================================
-// EXPRESS ENDPOINT INTEGRATION (/api/automation/run)
-// ==========================================
-app.all('/api/automation/run', async (req, res) => {
+app.all('/api/react', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
-    const provider = (body.provider || 'keyyss').toLowerCase();
     const targetUrl = body.url || body.targetUrl;
     const emojis = body.emojis || body.emoji || '👍';
-    const vipKey = body.vipKey || body.key;
+    const vipKey = body.vipKey || body.key || null;
 
     if (!targetUrl) {
         return res.status(400).json({ status: false, error: 'Parameter target URL (url) wajib disertakan!' });
     }
 
     try {
+        // Memanggil fungsi 'run' atau 'executeReaction' yang diexport dari api/react.js
         let result;
-        if (provider === 'wellbypass' || provider === 'bypass') {
-            result = await executeWellBypassTask(targetUrl);
-        } else {
-            result = await executeKeyyssReaction({
+        if (typeof reactModule.run === 'function') {
+            result = await reactModule.run(targetUrl, emojis, vipKey);
+        } else if (typeof reactModule.executeReaction === 'function') {
+            result = await reactModule.executeReaction({
                 channelLink: targetUrl,
                 emojis,
                 vipKey
             });
+        } else {
+            throw new Error('Fungsi eksekusi pada api/react.js tidak ditemukan.');
         }
 
-        return res.status(200).json({ status: true, creator: 'ReyCode', result });
+        return res.status(200).json({ status: true, creator: CREATOR, result });
     } catch (err) {
-        return res.status(500).json({ status: false, creator: 'ReyCode', error: err.message });
+        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
     }
 });
 
