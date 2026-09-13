@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#090a0d">
     <title>ReyMail — Temporary Mail</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-
     <script>
         tailwind.config = {
             theme: {
@@ -20,16 +18,9 @@
             }
         }
     </script>
-
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body {
             margin: 0;
             min-height: 100vh;
@@ -40,7 +31,6 @@
             color: #f8fafc;
             font-family: Inter, system-ui, sans-serif;
         }
-
         body::before {
             content: "";
             position: fixed;
@@ -53,7 +43,6 @@
             background-size: 40px 40px;
             mask-image: linear-gradient(to bottom, black, transparent);
         }
-
         .glass {
             background: rgba(15,17,22,.72);
             border: 1px solid rgba(255,255,255,.075);
@@ -61,62 +50,39 @@
             -webkit-backdrop-filter: blur(22px);
             box-shadow: 0 25px 80px rgba(0,0,0,.28);
         }
-
         .glass-soft {
             background: rgba(255,255,255,.025);
             border: 1px solid rgba(255,255,255,.065);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
         }
-
         .amber-button {
             background: linear-gradient(135deg,#fbbf24,#f59e0b);
             color: #17120a;
             box-shadow: 0 12px 35px rgba(245,158,11,.16);
         }
-
         .amber-button:hover {
             transform: translateY(-1px);
             box-shadow: 0 16px 42px rgba(245,158,11,.24);
         }
-
-        .amber-button:active {
-            transform: translateY(0);
-        }
-
+        .amber-button:active { transform: translateY(0); }
         .amber-button:disabled {
             opacity: .65;
             cursor: not-allowed;
             transform: none;
         }
-
-        .transition-all {
-            transition: all .2s ease;
-        }
-
-        .view {
-            animation: viewIn .35s ease both;
-        }
-
+        .transition-all { transition: all .2s ease; }
+        .view { animation: viewIn .35s ease both; }
         @keyframes viewIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
         .robot {
             position: relative;
             width: 76px;
             height: 76px;
             margin: auto;
         }
-
         .robot-head {
             position: absolute;
             left: 11px;
@@ -126,11 +92,8 @@
             border-radius: 15px;
             background: linear-gradient(145deg,#1d2027,#0d0f13);
             border: 1px solid rgba(255,255,255,.1);
-            box-shadow:
-                0 0 0 4px rgba(245,158,11,.025),
-                0 0 35px rgba(245,158,11,.08);
+            box-shadow: 0 0 0 4px rgba(245,158,11,.025), 0 0 35px rgba(245,158,11,.08);
         }
-
         .robot-head::before {
             content: "";
             position: absolute;
@@ -141,7 +104,6 @@
             background: #f59e0b;
             transform: translateX(-50%);
         }
-
         .robot-head::after {
             content: "";
             position: absolute;
@@ -154,7 +116,6 @@
             transform: translateX(-50%);
             box-shadow: 0 0 12px rgba(251,191,36,.8);
         }
-
         .robot-eye {
             position: absolute;
             top: 17px;
@@ -165,25 +126,12 @@
             box-shadow: 0 0 12px rgba(251,191,36,.8);
             animation: blink 4s infinite;
         }
-
-        .robot-eye.left {
-            left: 13px;
-        }
-
-        .robot-eye.right {
-            right: 13px;
-        }
-
+        .robot-eye.left { left: 13px; }
+        .robot-eye.right { right: 13px; }
         @keyframes blink {
-            0%,45%,48%,100% {
-                transform: scaleY(1);
-            }
-
-            46%,47% {
-                transform: scaleY(.15);
-            }
+            0%,45%,48%,100% { transform: scaleY(1); }
+            46%,47% { transform: scaleY(.15); }
         }
-
         .robot-mouth {
             position: absolute;
             left: 50%;
@@ -194,7 +142,6 @@
             background: rgba(251,191,36,.45);
             transform: translateX(-50%);
         }
-
         .robot-body {
             position: absolute;
             left: 20px;
@@ -205,7 +152,6 @@
             background: #11141a;
             border: 1px solid rgba(255,255,255,.08);
         }
-
         .robot-light {
             position: absolute;
             left: 50%;
@@ -217,7 +163,6 @@
             transform: translateX(-50%);
             box-shadow: 0 0 10px rgba(251,191,36,.7);
         }
-
         .robot-arm {
             position: absolute;
             top: 9px;
@@ -227,17 +172,8 @@
             background: #181b22;
             border: 1px solid rgba(255,255,255,.06);
         }
-
-        .robot-arm.left {
-            left: -5px;
-            transform: rotate(15deg);
-        }
-
-        .robot-arm.right {
-            right: -5px;
-            transform: rotate(-15deg);
-        }
-
+        .robot-arm.left { left: -5px; transform: rotate(15deg); }
+        .robot-arm.right { right: -5px; transform: rotate(-15deg); }
         .loader {
             width: 17px;
             height: 17px;
@@ -246,31 +182,27 @@
             border-radius: 50%;
             animation: spin .7s linear infinite;
         }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
+        @keyframes spin { to { transform: rotate(360deg); } }
         .message-content {
             white-space: pre-wrap;
             word-break: break-word;
         }
-
-        .scrollbar::-webkit-scrollbar {
-            width: 5px;
+        .message-frame {
+            display: block;
+            width: 100%;
+            min-height: 420px;
+            height: 58vh;
+            max-height: 680px;
+            border: 0;
+            border-radius: 14px;
+            background: #fff;
         }
-
-        .scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
+        .scrollbar::-webkit-scrollbar { width: 5px; }
+        .scrollbar::-webkit-scrollbar-track { background: transparent; }
         .scrollbar::-webkit-scrollbar-thumb {
             background: rgba(255,255,255,.1);
             border-radius: 99px;
         }
-
         .empty-icon {
             width: 56px;
             height: 56px;
@@ -282,11 +214,17 @@
             background: rgba(255,255,255,.025);
             border: 1px solid rgba(255,255,255,.06);
         }
-
+        .mode-button {
+            transition: all .2s ease;
+        }
+        .mode-button.active {
+            background: rgba(245,158,11,.10);
+            border-color: rgba(245,158,11,.22);
+            color: #fbbf24;
+        }
         @media (max-width: 640px) {
-            .robot {
-                transform: scale(.9);
-            }
+            .robot { transform: scale(.9); }
+            .message-frame { min-height: 360px; height: 55vh; }
         }
     </style>
 </head>
@@ -296,57 +234,27 @@
     <header class="relative z-10 border-b border-white/[.06]">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4">
             <div class="flex items-center justify-between gap-3">
-
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="w-10 h-10 rounded-2xl glass-soft flex items-center justify-center shrink-0">
                         <svg width="21" height="21" viewBox="0 0 24 24" fill="none">
-                            <path
-                                d="M4 6.5C4 5.67 4.67 5 5.5 5h13c.83 0 1.5.67 1.5 1.5v11c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-11Z"
-                                stroke="#fbbf24"
-                                stroke-width="1.7"
-                            />
-                            <path
-                                d="m5 7 6.05 4.45a1.6 1.6 0 0 0 1.9 0L19 7"
-                                stroke="#fbbf24"
-                                stroke-width="1.7"
-                                stroke-linecap="round"
-                            />
+                            <path d="M4 6.5C4 5.67 4.67 5 5.5 5h13c.83 0 1.5.67 1.5 1.5v11c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-11Z" stroke="#fbbf24" stroke-width="1.7"/>
+                            <path d="m5 7 6.05 4.45a1.6 1.6 0 0 0 1.9 0L19 7" stroke="#fbbf24" stroke-width="1.7" stroke-linecap="round"/>
                         </svg>
                     </div>
-
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
-                            <h1 class="font-bold text-sm sm:text-base truncate">
-                                ReyMail
-                            </h1>
-
-                            <span class="text-[9px] sm:text-[10px] font-bold tracking-widest px-2 py-1 rounded-lg bg-amber-400/10 text-amber-300 border border-amber-400/10">
-                                TEMP
-                            </span>
+                            <h1 class="font-bold text-sm sm:text-base truncate">ReyMail</h1>
+                            <span class="text-[9px] sm:text-[10px] font-bold tracking-widest px-2 py-1 rounded-lg bg-amber-400/10 text-amber-300 border border-amber-400/10">TEMP</span>
                         </div>
-
-                        <p class="text-[10px] sm:text-[11px] text-slate-500">
-                            Temporary Mail Service
-                        </p>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500">Temporary Mail Service</p>
                     </div>
                 </div>
-
-                <a
-                    href="/dashboard"
-                    class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[.035] border border-white/[.07] text-[10px] sm:text-[11px] font-semibold text-slate-300 hover:text-white hover:bg-white/[.07] transition-all"
-                >
+                <a href="/dashboard" class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[.035] border border-white/[.07] text-[10px] sm:text-[11px] font-semibold text-slate-300 hover:text-white hover:bg-white/[.07] transition-all">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path
-                            d="M15 18L9 12L15 6"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
+                        <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                     Dashboard
                 </a>
-
             </div>
         </div>
     </header>
@@ -354,16 +262,13 @@
     <main class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
         <section id="createView" class="view">
-
             <div class="max-w-3xl mx-auto text-center">
-
                 <div class="robot mb-4">
                     <div class="robot-head">
                         <span class="robot-eye left"></span>
                         <span class="robot-eye right"></span>
                         <span class="robot-mouth"></span>
                     </div>
-
                     <div class="robot-body">
                         <span class="robot-light"></span>
                         <span class="robot-arm left"></span>
@@ -385,185 +290,146 @@
                     Buat alamat email sementara untuk kebutuhan testing,
                     development, dan menerima pesan tanpa menggunakan inbox utama.
                 </p>
-
             </div>
 
             <div class="max-w-2xl mx-auto mt-8">
-
                 <div class="glass rounded-3xl p-5 sm:p-7">
 
                     <div class="flex items-center justify-between gap-3 mb-5">
-
                         <div>
-                            <h3 class="font-semibold text-sm sm:text-base">
-                                Create Temporary Email
-                            </h3>
-
-                            <p class="text-[11px] text-slate-500 mt-1">
-                                Generate otomatis atau gunakan nama sendiri
-                            </p>
+                            <h3 class="font-semibold text-sm sm:text-base">Create Temporary Email</h3>
+                            <p class="text-[11px] text-slate-500 mt-1">Pilih mode akses email kamu</p>
                         </div>
-
                         <div class="w-9 h-9 rounded-xl bg-amber-400/10 flex items-center justify-center">
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-                                <path
-                                    d="M4 6.5C4 5.67 4.67 5 5.5 5h13c.83 0 1.5.67 1.5 1.5v11c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-11Z"
-                                    stroke="#fbbf24"
-                                    stroke-width="1.7"
-                                />
-                                <path
-                                    d="m5 7 6.05 4.45a1.6 1.6 0 0 0 1.9 0L19 7"
-                                    stroke="#fbbf24"
-                                    stroke-width="1.7"
-                                />
+                                <path d="M4 6.5C4 5.67 4.67 5 5.5 5h13c.83 0 1.5.67 1.5 1.5v11c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-11Z" stroke="#fbbf24" stroke-width="1.7"/>
+                                <path d="m5 7 6.05 4.45a1.6 1.6 0 0 0 1.9 0L19 7" stroke="#fbbf24" stroke-width="1.7"/>
                             </svg>
                         </div>
-
                     </div>
 
-                    <label class="block text-[11px] font-medium text-slate-400 mb-2">
-                        Custom Username
-                        <span class="text-slate-600">(optional)</span>
-                    </label>
-
-                    <div class="flex flex-col sm:flex-row gap-2">
-
-                        <div class="relative flex-1">
-
-                            <input
-                                id="usernameInput"
-                                type="text"
-                                autocomplete="off"
-                                maxlength="30"
-                                placeholder="contoh: reycode"
-                                class="w-full h-12 rounded-2xl bg-black/20 border border-white/[.07] outline-none px-4 pr-32 text-sm text-white placeholder:text-slate-700 focus:border-amber-400/30 transition-all"
-                            >
-
-                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 pointer-events-none">
-                                @akunlama.com
-                            </span>
-
-                        </div>
-
-                        <button
-                            id="createButton"
-                            onclick="createEmail()"
-                            class="h-12 px-5 rounded-2xl amber-button font-bold text-xs transition-all flex items-center justify-center gap-2"
-                        >
-                            <span id="createButtonText">
-                                Generate Email
-                            </span>
-
-                            <span id="createLoader" class="loader hidden"></span>
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                        <button id="customModeButton" type="button" onclick="setCreateMode('custom')" class="mode-button active rounded-2xl border border-white/[.07] px-3 py-3 text-left">
+                            <div class="flex items-center gap-2">
+                                <span class="text-base">✏️</span>
+                                <span class="text-xs font-bold">Custom Alias</span>
+                            </div>
+                            <div class="text-[9px] text-slate-600 mt-1.5">Login atau buat alias sendiri</div>
                         </button>
 
+                        <button id="randomModeButton" type="button" onclick="setCreateMode('random')" class="mode-button rounded-2xl border border-white/[.07] px-3 py-3 text-left">
+                            <div class="flex items-center gap-2">
+                                <span class="text-base">🎲</span>
+                                <span class="text-xs font-bold">Auto Random</span>
+                            </div>
+                            <div class="text-[9px] text-slate-600 mt-1.5">Generate alamat secara otomatis</div>
+                        </button>
                     </div>
 
-                    <div
-                        id="createError"
-                        class="hidden mt-3 rounded-xl bg-red-400/5 border border-red-400/10 px-3 py-2.5 text-[11px] text-red-300"
-                    ></div>
+                    <div id="customPanel">
+                        <label class="block text-[11px] font-medium text-slate-400 mb-2">
+                            Custom Username
+                            <span class="text-slate-600">(username saja)</span>
+                        </label>
+
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <div class="relative flex-1">
+                                <input
+                                    id="usernameInput"
+                                    type="text"
+                                    autocomplete="off"
+                                    autocapitalize="none"
+                                    spellcheck="false"
+                                    maxlength="30"
+                                    placeholder="contoh: reycode"
+                                    class="w-full h-12 rounded-2xl bg-black/20 border border-white/[.07] outline-none px-4 pr-32 text-sm text-white placeholder:text-slate-700 focus:border-amber-400/30 transition-all"
+                                >
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 pointer-events-none">@akunlama.com</span>
+                            </div>
+
+                            <button
+                                id="customButton"
+                                onclick="loginCustomEmail()"
+                                class="h-12 px-5 rounded-2xl amber-button font-bold text-xs transition-all flex items-center justify-center gap-2"
+                            >
+                                <span id="customButtonText">Custom Alias / Login</span>
+                                <span id="customLoader" class="loader hidden"></span>
+                            </button>
+                        </div>
+
+                        <p class="text-[10px] text-slate-600 mt-2.5">
+                            Jika alias sudah pernah digunakan, inbox yang sama akan dibuka kembali.
+                        </p>
+                    </div>
+
+                    <div id="randomPanel" class="hidden">
+                        <div class="rounded-2xl bg-amber-400/[.04] border border-amber-400/[.08] p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center text-lg">🎲</div>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold">Auto Random Email</div>
+                                    <div class="text-[10px] text-slate-600 mt-1">Sistem akan memilih username random yang tersedia.</div>
+                                </div>
+                            </div>
+                            <button id="randomButton" onclick="createRandomEmail()" class="w-full h-12 mt-4 rounded-2xl amber-button font-bold text-xs transition-all flex items-center justify-center gap-2">
+                                <span id="randomButtonText">Generate Random Email</span>
+                                <span id="randomLoader" class="loader hidden"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="createError" class="hidden mt-3 rounded-xl bg-red-400/5 border border-red-400/10 px-3 py-2.5 text-[11px] text-red-300"></div>
 
                     <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2">
-
                         <div class="glass-soft rounded-2xl p-3">
-                            <div class="text-[10px] text-slate-500">
-                                Privacy
-                            </div>
-
-                            <div class="text-xs font-semibold mt-1">
-                                Temporary
-                            </div>
+                            <div class="text-[10px] text-slate-500">Privacy</div>
+                            <div class="text-xs font-semibold mt-1">Temporary</div>
                         </div>
-
                         <div class="glass-soft rounded-2xl p-3">
-                            <div class="text-[10px] text-slate-500">
-                                Inbox
-                            </div>
-
-                            <div class="text-xs font-semibold mt-1">
-                                Auto Refresh
-                            </div>
+                            <div class="text-[10px] text-slate-500">Inbox</div>
+                            <div class="text-xs font-semibold mt-1">Auto Refresh</div>
                         </div>
-
                         <div class="glass-soft rounded-2xl p-3">
-                            <div class="text-[10px] text-slate-500">
-                                Access
-                            </div>
-
-                            <div class="text-xs font-semibold mt-1">
-                                No Account
-                            </div>
+                            <div class="text-[10px] text-slate-500">Access</div>
+                            <div class="text-xs font-semibold mt-1">No Account</div>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
             <div class="max-w-2xl mx-auto mt-4">
-
                 <div class="glass-soft rounded-3xl p-4 sm:p-5">
-
                     <div class="flex items-center gap-4">
-
                         <div class="robot shrink-0 scale-[.72] origin-left -mr-2">
                             <div class="robot-head">
                                 <span class="robot-eye left"></span>
                                 <span class="robot-eye right"></span>
                                 <span class="robot-mouth"></span>
                             </div>
-
                             <div class="robot-body">
                                 <span class="robot-light"></span>
                             </div>
                         </div>
-
                         <div class="min-w-0">
-
                             <div class="flex items-center gap-2">
-                                <span class="text-[10px] font-bold tracking-widest text-amber-300">
-                                    REYCODE SECURITY
-                                </span>
-
+                                <span class="text-[10px] font-bold tracking-widest text-amber-300">REYCODE SECURITY</span>
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                             </div>
-
-                            <p class="text-[11px] text-slate-500 mt-1">
-                                Server online · System monitoring active
-                            </p>
-
+                            <p class="text-[11px] text-slate-500 mt-1">Server online · System monitoring active</p>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </section>
 
         <section id="inboxView" class="hidden view">
-
             <div class="max-w-4xl mx-auto">
 
                 <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
-
                     <div>
-
-                        <button
-                            onclick="showCreateView()"
-                            class="inline-flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-amber-300 transition-all mb-4"
-                        >
+                        <button onclick="startNewEmail()" class="inline-flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-amber-300 transition-all mb-4">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                                <path
-                                    d="M15 18L9 12L15 6"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                />
+                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             New Email
                         </button>
@@ -572,327 +438,137 @@
                             Your <span class="text-amber-400">Inbox.</span>
                         </h2>
 
-                        <p class="text-xs sm:text-sm text-slate-500 mt-2">
-                            Pesan yang masuk akan muncul di sini secara otomatis.
-                        </p>
-
+                        <p class="text-xs sm:text-sm text-slate-500 mt-2">Pesan yang masuk akan muncul di sini secara otomatis.</p>
                     </div>
 
-                    <button
-                        id="refreshButton"
-                        onclick="refreshInbox()"
-                        class="h-10 px-4 rounded-xl glass-soft text-[11px] font-semibold text-slate-300 hover:text-white hover:bg-white/[.06] transition-all flex items-center justify-center gap-2"
-                    >
-                        <svg
-                            id="refreshIcon"
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                        >
-                            <path
-                                d="M20 11a8 8 0 0 0-14.9-3M4 5v3h3"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            />
-
-                            <path
-                                d="M4 13a8 8 0 0 0 14.9 3M20 19v-3h-3"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            />
+                    <button id="refreshButton" onclick="refreshInbox()" class="h-10 px-4 rounded-xl glass-soft text-[11px] font-semibold text-slate-300 hover:text-white hover:bg-white/[.06] transition-all flex items-center justify-center gap-2">
+                        <svg id="refreshIcon" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                            <path d="M20 11a8 8 0 0 0-14.9-3M4 5v3h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M4 13a8 8 0 0 0 14.9 3M20 19v-3h-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-
                         Refresh
                     </button>
-
                 </div>
 
                 <div class="glass rounded-3xl p-4 sm:p-6">
-
                     <div class="glass-soft rounded-2xl p-4 mb-5">
-
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-
                             <div class="min-w-0">
-
-                                <div class="text-[10px] uppercase tracking-widest text-slate-600 mb-1">
-                                    Active Email
-                                </div>
-
+                                <div class="text-[10px] uppercase tracking-widest text-slate-600 mb-1">Active Email</div>
                                 <div class="flex items-center gap-2">
-
-                                    <span
-                                        id="activeEmail"
-                                        class="font-mono text-xs sm:text-sm text-amber-300 break-all"
-                                    ></span>
-
-                                    <button
-                                        onclick="copyEmail()"
-                                        class="w-8 h-8 rounded-xl bg-white/[.04] border border-white/[.06] flex items-center justify-center text-slate-500 hover:text-white transition-all shrink-0"
-                                        title="Copy Email"
-                                    >
+                                    <span id="activeEmail" class="font-mono text-xs sm:text-sm text-amber-300 break-all"></span>
+                                    <button onclick="copyEmail()" class="w-8 h-8 rounded-xl bg-white/[.04] border border-white/[.06] flex items-center justify-center text-slate-500 hover:text-white transition-all shrink-0" title="Copy Email">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                                            <rect
-                                                x="8"
-                                                y="8"
-                                                width="11"
-                                                height="11"
-                                                rx="2"
-                                                stroke="currentColor"
-                                                stroke-width="1.7"
-                                            />
-
-                                            <path
-                                                d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
-                                                stroke="currentColor"
-                                                stroke-width="1.7"
-                                            />
+                                            <rect x="8" y="8" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"/>
+                                            <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.7"/>
                                         </svg>
                                     </button>
-
                                 </div>
-
                             </div>
-
                             <div class="flex items-center gap-2 shrink-0">
                                 <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,.65)]"></span>
-
-                                <span class="text-[10px] text-emerald-300 font-semibold">
-                                    ACTIVE
-                                </span>
+                                <span class="text-[10px] text-emerald-300 font-semibold">ACTIVE</span>
                             </div>
-
                         </div>
-
                     </div>
 
                     <div class="flex items-center justify-between mb-3">
-
                         <div>
-                            <h3 class="text-sm font-semibold">
-                                Inbox
-                            </h3>
-
-                            <p
-                                id="inboxStatus"
-                                class="text-[10px] text-slate-600 mt-1"
-                            >
-                                Checking messages...
-                            </p>
+                            <h3 class="text-sm font-semibold">Inbox</h3>
+                            <p id="inboxStatus" class="text-[10px] text-slate-600 mt-1">Checking messages...</p>
                         </div>
-
-                        <span
-                            id="messageCount"
-                            class="text-[10px] px-2.5 py-1 rounded-lg bg-white/[.035] text-slate-500 border border-white/[.05]"
-                        >
-                            0 messages
-                        </span>
-
+                        <span id="messageCount" class="text-[10px] px-2.5 py-1 rounded-lg bg-white/[.035] text-slate-500 border border-white/[.05]">0 messages</span>
                     </div>
 
-                    <div
-                        id="inboxList"
-                        class="space-y-2 max-h-[500px] overflow-y-auto scrollbar"
-                    ></div>
-
+                    <div id="inboxList" class="space-y-2 max-h-[500px] overflow-y-auto scrollbar"></div>
                 </div>
 
                 <div class="mt-4 glass-soft rounded-3xl p-4 sm:p-5">
-
                     <div class="flex items-center gap-4">
-
                         <div class="robot shrink-0 scale-[.72] origin-left -mr-2">
                             <div class="robot-head">
                                 <span class="robot-eye left"></span>
                                 <span class="robot-eye right"></span>
                                 <span class="robot-mouth"></span>
                             </div>
-
                             <div class="robot-body">
                                 <span class="robot-light"></span>
                             </div>
                         </div>
-
                         <div class="min-w-0 flex-1">
-
                             <div class="flex flex-wrap items-center gap-2">
-
-                                <span class="text-[10px] font-bold tracking-widest text-amber-300">
-                                    REYCODE SECURITY
-                                </span>
-
-                                <span class="px-2 py-1 rounded-md bg-emerald-400/10 text-emerald-300 text-[9px] font-bold">
-                                    SYSTEM SECURE
-                                </span>
-
+                                <span class="text-[10px] font-bold tracking-widest text-amber-300">REYCODE SECURITY</span>
+                                <span class="px-2 py-1 rounded-md bg-emerald-400/10 text-emerald-300 text-[9px] font-bold">SYSTEM SECURE</span>
                             </div>
-
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
-
                                 <div>
-                                    <div class="text-[9px] text-slate-600 uppercase">
-                                        Server
-                                    </div>
-
-                                    <div class="text-[10px] text-slate-400 mt-1">
-                                        Online
-                                    </div>
+                                    <div class="text-[9px] text-slate-600 uppercase">Server</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Online</div>
                                 </div>
-
                                 <div>
-                                    <div class="text-[9px] text-slate-600 uppercase">
-                                        Security
-                                    </div>
-
-                                    <div class="text-[10px] text-slate-400 mt-1">
-                                        Protected
-                                    </div>
+                                    <div class="text-[9px] text-slate-600 uppercase">Security</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Protected</div>
                                 </div>
-
                                 <div>
-                                    <div class="text-[9px] text-slate-600 uppercase">
-                                        Monitor
-                                    </div>
-
-                                    <div class="text-[10px] text-slate-400 mt-1">
-                                        Active
-                                    </div>
+                                    <div class="text-[9px] text-slate-600 uppercase">Monitor</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Active</div>
                                 </div>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </section>
-
     </main>
 
     <footer class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 pb-7 pt-4">
-
         <div class="border-t border-white/[.05] pt-5 flex flex-col sm:flex-row items-center justify-between gap-2">
-
-            <p class="text-[10px] text-slate-700">
-                © 2026 ReyCode · Temporary Mail
-            </p>
-
+            <p class="text-[10px] text-slate-700">© 2026 ReyCode · Temporary Mail</p>
             <div class="flex items-center gap-2 text-[10px] text-slate-700">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400/70"></span>
                 ReyCode System Online
             </div>
-
         </div>
-
     </footer>
 
-    <div
-        id="messageModal"
-        class="hidden fixed inset-0 z-50 p-4 flex items-center justify-center bg-black/70 backdrop-blur-sm"
-    >
-
-        <div
-            onclick="event.stopPropagation()"
-            class="glass rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-hidden"
-        >
-
+    <div id="messageModal" class="hidden fixed inset-0 z-50 p-4 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div onclick="event.stopPropagation()" class="glass rounded-3xl w-full max-w-2xl max-h-[88vh] overflow-hidden">
             <div class="p-4 sm:p-5 border-b border-white/[.06] flex items-start justify-between gap-4">
-
                 <div class="min-w-0">
-
-                    <div class="text-[9px] uppercase tracking-widest text-slate-600 mb-1">
-                        Message
-                    </div>
-
-                    <h3
-                        id="modalSubject"
-                        class="font-semibold text-sm sm:text-base break-words"
-                    >
-                        —
-                    </h3>
-
+                    <div class="text-[9px] uppercase tracking-widest text-slate-600 mb-1">Message</div>
+                    <h3 id="modalSubject" class="font-semibold text-sm sm:text-base break-words">—</h3>
                 </div>
-
-                <button
-                    onclick="closeMessage()"
-                    class="w-9 h-9 rounded-xl bg-white/[.035] border border-white/[.06] text-slate-500 hover:text-white transition-all shrink-0"
-                >
+                <button onclick="closeMessage()" class="w-9 h-9 rounded-xl bg-white/[.035] border border-white/[.06] text-slate-500 hover:text-white transition-all shrink-0">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" class="mx-auto">
-                        <path
-                            d="m7 7 10 10M17 7 7 17"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            stroke-linecap="round"
-                        />
+                        <path d="m7 7 10 10M17 7 7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                     </svg>
                 </button>
-
             </div>
 
-            <div class="p-4 sm:p-5 overflow-y-auto max-h-[65vh] scrollbar">
-
+            <div class="p-4 sm:p-5 overflow-y-auto max-h-[75vh] scrollbar">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-
                     <div class="glass-soft rounded-2xl p-3">
-
-                        <div class="text-[9px] uppercase tracking-widest text-slate-600">
-                            From
-                        </div>
-
-                        <div
-                            id="modalFrom"
-                            class="text-xs text-slate-300 mt-1 break-all"
-                        >
-                            —
-                        </div>
-
+                        <div class="text-[9px] uppercase tracking-widest text-slate-600">From</div>
+                        <div id="modalFrom" class="text-xs text-slate-300 mt-1 break-all">—</div>
                     </div>
-
                     <div class="glass-soft rounded-2xl p-3">
-
-                        <div class="text-[9px] uppercase tracking-widest text-slate-600">
-                            Date
-                        </div>
-
-                        <div
-                            id="modalDate"
-                            class="text-xs text-slate-300 mt-1"
-                        >
-                            —
-                        </div>
-
+                        <div class="text-[9px] uppercase tracking-widest text-slate-600">Date</div>
+                        <div id="modalDate" class="text-xs text-slate-300 mt-1">—</div>
                     </div>
-
                 </div>
 
-                <div class="glass-soft rounded-2xl p-4">
-
-                    <div
-                        id="modalContent"
-                        class="message-content text-xs sm:text-sm text-slate-300 leading-7"
-                    ></div>
-
+                <div class="glass-soft rounded-2xl p-3 sm:p-4">
+                    <div id="modalContent" class="message-content text-xs sm:text-sm text-slate-300 leading-7">
+                        <div class="py-10 flex items-center justify-center">
+                            <div class="loader"></div>
+                        </div>
+                    </div>
                 </div>
-
             </div>
-
         </div>
-
     </div>
 
-    <div
-        id="toast"
-        class="fixed z-[60] bottom-5 left-1/2 -translate-x-1/2 translate-y-4 opacity-0 pointer-events-none transition-all duration-300"
-    >
+    <div id="toast" class="fixed z-[60] bottom-5 left-1/2 -translate-x-1/2 translate-y-4 opacity-0 pointer-events-none transition-all duration-300">
         <div class="glass rounded-2xl px-4 py-3 text-xs font-medium text-slate-200">
             <span id="toastText"></span>
         </div>
@@ -900,10 +576,14 @@
 
     <script>
         const API_BASE = "/api/mail";
+        const SESSION_KEY = "reymail_session_v2";
+        const CREATE_MODE_KEY = "reymail_create_mode";
 
         let currentEmail = "";
         let currentUsername = "";
+        let currentRegion = "us";
         let refreshTimer = null;
+        let currentCreateMode = localStorage.getItem(CREATE_MODE_KEY) || "custom";
 
         const $ = id => document.getElementById(id);
 
@@ -924,32 +604,47 @@
 
         function showToast(message) {
             $("toastText").textContent = message;
-
             const toast = $("toast");
-
-            toast.classList.remove(
-                "opacity-0",
-                "translate-y-4"
-            );
-
-            toast.classList.add(
-                "opacity-100",
-                "translate-y-0"
-            );
-
+            toast.classList.remove("opacity-0", "translate-y-4");
+            toast.classList.add("opacity-100", "translate-y-0");
             clearTimeout(showToast.timer);
-
             showToast.timer = setTimeout(() => {
-                toast.classList.add(
-                    "opacity-0",
-                    "translate-y-4"
-                );
-
-                toast.classList.remove(
-                    "opacity-100",
-                    "translate-y-0"
-                );
+                toast.classList.add("opacity-0", "translate-y-4");
+                toast.classList.remove("opacity-100", "translate-y-0");
             }, 2200);
+        }
+
+        function saveSession() {
+            if (!currentUsername || !currentEmail) return;
+            localStorage.setItem(SESSION_KEY, JSON.stringify({
+                username: currentUsername,
+                email: currentEmail,
+                region: currentRegion || "us",
+                savedAt: Date.now()
+            }));
+        }
+
+        function loadSession() {
+            try {
+                const raw = localStorage.getItem(SESSION_KEY);
+                if (!raw) return false;
+                const session = JSON.parse(raw);
+                if (!session || !session.username) return false;
+                currentUsername = String(session.username);
+                currentEmail = String(session.email || `${currentUsername}@akunlama.com`);
+                currentRegion = String(session.region || "us");
+                return true;
+            } catch {
+                localStorage.removeItem(SESSION_KEY);
+                return false;
+            }
+        }
+
+        function clearSession() {
+            localStorage.removeItem(SESSION_KEY);
+            currentEmail = "";
+            currentUsername = "";
+            currentRegion = "us";
         }
 
         function stopRefreshTimer() {
@@ -961,9 +656,8 @@
 
         function startRefreshTimer() {
             stopRefreshTimer();
-
             refreshTimer = setInterval(() => {
-                if (currentUsername) {
+                if (currentUsername && !document.hidden) {
                     refreshInbox(true);
                 }
             }, 10000);
@@ -971,144 +665,207 @@
 
         function showCreateView() {
             stopRefreshTimer();
-
             $("inboxView").classList.add("hidden");
             $("createView").classList.remove("hidden");
-
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
+            $("usernameInput").focus();
+            window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
         function showInboxView() {
             $("createView").classList.add("hidden");
             $("inboxView").classList.remove("hidden");
+            $("activeEmail").textContent = currentEmail;
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
 
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
+        function startNewEmail() {
+            closeMessage();
+            clearSession();
+            $("inboxList").innerHTML = "";
+            $("messageCount").textContent = "0 messages";
+            $("inboxStatus").textContent = "Checking messages...";
+            $("usernameInput").value = "";
+            $("createError").classList.add("hidden");
+            showCreateView();
+            showToast("Session email sebelumnya ditutup");
+        }
+
+        function setCreateMode(mode) {
+            currentCreateMode = mode === "random" ? "random" : "custom";
+            localStorage.setItem(CREATE_MODE_KEY, currentCreateMode);
+
+            $("customPanel").classList.toggle("hidden", currentCreateMode !== "custom");
+            $("randomPanel").classList.toggle("hidden", currentCreateMode !== "random");
+            $("customModeButton").classList.toggle("active", currentCreateMode === "custom");
+            $("randomModeButton").classList.toggle("active", currentCreateMode === "random");
+
+            $("createError").classList.add("hidden");
+            $("createError").textContent = "";
+        }
+
+        function showCreateError(message) {
+            $("createError").textContent = message || "Terjadi kesalahan.";
+            $("createError").classList.remove("hidden");
+        }
+
+        function setButtonLoading(button, textElement, loader, loading, text) {
+            button.disabled = loading;
+            textElement.textContent = loading ? text : textElement.dataset.defaultText;
+            loader.classList.toggle("hidden", !loading);
         }
 
         async function readJsonResponse(response) {
             const text = await response.text();
-
             let data;
-
             try {
                 data = JSON.parse(text);
             } catch {
-                throw new Error(
-                    `Server mengembalikan response tidak valid (${response.status}).`
-                );
+                throw new Error(`Server mengembalikan response tidak valid (${response.status}).`);
             }
-
             return data;
         }
 
-        async function createEmail() {
+        function extractApiResult(data) {
+            if (data && data.data !== undefined) return data.data;
+            return data;
+        }
+
+        async function requestCreate(username = "") {
+            let url = `${API_BASE}?action=create`;
+            if (username) {
+                url += `&username=${encodeURIComponent(username)}`;
+            }
+
+            const response = await fetch(url, {
+                method: "GET",
+                headers: { Accept: "application/json" },
+                cache: "no-store"
+            });
+
+            const data = await readJsonResponse(response);
+
+            if (!response.ok || data.status !== true) {
+                throw new Error(
+                    data.error ||
+                    data.message ||
+                    `Gagal membuat temporary email. HTTP ${response.status}`
+                );
+            }
+
+            return extractApiResult(data);
+        }
+
+        async function openExistingAlias(username) {
+            const clean = String(username || "").trim().toLowerCase();
+
+            if (!clean) {
+                throw new Error("Masukkan username terlebih dahulu.");
+            }
+
+            const result = await requestCreate(clean);
+
+            const email = result.email || `${clean}@akunlama.com`;
+            const resolvedUsername = result.username || clean;
+
+            currentEmail = email;
+            currentUsername = resolvedUsername;
+            currentRegion = result.region || result.storage?.region || "us";
+
+            saveSession();
+            $("activeEmail").textContent = currentEmail;
+            $("inboxList").innerHTML = "";
+            $("messageCount").textContent = "0 messages";
+            $("inboxStatus").textContent = "Checking messages...";
+
+            showInboxView();
+            await refreshInbox();
+            startRefreshTimer();
+        }
+
+        async function loginCustomEmail() {
             const input = $("usernameInput");
-            const button = $("createButton");
-            const buttonText = $("createButtonText");
-            const loader = $("createLoader");
-            const error = $("createError");
+            const button = $("customButton");
+            const buttonText = $("customButtonText");
+            const loader = $("customLoader");
 
             const username = input.value.trim();
 
-            error.classList.add("hidden");
-            error.textContent = "";
+            $("createError").classList.add("hidden");
+            $("createError").textContent = "";
+
+            if (!username) {
+                showCreateError("Masukkan custom username terlebih dahulu.");
+                input.focus();
+                return;
+            }
+
+            if (!/^[a-zA-Z0-9._-]{1,30}$/.test(username)) {
+                showCreateError("Username hanya boleh menggunakan huruf, angka, titik, underscore, dan strip.");
+                input.focus();
+                return;
+            }
 
             button.disabled = true;
-            buttonText.textContent = "Creating...";
+            buttonText.textContent = "Opening...";
             loader.classList.remove("hidden");
 
             try {
-                let url = `${API_BASE}?action=create`;
-
-                if (username) {
-                    url +=
-                        "&username=" +
-                        encodeURIComponent(username);
-                }
-
-                const response = await fetch(url, {
-                    method: "GET",
-                    headers: {
-                        Accept: "application/json"
-                    },
-                    cache: "no-store"
-                });
-
-                const data =
-                    await readJsonResponse(response);
-
-                if (!response.ok || data.status !== true) {
-                    throw new Error(
-                        data.error ||
-                        data.message ||
-                        `Gagal membuat temporary email. HTTP ${response.status}`
-                    );
-                }
-
-                const result =
-                    data.data || data;
-
-                currentEmail =
-                    result.email || "";
-
-                currentUsername =
-                    result.username ||
-                    currentEmail.split("@")[0] ||
-                    "";
-
-                if (!currentEmail || !currentUsername) {
-                    throw new Error(
-                        "Response API tidak memiliki email atau username."
-                    );
-                }
-
-                $("activeEmail").textContent =
-                    currentEmail;
-
-                $("inboxList").innerHTML = "";
-
-                $("messageCount").textContent =
-                    "0 messages";
-
-                $("inboxStatus").textContent =
-                    "Checking messages...";
-
-                showInboxView();
-
-                await refreshInbox();
-
-                startRefreshTimer();
-
-                showToast(
-                    "Temporary email berhasil dibuat"
-                );
-
+                await openExistingAlias(username);
+                showToast("Inbox alias berhasil dibuka");
             } catch (err) {
-                error.textContent =
-                    err.message ||
-                    "Terjadi kesalahan.";
-
-                error.classList.remove("hidden");
-
+                showCreateError(err.message || "Gagal membuka alias.");
             } finally {
                 button.disabled = false;
-                buttonText.textContent =
-                    "Generate Email";
+                buttonText.textContent = "Custom Alias / Login";
+                loader.classList.add("hidden");
+            }
+        }
 
+        async function createRandomEmail() {
+            const button = $("randomButton");
+            const buttonText = $("randomButtonText");
+            const loader = $("randomLoader");
+
+            $("createError").classList.add("hidden");
+            $("createError").textContent = "";
+
+            button.disabled = true;
+            buttonText.textContent = "Generating...";
+            loader.classList.remove("hidden");
+
+            try {
+                const result = await requestCreate();
+
+                currentEmail = result.email || "";
+                currentUsername = result.username || currentEmail.split("@")[0] || "";
+                currentRegion = result.region || result.storage?.region || "us";
+
+                if (!currentEmail || !currentUsername) {
+                    throw new Error("Response API tidak memiliki email atau username.");
+                }
+
+                saveSession();
+                $("activeEmail").textContent = currentEmail;
+                $("inboxList").innerHTML = "";
+                $("messageCount").textContent = "0 messages";
+                $("inboxStatus").textContent = "Checking messages...";
+
+                showInboxView();
+                await refreshInbox();
+                startRefreshTimer();
+
+                showToast("Random temporary email berhasil dibuat");
+            } catch (err) {
+                showCreateError(err.message || "Gagal membuat random email.");
+            } finally {
+                button.disabled = false;
+                buttonText.textContent = "Generate Random Email";
                 loader.classList.add("hidden");
             }
         }
 
         async function refreshInbox(silent = false) {
-            if (!currentUsername) {
-                return;
-            }
+            if (!currentUsername) return;
 
             const button = $("refreshButton");
             const icon = $("refreshIcon");
@@ -1125,19 +882,13 @@
 
                 const response = await fetch(url, {
                     method: "GET",
-                    headers: {
-                        Accept: "application/json"
-                    },
+                    headers: { Accept: "application/json" },
                     cache: "no-store"
                 });
 
-                const data =
-                    await readJsonResponse(response);
+                const data = await readJsonResponse(response);
 
-                if (
-                    !response.ok ||
-                    data.status === false
-                ) {
+                if (!response.ok || data.status === false) {
                     throw new Error(
                         data.error ||
                         data.message ||
@@ -1145,59 +896,44 @@
                     );
                 }
 
-                const result =
-                    data.data || data;
-
+                const result = extractApiResult(data);
                 let messages = [];
 
                 if (Array.isArray(result)) {
                     messages = result;
-                } else if (
-                    result &&
-                    Array.isArray(result.messages)
-                ) {
+                } else if (result && Array.isArray(result.messages)) {
                     messages = result.messages;
-                } else if (
-                    result &&
-                    Array.isArray(result.inbox)
-                ) {
+                } else if (result && Array.isArray(result.inbox)) {
                     messages = result.inbox;
-                } else if (
-                    result &&
-                    Array.isArray(result.results)
-                ) {
+                } else if (result && Array.isArray(result.results)) {
                     messages = result.results;
-                } else if (
-                    result &&
-                    Array.isArray(result.data)
-                ) {
+                } else if (result && Array.isArray(result.data)) {
                     messages = result.data;
+                }
+
+                if (result && result.email) {
+                    currentEmail = result.email;
+                    currentUsername = result.username || currentUsername;
+                    saveSession();
+                    $("activeEmail").textContent = currentEmail;
                 }
 
                 renderInbox(messages);
 
                 $("inboxStatus").textContent =
                     "Last checked · " +
-                    new Date().toLocaleTimeString(
-                        "id-ID",
-                        {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit"
-                        }
-                    );
+                    new Date().toLocaleTimeString("id-ID", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit"
+                    });
 
             } catch (err) {
-                $("inboxStatus").textContent =
-                    "Unable to check inbox";
+                $("inboxStatus").textContent = "Unable to check inbox";
 
                 if (!silent) {
-                    showToast(
-                        err.message ||
-                        "Gagal mengambil inbox"
-                    );
+                    showToast(err.message || "Gagal mengambil inbox");
                 }
-
             } finally {
                 if (!silent) {
                     button.disabled = false;
@@ -1206,327 +942,378 @@
             }
         }
 
+        function getMessageId(message, fallback = "") {
+            return (
+                message?.id ??
+                message?._id ??
+                message?.messageId ??
+                message?.uid ??
+                fallback
+            );
+        }
+
+        function getMessageRegion(message) {
+            return (
+                message?.region ||
+                message?.storage?.region ||
+                currentRegion ||
+                "us"
+            );
+        }
+
         function renderInbox(messages) {
             const list = $("inboxList");
 
             $("messageCount").textContent =
                 messages.length +
-                (
-                    messages.length === 1
-                        ? " message"
-                        : " messages"
-                );
+                (messages.length === 1 ? " message" : " messages");
 
             if (!messages.length) {
                 list.innerHTML = `
                     <div class="py-14 text-center">
-
                         <div class="empty-icon mb-4">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                                <path
-                                    d="M4 6.5C4 5.67 4.67 5 5.5 5h13c.83 0 1.5.67 1.5 1.5v11c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-11Z"
-                                    stroke="currentColor"
-                                    class="text-slate-700"
-                                    stroke-width="1.6"
-                                />
-
-                                <path
-                                    d="m5 7 6.05 4.45a1.6 1.6 0 0 0 1.9 0L19 7"
-                                    stroke="currentColor"
-                                    class="text-slate-700"
-                                    stroke-width="1.6"
-                                />
+                                <path d="M4 6.5C4 5.67 4.67 5 5.5 5h13c.83 0 1.5.67 1.5 1.5v11c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-11Z" stroke="currentColor" class="text-slate-700" stroke-width="1.6"/>
+                                <path d="m5 7 6.05 4.45a1.6 1.6 0 0 0 1.9 0L19 7" stroke="currentColor" class="text-slate-700" stroke-width="1.6"/>
                             </svg>
                         </div>
-
-                        <div class="text-sm font-semibold text-slate-400">
-                            No messages yet
-                        </div>
-
-                        <p class="text-[11px] text-slate-700 mt-1">
-                            Waiting for incoming mail...
-                        </p>
-
+                        <div class="text-sm font-semibold text-slate-400">No messages yet</div>
+                        <p class="text-[11px] text-slate-700 mt-1">Waiting for incoming mail...</p>
                     </div>
                 `;
-
                 return;
             }
 
-            list.innerHTML = messages
-                .map((message, index) => {
+            list.innerHTML = messages.map((message, index) => {
+                const id = getMessageId(message, index);
+                const region = getMessageRegion(message);
 
-                    const id =
-                        message.id ??
-                        message._id ??
-                        message.messageId ??
-                        message.uid ??
-                        index;
+                const subject =
+                    message.subject ||
+                    message.title ||
+                    message.message?.headers?.subject ||
+                    "(No subject)";
 
-                    const subject =
-                        message.subject ||
-                        message.title ||
-                        "(No subject)";
+                const from =
+                    message.from ||
+                    message.sender ||
+                    message.email ||
+                    message.from_email ||
+                    message.message?.headers?.from ||
+                    "Unknown sender";
 
-                    const from =
-                        message.from ||
-                        message.sender ||
-                        message.email ||
-                        message.from_email ||
-                        "Unknown sender";
+                const preview =
+                    message.preview ||
+                    message.text ||
+                    message.body ||
+                    message.content ||
+                    message.html ||
+                    "Open this message to view its content.";
 
-                    const preview =
-                        message.text ||
-                        message.body ||
-                        message.content ||
-                        message.html ||
-                        "Open this message to view its content.";
+                const date =
+                    message.date ||
+                    message.created_at ||
+                    message.createdAt ||
+                    message.timestamp ||
+                    message.received_at ||
+                    "";
 
-                    const date =
-                        message.date ||
-                        message.created_at ||
-                        message.createdAt ||
-                        message.timestamp ||
-                        message.received_at ||
-                        "";
+                const encoded =
+                    encodeURIComponent(JSON.stringify({
+                        id,
+                        messageId: message.messageId || id,
+                        uid: message.uid || id,
+                        region,
+                        subject,
+                        from,
+                        sender: from,
+                        timestamp: date,
+                        preview
+                    }));
 
-                    const safeMessage =
-                        encodeURIComponent(
-                            JSON.stringify(message)
-                        );
-
-                    return `
-                        <button
-                            type="button"
-                            data-message="${safeMessage}"
-                            onclick="openEncodedMessage(this)"
-                            class="w-full text-left glass-soft rounded-2xl p-4 hover:bg-white/[.045] hover:border-amber-400/10 transition-all group"
-                        >
-
-                            <div class="flex items-start gap-3">
-
-                                <div class="w-9 h-9 rounded-xl bg-amber-400/10 flex items-center justify-center shrink-0">
-
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                                        <path
-                                            d="M4 6.5C4 5.67 4.67 5 5.5 5h13c.83 0 1.5.67 1.5 1.5v11c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-11Z"
-                                            stroke="#fbbf24"
-                                            stroke-width="1.6"
-                                        />
-
-                                        <path
-                                            d="m5 7 6.05 4.45a1.6 1.6 0 0 0 1.9 0L19 7"
-                                            stroke="#fbbf24"
-                                            stroke-width="1.6"
-                                        />
-                                    </svg>
-
-                                </div>
-
-                                <div class="min-w-0 flex-1">
-
-                                    <div class="flex items-start justify-between gap-3">
-
-                                        <div class="font-semibold text-xs text-slate-200 truncate group-hover:text-amber-300 transition-all">
-                                            ${escapeHtml(subject)}
-                                        </div>
-
-                                        <div class="text-[9px] text-slate-600 shrink-0">
-                                            ${escapeHtml(formatDate(date))}
-                                        </div>
-
-                                    </div>
-
-                                    <div class="text-[10px] text-slate-600 mt-1 truncate">
-                                        ${escapeHtml(from)}
-                                    </div>
-
-                                    <div class="text-[11px] text-slate-600 mt-2 line-clamp-2 leading-5">
-                                        ${escapeHtml(
-                                            stripHtml(preview)
-                                        )}
-                                    </div>
-
-                                </div>
-
+                return `
+                    <button
+                        type="button"
+                        data-message="${encoded}"
+                        onclick="openEncodedMessage(this)"
+                        class="w-full text-left glass-soft rounded-2xl p-4 hover:bg-white/[.045] hover:border-amber-400/10 transition-all group"
+                    >
+                        <div class="flex items-start gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-amber-400/10 flex items-center justify-center shrink-0">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 6.5C4 5.67 4.67 5 5.5 5h13c.83 0 1.5.67 1.5 1.5v11c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-11Z" stroke="#fbbf24" stroke-width="1.6"/>
+                                    <path d="m5 7 6.05 4.45a1.6 1.6 0 0 0 1.9 0L19 7" stroke="#fbbf24" stroke-width="1.6"/>
+                                </svg>
                             </div>
 
-                        </button>
-                    `;
-                })
-                .join("");
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="font-semibold text-xs text-slate-200 truncate group-hover:text-amber-300 transition-all">
+                                        ${escapeHtml(subject)}
+                                    </div>
+                                    <div class="text-[9px] text-slate-600 shrink-0">
+                                        ${escapeHtml(formatDate(date))}
+                                    </div>
+                                </div>
+
+                                <div class="text-[10px] text-slate-600 mt-1 truncate">
+                                    ${escapeHtml(from)}
+                                </div>
+
+                                <div class="text-[11px] text-slate-600 mt-2 line-clamp-2 leading-5">
+                                    ${escapeHtml(stripHtml(preview))}
+                                </div>
+                            </div>
+                        </div>
+                    </button>
+                `;
+            }).join("");
         }
 
         function openEncodedMessage(element) {
             try {
-                const message =
-                    JSON.parse(
-                        decodeURIComponent(
-                            element.dataset.message
-                        )
-                    );
-
+                const message = JSON.parse(decodeURIComponent(element.dataset.message));
                 openMessage(message);
-
             } catch {
-                showToast(
-                    "Gagal membuka pesan."
-                );
+                showToast("Gagal membuka pesan.");
             }
         }
 
         function formatDate(value) {
-            if (!value) {
-                return "";
-            }
+            if (value === null || value === undefined || value === "") return "";
 
-            const date = new Date(value);
+            let date;
+
+            if (
+                typeof value === "number" ||
+                (typeof value === "string" && /^-?\d+(\.\d+)?$/.test(value.trim()))
+            ) {
+                const numeric = Number(value);
+                date = new Date(Math.abs(numeric) < 1e12 ? numeric * 1000 : numeric);
+            } else {
+                date = new Date(value);
+            }
 
             if (Number.isNaN(date.getTime())) {
-                return String(value).slice(0, 20);
+                return String(value).slice(0, 30);
             }
 
-            return date.toLocaleString(
-                "id-ID",
-                {
-                    day: "2-digit",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit"
-                }
-            );
+            return date.toLocaleString("id-ID", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
         }
 
-        function openMessage(message) {
-            const subject =
-                message.subject ||
-                message.title ||
-                "(No subject)";
+        function setModalLoading() {
+            $("modalSubject").textContent = "Loading message...";
+            $("modalFrom").textContent = "—";
+            $("modalDate").textContent = "—";
+            $("modalContent").innerHTML = `
+                <div class="py-14 flex flex-col items-center justify-center gap-3">
+                    <div class="loader"></div>
+                    <span class="text-[10px] text-slate-600">Loading message...</span>
+                </div>
+            `;
+        }
 
-            const from =
-                message.from ||
-                message.sender ||
-                message.email ||
-                message.from_email ||
-                "Unknown sender";
+        function renderMessageBody(message) {
+            const content = $("modalContent");
+            content.innerHTML = "";
 
-            const date =
-                message.date ||
-                message.created_at ||
-                message.createdAt ||
-                message.timestamp ||
-                message.received_at ||
-                "";
+            const html = message?.html;
 
-            const textContent =
-                message.text ||
-                message.body ||
-                message.content ||
-                "";
-
-            $("modalSubject").textContent =
-                subject;
-
-            $("modalFrom").textContent =
-                from;
-
-            $("modalDate").textContent =
-                formatDate(date);
-
-            if (message.html) {
-                $("modalContent").innerHTML =
-                    `<div class="message-content">${message.html}</div>`;
-            } else {
-                $("modalContent").textContent =
-                    textContent ||
-                    "Message content is empty.";
+            if (html) {
+                const frame = document.createElement("iframe");
+                frame.className = "message-frame";
+                frame.setAttribute("sandbox", "");
+                frame.setAttribute("referrerpolicy", "no-referrer");
+                frame.setAttribute("loading", "lazy");
+                frame.srcdoc = String(html);
+                content.appendChild(frame);
+                return;
             }
 
-            $("messageModal").classList.remove(
-                "hidden"
-            );
+            const text =
+                message?.text ||
+                message?.body ||
+                message?.content ||
+                message?.preview ||
+                "";
 
-            document.body.style.overflow =
-                "hidden";
+            content.textContent =
+                text ||
+                "Message content is empty.";
+        }
+
+        async function fetchMessageDetail(id, region) {
+            const url =
+                `${API_BASE}?action=message` +
+                `&username=${encodeURIComponent(currentUsername)}` +
+                `&id=${encodeURIComponent(id)}` +
+                `&region=${encodeURIComponent(region || "us")}`;
+
+            const response = await fetch(url, {
+                method: "GET",
+                headers: { Accept: "application/json" },
+                cache: "no-store"
+            });
+
+            const data = await readJsonResponse(response);
+
+            if (!response.ok || data.status === false) {
+                throw new Error(
+                    data.error ||
+                    data.message ||
+                    `Gagal mengambil detail pesan. HTTP ${response.status}`
+                );
+            }
+
+            return extractApiResult(data);
+        }
+
+        async function openMessage(message) {
+            const id = getMessageId(message);
+
+            if (id === "" || id === null || id === undefined) {
+                showToast("ID pesan tidak ditemukan.");
+                return;
+            }
+
+            const region = getMessageRegion(message);
+
+            $("messageModal").classList.remove("hidden");
+            document.body.style.overflow = "hidden";
+            setModalLoading();
+
+            try {
+                const result = await fetchMessageDetail(id, region);
+                const detail =
+                    result?.message ||
+                    result?.data?.message ||
+                    result;
+
+                const subject =
+                    detail?.subject ||
+                    detail?.title ||
+                    detail?.headers?.subject ||
+                    message.subject ||
+                    "(No subject)";
+
+                const from =
+                    detail?.from ||
+                    detail?.sender ||
+                    detail?.headers?.from ||
+                    message.from ||
+                    message.sender ||
+                    "Unknown sender";
+
+                const date =
+                    detail?.date ||
+                    detail?.timestamp ||
+                    detail?.created_at ||
+                    detail?.createdAt ||
+                    message.timestamp ||
+                    message.date ||
+                    "";
+
+                $("modalSubject").textContent = subject;
+                $("modalFrom").textContent = from;
+                $("modalDate").textContent = formatDate(date);
+
+                renderMessageBody(detail);
+            } catch (err) {
+                $("modalSubject").textContent =
+                    message.subject || "(No subject)";
+
+                $("modalFrom").textContent =
+                    message.from || message.sender || "Unknown sender";
+
+                $("modalDate").textContent =
+                    formatDate(message.timestamp || message.date);
+
+                $("modalContent").innerHTML = `
+                    <div class="py-10 text-center">
+                        <div class="text-sm font-semibold text-red-300">Unable to load message</div>
+                        <p class="text-[10px] text-slate-600 mt-2">${escapeHtml(err.message || "Gagal mengambil detail pesan.")}</p>
+                        <button onclick="openMessage(${escapeHtml(JSON.stringify(message))})" class="mt-4 px-4 py-2 rounded-xl bg-white/[.04] border border-white/[.06] text-[10px] font-semibold text-slate-300">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
         }
 
         function closeMessage() {
-            $("messageModal").classList.add(
-                "hidden"
-            );
-
+            $("messageModal").classList.add("hidden");
+            $("modalContent").innerHTML = "";
             document.body.style.overflow = "";
         }
 
         async function copyEmail() {
-            if (!currentEmail) {
-                return;
-            }
+            if (!currentEmail) return;
 
             try {
-                await navigator.clipboard.writeText(
-                    currentEmail
-                );
-
-                showToast(
-                    "Email berhasil disalin"
-                );
-
+                await navigator.clipboard.writeText(currentEmail);
+                showToast("Email berhasil disalin");
             } catch {
-                const textarea =
-                    document.createElement("textarea");
-
-                textarea.value =
-                    currentEmail;
-
-                textarea.style.position =
-                    "fixed";
-
+                const textarea = document.createElement("textarea");
+                textarea.value = currentEmail;
+                textarea.style.position = "fixed";
                 textarea.style.opacity = "0";
-
-                document.body.appendChild(
-                    textarea
-                );
-
+                document.body.appendChild(textarea);
                 textarea.select();
-
                 document.execCommand("copy");
-
                 textarea.remove();
-
-                showToast(
-                    "Email berhasil disalin"
-                );
+                showToast("Email berhasil disalin");
             }
         }
 
-        $("messageModal").addEventListener(
-            "click",
-            event => {
-                if (
-                    event.target ===
-                    $("messageModal")
-                ) {
-                    closeMessage();
-                }
+        function restoreSession() {
+            if (!loadSession()) {
+                showCreateView();
+                return;
             }
-        );
 
-        $("usernameInput").addEventListener(
-            "keydown",
-            event => {
-                if (event.key === "Enter") {
-                    createEmail();
-                }
-            }
-        );
+            $("activeEmail").textContent = currentEmail;
+            $("inboxStatus").textContent = "Restoring inbox...";
+            $("messageCount").textContent = "0 messages";
+            showInboxView();
+            refreshInbox().then(() => {
+                startRefreshTimer();
+            });
+        }
 
-        window.addEventListener(
-            "beforeunload",
-            () => {
-                stopRefreshTimer();
+        $("messageModal").addEventListener("click", event => {
+            if (event.target === $("messageModal")) {
+                closeMessage();
             }
-        );
+        });
+
+        $("usernameInput").addEventListener("keydown", event => {
+            if (event.key === "Enter") {
+                loginCustomEmail();
+            }
+        });
+
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape" && !$("messageModal").classList.contains("hidden")) {
+                closeMessage();
+            }
+        });
+
+        document.addEventListener("visibilitychange", () => {
+            if (!document.hidden && currentUsername) {
+                refreshInbox(true);
+            }
+        });
+
+        window.addEventListener("beforeunload", stopRefreshTimer);
+
+        setCreateMode(currentCreateMode);
+        restoreSession();
     </script>
 
 </body>

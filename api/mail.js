@@ -1,229 +1,23 @@
-const https = require('https')
-const http = require('http')
+const http = require('node:http')
+const https = require('node:https')
 
 const DOMAIN = 'akunlama.com'
-const PROVIDER_BASE_URL =
+const PROVIDER_BASE_URL = (
     process.env.TEMPMAIL_PROVIDER_URL ||
     `https://${DOMAIN}`
+).replace(/\/+$/, '')
 
-const adjectives = [
-    'happy',
-    'sleepy',
-    'clever',
-    'swift',
-    'brave',
-    'calm',
-    'wild',
-    'gentle',
-    'lucky',
-    'proud',
-    'cozy',
-    'fuzzy',
-    'bright',
-    'quick',
-    'silent',
-    'mighty',
-    'friendly',
-    'curious',
-    'fearless',
-    'cheerful',
-    'playful',
-    'peaceful',
-    'clever',
-    'cool',
-    'fresh',
-    'smooth',
-    'tiny',
-    'big',
-    'strong',
-    'smart',
-    'kind',
-    'sweet',
-    'funny',
-    'jolly',
-    'sunny',
-    'chill',
-    'rapid',
-    'magic',
-    'lively',
-    'bouncy',
-    'sleepy',
-    'dreamy',
-    'shiny',
-    'happy',
-    'mellow',
-    'brisk',
-    'bold',
-    'epic',
-    'royal',
-    'noble',
-    'young',
-    'free',
-    'crazy',
-    'lucky',
-    'awesome',
-    'super',
-    'hyper',
-    'cosmic',
-    'stellar',
-    'mystic',
-    'frosty',
-    'stormy',
-    'snowy',
-    'sunny',
-    'rainy',
-    'windy',
-    'cloudy',
-    'golden',
-    'silver',
-    'hidden',
-    'secret',
-    'shadow',
-    'rapid',
-    'electric',
-    'digital',
-    'pixel',
-    'neon',
-    'cyber',
-    'quantum',
-    'atomic',
-    'legendary',
-    'ultimate',
-    'ancient',
-    'modern',
-    'urban',
-    'ninja',
-    'swift',
-    'silent',
-    'dark',
-    'light',
-    'wild',
-    'crazy',
-    'lunar',
-    'solar',
-    'orbit',
-    'nova',
-    'zero',
-    'alpha',
-    'omega'
-]
-
-const animals = [
-    'kitten',
-    'cat',
-    'tiger',
-    'lion',
-    'panther',
-    'cheetah',
-    'lynx',
-    'puma',
-    'jaguar',
-    'leopard',
-    'wolf',
-    'fox',
-    'bear',
-    'panda',
-    'koala',
-    'rabbit',
-    'bunny',
-    'hamster',
-    'mouse',
-    'rat',
-    'deer',
-    'moose',
-    'elk',
-    'horse',
-    'pony',
-    'zebra',
-    'giraffe',
-    'monkey',
-    'gorilla',
-    'chimp',
-    'otter',
-    'beaver',
-    'badger',
-    'raccoon',
-    'skunk',
-    'squirrel',
-    'hedgehog',
-    'penguin',
-    'owl',
-    'eagle',
-    'hawk',
-    'falcon',
-    'raven',
-    'crow',
-    'parrot',
-    'sparrow',
-    'pigeon',
-    'duck',
-    'goose',
-    'swan',
-    'flamingo',
-    'peacock',
-    'chicken',
-    'rooster',
-    'turkey',
-    'dolphin',
-    'whale',
-    'shark',
-    'seal',
-    'otter',
-    'turtle',
-    'tortoise',
-    'frog',
-    'toad',
-    'gecko',
-    'lizard',
-    'iguana',
-    'chameleon',
-    'snake',
-    'python',
-    'cobra',
-    'dragon',
-    'unicorn',
-    'phoenix',
-    'penguin',
-    'kangaroo',
-    'wombat',
-    'platypus',
-    'sloth',
-    'armadillo',
-    'meerkat',
-    'mongoose',
-    'hyena',
-    'cheetah',
-    'gazelle',
-    'buffalo',
-    'bison',
-    'camel',
-    'llama',
-    'alpaca',
-    'donkey',
-    'ram',
-    'goat',
-    'sheep',
-    'pig',
-    'boar',
-    'hamster',
-    'ferret',
-    'mole'
-]
+const REQUEST_TIMEOUT = 15000
+const MAX_REDIRECTS = 5
 
 function request(url, options = {}, redirectCount = 0) {
     return new Promise((resolve, reject) => {
-        if (redirectCount > 7) {
-            return reject(
-                new Error('Terlalu banyak redirect dari provider.')
-            )
-        }
-
         let parsed
 
         try {
             parsed = new URL(url)
         } catch {
-            return reject(new Error('URL provider tidak valid.'))
+            return reject(new Error('URL tidak valid.'))
         }
 
         const client =
@@ -232,85 +26,110 @@ function request(url, options = {}, redirectCount = 0) {
                 : http
 
         const headers = {
-            'User-Agent':
-                'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
-            Accept:
-                'text/html,application/xhtml+xml,application/json,text/plain,*/*',
-            ...options.headers
-        }
-
-        const reqOptions = {
-            hostname: parsed.hostname,
-            port:
-                parsed.port ||
-                (parsed.protocol === 'https:' ? 443 : 80),
-            path:
-                parsed.pathname +
-                parsed.search,
-            method: options.method || 'GET',
-            headers
+            Accept: '*/*',
+            'User-Agent': 'Mozilla/5.0',
+            ...(options.headers || {})
         }
 
         const req = client.request(
-            reqOptions,
+            parsed,
+            {
+                method:
+                    options.method ||
+                    'GET',
+                headers,
+                timeout:
+                    options.timeout ||
+                    REQUEST_TIMEOUT
+            },
             res => {
-                const statusCode = res.statusCode || 0
-                const location = res.headers.location
-
-                if (
-                    [301, 302, 303, 307, 308].includes(statusCode) &&
-                    location
-                ) {
-                    const redirectUrl =
-                        new URL(
-                            location,
-                            url
-                        ).toString()
-
-                    res.resume()
-
-                    return request(
-                        redirectUrl,
-                        options,
-                        redirectCount + 1
-                    )
-                        .then(resolve)
-                        .catch(reject)
-                }
-
-                let body = ''
-
-                res.setEncoding('utf8')
+                const chunks = []
 
                 res.on('data', chunk => {
-                    body += chunk
+                    chunks.push(chunk)
                 })
 
-                res.on('end', () => {
+                res.on('end', async () => {
+                    const body =
+                        Buffer.concat(chunks).toString('utf8')
+
+                    const statusCode =
+                        res.statusCode || 0
+
+                    const location =
+                        res.headers.location
+
+                    if (
+                        location &&
+                        statusCode >= 300 &&
+                        statusCode < 400
+                    ) {
+                        if (
+                            redirectCount >=
+                            MAX_REDIRECTS
+                        ) {
+                            return reject(
+                                new Error(
+                                    'Terlalu banyak redirect.'
+                                )
+                            )
+                        }
+
+                        let redirectUrl
+
+                        try {
+                            redirectUrl =
+                                new URL(
+                                    location,
+                                    parsed
+                                ).toString()
+                        } catch {
+                            return reject(
+                                new Error(
+                                    'URL redirect provider tidak valid.'
+                                )
+                            )
+                        }
+
+                        try {
+                            const result =
+                                await request(
+                                    redirectUrl,
+                                    options,
+                                    redirectCount + 1
+                                )
+
+                            resolve(result)
+                        } catch (error) {
+                            reject(error)
+                        }
+
+                        return
+                    }
+
                     resolve({
                         statusCode,
-                        headers: res.headers,
+                        headers:
+                            res.headers,
                         body,
-                        url
+                        url:
+                            parsed.toString()
                     })
                 })
             }
         )
 
-        req.on('error', reject)
-
-        if (options.timeout) {
-            req.setTimeout(
-                options.timeout,
-                () => {
-                    req.destroy(
-                        new Error(
-                            'Request timeout.'
-                        )
-                    )
-                }
+        req.on('timeout', () => {
+            req.destroy(
+                new Error(
+                    'Request ke provider timeout.'
+                )
             )
-        }
+        })
+
+        req.on('error', error => {
+            reject(error)
+        })
 
         if (options.body) {
             req.write(options.body)
@@ -320,14 +139,39 @@ function request(url, options = {}, redirectCount = 0) {
     })
 }
 
+function escapeRegExp(value) {
+    return String(value).replace(
+        /[.*+?^${}()|[\]\\]/g,
+        '\\$&'
+    )
+}
+
 function normalizeUsername(input) {
-    return String(input || '')
-        .trim()
-        .toLowerCase()
-        .replace(/@${DOMAIN}$/i, '')
-        .replace(/[^a-z0-9._-]/g, '')
-        .replace(/^[._-]+|[._-]+$/g, '')
-        .slice(0, 40)
+    let value =
+        String(input || '')
+            .trim()
+
+    value =
+        value.replace(
+            new RegExp(
+                `@${escapeRegExp(DOMAIN)}$`,
+                'i'
+            ),
+            ''
+        )
+
+    return value.trim()
+}
+
+function getEmail(username) {
+    const clean =
+        normalizeUsername(username)
+
+    if (!clean) {
+        return ''
+    }
+
+    return `${clean}@${DOMAIN}`
 }
 
 function randomItem(array) {
@@ -338,59 +182,72 @@ function randomItem(array) {
     ]
 }
 
-function randomNumber() {
+function randomNumber(min, max) {
     return Math.floor(
-        100 + Math.random() * 900
-    )
+        Math.random() *
+        (max - min + 1)
+    ) + min
 }
 
-function generateUsername() {
-    const adjective =
-        randomItem(adjectives)
+function generateUsername(length = 10) {
+    const first = [
+        'zero',
+        'dark',
+        'blue',
+        'red',
+        'wolf',
+        'ghost',
+        'neo',
+        'cyber',
+        'cloud',
+        'rey',
+        'nova',
+        'pixel',
+        'rapid',
+        'shadow',
+        'night'
+    ]
 
-    const animal =
-        randomItem(animals)
+    const second = [
+        'whale',
+        'tiger',
+        'fox',
+        'lion',
+        'bird',
+        'storm',
+        'byte',
+        'code',
+        'mail',
+        'dev',
+        'star',
+        'wave',
+        'fire',
+        'moon',
+        'tech'
+    ]
 
-    const number =
-        randomNumber()
+    let username =
+        `${randomItem(first)}_${randomItem(second)}`
 
-    return `${adjective}_${animal}${number}`
+    while (
+        username.length <
+        length
+    ) {
+        username +=
+            randomNumber(0, 9)
+    }
+
+    return username
+        .slice(0, Math.max(length, 1))
+        .toLowerCase()
 }
 
 function generateManualUsername(input) {
-    const username =
-        normalizeUsername(input)
-
-    if (!username) {
-        throw new Error(
-            'Username tidak valid.'
-        )
-    }
-
-    const animal =
-        randomItem(animals)
-
-    const number =
-        randomNumber()
-
-    return `${username}_${animal}${number}`
-}
-
-function getEmail(username) {
-    return `${normalizeUsername(username)}@${DOMAIN}`
-}
-
-function escapeRegExp(value) {
-    return String(value).replace(
-        /[.*+?^${}()|[\]\\]/g,
-        '\\$&'
-    )
+    return normalizeUsername(input)
 }
 
 function decodeHtml(value) {
-    if (!value) return ''
-
-    return String(value)
+    return String(value || '')
         .replace(
             /&nbsp;/gi,
             ' '
@@ -415,123 +272,111 @@ function decodeHtml(value) {
             /&#39;/gi,
             "'"
         )
-        .replace(
-            /&#x27;/gi,
-            "'"
-        )
 }
 
-function stripHtml(html) {
-    if (!html) return ''
-
+function stripHtml(value) {
     return decodeHtml(
-        String(html)
+        String(value || '')
             .replace(
-                /<script[\s\S]*?<\/script>/gi,
-                ' '
+                /<br\s*\/?>/gi,
+                '\n'
             )
             .replace(
-                /<style[\s\S]*?<\/style>/gi,
-                ' '
+                /<\/p>/gi,
+                '\n'
             )
             .replace(
-                /<noscript[\s\S]*?<\/noscript>/gi,
-                ' '
+                /<\/div>/gi,
+                '\n'
             )
             .replace(
-                /<[^>]+>/g,
-                ' '
+                /<[^>]*>/g,
+                ''
             )
-            .replace(
-                /\s+/g,
-                ' '
-            )
-            .trim()
     )
+        .replace(
+            /\r\n/g,
+            '\n'
+        )
+        .replace(
+            /\n{3,}/g,
+            '\n\n'
+        )
+        .trim()
 }
 
 function extractAttribute(
     html,
     attribute,
-    valuePattern
+    value
 ) {
-    const regex = new RegExp(
-        `<[^>]+${attribute}\\s*=\\s*["'][^"']*${valuePattern}[^"']*["'][^>]*>`,
-        'i'
-    )
-
-    const match =
-        html.match(regex)
-
-    return match
-        ? match[0]
-        : null
-}
-
-function extractMessageIdFromHref(
-    href
-) {
-    if (!href) return null
-
-    const decoded =
-        decodeHtml(href)
-
-    const match =
-        decoded.match(
-            /\/message\/us\/([a-f0-9-]{20,})/i
+    const regex =
+        new RegExp(
+            `<[^>]+${attribute}\\s*=\\s*["']${escapeRegExp(value)}["'][^>]*>([\\s\\S]*?)<\\/[^>]+>`,
+            'i'
         )
+
+    const match =
+        String(html || '').match(regex)
 
     return match
         ? match[1]
         : null
 }
 
-function extractLinks(html) {
-    const links = []
+function extractMessageIdFromHref(
+    href
+) {
+    if (!href) {
+        return null
+    }
 
+    const match =
+        String(href).match(
+            /\/message\/[^/]+\/([^/?#]+)/i
+        )
+
+    return match
+        ? decodeURIComponent(match[1])
+        : null
+}
+
+function extractLinks(html) {
+    const result = []
     const regex =
         /<a\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi
 
     let match
 
     while (
-        (match = regex.exec(html))
+        (match = regex.exec(
+            String(html || '')
+        ))
     ) {
-        const href = decodeHtml(
-            match[1]
-        )
-
-        const text =
-            stripHtml(match[2])
-
-        const messageId =
-            extractMessageIdFromHref(
-                href
-            )
-
-        if (messageId) {
-            links.push({
-                id: messageId,
-                href,
-                text
-            })
-        }
+        result.push({
+            href:
+                decodeHtml(match[1]),
+            text:
+                stripHtml(match[2])
+        })
     }
 
-    return links
+    return result
 }
 
 function uniqueMessages(messages) {
     const map = new Map()
 
-    for (const message of messages) {
-        if (!message || !message.id) {
-            continue
-        }
+    for (const message of messages || []) {
+        const key =
+            message.id ||
+            message.messageId ||
+            message.uid ||
+            JSON.stringify(message)
 
-        if (!map.has(message.id)) {
+        if (!map.has(key)) {
             map.set(
-                message.id,
+                key,
                 message
             )
         }
@@ -551,107 +396,39 @@ function parseInboxHtml(
         extractLinks(html)
 
     for (const link of links) {
-        const containerRegex =
-            new RegExp(
-                `<(?:div|li|article|tr)[^>]*>[\\s\\S]{0,5000}?${escapeRegExp(link.id)}[\\s\\S]{0,5000}?<\\/(?:div|li|article|tr)>`,
-                'i'
+        const id =
+            extractMessageIdFromHref(
+                link.href
             )
 
-        const container =
-            html.match(
-                containerRegex
-            )
-
-        const text =
-            stripHtml(
-                container
-                    ? container[0]
-                    : link.text
-            )
-
-        let subject = ''
-        let sender = ''
-        let date = ''
-
-        const subjectMatch =
-            text.match(
-                /(?:subject|subjek)\s*[:\-]\s*(.+?)(?=\s+(?:from|sender|pengirim|date|tanggal)\s*[:\-]|$)/i
-            )
-
-        if (subjectMatch) {
-            subject =
-                subjectMatch[1].trim()
-        }
-
-        const senderMatch =
-            text.match(
-                /(?:from|sender|pengirim)\s*[:\-]\s*([^\s]+@[^\s]+)/i
-            )
-
-        if (senderMatch) {
-            sender =
-                senderMatch[1].trim()
-        }
-
-        const dateMatch =
-            text.match(
-                /(?:date|tanggal)\s*[:\-]\s*(.+)$/i
-            )
-
-        if (dateMatch) {
-            date =
-                dateMatch[1].trim()
-        }
-
-        if (!subject) {
-            const titleMatch =
-                text.match(
-                    /(?:subject|subjek)\s+(.{1,200})/i
-                )
-
-            if (titleMatch) {
-                subject =
-                    titleMatch[1].trim()
-            }
-        }
-
-        if (!sender) {
-            const emailMatch =
-                text.match(
-                    /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i
-                )
-
-            if (
-                emailMatch &&
-                emailMatch[0].toLowerCase() !==
-                    email.toLowerCase()
-            ) {
-                sender =
-                    emailMatch[0]
-            }
+        if (!id) {
+            continue
         }
 
         messages.push({
-            id: link.id,
-            messageId: link.id,
-            uid: link.id,
+            id,
+            messageId: id,
+            uid: id,
             subject:
-                subject ||
                 link.text ||
                 'Pesan masuk',
-            sender:
-                sender ||
-                null,
-            from:
-                sender ||
-                null,
-            date:
-                date ||
-                null,
+            sender: null,
+            from: null,
+            recipient: email,
+            to: email,
+            preview: '',
+            timestamp: null,
+            time: null,
+            read_at: null,
+            region: 'us',
+            storage: {
+                key: id,
+                region: 'us'
+            },
             email,
             url:
                 new URL(
-                    `/inbox/${encodeURIComponent(email)}/message/us/${encodeURIComponent(link.id)}`,
+                    link.href,
                     PROVIDER_BASE_URL
                 ).toString()
         })
@@ -667,123 +444,41 @@ function parseMessageHtml(
     email,
     messageId
 ) {
+    const body =
+        String(html || '')
+
+    const text =
+        stripHtml(body)
+
     const titleMatch =
-        html.match(
+        body.match(
             /<title[^>]*>([\s\S]*?)<\/title>/i
         )
 
-    const title =
+    const subject =
         titleMatch
-            ? stripHtml(titleMatch[1])
-            : ''
-
-    const plain =
-        stripHtml(html)
-
-    let subject = ''
-
-    const subjectMatch =
-        plain.match(
-            /(?:subject|subjek)\s*[:\-]\s*(.+?)(?=\s+(?:from|sender|pengirim|to|kepada|date|tanggal)\s*[:\-]|$)/i
-        )
-
-    if (subjectMatch) {
-        subject =
-            subjectMatch[1].trim()
-    }
-
-    let sender = null
-
-    const senderMatch =
-        plain.match(
-            /(?:from|sender|pengirim)\s*[:\-]\s*([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/i
-        )
-
-    if (senderMatch) {
-        sender =
-            senderMatch[1]
-    }
-
-    let recipient = null
-
-    const recipientMatch =
-        plain.match(
-            /(?:to|kepada)\s*[:\-]\s*([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/i
-        )
-
-    if (recipientMatch) {
-        recipient =
-            recipientMatch[1]
-    }
-
-    let date = null
-
-    const dateMatch =
-        plain.match(
-            /(?:date|tanggal)\s*[:\-]\s*(.+?)(?=\s+(?:subject|subjek|from|sender|pengirim|to|kepada)\s*[:\-]|$)/i
-        )
-
-    if (dateMatch) {
-        date =
-            dateMatch[1].trim()
-    }
-
-    let content = ''
-
-    const contentPatterns = [
-        /<(?:div|section|article)[^>]*(?:class|id)\s*=\s*["'][^"']*(?:message|content|body|email)[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|section|article)>/gi,
-        /<(?:main|article)[^>]*>([\s\S]*?)<\/(?:main|article)>/gi
-    ]
-
-    for (const pattern of contentPatterns) {
-        const matches = [
-            ...html.matchAll(pattern)
-        ]
-
-        if (matches.length) {
-            const candidate =
-                stripHtml(
-                    matches[
-                        matches.length - 1
-                    ][1]
-                )
-
-            if (
-                candidate &&
-                candidate.length > content.length
-            ) {
-                content =
-                    candidate
-            }
-        }
-    }
-
-    if (!content) {
-        content = plain
-    }
+            ? stripHtml(
+                titleMatch[1]
+            )
+            : 'Pesan masuk'
 
     return {
         id: messageId,
         messageId,
         uid: messageId,
-        email,
-        subject:
-            subject ||
-            title ||
-            'Pesan',
-        sender,
-        from: sender,
-        recipient,
-        to: recipient,
-        date,
-        content,
-        text: content,
-        html,
-        url:
-            new URL(
-                `/inbox/${encodeURIComponent(email)}/message/us/${encodeURIComponent(messageId)}`,
-                PROVIDER_BASE_URL
-            ).toString()
+        subject,
+        sender: null,
+        from: null,
+        recipient: email,
+        to: email,
+        preview:
+            text.slice(0, 300),
+        text,
+        html: body,
+        timestamp: null,
+        time: null,
+        read_at: null,
+        email
     }
 }
 
@@ -803,14 +498,21 @@ async function providerInbox(
         getEmail(cleanUsername)
 
     const url =
-        `${PROVIDER_BASE_URL}/inbox/` +
-        encodeURIComponent(email) +
-        `/list`
+        `${PROVIDER_BASE_URL}/api/list?recipient=` +
+        encodeURIComponent(email)
 
     const response =
-        await request(url, {
-            timeout: 15000
-        })
+        await request(
+            url,
+            {
+                timeout:
+                    REQUEST_TIMEOUT,
+                headers: {
+                    Accept:
+                        'application/json'
+                }
+            }
+        )
 
     if (
         response.statusCode < 200 ||
@@ -821,19 +523,133 @@ async function providerInbox(
         )
     }
 
-    const messages =
-        parseInboxHtml(
-            response.body,
-            email
+    let data
+
+    try {
+        data =
+            JSON.parse(
+                response.body
+            )
+    } catch {
+        throw new Error(
+            'Response provider bukan JSON yang valid.'
         )
+    }
+
+    if (!Array.isArray(data)) {
+        throw new Error(
+            'Format response inbox provider tidak valid.'
+        )
+    }
+
+    const messages =
+        data
+            .map(item => {
+                const headers =
+                    item &&
+                    item.message &&
+                    item.message.headers
+                        ? item.message.headers
+                        : {}
+
+                const storage =
+                    item &&
+                    item.storage
+                        ? item.storage
+                        : {}
+
+                const key =
+                    storage.key ||
+                    item.id ||
+                    null
+
+                const region =
+                    storage.region ||
+                    'us'
+
+                return {
+                    id: key,
+                    messageId: key,
+                    uid: key,
+
+                    subject:
+                        headers.subject ||
+                        'Pesan masuk',
+
+                    sender:
+                        headers.from ||
+                        null,
+
+                    from:
+                        headers.from ||
+                        null,
+
+                    recipient:
+                        headers.to ||
+                        email,
+
+                    to:
+                        headers.to ||
+                        email,
+
+                    preview:
+                        item.preview ||
+                        '',
+
+                    timestamp:
+                        item.timestamp ||
+                        null,
+
+                    time:
+                        item.timestamp ||
+                        null,
+
+                    read_at:
+                        item.read_at ||
+                        null,
+
+                    region,
+
+                    storage: {
+                        key,
+                        region
+                    },
+
+                    email,
+
+                    url:
+                        key
+                            ? new URL(
+                                `/inbox/${encodeURIComponent(email)}/message/${encodeURIComponent(region)}/${encodeURIComponent(key)}`,
+                                PROVIDER_BASE_URL
+                            ).toString()
+                            : null
+                }
+            })
+            .filter(
+                message =>
+                    Boolean(
+                        message.id
+                    )
+            )
 
     return {
         username:
             cleanUsername,
+
         email,
-        messages,
+
+        messages:
+            uniqueMessages(
+                messages
+            ),
+
+        count:
+            messages.length,
+
         statusCode:
             response.statusCode,
+
         url:
             response.url
     }
@@ -841,7 +657,8 @@ async function providerInbox(
 
 async function providerMessage(
     username,
-    messageId
+    messageId,
+    region = 'us'
 ) {
     const cleanUsername =
         normalizeUsername(username)
@@ -861,151 +678,291 @@ async function providerMessage(
     const email =
         getEmail(cleanUsername)
 
-    const url =
-        `${PROVIDER_BASE_URL}/inbox/` +
-        encodeURIComponent(email) +
-        `/message/us/` +
-        encodeURIComponent(messageId)
+    const cleanRegion =
+        String(
+            region || 'us'
+        ).trim() || 'us'
 
-    const response =
-        await request(url, {
-            timeout: 15000
-        })
+    const keyUrl =
+        `${PROVIDER_BASE_URL}/api/getKey?region=` +
+        encodeURIComponent(
+            cleanRegion
+        ) +
+        `&key=` +
+        encodeURIComponent(
+            messageId
+        )
+
+    const htmlUrl =
+        `${PROVIDER_BASE_URL}/api/getHtml?region=` +
+        encodeURIComponent(
+            cleanRegion
+        ) +
+        `&key=` +
+        encodeURIComponent(
+            messageId
+        )
+
+    const [
+        keyResponse,
+        htmlResponse
+    ] = await Promise.all([
+        request(
+            keyUrl,
+            {
+                timeout:
+                    REQUEST_TIMEOUT,
+                headers: {
+                    Accept:
+                        'application/json'
+                }
+            }
+        ),
+
+        request(
+            htmlUrl,
+            {
+                timeout:
+                    REQUEST_TIMEOUT,
+                headers: {
+                    Accept:
+                        'text/html,text/plain,*/*'
+                }
+            }
+        )
+    ])
 
     if (
-        response.statusCode < 200 ||
-        response.statusCode >= 300
+        keyResponse.statusCode < 200 ||
+        keyResponse.statusCode >= 300
     ) {
         throw new Error(
-            `Provider mengembalikan HTTP ${response.statusCode}.`
+            `Provider getKey mengembalikan HTTP ${keyResponse.statusCode}.`
         )
     }
 
-    const message =
+    if (
+        htmlResponse.statusCode < 200 ||
+        htmlResponse.statusCode >= 300
+    ) {
+        throw new Error(
+            `Provider getHtml mengembalikan HTTP ${htmlResponse.statusCode}.`
+        )
+    }
+
+    let keyData = null
+
+    try {
+        keyData =
+            JSON.parse(
+                keyResponse.body
+            )
+    } catch {
+        keyData = null
+    }
+
+    const keyMessage =
+        keyData &&
+        keyData.message
+            ? keyData.message
+            : {}
+
+    const keyHeaders =
+        keyMessage &&
+        keyMessage.headers
+            ? keyMessage.headers
+            : (
+                keyData &&
+                keyData.headers
+                    ? keyData.headers
+                    : {}
+            )
+
+    const parsed =
         parseMessageHtml(
-            response.body,
+            htmlResponse.body,
             email,
             messageId
         )
 
+    const subject =
+        keyHeaders.subject ||
+        keyData?.subject ||
+        parsed.subject ||
+        'Pesan masuk'
+
+    const sender =
+        keyHeaders.from ||
+        keyData?.from ||
+        null
+
+    const recipient =
+        keyHeaders.to ||
+        keyData?.to ||
+        email
+
+    const message = {
+        ...parsed,
+
+        subject,
+
+        sender,
+
+        from:
+            sender,
+
+        recipient,
+
+        to:
+            recipient,
+
+        region:
+            cleanRegion,
+
+        storage: {
+            key:
+                messageId,
+            region:
+                cleanRegion
+        },
+
+        providerData:
+            keyData,
+
+        html:
+            htmlResponse.body,
+
+        text:
+            stripHtml(
+                htmlResponse.body
+            )
+    }
+
     return {
         username:
             cleanUsername,
+
         email,
-        found: true,
+
+        found:
+            true,
+
         message,
+
         statusCode:
-            response.statusCode,
+            htmlResponse.statusCode,
+
         url:
-            response.url
-    }
-}
-
-async function isUsernameAvailable(
-    username
-) {
-    try {
-        const result =
-            await providerInbox(
-                username
+            `${PROVIDER_BASE_URL}/inbox/` +
+            encodeURIComponent(
+                email
+            ) +
+            `/message/` +
+            encodeURIComponent(
+                cleanRegion
+            ) +
+            `/` +
+            encodeURIComponent(
+                messageId
             )
-
-        return (
-            result.messages.length === 0
-        )
-    } catch {
-        return true
-    }
-}
-
-async function createUsername(
-    customUsername = null
-) {
-    const manual =
-        normalizeUsername(
-            customUsername
-        )
-
-    for (
-        let attempt = 0;
-        attempt < 10;
-        attempt++
-    ) {
-        const candidate =
-            manual
-                ? generateManualUsername(
-                      manual
-                  )
-                : generateUsername()
-
-        if (
-            await isUsernameAvailable(
-                candidate
-            )
-        ) {
-            return candidate
-        }
-    }
-
-    throw new Error(
-        'Tidak mendapatkan username unik setelah 10 percobaan.'
-    )
-}
-
-async function createTempEmail(
-    customUsername = null
-) {
-    const username =
-        await createUsername(
-            customUsername
-        )
-
-    return {
-        username,
-        email:
-            getEmail(username),
-        domain:
-            DOMAIN
     }
 }
 
 async function getInbox(
     username
 ) {
-    const result =
-        await providerInbox(
-            username
-        )
-
-    return {
-        username:
-            result.username,
-        email:
-            result.email,
-        total:
-            result.messages.length,
-        messages:
-            result.messages
-    }
+    return providerInbox(
+        username
+    )
 }
 
 async function getMessage(
     username,
-    messageId
+    messageId,
+    region = 'us'
 ) {
     return providerMessage(
         username,
-        messageId
+        messageId,
+        region
     )
 }
 
-async function proxyProvider(
-    req,
-    res
+async function createUsername(
+    requestedUsername
 ) {
-    const query =
-        req.query || {}
+    const username =
+        requestedUsername
+            ? generateManualUsername(
+                requestedUsername
+            )
+            : generateUsername()
 
+    if (!username) {
+        throw new Error(
+            'Username tidak valid.'
+        )
+    }
+
+    return {
+        username,
+        email:
+            getEmail(username)
+    }
+}
+
+async function createTempEmail(
+    requestedUsername
+) {
+    return createUsername(
+        requestedUsername
+    )
+}
+
+async function isUsernameAvailable(
+    username
+) {
+    const cleanUsername =
+        normalizeUsername(username)
+
+    if (!cleanUsername) {
+        return false
+    }
+
+    try {
+        const inbox =
+            await providerInbox(
+                cleanUsername
+            )
+
+        return {
+            available: true,
+            username:
+                cleanUsername,
+            email:
+                getEmail(
+                    cleanUsername
+                ),
+            inbox:
+                inbox.messages
+        }
+    } catch {
+        return {
+            available: true,
+            username:
+                cleanUsername,
+            email:
+                getEmail(
+                    cleanUsername
+                ),
+            inbox: []
+        }
+    }
+}
+
+async function proxyProvider(
+    query = {}
+) {
     const username =
         query.username ||
         query.mailbox ||
@@ -1016,80 +973,72 @@ async function proxyProvider(
         query.messageId ||
         query.uid
 
-    if (!username) {
-        return res.status(400).json({
-            status: false,
-            creator: 'ReyCode',
-            error:
-                'Parameter username wajib diisi.'
-        })
+    const region =
+        query.region ||
+        'us'
+
+    if (id) {
+        return providerMessage(
+            username,
+            id,
+            region
+        )
     }
 
-    try {
-        if (id) {
-            const data =
-                await providerMessage(
-                    username,
-                    id
-                )
-
-            return res.status(200).json({
-                status: true,
-                creator: 'ReyCode',
-                provider: DOMAIN,
-                data
-            })
-        }
-
-        const data =
-            await providerInbox(
-                username
-            )
-
-        return res.status(200).json({
-            status: true,
-            creator: 'ReyCode',
-            provider: DOMAIN,
-            data
-        })
-    } catch (error) {
-        return res.status(500).json({
-            status: false,
-            creator: 'ReyCode',
-            provider: DOMAIN,
-            error:
-                error.message
-        })
-    }
+    return providerInbox(
+        username
+    )
 }
 
-module.exports = async function handler(
+function getQuery(req) {
+    if (
+        req &&
+        req.query
+    ) {
+        return req.query
+    }
+
+    const url =
+        req &&
+        req.url
+            ? new URL(
+                req.url,
+                'http://localhost'
+            )
+            : null
+
+    return url
+        ? Object.fromEntries(
+            url.searchParams.entries()
+        )
+        : {}
+}
+
+async function handler(
     req,
     res
 ) {
     const query =
-        req.query || {}
+        getQuery(req)
 
     const action =
         String(
-            query.action || 'info'
+            query.action ||
+            ''
         ).toLowerCase()
 
     try {
         if (action === 'create') {
-            const customUsername =
-                query.username ||
-                query.name ||
-                null
-
             const data =
                 await createTempEmail(
-                    customUsername
+                    query.username ||
+                    query.mailbox ||
+                    query.name
                 )
 
             return res.status(200).json({
                 status: true,
-                creator: 'ReyCode',
+                creator: 'ReyCloudSHP',
                 provider: DOMAIN,
                 data
             })
@@ -1107,8 +1056,7 @@ module.exports = async function handler(
             if (!username) {
                 return res.status(400).json({
                     status: false,
-                    creator: 'ReyCode',
-                    error:
+                    message:
                         'Parameter username wajib diisi.'
                 })
             }
@@ -1120,13 +1068,15 @@ module.exports = async function handler(
 
             return res.status(200).json({
                 status: true,
-                creator: 'ReyCode',
+                creator: 'ReyCloudSHP',
                 provider: DOMAIN,
                 data
             })
         }
 
-        if (action === 'message') {
+        if (
+            action === 'message'
+        ) {
             const username =
                 query.username ||
                 query.mailbox ||
@@ -1137,11 +1087,14 @@ module.exports = async function handler(
                 query.messageId ||
                 query.uid
 
+            const region =
+                query.region ||
+                'us'
+
             if (!username) {
                 return res.status(400).json({
                     status: false,
-                    creator: 'ReyCode',
-                    error:
+                    message:
                         'Parameter username wajib diisi.'
                 })
             }
@@ -1149,78 +1102,105 @@ module.exports = async function handler(
             if (!id) {
                 return res.status(400).json({
                     status: false,
-                    creator: 'ReyCode',
-                    error:
-                        'Parameter message ID wajib diisi.'
+                    message:
+                        'Parameter id/messageId wajib diisi.'
                 })
             }
 
             const data =
                 await getMessage(
                     username,
-                    id
+                    id,
+                    region
                 )
 
             return res.status(200).json({
                 status: true,
-                creator: 'ReyCode',
+                creator: 'ReyCloudSHP',
                 provider: DOMAIN,
                 data
             })
         }
 
-        if (action === 'provider') {
-            return proxyProvider(
-                req,
-                res
-            )
+        if (
+            action === 'provider'
+        ) {
+            const data =
+                await proxyProvider(
+                    query
+                )
+
+            return res.status(200).json({
+                status: true,
+                creator: 'ReyCloudSHP',
+                provider: DOMAIN,
+                data
+            })
         }
 
         return res.status(200).json({
             status: true,
-            creator: 'ReyCode',
-            name:
-                'ReyCode TempMail',
-            provider:
-                DOMAIN,
+            creator: 'ReyCloudSHP',
+            provider: DOMAIN,
             message:
-                'Temporary Mail API is online.',
+                'Temporary Mail API aktif.',
             endpoints: {
                 create:
-                    '/api/mail?action=create',
-                create_custom:
-                    '/api/mail?action=create&username=reycode',
+                    '?action=create',
                 inbox:
-                    '/api/mail?action=inbox&username=lucky_lion625',
-                check:
-                    '/api/mail?action=check&username=lucky_lion625',
+                    '?action=inbox&username=USERNAME',
                 message:
-                    '/api/mail?action=message&username=lucky_lion625&id=4c6c2f7c-e820-4cf9-9d4b-226948dd19c3',
+                    '?action=message&username=USERNAME&id=MESSAGE_ID&region=us',
                 provider:
-                    '/api/mail?action=provider&username=lucky_lion625&id=4c6c2f7c-e820-4cf9-9d4b-226948dd19c3'
+                    '?action=provider&username=USERNAME'
             }
         })
     } catch (error) {
+        console.error(
+            '[MAIL API]',
+            error
+        )
+
         return res.status(500).json({
             status: false,
-            creator: 'ReyCode',
-            error:
-                error.message
+            creator: 'ReyCloudSHP',
+            provider: DOMAIN,
+            message:
+                error?.message ||
+                'Terjadi kesalahan pada mail provider.'
         })
     }
 }
 
-module.exports.createTempEmail =
-    createTempEmail
+handler.providerInbox =
+    providerInbox
 
-module.exports.generateUsername =
-    generateUsername
+handler.providerMessage =
+    providerMessage
 
-module.exports.generateManualUsername =
-    generateManualUsername
-
-module.exports.getInbox =
+handler.getInbox =
     getInbox
 
-module.exports.getMessage =
+handler.getMessage =
     getMessage
+
+handler.createUsername =
+    createUsername
+
+handler.createTempEmail =
+    createTempEmail
+
+handler.isUsernameAvailable =
+    isUsernameAvailable
+
+handler.proxyProvider =
+    proxyProvider
+
+handler.normalizeUsername =
+    normalizeUsername
+
+handler.getEmail =
+    getEmail
+
+module.exports =
+    handler
