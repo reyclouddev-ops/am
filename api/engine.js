@@ -24,13 +24,19 @@ const tls = require('tls');
 const { execSync } = require('child_process');
 
 const app = express();
+
+app.use((req, res, next) => {
+    if (req.path === '/api/engine' && req.query.route) {
+        const route = String(req.query.route).replace(/^\/+/, '');
+        req.url = `/api/${route}`;
+    }
+    next();
+});
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const CREATOR = 'ReyCode';
-// Import modul automation dari api/react.js
-const reactModule = require('./react');
-
 // ==========================================
 // 0. TURNSTILE CLOUDFLARE PROTECTION
 // ==========================================
