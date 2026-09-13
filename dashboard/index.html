@@ -140,25 +140,6 @@
             </div>
         </div>
 
-        <!-- Dynamic User Greeting Banner (Klik untuk ke Profil) -->
-        <a id="profileBannerLink" href="/docs/profile/" class="block bg-card-theme hover:border-indigo-500/50 border border-theme rounded-2xl p-3.5 flex items-center justify-between shadow-lg transition-all duration-300 group">
-            <div class="flex items-center space-x-2.5">
-                <div class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs group-hover:scale-110 transition-transform">
-                    👤
-                </div>
-                <div>
-                    <div class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Selamat Datang Kembali,</div>
-                    <div id="displayUsername" class="text-xs font-black text-white tracking-wide">Loading...</div>
-                </div>
-            </div>
-            <div class="flex items-center space-x-2">
-                <span id="displayRole" class="px-2.5 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-wider">
-                    USER
-                </span>
-                <span class="text-slate-500 text-xs group-hover:translate-x-1 transition-transform">→</span>
-            </div>
-        </a>
-
         <!-- Info Subheader -->
         <div class="space-y-1 px-1">
             <div class="text-[10px] text-slate-400 tracking-wider">COMMAND CENTER <span class="text-indigo-400 font-extrabold">ULTRA DASHBOARD</span></div>
@@ -335,26 +316,6 @@
                     sessionStorage.removeItem('reycloud_active_user');
                     window.location.href = '/index.html';
                     return;
-                }
-
-                const user = data.user;
-                document.getElementById('displayUsername').textContent = user.username;
-                
-                document.querySelectorAll('a').forEach(link => {
-                    const href = link.getAttribute('href');
-                    if (href && !href.startsWith('http') && !href.startsWith('#')) {
-                        const cleanHref = href.split('?')[0];
-                        link.setAttribute('href', `${cleanHref}?user=${encodeURIComponent(user.username)}`);
-                    }
-                });
-
-                const roleBadge = document.getElementById('displayRole');
-                roleBadge.textContent = user.role.toUpperCase();
-                
-                if (user.role.toLowerCase() === 'creator' || user.role.toLowerCase() === 'admin') {
-                    roleBadge.className = "px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider shadow-sm";
-                } else {
-                    roleBadge.className = "px-2.5 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-wider shadow-sm";
                 }
             } catch (err) {
                 window.location.href = '/index.html';

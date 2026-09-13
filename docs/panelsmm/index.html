@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ReyCloud - Dashboard SMM & OTP</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <meta name="theme-color" content="#05070a">
+    <title>ReyCloud - Panel SMM & OTP (Maintenance)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         * { touch-action: manipulation; }
         body { background-color: #08090c; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; position: fixed; width: 100%; height: 100%; overflow: hidden; }
@@ -13,29 +15,71 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
         }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #1e2637; border-radius: 9999px; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-up { animation: fadeUp .45s ease both; }
         
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+        /* Cyberpunk Core / Shield Maintenance Animation */
+        .cyber-core-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .custom-alert-box {
-            animation: fadeInScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .core-ring {
+            position: absolute;
+            inset: 0;
+            border: 2px dashed rgba(245, 158, 11, 0.35);
+            border-radius: 50%;
+            animation: spinRing 12s linear infinite;
+        }
+        .core-ring-inner {
+            position: absolute;
+            inset: 12px;
+            border: 2px solid rgba(245, 158, 11, 0.2);
+            border-radius: 50%;
+            animation: spinRingReverse 8s linear infinite;
+        }
+        .core-shield {
+            position: relative;
+            width: 56px;
+            height: 64px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(15, 23, 42, 0.8));
+            border: 2px solid #f59e0b;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.3);
+            animation: shieldPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes spinRing {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes spinRingReverse {
+            0% { transform: rotate(360deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @keyframes shieldPulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(245,158,11,0.4)); }
+            50% { transform: scale(1.06); filter: drop-shadow(0 0 18px rgba(245,158,11,0.7)); }
         }
     </style>
 </head>
-<body id="pageBody" class="flex flex-col items-center justify-center p-3 sm:p-6 relative">
+<body class="flex flex-col items-center justify-center p-4 relative">
 
     <!-- Ambient Glow Background -->
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[180px] bg-amber-500/15 blur-[120px] pointer-events-none rounded-full"></div>
     <div class="absolute top-1/3 -right-20 w-[250px] h-[250px] bg-cyan-500/10 blur-[140px] pointer-events-none rounded-full"></div>
 
-    <div class="w-full max-w-md flex flex-col space-y-3.5 relative z-10 my-auto">
+    <div class="w-full max-w-sm flex flex-col space-y-4 relative z-10 my-auto fade-up">
         
         <!-- Top Navbar Header -->
-        <div id="navHeader" class="flex items-center justify-between glass-panel border border-[#232936] rounded-2xl px-4 py-3 shadow-2xl">
+        <div class="flex items-center justify-between glass-panel border border-[#232936] rounded-2xl px-4 py-3 shadow-2xl">
             <div class="flex items-center space-x-3">
                 <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 p-[1px] shadow-lg shadow-amber-500/10">
                     <div class="w-full h-full bg-[#0a0d12] rounded-[10px] flex items-center justify-center text-amber-400 font-black text-xs">
@@ -51,120 +95,40 @@
                 </div>
             </div>
             
-            <a id="homeMenuLink" href="/dashboard" class="px-3 py-1.5 rounded-xl bg-[#161d2b] hover:bg-[#1f293d] border border-[#232f46] text-[11px] text-slate-300 hover:text-white transition-all font-semibold shadow-inner">
-                ← Menu Utama
-            </a>
+            <span class="px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[10px] font-mono font-bold text-amber-400 uppercase">
+                Locked
+            </span>
         </div>
 
-        <!-- User Info & Balance Card -->
-        <div class="bg-gradient-to-br from-[#0e1117] to-[#141a25] border border-[#1e2637] rounded-2xl p-3.5 shadow-2xl relative overflow-hidden">
-            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-500/5 blur-2xl rounded-full pointer-events-none"></div>
-            <div class="flex items-center justify-between">
-                <div>
-                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Username</span>
-                    <span id="uiUsername" class="text-xs font-bold text-white tracking-wide mt-0.5 block font-mono">Memuat...</span>
-                </div>
-                <button onclick="openDepositModal()" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-[11px] rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center space-x-1 cursor-pointer">
-                    <span>➕ Deposit</span>
-                </button>
-            </div>
-            <div class="mt-3 pt-2.5 border-t border-[#1e2637] flex items-baseline justify-between">
-                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Saldo Tersedia</span>
-                <span id="uiBalance" class="text-base font-black text-amber-400 font-mono tracking-tight">Rp0</span>
-            </div>
-        </div>
+        <!-- Maintenance Card -->
+        <div class="bg-[#0e1117]/95 backdrop-blur-xl border border-[#1e2637] rounded-3xl p-6 shadow-2xl text-center space-y-5 relative overflow-hidden">
+            <div class="absolute -top-20 -right-20 w-40 h-40 bg-amber-500/5 blur-3xl rounded-full pointer-events-none"></div>
 
-        <!-- Main Panel Container -->
-        <div class="bg-[#0e1117]/95 backdrop-blur-xl border border-[#1e2637] rounded-2xl p-3.5 shadow-2xl space-y-3.5">
-            
-            <!-- Tab Navigation Menu -->
-            <div class="grid grid-cols-2 gap-2 bg-[#07080b] p-1 rounded-xl border border-[#1e2637]">
-                <button onclick="switchTab('order')" id="tabBtnOrder" class="py-2 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition-all cursor-pointer shadow">
-                    📱 Pesan Nomor OTP
-                </button>
-                <button onclick="switchTab('history')" id="tabBtnHistory" class="py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer">
-                    📊 Riwayat / Cek
-                </button>
-            </div>
-
-            <!-- Tab 1: Pesan Nomor OTP -->
-            <div id="tabOrder" class="space-y-2.5">
-                
-                <!-- Custom Dropdown Layanan -->
-                <div class="space-y-1 relative">
-                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Pilih Layanan Aplikasi</label>
-                    <div onclick="toggleDropdown('serviceDropdownList')" id="serviceDropdownBtn" class="w-full bg-[#07080b] border border-[#1e2637] hover:border-amber-400/50 rounded-xl px-3 py-2 text-xs text-slate-300 flex items-center justify-between cursor-pointer transition-all">
-                        <span id="serviceSelectedText">-- Pilih Layanan Aplikasi --</span>
-                        <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </div>
-                    <!-- Dropdown List Fixed / Absolute dalam Card -->
-                    <div id="serviceDropdownList" class="hidden absolute left-0 right-0 mt-1 bg-[#0d1017] border border-[#232f46] rounded-xl max-h-40 overflow-y-auto z-50 shadow-2xl p-1 space-y-0.5">
-                        <div class="p-2 text-xs text-amber-400 text-center animate-pulse">Memuat layanan...</div>
-                    </div>
-                </div>
-
-                <!-- Custom Dropdown Negara -->
-                <div class="space-y-1 relative">
-                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Pilih Negara & Harga</label>
-                    <div onclick="toggleDropdown('countryDropdownList')" id="countryDropdownBtn" class="w-full bg-[#07080b] border border-[#1e2637] hover:border-amber-400/50 rounded-xl px-3 py-2 text-xs text-slate-300 flex items-center justify-between cursor-pointer transition-all">
-                        <span id="countrySelectedText">-- Pilih Negara --</span>
-                        <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </div>
-                    <div id="countryDropdownList" class="hidden absolute left-0 right-0 mt-1 bg-[#0d1017] border border-[#232f46] rounded-xl max-h-40 overflow-y-auto z-50 shadow-2xl p-1 space-y-0.5">
-                        <div class="p-2 text-xs text-slate-500 text-center">Pilih layanan terlebih dahulu</div>
-                    </div>
-                </div>
-
-                <button onclick="requestNumber()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 cursor-pointer mt-1">
-                    🚀 Ambil Nomor Virtual
-                </button>
-
-                <!-- Box Hasil Pesanan Nomor -->
-                <div id="orderResultContainer" class="hidden bg-[#07080b] border border-[#1e2637] rounded-xl p-3 space-y-2 text-xs">
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-400">Order ID:</span>
-                        <span id="resOrderId" class="font-mono font-bold text-amber-400">-</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-400">Nomor Telepon:</span>
-                        <div class="flex items-center space-x-2">
-                            <span id="resPhone" class="font-mono font-black text-white text-sm tracking-wide">-</span>
-                            <button onclick="copyPhone()" class="bg-[#161d2b] hover:bg-[#1f293d] text-slate-300 px-2 py-1 rounded text-[10px] cursor-pointer border border-[#232f46]">Salin</button>
-                        </div>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-400">Status OTP:</span>
-                        <span id="resOtpStatus" class="font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Menunggu SMS...</span>
-                    </div>
-                    <div class="flex justify-between items-center pt-1 border-t border-[#1e2637]">
-                        <span class="text-slate-400">Kode OTP Masuk:</span>
-                        <span id="resOtpCode" class="font-mono font-black text-emerald-400 text-sm tracking-widest">-</span>
-                    </div>
-                    <button onclick="checkOtpStatus()" class="w-full mt-1 py-1.5 bg-[#161d2b] hover:bg-[#1f293d] border border-[#232f46] text-slate-200 rounded-lg font-bold text-[11px] transition-all cursor-pointer">
-                        🔄 Cek Status / Refresh SMS
-                    </button>
+            <!-- Cyberpunk Core / Shield Icon -->
+            <div class="cyber-core-container">
+                <div class="core-ring"></div>
+                <div class="core-ring-inner"></div>
+                <div class="core-shield">
+                    <i class="fa-solid fa-lock text-amber-400 text-lg"></i>
                 </div>
             </div>
 
-            <!-- Tab 2: Riwayat / Cek Status Manual -->
-            <div id="tabHistory" class="hidden space-y-2.5">
-                <div class="space-y-1">
-                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Masukkan Order ID</label>
-                    <div class="flex space-x-2">
-                        <input type="text" id="manualOrderIdInput" placeholder="Contoh: RO0004647717" 
-                            class="flex-1 bg-[#07080b] border border-[#1e2637] rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-400/70 font-mono">
-                        <button onclick="checkManualOrder()" class="bg-[#161d2b] hover:bg-[#1f293d] text-amber-400 border border-[#232f46] font-bold px-3 py-2 rounded-xl text-xs cursor-pointer">
-                            Cek
-                        </button>
-                    </div>
-                </div>
-                <div id="manualResultBox" class="hidden bg-[#07080b] border border-[#1e2637] rounded-xl p-3 text-xs space-y-1.5 font-mono">
-                    <div class="text-slate-400 text-[10px]">Status: <span id="manStatus" class="text-white font-bold">-</span></div>
-                    <div class="text-slate-400 text-[10px]">Nomor: <span id="manPhone" class="text-white font-bold">-</span></div>
-                    <div class="text-slate-400 text-[10px]">Pesan OTP: <span id="manMsg" class="text-emerald-400 font-bold whitespace-pre-wrap">-</span></div>
-                </div>
+            <div class="space-y-2">
+                <span class="inline-block px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[9px] font-mono font-bold text-amber-400 uppercase tracking-widest">
+                    System Maintenance
+                </span>
+                <h3 class="text-lg font-black text-white tracking-wide uppercase">Fitur Sedang Dikunci</h3>
+                <p class="text-[11px] text-slate-400 leading-relaxed px-2">
+                    Panel SMM & OTP sedang dalam peningkatan sistem dan pemeliharaan server pusat. Silakan kembali beberapa saat lagi.
+                </p>
             </div>
 
+            <div class="pt-2">
+                <a href="/dashboard" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Kembali ke Dashboard Utama</span>
+                </a>
+            </div>
         </div>
 
         <!-- Footer Info -->
@@ -174,407 +138,5 @@
 
     </div>
 
-    <!-- MODAL DEPOSIT QRIS (FIXED & TERKUNCI DI TENGAH) -->
-    <div id="depositModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-hidden">
-        <div class="bg-[#0e1117] border border-[#1e2637] rounded-2xl w-full max-w-xs p-4 space-y-3.5 shadow-2xl relative">
-            <div class="flex items-center justify-between pb-2 border-b border-[#1e2637]">
-                <h3 class="text-xs font-black text-white uppercase tracking-wider">Topup Saldo QRIS Instant</h3>
-                <button onclick="closeDepositModal()" class="text-slate-400 hover:text-white text-xs font-bold px-2 py-1 rounded bg-[#161d2b] cursor-pointer">✕</button>
-            </div>
-
-            <!-- Form Nominal -->
-            <div id="depositFormStep" class="space-y-3">
-                <div class="space-y-1">
-                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Nominal Deposit (IDR)</label>
-                    <input type="text" inputmode="numeric" id="depositAmountInput" placeholder="Contoh: 10000" 
-                        class="w-full bg-[#07080b] border border-[#1e2637] rounded-xl px-3 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-400/70 font-mono">
-                </div>
-                <button onclick="generateQris()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 cursor-pointer">
-                    Generate QRIS Pembayaran
-                </button>
-            </div>
-
-            <!-- Tampilan QRIS Result -->
-            <div id="depositResultStep" class="hidden flex flex-col items-center space-y-2.5">
-                <div class="bg-white p-2 rounded-xl shadow-inner border border-[#1e2637]">
-                    <img id="qrisImageSrc" src="" alt="QRIS Code" class="w-40 h-40 object-contain">
-                </div>
-                <div class="text-center space-y-1 w-full font-mono">
-                    <div class="text-[9px] text-slate-400">ID: <span id="resDepId" class="text-white"></span></div>
-                    <div class="text-xs font-bold text-amber-400">Total Bayar: <span id="resDepTotal" class="text-sm"></span></div>
-                    <div id="resDepStatus" class="text-[10px] font-bold text-amber-400 bg-amber-500/10 py-1 rounded border border-amber-500/20">Status: Pending</div>
-                </div>
-                <div class="flex space-x-2 w-full pt-1">
-                    <button onclick="checkDepositStatus()" class="flex-1 py-2 bg-[#161d2b] hover:bg-[#1f293d] border border-[#232f46] text-slate-200 rounded-xl font-bold text-[11px] transition-all cursor-pointer">
-                        Cek Status
-                    </button>
-                    <button onclick="resetDepositModal()" class="px-4 py-2 bg-[#161d2b] hover:bg-[#1f293d] border border-[#232f46] text-slate-400 hover:text-white rounded-xl font-bold text-[11px] transition-all cursor-pointer">
-                        Batal
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- CUSTOM MODERN ALERT MODAL -->
-    <div id="customAlertModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-hidden">
-        <div class="custom-alert-box bg-[#0e1117] border border-[#1e2637] rounded-2xl w-full max-w-xs p-5 space-y-4 shadow-2xl text-center">
-            <div id="alertIconContainer" class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl font-bold">
-                ⚠️
-            </div>
-            <div class="space-y-1">
-                <h4 id="alertTitle" class="text-xs font-black text-white uppercase tracking-wider">Pemberitahuan</h4>
-                <p id="alertMessage" class="text-xs text-slate-300 leading-relaxed">Pesan kustom di sini...</p>
-            </div>
-            <button onclick="closeCustomAlert()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20 cursor-pointer">
-                OK, Mengerti
-            </button>
-        </div>
-    </div>
-
-    <script>
-        let currentUsername = '';
-        let currentOrderId = '';
-        let currentDepositId = '';
-        let depositInterval = null;
-
-        let selectedServiceCode = '';
-        let selectedCountryJson = null;
-
-        function showCustomAlert(title, message, type = 'warning') {
-            document.getElementById('alertTitle').textContent = title;
-            document.getElementById('alertMessage').textContent = message;
-            
-            const iconBox = document.getElementById('alertIconContainer');
-            if (type === 'success') {
-                iconBox.textContent = '✅';
-                iconBox.className = "w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-xl font-bold";
-            } else if (type === 'error') {
-                iconBox.textContent = '❌';
-                iconBox.className = "w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto text-xl font-bold";
-            } else {
-                iconBox.textContent = '⚠️';
-                iconBox.className = "w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl font-bold";
-            }
-
-            document.getElementById('customAlertModal').classList.remove('hidden');
-        }
-
-        function closeCustomAlert() {
-            document.getElementById('customAlertModal').classList.add('hidden');
-        }
-
-        window.onclick = function(event) {
-            if (!event.target.closest('.relative')) {
-                document.getElementById('serviceDropdownList').classList.add('hidden');
-                document.getElementById('countryDropdownList').classList.add('hidden');
-            }
-        }
-
-        function toggleDropdown(listId) {
-            const list = document.getElementById(listId);
-            document.querySelectorAll('[id$="DropdownList"]').forEach(el => {
-                if (el.id !== listId) el.classList.add('hidden');
-            });
-            list.classList.toggle('hidden');
-        }
-
-        async function initDashboard() {
-            const urlParams = new URLSearchParams(window.location.search);
-            currentUsername = urlParams.get('user') || sessionStorage.getItem('reycloud_active_user');
-
-            if (!currentUsername) {
-                window.location.href = '/index.html';
-                return;
-            }
-
-            sessionStorage.setItem('reycloud_active_user', currentUsername);
-            document.getElementById('uiUsername').textContent = currentUsername;
-            document.getElementById('homeMenuLink').setAttribute('href', `/dashboard?user=${encodeURIComponent(currentUsername)}`);
-
-            await fetchUserProfileAndBalance();
-            await loadServices();
-        }
-
-        async function fetchUserProfileAndBalance() {
-            try {
-                const res = await fetch(`/api/otp/balance?user=${encodeURIComponent(currentUsername)}`);
-                const json = await res.json();
-                if (json.success && json.data) {
-                    document.getElementById('uiBalance').textContent = json.data.formated || `Rp${json.data.balance}`;
-                }
-            } catch (err) {
-                console.error('Gagal memuat saldo:', err);
-            }
-        }
-
-        function switchTab(tab) {
-            const tabOrder = document.getElementById('tabOrder');
-            const tabHistory = document.getElementById('tabHistory');
-            const btnOrder = document.getElementById('tabBtnOrder');
-            const btnHistory = document.getElementById('tabBtnHistory');
-
-            if (tab === 'order') {
-                tabOrder.classList.remove('hidden');
-                tabHistory.classList.add('hidden');
-                btnOrder.className = "py-2 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition-all cursor-pointer shadow";
-                btnHistory.className = "py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer";
-            } else {
-                tabOrder.classList.add('hidden');
-                tabHistory.classList.remove('hidden');
-                btnHistory.className = "py-2 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition-all cursor-pointer shadow";
-                btnOrder.className = "py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer";
-            }
-        }
-
-        async function loadServices() {
-            try {
-                const listContainer = document.getElementById('serviceDropdownList');
-                listContainer.innerHTML = '<div class="p-2 text-xs text-amber-400 text-center animate-pulse">Memuat layanan...</div>';
-
-                const res = await fetch(`/api/otp/services?user=${encodeURIComponent(currentUsername)}`);
-                const json = await res.json();
-                
-                const servicesData = Array.isArray(json) ? json : (json.data || json.services || []);
-
-                if (servicesData.length > 0) {
-                    listContainer.innerHTML = '';
-                    
-                    servicesData.forEach(s => {
-                        const sName = s.service_name || s.name || s.title || 'Layanan';
-                        const sCode = s.service_code || s.code || s.id;
-
-                        const item = document.createElement('div');
-                        item.className = "px-3 py-2 text-xs text-slate-200 hover:bg-amber-500/20 hover:text-amber-400 rounded-lg cursor-pointer transition-colors flex items-center justify-between";
-                        item.innerHTML = `<span>${sName}</span>`;
-                        item.onclick = () => {
-                            selectedServiceCode = sCode;
-                            document.getElementById('serviceSelectedText').textContent = sName;
-                            document.getElementById('serviceSelectedText').className = "text-white font-bold";
-                            listContainer.classList.add('hidden');
-                            
-                            selectedCountryJson = null;
-                            document.getElementById('countrySelectedText').textContent = "-- Pilih Negara --";
-                            document.getElementById('countrySelectedText').className = "text-slate-400";
-                            loadCountries(sCode);
-                        };
-                        listContainer.appendChild(item);
-                    });
-                } else {
-                    listContainer.innerHTML = '<div class="p-2 text-xs text-rose-400 text-center">Tidak ada layanan tersedia</div>';
-                }
-            } catch (err) {
-                console.error('Gagal load services:', err);
-                document.getElementById('serviceDropdownList').innerHTML = '<div class="p-2 text-xs text-rose-400 text-center">Gagal terhubung ke server</div>';
-            }
-        }
-
-        async function loadCountries(serviceId) {
-            if (!serviceId) return;
-            try {
-                const listContainer = document.getElementById('countryDropdownList');
-                listContainer.innerHTML = '<div class="p-2 text-xs text-amber-400 text-center animate-pulse">Memuat negara...</div>';
-
-                const res = await fetch(`/api/otp/countries?service_id=${serviceId}&user=${encodeURIComponent(currentUsername)}`);
-                const json = await res.json();
-                
-                const countriesData = Array.isArray(json) ? json : (json.data || json.countries || []);
-
-                if (countriesData.length > 0) {
-                    listContainer.innerHTML = '';
-
-                    countriesData.forEach(c => {
-                        const priceInfo = c.pricelist && c.pricelist[0] ? (c.pricelist[0].price_format || `Rp${c.pricelist[0].price}`) : '';
-                        const item = document.createElement('div');
-                        item.className = "px-3 py-2 text-xs text-slate-200 hover:bg-amber-500/20 hover:text-amber-400 rounded-lg cursor-pointer transition-colors flex items-center justify-between";
-                        item.innerHTML = `<span>${c.name}</span> <span class="font-mono font-bold text-amber-400">${priceInfo}</span>`;
-                        item.onclick = () => {
-                            selectedCountryJson = c;
-                            document.getElementById('countrySelectedText').textContent = `${c.name} (${priceInfo})`;
-                            document.getElementById('countrySelectedText').className = "text-white font-bold";
-                            listContainer.classList.add('hidden');
-                        };
-                        listContainer.appendChild(item);
-                    });
-                } else {
-                    listContainer.innerHTML = '<div class="p-2 text-xs text-rose-400 text-center">Stok negara kosong</div>';
-                }
-            } catch (err) {
-                console.error('Gagal load countries:', err);
-                document.getElementById('countryDropdownList').innerHTML = '<div class="p-2 text-xs text-rose-400 text-center">Gagal memuat negara</div>';
-            }
-        }
-
-        async function requestNumber() {
-            if (!selectedServiceCode || !selectedCountryJson) {
-                showCustomAlert('Peringatan', 'Silakan pilih layanan dan negara terlebih dahulu!', 'warning');
-                return;
-            }
-
-            const pInfo = selectedCountryJson.pricelist[0];
-
-            const payload = {
-                user: currentUsername,
-                number_id: selectedCountryJson.number_id,
-                provider_id: pInfo.provider_id,
-                operator_id: pInfo.server_id
-            };
-
-            try {
-                const res = await fetch('/api/otp/order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const json = await res.json();
-
-                if (json.success && json.data) {
-                    currentOrderId = json.data.order_id;
-                    document.getElementById('resOrderId').textContent = currentOrderId;
-                    document.getElementById('resPhone').textContent = json.data.phone_number;
-                    document.getElementById('resOtpStatus').textContent = 'Menunggu SMS...';
-                    document.getElementById('resOtpCode').textContent = '-';
-                    document.getElementById('orderResultContainer').classList.remove('hidden');
-                    fetchUserProfileAndBalance();
-                } else {
-                    // Penanganan aman agar error tidak tercetak [object Object]
-                    let errMessage = 'Stok habis / Saldo tidak cukup';
-                    if (json.error) {
-                        if (typeof json.error === 'object') {
-                            errMessage = json.error.message || json.error.error || JSON.stringify(json.error);
-                        } else {
-                            errMessage = json.error;
-                        }
-                    }
-                    showCustomAlert('Gagal Memesan', errMessage, 'error');
-                }
-            } catch (err) {
-                showCustomAlert('Error', 'Terjadi kesalahan koneksi server: ' + err.message, 'error');
-            }
-        }
-
-        async function checkOtpStatus() {
-            if (!currentOrderId) return;
-            try {
-                const res = await fetch(`/api/otp/status?order_id=${currentOrderId}&user=${encodeURIComponent(currentUsername)}`);
-                const json = await res.json();
-                if (json.success && json.data) {
-                    document.getElementById('resOtpStatus').textContent = json.data.status;
-                    if (json.data.otp_code) {
-                        document.getElementById('resOtpCode').textContent = json.data.otp_code;
-                    }
-                }
-            } catch (err) {
-                console.error('Gagal cek status OTP:', err);
-            }
-        }
-
-        async function checkManualOrder() {
-            const orderId = document.getElementById('manualOrderIdInput').value.trim();
-            if (!orderId) {
-                showCustomAlert('Peringatan', 'Masukkan Order ID terlebih dahulu!', 'warning');
-                return;
-            }
-            try {
-                const res = await fetch(`/api/otp/status?order_id=${orderId}&user=${encodeURIComponent(currentUsername)}`);
-                const json = await res.json();
-                if (json.success && json.data) {
-                    document.getElementById('manualResultBox').classList.remove('hidden');
-                    document.getElementById('manStatus').textContent = json.data.status;
-                    document.getElementById('manPhone').textContent = json.data.phone_number || '-';
-                    document.getElementById('manMsg').textContent = json.data.otp_msg || json.data.otp_code || 'Belum ada pesan SMS masuk.';
-                } else {
-                    showCustomAlert('Tidak Ditemukan', 'Order ID tersebut tidak valid.', 'error');
-                }
-            } catch (err) {
-                showCustomAlert('Error', 'Gagal mengecek order.', 'error');
-            }
-        }
-
-        function copyPhone() {
-            const phoneText = document.getElementById('resPhone').textContent;
-            navigator.clipboard.writeText(phoneText);
-            showCustomAlert('Berhasil', 'Nomor telepon berhasil disalin: ' + phoneText, 'success');
-        }
-
-        function openDepositModal() {
-            document.getElementById('depositModal').classList.remove('hidden');
-        }
-
-        function closeDepositModal() {
-            document.getElementById('depositModal').classList.add('hidden');
-            resetDepositModal();
-        }
-
-        function resetDepositModal() {
-            if (depositInterval) clearInterval(depositInterval);
-            document.getElementById('depositFormStep').classList.remove('hidden');
-            document.getElementById('depositResultStep').classList.add('hidden');
-            document.getElementById('depositAmountInput').value = '';
-        }
-
-        async function generateQris() {
-            const amount = document.getElementById('depositAmountInput').value.replace(/[^0-9]/g, '').trim();
-            if (!amount || parseInt(amount) < 10000) {
-                showCustomAlert('Peringatan', 'Minimal nominal deposit adalah Rp10.000', 'warning');
-                return;
-            }
-
-            try {
-                const res = await fetch(`/api/otp/deposit?amount=${amount}&user=${encodeURIComponent(currentUsername)}`);
-                const json = await res.json();
-
-                if (json.success && json.data) {
-                    currentDepositId = json.data.id;
-                    document.getElementById('resDepId').textContent = currentDepositId;
-                    document.getElementById('resDepTotal').textContent = json.data.currency?.total ? `Rp${json.data.currency.total}` : `Rp${amount}`;
-                    document.getElementById('qrisImageSrc').src = json.data.qr_image;
-
-                    document.getElementById('depositFormStep').classList.add('hidden');
-                    document.getElementById('depositResultStep').classList.remove('hidden');
-
-                    depositInterval = setInterval(checkDepositStatusSilent, 5000);
-                } else {
-                    let errMessage = 'Gagal membuat QRIS';
-                    if (json.error) {
-                        errMessage = typeof json.error === 'object' ? (json.error.message || JSON.stringify(json.error)) : json.error;
-                    }
-                    showCustomAlert('Gagal QRIS', errMessage, 'error');
-                }
-            } catch (err) {
-                showCustomAlert('Error', 'Terjadi kesalahan koneksi.', 'error');
-            }
-        }
-
-        async function checkDepositStatus() {
-            await checkDepositStatusSilent(true);
-        }
-
-        async function checkDepositStatusSilent(showAlert = false) {
-            if (!currentDepositId) return;
-            try {
-                const res = await fetch(`/api/otp/deposit/status?deposit_id=${currentDepositId}&user=${encodeURIComponent(currentUsername)}`);
-                const json = await res.json();
-
-                if (json.success && json.data) {
-                    const status = json.data.status;
-                    document.getElementById('resDepStatus').textContent = `Status: ${status.toUpperCase()}`;
-
-                    if (status === 'success') {
-                        if (depositInterval) clearInterval(depositInterval);
-                        showCustomAlert('Berhasil', '🎉 Pembayaran Berhasil! Saldo telah ditambahkan ke akunmu.', 'success');
-                        closeDepositModal();
-                        fetchUserProfileAndBalance();
-                    } else if (showAlert) {
-                        showCustomAlert('Status Pembayaran', `Status saat ini: ${status.toUpperCase()}`, 'warning');
-                    }
-                }
-            } catch (err) {
-                console.error('Gagal cek status deposit:', err);
-            }
-        }
-
-        window.onload = initDashboard;
-    </script>
 </body>
 </html>

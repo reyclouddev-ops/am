@@ -39,29 +39,151 @@
     <style>
         * { box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-        body { font-family: "Plus Jakarta Sans", sans-serif; background: radial-gradient(circle at 15% 0%, rgba(16,185,129,.08), transparent 28%), radial-gradient(circle at 90% 15%, rgba(6,182,212,.07), transparent 25%), #05070a; }
+        body { font-family: "Plus Jakarta Sans", sans-serif; background: radial-gradient(circle at 15% 0%, rgba(244,63,94,.08), transparent 28%), radial-gradient(circle at 90% 15%, rgba(168,85,247,.07), transparent 25%), #05070a; }
         .mono { font-family: "JetBrains Mono", monospace; }
         .glass { background: rgba(11,16,23,.78); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         .grid-bg { background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px); background-size: 32px 32px; }
-        .input { width: 100%; background: rgba(5,7,10,.8); border: 1px solid #1b2635; color: #fff; border-radius: 14px; padding: 13px 14px 13px 42px; outline: none; font-size: 12px; transition: .2s ease; }
-        .input:hover { border-color: #263548; }
-        .input:focus { border-color: rgba(16,185,129,.65); box-shadow: 0 0 0 3px rgba(16,185,129,.08); }
-        .field-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 12px; pointer-events: none; }
-        .emoji-btn { min-width: 36px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid #1b2635; background: #080c12; transition: .2s ease; font-size: 14px; }
-        .emoji-btn:hover { border-color: rgba(16,185,129,.5); background: rgba(16,185,129,.08); transform: translateY(-1px); }
-        .execute-btn { position: relative; overflow: hidden; background: linear-gradient(110deg,#059669,#10b981,#06b6d4); box-shadow: 0 12px 35px rgba(16,185,129,.16); }
-        .execute-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,.18) 50%, transparent 75% ); transform: translateX(-120%); transition: .6s ease; }
-        .execute-btn:hover::before { transform: translateX(120%); }
-        .execute-btn:disabled { opacity: .65; cursor: not-allowed; transform: none; }
-        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #34d399; box-shadow: 0 0 12px rgba(52,211,153,.7); }
-        .progress-track { height: 7px; background: #080c12; border: 1px solid #1b2635; border-radius: 999px; overflow: hidden; }
-        .progress-fill { height: 100%; width: 0%; border-radius: inherit; background: linear-gradient(90deg,#10b981,#06b6d4); box-shadow: 0 0 18px rgba(16,185,129,.35); transition: width .35s ease; }
         .fade-up { animation: fadeUp .45s ease both; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .pulse-ring { animation: pulseRing 2s infinite; }
-        @keyframes pulseRing { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,.18); } 50% { box-shadow: 0 0 0 7px rgba(16,185,129,0); } }
-        .tab-btn { transition: all .2s ease; }
-        .tab-btn.active { background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.4); color: #34d399; }
+        
+        /* Robot 2D Real & Terkunci Rapi */
+        .robot-container {
+            position: relative;
+            width: 130px;
+            height: 110px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: robotFloat 4s ease-in-out infinite;
+        }
+        .robot-head {
+            width: 80px;
+            height: 65px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 2px solid rgba(244, 63, 94, 0.4);
+            border-radius: 18px;
+            position: relative;
+            box-shadow: 0 0 25px rgba(244, 63, 94, 0.25), inset 0 0 12px rgba(244, 63, 94, 0.15);
+        }
+        .robot-antenna {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 18px;
+            background: #475569;
+        }
+        .robot-antenna-ball {
+            position: absolute;
+            top: -26px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            background: #f43f5e;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #f43f5e;
+            animation: antennaBlink 1.5s ease-in-out infinite;
+        }
+        .robot-ears-left, .robot-ears-right {
+            position: absolute;
+            top: 20px;
+            width: 8px;
+            height: 18px;
+            background: #334155;
+            border-radius: 4px;
+        }
+        .robot-ears-left { left: -10px; }
+        .robot-ears-right { right: -10px; }
+
+        .robot-eyes-container {
+            position: absolute;
+            top: 18px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 12px;
+        }
+        .robot-eye {
+            width: 16px;
+            height: 16px;
+            background: #020617;
+            border: 2px solid #f43f5e;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 8px rgba(244, 63, 94, 0.5);
+        }
+        .robot-eye::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 6px;
+            height: 6px;
+            background: #f43f5e;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #f43f5e;
+            animation: eyeScan 3s infinite;
+        }
+        .robot-mouth {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 6px;
+            background: #020617;
+            border: 1px solid rgba(244, 63, 94, 0.4);
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 4px;
+            align-items: center;
+        }
+        .mouth-line {
+            width: 3px;
+            height: 2px;
+            background: #f43f5e;
+            box-shadow: 0 0 4px #f43f5e;
+            animation: mouthSound 1s ease-in-out infinite alternate;
+        }
+        .robot-padlock-badge {
+            position: absolute;
+            bottom: -6px;
+            right: -6px;
+            width: 26px;
+            height: 26px;
+            background: #0f172a;
+            border: 2px solid #f43f5e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #f43f5e;
+            box-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
+        }
+
+        @keyframes robotFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+        @keyframes antennaBlink {
+            0%, 100% { opacity: 0.4; box-shadow: 0 0 4px #f43f5e; }
+            50% { opacity: 1; box-shadow: 0 0 16px #f43f5e; }
+        }
+        @keyframes eyeScan {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(6px); }
+        }
+        @keyframes mouthSound {
+            0% { height: 2px; }
+            100% { height: 4px; }
+        }
     </style>
 </head>
 <body class="min-h-screen text-slate-200 grid-bg">
@@ -71,147 +193,75 @@
         <header class="sticky top-0 z-50 border-b border-white/[.06] glass">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 h-[68px] flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-[13px] flex items-center justify-center bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 border border-emerald-500/20 pulse-ring">
-                        <i class="fa-solid fa-bolt text-emerald-400"></i>
+                    <div class="w-10 h-10 rounded-[13px] flex items-center justify-center bg-gradient-to-br from-rose-500/15 to-purple-500/15 border border-rose-500/20">
+                        <i class="fa-solid fa-lock text-rose-400"></i>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="text-sm font-extrabold tracking-tight text-white">ReactWA & Bypass</h1>
-                            <span class="text-[9px] px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 font-bold">PRO</span>
+                            <span class="text-[9px] px-2 py-0.5 rounded-full border border-rose-500/20 bg-rose-500/10 text-rose-400 font-bold">MAINTENANCE</span>
                         </div>
                         <p class="text-[10px] text-slate-500 mt-0.5">Unified Automation Suite</p>
                     </div>
                 </div>
                 <a href="/dashboard" class="group flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-white/[.07] bg-white/[.025] hover:bg-white/[.05] transition">
-                    <i class="fa-solid fa-arrow-left text-[10px] text-slate-500 group-hover:text-emerald-400 transition"></i>
+                    <i class="fa-solid fa-arrow-left text-[10px] text-slate-500 group-hover:text-rose-400 transition"></i>
                     <span class="hidden sm:block text-[11px] font-semibold text-slate-300">Dashboard</span>
                 </a>
             </div>
         </header>
 
         <!-- Main Content -->
-        <main class="flex-1 w-full max-w-3xl mx-auto px-4 py-8 sm:py-10">
+        <main class="flex-1 w-full max-w-xl mx-auto px-4 py-12 sm:py-16 flex items-center justify-center">
             
-            <section class="text-center mb-6 fade-up">
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/15 bg-emerald-500/[.06] text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-                    <span class="status-dot"></span>
-                    <span>Engine Online & Optimized for Vercel</span>
-                </div>
-                <h2 class="mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                    WhatsApp Reaction & <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Link Skipper</span>
-                </h2>
-                <p class="mt-2 max-w-xl mx-auto text-xs sm:text-sm leading-6 text-slate-500">
-                    Pilih mode automasi yang diinginkan: Kirim reaksi channel WhatsApp atau lewati link shortener otomatis.
-                </p>
-            </section>
+            <section class="w-full text-center fade-up">
+                <div class="main-card relative overflow-hidden rounded-[28px] border border-white/[.07] bg-[#0b1017]/90 shadow-soft p-8 sm:p-10">
+                    <div class="absolute -top-32 -right-32 w-64 h-64 bg-rose-500/[.05] rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute -bottom-32 -left-32 w-64 h-64 bg-purple-500/[.04] rounded-full blur-3xl pointer-events-none"></div>
 
-            <!-- Console Card -->
-            <section class="main-card relative overflow-hidden rounded-[24px] border border-white/[.07] bg-[#0b1017]/90 shadow-soft fade-up">
-                <div class="absolute -top-32 -right-32 w-64 h-64 bg-emerald-500/[.05] rounded-full blur-3xl pointer-events-none"></div>
-                <div class="absolute -bottom-32 -left-32 w-64 h-64 bg-cyan-500/[.04] rounded-full blur-3xl pointer-events-none"></div>
-                
-                <div class="relative z-10 p-5 sm:p-7">
-                    
-                    <!-- Provider Switcher Tabs -->
-                    <div class="grid grid-cols-2 gap-2 mb-6 p-1 bg-[#05070a] border border-white/[.06] rounded-xl">
-                        <button type="button" id="tabKeyyss" onclick="switchProvider('keyyss')" class="tab-btn active py-2.5 px-3 rounded-lg text-xs font-bold text-slate-400 flex items-center justify-center gap-2">
-                            <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Reaction
-                        </button>
-                        <button type="button" id="tabBypass" onclick="switchProvider('wellbypass')" class="tab-btn py-2.5 px-3 rounded-lg text-xs font-bold text-slate-400 flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-link-slash text-xs"></i> Link Skipper
-                        </button>
-                    </div>
-
-                    <form id="automationForm" onsubmit="handleExecute(event)" class="space-y-5">
+                    <div class="relative z-10 flex flex-col items-center space-y-6">
                         
-                        <!-- URL Input -->
-                        <div>
-                            <label id="urlLabel" class="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-2">Target Channel URL</label>
-                            <div class="relative">
-                                <i id="urlIcon" class="fa-brands fa-whatsapp field-icon"></i>
-                                <input type="url" id="targetUrlInput" required autocomplete="off" placeholder="https://whatsapp.com/channel/..." class="input mono">
-                            </div>
-                            <p id="urlDesc" class="mt-1.5 text-[10px] text-slate-600">Masukkan URL channel WhatsApp yang valid.</p>
-                        </div>
-
-                        <!-- Dynamic Section (Hanya muncul jika mode Keyyss) -->
-                        <div id="keyyssSpecificSection" class="space-y-5">
-                            <div>
-                                <div class="flex items-center justify-between mb-2">
-                                    <label class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Reaction Emoji</label>
-                                    <span class="text-[9px] text-slate-600 font-semibold">MAX 4</span>
+                        <!-- Real 2D Animated Tech Robot (Antena Menyatu) -->
+                        <div class="robot-container">
+                            <div class="robot-head">
+                                <div class="robot-antenna"></div>
+                                <div class="robot-antenna-ball"></div>
+                                <div class="robot-ears-left"></div>
+                                <div class="robot-ears-right"></div>
+                                <div class="robot-eyes-container">
+                                    <div class="robot-eye"></div>
+                                    <div class="robot-eye"></div>
                                 </div>
-                                <div class="relative">
-                                    <i class="fa-solid fa-face-smile field-icon"></i>
-                                    <input type="text" id="emojisInput" value="👍" autocomplete="off" placeholder="👍, 🔥, ❤️" class="input">
+                                <div class="robot-mouth">
+                                    <div class="mouth-line"></div>
+                                    <div class="mouth-line"></div>
+                                    <div class="mouth-line"></div>
                                 </div>
-                                <div class="flex flex-wrap gap-1.5 mt-2.5">
-                                    <button type="button" onclick="addEmoji('👍')" class="emoji-btn">👍</button>
-                                    <button type="button" onclick="addEmoji('❤️')" class="emoji-btn">❤️</button>
-                                    <button type="button" onclick="addEmoji('🔥')" class="emoji-btn">🔥</button>
-                                    <button type="button" onclick="addEmoji('😂')" class="emoji-btn">😂</button>
-                                    <button type="button" onclick="addEmoji('😮')" class="emoji-btn">😮</button>
-                                    <button type="button" onclick="addEmoji('😢')" class="emoji-btn">😢</button>
-                                    <button type="button" onclick="addEmoji('🙏')" class="emoji-btn">🙏</button>
-                                    <button type="button" onclick="addEmoji('👏')" class="emoji-btn">👏</button>
+                                <div class="robot-padlock-badge">
+                                    <i class="fa-solid fa-lock text-[10px]"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Advanced Proxy Options -->
-                        <div class="pt-4 border-t border-white/[.06]">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <label class="flex items-center gap-3 p-3 rounded-xl bg-[#070b10] border border-white/[.06] cursor-pointer hover:border-emerald-500/20 transition">
-                                    <input type="checkbox" id="useProxyCheck" class="w-4 h-4 accent-emerald-500">
-                                    <div>
-                                        <p class="text-[11px] font-semibold text-slate-300">Proxy Pool</p>
-                                        <p class="text-[9px] text-slate-600 mt-0.5">Gunakan pool proxy otomatis</p>
-                                    </div>
-                                </label>
-                                <div class="relative">
-                                    <i class="fa-solid fa-network-wired field-icon"></i>
-                                    <input type="text" id="manualProxyInput" placeholder="host:port (Opsional)" autocomplete="off" class="input mono">
-                                </div>
-                            </div>
+                        <div class="space-y-2">
+                            <span class="inline-block px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-[10px] font-mono font-bold text-rose-400 uppercase tracking-widest">
+                                System Maintenance
+                            </span>
+                            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                                Sedang Dalam <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-purple-400">Pemeliharaan</span>
+                            </h2>
+                            <p class="text-xs sm:text-sm leading-relaxed text-slate-400 max-w-md mx-auto pt-1">
+                                Layanan ReactWA & Link Skipper sedang dikunci sementara untuk pembaruan worker Cloudflare dan peningkatan performa sistem. Silakan kembali beberapa saat lagi.
+                            </p>
                         </div>
 
-                        <!-- Submit Button -->
-                        <button type="submit" id="submitBtn" class="execute-btn w-full h-12 rounded-xl text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all active:scale-[.99]">
-                            <i id="btnIcon" class="fa-solid fa-bolt"></i>
-                            <span id="btnText">EXECUTE AUTOMATION</span>
-                        </button>
-                    </form>
-
-                    <!-- Progress Bar Container -->
-                    <div id="progressContainer" class="hidden mt-5 rounded-2xl border border-white/[.06] bg-[#070b10] p-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <span class="status-dot shrink-0"></span>
-                                <span id="progressStatusText" class="text-[10px] text-emerald-400 font-semibold mono truncate">Initializing...</span>
-                            </div>
-                            <span id="progressPercentage" class="text-[10px] text-cyan-400 font-bold mono ml-3">0%</span>
-                        </div>
-                        <div class="progress-track">
-                            <div id="progressBarFill" class="progress-fill"></div>
+                        <div class="w-full pt-4 border-t border-white/[.06]">
+                            <a href="/dashboard" class="w-full h-12 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-rose-500/20">
+                                <i class="fa-solid fa-house"></i>
+                                <span>KEMBALI KE DASHBOARD UTAMA</span>
+                            </a>
                         </div>
                     </div>
-
-                    <!-- Result Container -->
-                    <div id="resultBox" class="hidden mt-4">
-                        <div class="rounded-2xl border border-emerald-500/15 bg-emerald-500/[.035] p-4 fade-up">
-                            <div class="flex items-center gap-2 mb-3">
-                                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                                    <i class="fa-solid fa-check text-emerald-400 text-xs"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Execution Result</p>
-                                    <p class="text-xs font-bold text-white">Operation Completed</p>
-                                </div>
-                            </div>
-                            <div id="resultCard"></div>
-                        </div>
-                    </div>
-
                 </div>
             </section>
 
@@ -224,251 +274,11 @@
                 <div class="flex items-center gap-2 text-[10px] text-slate-600">
                     <span>ReactWA Suite</span>
                     <span>•</span>
-                    <span class="text-emerald-500/70">Automation Console</span>
+                    <span class="text-rose-500/70">Under Maintenance</span>
                 </div>
             </div>
         </footer>
 
     </div>
-
-    <!-- Script Utama -->
-    <script>
-        let currentProvider = 'keyyss';
-        let cooldownTimer = null;
-
-        const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 2600,
-            timerProgressBar: true,
-            background: "#0b1017",
-            color: "#fff",
-            customClass: { popup: "border border-white/[.08]" }
-        });
-
-        function switchProvider(provider) {
-            currentProvider = provider;
-            const tabKeyyss = document.getElementById('tabKeyyss');
-            const tabBypass = document.getElementById('tabBypass');
-            const keyyssSection = document.getElementById('keyyssSpecificSection');
-            const urlLabel = document.getElementById('urlLabel');
-            const urlInput = document.getElementById('targetUrlInput');
-            const urlDesc = document.getElementById('urlDesc');
-            const urlIcon = document.getElementById('urlIcon');
-
-            if (provider === 'keyyss') {
-                tabKeyyss.classList.add('active');
-                tabBypass.classList.remove('active');
-                keyyssSection.classList.remove('hidden');
-                urlLabel.textContent = 'Target Channel URL';
-                urlInput.placeholder = 'https://whatsapp.com/channel/...';
-                urlDesc.textContent = 'Masukkan URL channel WhatsApp yang menjadi target.';
-                urlIcon.className = 'fa-brands fa-whatsapp field-icon';
-            } else {
-                tabBypass.classList.add('active');
-                tabKeyyss.classList.remove('active');
-                keyyssSection.classList.add('hidden');
-                urlLabel.textContent = 'Target Shortlink / Bypass URL';
-                urlInput.placeholder = 'https://sfile.mobi/... atau sub2unlock...';
-                urlDesc.textContent = 'Masukkan link shortener atau file target yang ingin di-bypass.';
-                urlIcon.className = 'fa-solid fa-link field-icon';
-            }
-        }
-
-        function addEmoji(emoji) {
-            const input = document.getElementById("emojisInput");
-            const current = input.value.trim();
-            if (!current) {
-                input.value = emoji;
-                return;
-            }
-            const parts = current.split(",").map(item => item.trim()).filter(Boolean);
-            if (parts.includes(emoji)) {
-                Toast.fire({ icon: "info", title: "Emoji sudah dipilih" });
-                return;
-            }
-            if (parts.length >= 4) {
-                Toast.fire({ icon: "warning", title: "Maksimal 4 emoji" });
-                return;
-            }
-            input.value = `${current}, ${emoji}`;
-        }
-
-        function triggerCooldown(seconds) {
-            const button = document.getElementById("submitBtn");
-            const text = document.getElementById("btnText");
-            const icon = document.getElementById("btnIcon");
-            clearInterval(cooldownTimer);
-            button.disabled = true;
-            icon.className = "fa-solid fa-clock text-amber-300";
-            let timeLeft = Number(seconds);
-            const update = () => {
-                if (timeLeft <= 0) {
-                    clearInterval(cooldownTimer);
-                    button.disabled = false;
-                    icon.className = "fa-solid fa-bolt";
-                    text.textContent = "EXECUTE AUTOMATION";
-                    return;
-                }
-                const minutes = Math.floor(timeLeft / 60);
-                const secondsLeft = timeLeft % 60;
-                const formatted = minutes > 0 ? `${minutes}m ${secondsLeft}s` : `${secondsLeft}s`;
-                text.textContent = `COOLDOWN · ${formatted}`;
-                timeLeft--;
-            };
-            update();
-            cooldownTimer = setInterval(update, 1000);
-        }
-
-        function updateProgress(percent, text) {
-            const container = document.getElementById("progressContainer");
-            const fill = document.getElementById("progressBarFill");
-            const percentage = document.getElementById("progressPercentage");
-            const status = document.getElementById("progressStatusText");
-            const value = Math.max(0, Math.min(100, Number(percent) || 0));
-            container.classList.remove("hidden");
-            fill.style.width = `${value}%`;
-            percentage.textContent = `${value}%`;
-            status.textContent = text;
-        }
-
-        function escapeHtml(value) {
-            return String(value ?? "")
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#039;");
-        }
-
-        async function handleExecute(event) {
-            event.preventDefault();
-            const url = document.getElementById("targetUrlInput").value.trim();
-            const emojis = document.getElementById("emojisInput").value.trim() || "👍";
-            const useProxy = document.getElementById("useProxyCheck").checked;
-            const manualProxy = document.getElementById("manualProxyInput").value.trim();
-
-            const button = document.getElementById("submitBtn");
-            const buttonText = document.getElementById("btnText");
-            const buttonIcon = document.getElementById("btnIcon");
-            const resultBox = document.getElementById("resultBox");
-            const resultCard = document.getElementById("resultCard");
-
-            if (currentProvider === 'keyyss') {
-                const emojiParts = emojis.split(",").map(item => item.trim()).filter(Boolean);
-                if (emojiParts.length > 4) {
-                    Toast.fire({ icon: "error", title: "Maksimal 4 emoji" });
-                    return;
-                }
-                const channelRegex = /^https:\/\/(www\.)?whatsapp\.com\/channel\/[a-zA-Z0-9_-]+(\/.+)?$/i;
-                if (!channelRegex.test(url)) {
-                    Toast.fire({ icon: "error", title: "URL Channel WhatsApp tidak valid" });
-                    updateProgress(100, "ERROR · URL tidak valid");
-                    triggerCooldown(60);
-                    return;
-                }
-            }
-
-            button.disabled = true;
-            buttonIcon.className = "fa-solid fa-circle-notch fa-spin";
-            buttonText.textContent = "PROCESSING...";
-            resultBox.classList.add("hidden");
-            resultCard.innerHTML = "";
-
-            updateProgress(20, "CONNECTING · Menyiapkan request ke edge server...");
-
-            try {
-                await new Promise(resolve => setTimeout(resolve, 400));
-                updateProgress(50, "PROCESSING · Melewati WAF & Turnstile challenge...");
-
-                const response = await fetch("/api/automation/run", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                        provider: currentProvider, 
-                        url, 
-                        emojis, 
-                        proxy: useProxy, 
-                        manualProxy 
-                    })
-                });
-
-                updateProgress(80, "RECEIVING · Mengambil response server...");
-
-                let json;
-                try {
-                    json = await response.json();
-                } catch {
-                    throw new Error("Response server bukan JSON yang valid.");
-                }
-
-                if (!response.ok || !json.status || !json.result) {
-                    throw new Error(json?.error || json?.result?.message || `Request gagal (${response.status})`);
-                }
-
-                const result = json.result;
-                const data = result.data || {};
-
-                updateProgress(100, "COMPLETE · Operation berhasil");
-
-                let detailsHtml = '';
-                if (currentProvider === 'keyyss') {
-                    detailsHtml = `
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <div class="rounded-xl bg-[#070b10] border border-white/[.05] p-3">
-                                <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">Status</p>
-                                <p class="mt-1.5 text-[11px] font-bold text-emerald-400"><i class="fa-solid fa-circle-check mr-1"></i> ${escapeHtml(result.status || "SUCCESS")}</p>
-                            </div>
-                            <div class="rounded-xl bg-[#070b10] border border-white/[.05] p-3">
-                                <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">Duration</p>
-                                <p class="mt-1.5 text-[11px] font-bold text-cyan-400 mono">${escapeHtml(data.duration || "-")}</p>
-                            </div>
-                            <div class="sm:col-span-2 rounded-xl bg-[#070b10] border border-white/[.05] p-3">
-                                <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">Target</p>
-                                <p class="mt-1.5 text-[10px] text-slate-300 mono break-all">${escapeHtml(data.target || url)}</p>
-                            </div>
-                            <div class="rounded-xl bg-[#070b10] border border-white/[.05] p-3">
-                                <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">Reaction</p>
-                                <p class="mt-1.5 text-[12px]">${escapeHtml(data.emojis || emojis)}</p>
-                            </div>
-                            <div class="rounded-xl bg-[#070b10] border border-white/[.05] p-3">
-                                <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">Network</p>
-                                <p class="mt-1.5 text-[10px] text-cyan-300 mono truncate">${escapeHtml(data.proxy || "Direct Edge")}</p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    detailsHtml = `
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <div class="rounded-xl bg-[#070b10] border border-white/[.05] p-3">
-                                <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">Status</p>
-                                <p class="mt-1.5 text-[11px] font-bold text-emerald-400"><i class="fa-solid fa-circle-check mr-1"></i> ${escapeHtml(result.status || "SUCCESS")}</p>
-                            </div>
-                            <div class="rounded-xl bg-[#070b10] border border-white/[.05] p-3">
-                                <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">Duration</p>
-                                <p class="mt-1.5 text-[11px] font-bold text-cyan-400 mono">${escapeHtml(data.duration || "-")}</p>
-                            </div>
-                            <div class="sm:col-span-2 rounded-xl bg-[#070b10] border border-white/[.05] p-3">
-                                <p class="text-[9px] uppercase tracking-wider text-slate-600 font-bold">Bypassed URL Output</p>
-                                <p class="mt-1.5 text-[10px] text-emerald-300 mono break-all"><a href="${escapeHtml(data.bypassedUrl || '#')}" target="_blank" class="underline">${escapeHtml(data.bypassedUrl || 'Tidak ditemukan')}</a></p>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                resultCard.innerHTML = detailsHtml;
-                resultBox.classList.remove("hidden");
-                Toast.fire({ icon: "success", title: result.message || "Operation berhasil" });
-
-            } catch (error) {
-                const message = error?.message || "Terjadi kesalahan saat memproses request.";
-                updateProgress(100, `ERROR · ${message}`);
-                Toast.fire({ icon: "error", title: message });
-            } finally {
-                triggerCooldown(10);
-            }
-        }
-    </script>
 </body>
 </html>

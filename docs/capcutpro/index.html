@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maintenance - CapCut Pro 7d Trial Engine</title>
-    <!-- Tailwind CSS CDN -->
+    <meta name="theme-color" content="#05070a">
+    <title>CapCut Pro - 404 Maintenance Cyberpunk Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,119 +12,123 @@
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#07090e',
-                        cardbg: '#0f172a',
-                        cardborder: '#1e293b',
-                        accent: '#6366f1',
-                        accenthover: '#4f46e5',
-                        cyanaccent: '#06b6d4'
+                        darkbg: '#05070a',
+                        cardbg: '#0b1017',
+                        cardborder: '#1b2635'
                     },
                     boxShadow: {
-                        glow: '0 0 25px -5px rgba(99, 102, 241, 0.3)',
-                        cyanGlow: '0 0 20px -5px rgba(6, 182, 212, 0.3)'
+                        neon: '0 0 35px -5px rgba(244, 63, 94, 0.25)',
+                        cyanGlow: '0 0 35px -5px rgba(6, 182, 212, 0.25)'
                     }
                 }
             }
         }
     </script>
-    <!-- FontAwesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #05070a; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
-        .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); }
+        .glass-panel { background: rgba(11, 16, 23, 0.85); backdrop-filter: blur(20px); }
+        
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+        .animate-pulse-glow { animation: pulseGlow 4s ease-in-out infinite; }
+        
+        @keyframes floatAnim {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float { animation: floatAnim 3s ease-in-out infinite; }
     </style>
 </head>
-<body class="bg-darkbg text-gray-100 min-h-screen flex flex-col justify-between selection:bg-accent selection:text-white">
+<body class="bg-darkbg text-gray-100 min-h-screen flex flex-col justify-between selection:bg-rose-500 selection:text-white">
 
-    <!-- Navbar Modern Glassmorphism -->
-    <nav class="border-b border-gray-800/80 glass-panel sticky top-0 z-50">
+    <!-- Ambient Background Glows -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[250px] bg-rose-500/10 blur-[150px] pointer-events-none rounded-full animate-pulse-glow"></div>
+    <div class="absolute bottom-10 right-10 w-[300px] h-[300px] bg-cyan-500/10 blur-[150px] pointer-events-none rounded-full animate-pulse-glow" style="animation-delay: 2s;"></div>
+
+    <!-- Header Modern -->
+    <nav class="border-b border-white/[.06] glass-panel sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div class="relative">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-75 animate-pulse"></div>
-                    <div class="relative bg-cardbg p-3 rounded-2xl border border-gray-700 text-indigo-400 flex items-center justify-center">
-                        <i class="fa-solid fa-screwdriver-wrench text-xl"></i>
-                    </div>
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500/20 to-purple-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 font-black shadow-lg">
+                    ✨
                 </div>
                 <div>
                     <div class="flex items-center space-x-2">
-                        <span class="font-extrabold text-lg tracking-tight text-white">CapCut Pro <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Master</span></span>
-                        <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Maintenance</span>
+                        <span class="font-extrabold text-sm tracking-tight text-white">CAPCUT <span class="text-rose-400">PRO</span></span>
+                        <span class="bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Offline</span>
                     </div>
-                    <p class="text-xs text-gray-400">Automated Enterprise Tier Generator & Scraper Suite</p>
+                    <p class="text-[10px] text-gray-400">Trial Master & Edge Gateway</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-3">
-                <a href="/dashboard" class="text-xs sm:text-sm px-4 py-2.5 rounded-xl bg-gray-900/80 hover:bg-gray-800 transition text-gray-300 font-medium border border-gray-800 flex items-center space-x-2 shadow-sm">
-                    <i class="fa-solid fa-arrow-left text-gray-400"></i>
-                    <span class="hidden sm:inline">Kembali ke Home</span>
-                </a>
-            </div>
+            <a href="/dashboard" class="text-xs px-4 py-2.5 rounded-xl bg-white/[.03] hover:bg-white/[.06] transition text-gray-300 font-semibold border border-white/[.08] flex items-center space-x-2 shadow-sm">
+                <i class="fa-solid fa-arrow-left text-gray-400"></i>
+                <span class="hidden sm:inline">Dashboard Utama</span>
+            </a>
         </div>
     </nav>
 
-    <!-- Main Container -->
-    <main class="max-w-3xl mx-auto px-4 py-20 flex-grow w-full flex items-center justify-center">
+    <!-- Main Container Content -->
+    <main class="max-w-xl mx-auto px-4 py-12 flex-grow w-full flex items-center justify-center relative z-10">
         
-        <div class="bg-cardbg border border-cardborder rounded-3xl p-8 sm:p-12 shadow-glow w-full text-center relative overflow-hidden">
-            <div class="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="bg-cardbg/90 border border-cardborder rounded-[28px] p-8 sm:p-10 shadow-neon w-full text-center space-y-6 relative overflow-hidden backdrop-blur-xl">
+            
+            <!-- Cybernetic Holographic Icon -->
+            <div class="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-rose-500/15 via-purple-500/10 to-cyan-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 text-4xl shadow-lg shadow-rose-500/20 animate-float relative">
+                <div class="absolute inset-0 rounded-3xl border border-rose-400/20 animate-ping pointer-events-none" style="animation-duration: 3s;"></div>
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
 
-            <div class="relative z-10 space-y-6">
-                <!-- Maintenance Icon Animation -->
-                <div class="w-20 h-20 mx-auto rounded-3xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-3xl shadow-inner animate-bounce">
-                    <i class="fa-solid fa-gears fa-spin" style="animation-duration: 6s;"></i>
+            <!-- Title & Status Badge -->
+            <div class="space-y-3">
+                <div class="inline-flex items-center space-x-2 bg-rose-500/10 border border-rose-500/20 px-3.5 py-1 rounded-full text-[10px] font-mono font-bold text-rose-400 uppercase tracking-widest">
+                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                    <span>CapCut Pro Engine / 404 Maintenance</span>
                 </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    Modul CapCut Pro Sedang <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-purple-400">Maintenance</span>
+                </h1>
+                <p class="text-gray-400 text-xs sm:text-sm leading-relaxed max-w-md mx-auto">
+                    Sistem aktivasi trial 7 hari dan scraper CapCut Pro sedang dalam peningkatan performa serta pembaruan token enkripsi. Akses ditutup sementara.
+                </p>
+            </div>
 
-                <div class="space-y-2">
-                    <div class="inline-flex items-center space-x-2 bg-indigo-500/10 border border-indigo-500/20 px-4 py-1.5 rounded-full text-xs font-semibold text-indigo-300">
-                        <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
-                        <span>Engine Optimization in Progress</span>
-                    </div>
-                    <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                        CapCut Pro Engine Maintenance
-                    </h1>
-                    <p class="text-gray-400 max-w-md mx-auto text-sm sm:text-base leading-relaxed">
-                        Sistem pendaftaran otomatis dan aktivasi trial 7 hari sedang ditingkatkan performanya untuk menghindari error endpoint dan pembatasan WAF. Silakan kembali beberapa saat lagi.
-                    </p>
+            <!-- Cyber Terminal Code Box -->
+            <div class="bg-[#05070a] border border-white/[.06] rounded-2xl p-4 text-left font-mono text-xs space-y-2 max-w-sm mx-auto shadow-inner">
+                <div class="flex items-center justify-between text-gray-400 text-[11px]">
+                    <span class="text-rose-400 font-bold">STATUS: LOCKED</span>
+                    <span class="text-cyan-400">CAPCUT-API</span>
                 </div>
-
-                <!-- Status Progress Box -->
-                <div class="bg-[#07090e] border border-gray-800 rounded-2xl p-5 text-left font-mono text-xs space-y-2 max-w-md mx-auto">
-                    <div class="flex items-center justify-between text-gray-400">
-                        <span>Status Sistem:</span>
-                        <span class="text-indigo-400 font-bold">UPGRADING...</span>
-                    </div>
-                    <div class="flex items-center justify-between text-gray-400">
-                        <span>API Gateway:</span>
-                        <span class="text-cyan-400 font-bold">SYNCING</span>
-                    </div>
-                    <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden mt-3">
-                        <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full animate-pulse" style="width: 65%;"></div>
-                    </div>
-                </div>
-
-                <div class="pt-4">
-                    <a href="/dashboard" class="inline-flex items-center space-x-2 bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 text-white font-extrabold py-3.5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg shadow-indigo-500/25 text-sm">
-                        <i class="fa-solid fa-house"></i>
-                        <span>Kembali ke Dashboard Utama</span>
-                    </a>
+                <div class="text-[10px] text-gray-500 border-t border-white/[.05] pt-2 font-mono">
+                    > root@capcut-engine:~# systemctl status trial-service<br>
+                    > warning: endpoint temporarily isolated for upgrades.
                 </div>
             </div>
+
+            <!-- Action Button -->
+            <div class="pt-2">
+                <a href="/dashboard" class="w-full inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-rose-600 via-purple-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white font-extrabold py-3.5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-rose-500/25 text-xs sm:text-sm">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Kembali ke Dashboard Utama</span>
+                </a>
+            </div>
+
         </div>
 
     </main>
 
-    <!-- Modern Footer -->
-    <footer class="border-t border-gray-800/80 glass-panel py-8 mt-20 text-center text-xs text-gray-500">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+    <!-- Footer -->
+    <footer class="border-t border-white/[.05] glass-panel py-6 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
             <p>&copy; 2026 ReyCode Enterprise. All rights reserved.</p>
-            <div class="flex items-center space-x-4 text-gray-400 font-medium">
-                <span>CapCut Pro Trial Suite</span>
+            <div class="flex items-center space-x-3 text-gray-400 font-medium text-[11px]">
+                <span>CapCut Pro Suite</span>
                 <span>•</span>
-                <span class="text-indigo-400">Under Maintenance</span>
+                <span class="text-rose-400">Engine Locked</span>
             </div>
         </div>
     </footer>
