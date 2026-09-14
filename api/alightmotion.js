@@ -420,7 +420,7 @@ async function handler(req, res) {
             const username = data.username || data.user || ''
 
             if (mongoose.connection.readyState !== 1) {
-                await mongoose.connect(process.env.MONGODB_URI || '')
+                await mongoose.connect(process.env.MONGO_URI || '')
             }
 
             if (!apiKeyInput) {

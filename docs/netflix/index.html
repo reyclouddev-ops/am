@@ -746,90 +746,92 @@
         }
     }
 
-    async function generateToken() {
-        const country = document.getElementById('countryInput').value.trim();
-        const btn = document.getElementById('btnGenerate');
-        const loading = document.getElementById('genLoading');
-        const resultBox = document.getElementById('resultBoxGen');
+            async function generateToken() {
+            const country = document.getElementById('countryInput').value.trim();
+            const btn = document.getElementById('btnGenerate');
+            const loading = document.getElementById('genLoading');
+            const resultBox = document.getElementById('resultBoxGen');
 
-        if (!country) {
-            showModal('Peringatan', 'Masukkan kode negara terlebih dahulu!');
-            return;
-        }
-
-        btn.disabled = true;
-        loading.classList.remove('hidden');
-        resultBox.classList.add('hidden');
-
-        try {
-            const res = await fetch(`/api/netflixtoken?action=generate&country=${encodeURIComponent(country)}`);
-            const data = await res.json();
-
-            if (data.status && data.data) {
-                document.getElementById('resCountryBadge').textContent = data.data.country;
-                document.getElementById('resBrowserLink').value = data.data.links.browser || '';
-                document.getElementById('resMobileLink').value = data.data.links.mobile || '';
-                document.getElementById('resExpires').textContent = data.data.expiresReadable || '-';
-
-                resultBox.classList.remove('hidden');
-
-                showModal('Berhasil', 'NFToken berhasil dibuat!', 'success');
-            } else {
-                throw new Error(data.error || 'Gagal menghasilkan link.');
+            if (!country) {
+                showModal('Peringatan', 'Masukkan kode negara terlebih dahulu!');
+                return;
             }
-        } catch (err) {
-            showModal('Gagal', err.message);
-        } finally {
-            btn.disabled = false;
-            loading.classList.add('hidden');
-        }
-    }
 
-    async function convertCookies() {
-        const cookies = document.getElementById('cookiesInput').value.trim();
-        const btn = document.getElementById('btnConvert');
-        const loading = document.getElementById('convLoading');
-        const resultBox = document.getElementById('resultBoxConv');
+            btn.disabled = true;
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
 
-        if (!cookies) {
-            showModal('Peringatan', 'Masukkan cookies mentah terlebih dahulu!');
-            return;
-        }
+            try {
+                const res = await fetch(`/api/netflixtoken?action=generate&country=${encodeURIComponent(country)}`);
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    throw new Error(text.substring(0, 100) || 'Terjadi kesalahan pada server (HTML/Text Response).');
+                }
 
-        btn.disabled = true;
-        loading.classList.remove('hidden');
-        resultBox.classList.add('hidden');
-
-        try {
-            const res = await fetch('/api/netflixtoken', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: 'convert',
-                    cookies
-                })
-            });
-
-            const data = await res.json();
-
-            if (data.status && data.data) {
-                document.getElementById('resConvBrowser').value = data.data.links.browser || '';
-
-                resultBox.classList.remove('hidden');
-
-                showModal('Berhasil', 'Cookies berhasil dikonversi!', 'success');
-            } else {
-                throw new Error(data.error || 'Gagal mengonversi cookies.');
+                if (data.status && data.data) {
+                    document.getElementById('resCountryBadge').textContent = data.data.country;
+                    document.getElementById('resBrowserLink').value = data.data.links.browser || '';
+                    document.getElementById('resMobileLink').value = data.data.links.mobile || '';
+                    document.getElementById('resExpires').textContent = data.data.expiresReadable || '-';
+                    resultBox.classList.remove('hidden');
+                    showModal('Berhasil', 'NFToken berhasil dibuat!', 'success');
+                } else {
+                    throw new Error(data.error || 'Gagal menghasilkan link.');
+                }
+            } catch (err) {
+                showModal('Gagal', err.message);
+            } finally {
+                btn.disabled = false;
+                loading.classList.add('hidden');
             }
-        } catch (err) {
-            showModal('Gagal', err.message);
-        } finally {
-            btn.disabled = false;
-            loading.classList.add('hidden');
         }
-    }
+
+        async function convertCookies() {
+            const cookies = document.getElementById('cookiesInput').value.trim();
+            const btn = document.getElementById('btnConvert');
+            const loading = document.getElementById('convLoading');
+            const resultBox = document.getElementById('resultBoxConv');
+
+            if (!cookies) {
+                showModal('Peringatan', 'Masukkan cookies mentah terlebih dahulu!');
+                return;
+            }
+
+            btn.disabled = true;
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/netflixtoken', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'convert', cookies })
+                });
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    throw new Error(text.substring(0, 100) || 'Terjadi kesalahan pada server (HTML/Text Response).');
+                }
+
+                if (data.status && data.data) {
+                    document.getElementById('resConvBrowser').value = data.data.links.browser || '';
+                    resultBox.classList.remove('hidden');
+                    showModal('Berhasil', 'Cookies berhasil dikonversi!', 'success');
+                } else {
+                    throw new Error(data.error || 'Gagal mengonversi cookies.');
+                }
+            } catch (err) {
+                showModal('Gagal', err.message);
+            } finally {
+                btn.disabled = false;
+                loading.classList.add('hidden');
+            }
+        }
 
     document.getElementById('countryInput').addEventListener('keydown', event => {
         if (event.key === 'Enter') {
