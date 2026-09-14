@@ -1,0 +1,854 @@
+<!DOCTYPE html><html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#05070b">
+    <title>Netflix Token — NFToken Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script><style>
+    * {
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at 10% -10%, rgba(229, 9, 20, .18), transparent 32%),
+            radial-gradient(circle at 100% 10%, rgba(239, 68, 68, .08), transparent 30%),
+            linear-gradient(180deg, #05070b 0%, #07090e 45%, #040509 100%);
+        color: #f8fafc;
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        overflow-x: hidden;
+    }
+
+    ::selection {
+        background: rgba(229, 9, 20, .35);
+        color: white;
+    }
+
+    ::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #293241;
+        border-radius: 999px;
+    }
+
+    button,
+    a,
+    input,
+    textarea {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    button:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+    .noise {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: .018;
+        z-index: 1;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
+    }
+
+    .orb {
+        position: fixed;
+        border-radius: 999px;
+        pointer-events: none;
+        filter: blur(110px);
+        z-index: 0;
+    }
+
+    .orb-a {
+        width: 300px;
+        height: 300px;
+        background: rgba(229, 9, 20, .10);
+        top: -130px;
+        left: -110px;
+    }
+
+    .orb-b {
+        width: 260px;
+        height: 260px;
+        background: rgba(220, 38, 38, .06);
+        right: -120px;
+        top: 45%;
+    }
+
+    .glass {
+        background: linear-gradient(
+            145deg,
+            rgba(14, 18, 27, .88),
+            rgba(7, 10, 16, .82)
+        );
+        border: 1px solid rgba(255, 255, 255, .055);
+        box-shadow:
+            0 25px 80px rgba(0, 0, 0, .24),
+            inset 0 1px 0 rgba(255, 255, 255, .025);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+    }
+
+    .glass-soft {
+        background: rgba(255, 255, 255, .025);
+        border: 1px solid rgba(255, 255, 255, .055);
+    }
+
+    .hero {
+        background:
+            linear-gradient(135deg, rgba(17, 8, 10, .96), rgba(10, 13, 21, .90)),
+            radial-gradient(circle at 85% 15%, rgba(229, 9, 20, .16), transparent 36%);
+    }
+
+    .hero-grid {
+        background-image:
+            linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+        background-size: 30px 30px;
+        mask-image: linear-gradient(to bottom, black, transparent);
+        -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+    }
+
+    .input-modern {
+        width: 100%;
+        min-height: 46px;
+        background: rgba(2, 5, 9, .72);
+        border: 1px solid #202a38;
+        color: #f8fafc;
+        border-radius: 14px;
+        padding: 12px 14px;
+        outline: none;
+        transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+        font-size: 12px;
+    }
+
+    .input-modern:hover {
+        border-color: #2c394c;
+    }
+
+    .input-modern:focus {
+        border-color: rgba(229, 9, 20, .65);
+        background: rgba(3, 6, 11, .9);
+        box-shadow: 0 0 0 3px rgba(229, 9, 20, .07);
+    }
+
+    .input-modern::placeholder {
+        color: #4b5563;
+    }
+
+    textarea.input-modern {
+        resize: vertical;
+        min-height: 110px;
+    }
+
+    .tab-active {
+        box-shadow:
+            0 10px 28px rgba(229, 9, 20, .18),
+            inset 0 1px 0 rgba(255,255,255,.08);
+    }
+
+    .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: rgba(0, 0, 0, .78);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        z-index: 99999;
+    }
+
+    .modal-backdrop.show {
+        display: flex;
+    }
+
+    .modal-box {
+        width: min(100%, 390px);
+        border-radius: 24px;
+        animation: modalIn .2s ease-out;
+    }
+
+    @keyframes modalIn {
+        from {
+            opacity: 0;
+            transform: scale(.96) translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    @keyframes pulseSoft {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: .55;
+        }
+    }
+
+    @keyframes floatN {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+
+    body.modal-open {
+        overflow: hidden;
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #34d399;
+        box-shadow: 0 0 12px rgba(52, 211, 153, .8);
+        animation: pulseSoft 2s infinite;
+    }
+
+    .hero-n {
+        animation: floatN 5s ease-in-out infinite;
+    }
+
+    .country-row {
+        transition: .18s ease;
+    }
+
+    .country-row:hover {
+        transform: translateY(-1px);
+    }
+
+    .result-card {
+        animation: modalIn .25s ease-out;
+    }
+
+    @media (max-width: 640px) {
+        .header-actions {
+            width: 100%;
+        }
+
+        .header-actions a,
+        .header-actions button {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+</style>
+
+</head><body>
+    <div class="noise"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div><main class="relative z-10 w-full max-w-5xl mx-auto px-3 py-4 sm:px-6 sm:py-7">
+
+    <header class="glass rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="relative w-11 h-11 shrink-0 rounded-2xl bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-xl shadow-lg shadow-red-600/20">
+                <span class="relative z-10">🎬</span>
+                <div class="absolute inset-0 rounded-2xl bg-red-500/20 blur-md"></div>
+            </div>
+
+            <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h1 class="font-black text-sm sm:text-base tracking-wide">
+                        NETFLIX<span class="text-red-500">TOKEN</span>
+                    </h1>
+
+                    <span class="px-2 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[8px] font-black">
+                        NFTOOLS
+                    </span>
+                </div>
+
+                <p class="text-[9px] text-slate-500 font-bold tracking-[.2em]">
+                    GENERATOR ENGINE
+                </p>
+            </div>
+        </div>
+
+        <div class="header-actions flex items-center gap-2">
+            <a id="dashboardLink"
+               href="/dashboard"
+               class="shrink-0 inline-flex items-center justify-center px-3 py-2.5 rounded-xl bg-white/[.035] border border-white/[.07] text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/[.07] transition">
+                ← Dashboard
+            </a>
+
+            <button onclick="checkUsage()" class="inline-flex items-center justify-center px-3 py-2.5 rounded-xl bg-white/[.035] border border-white/[.07] text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/[.07] transition">
+                📊 Cek Kuota
+            </button>
+        </div>
+    </header>
+
+    <section class="hero glass rounded-3xl mt-4 p-5 sm:p-7 overflow-hidden relative">
+        <div class="hero-grid absolute inset-0 opacity-50"></div>
+
+        <div class="absolute -right-20 -top-20 w-56 h-56 rounded-full bg-red-600/10 blur-3xl"></div>
+
+        <div class="relative z-10 max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[9px] font-black tracking-wider mb-4">
+                <span class="status-dot"></span>
+                ENGINE ONLINE
+            </div>
+
+            <h2 class="text-2xl sm:text-4xl font-black leading-tight tracking-tight">
+                Generate NFToken.
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-300 to-slate-300">
+                    Akses Instan.
+                </span>
+            </h2>
+
+            <p class="mt-3 text-xs sm:text-sm text-slate-400 leading-relaxed max-w-xl">
+                Pilih negara tujuan atau konversi cookies mentah Netflix Anda menjadi link akses instan secara otomatis.
+            </p>
+
+            <div class="mt-5 flex flex-wrap gap-2">
+                <span class="px-3 py-1.5 rounded-lg glass-soft text-[9px] font-bold text-slate-400">
+                    ⚡ Fast Engine
+                </span>
+                <span class="px-3 py-1.5 rounded-lg glass-soft text-[9px] font-bold text-slate-400">
+                    🌐 Multi Country
+                </span>
+                <span class="px-3 py-1.5 rounded-lg glass-soft text-[9px] font-bold text-slate-400">
+                    🔐 Token System
+                </span>
+            </div>
+        </div>
+
+        <div class="hero-n absolute right-5 bottom-0 text-8xl sm:text-[10rem] font-black opacity-[.035] select-none pointer-events-none">
+            N
+        </div>
+    </section>
+
+    <section class="mt-4">
+        <div class="glass rounded-2xl p-1.5 grid grid-cols-2 gap-1">
+            <button id="btnTabGenerate"
+                onclick="switchTab('generate')"
+                class="tab-active rounded-xl py-3 bg-red-600 text-white text-[10px] sm:text-xs font-black transition">
+                🌐 Generate by Country
+            </button>
+
+            <button id="btnTabConvert"
+                onclick="switchTab('convert')"
+                class="rounded-xl py-3 text-slate-400 hover:text-white text-[10px] sm:text-xs font-black transition">
+                🍪 Convert Cookies
+            </button>
+        </div>
+    </section>
+
+    <section id="sectionGenerate" class="glass rounded-3xl mt-4 p-5 sm:p-6">
+        <div class="flex gap-3 mb-5">
+            <div class="w-11 h-11 shrink-0 rounded-2xl bg-red-600/10 border border-red-500/20 flex items-center justify-center text-lg">
+                🌐
+            </div>
+
+            <div>
+                <h2 class="text-sm font-black">Generate NFToken Link</h2>
+                <p class="text-[10px] text-slate-500 mt-1">
+                    Pilih kode negara atau ambil dari daftar stok tersedia.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div class="sm:col-span-2">
+                <label class="block text-[9px] font-black text-slate-500 tracking-widest mb-2">
+                    KODE NEGARA (CONTOH: US, ID, IN)
+                </label>
+
+                <input id="countryInput"
+                    type="text"
+                    maxlength="3"
+                    autocomplete="off"
+                    placeholder="US"
+                    class="input-modern uppercase font-mono">
+            </div>
+
+            <div>
+                <label class="block text-[9px] font-black text-slate-500 tracking-widest mb-2">
+                    AKSI
+                </label>
+
+                <button onclick="fetchCountries()" class="w-full py-[13px] rounded-xl bg-white/[.04] border border-white/[.1] text-xs font-bold text-slate-300 hover:bg-white/[.08] transition">
+                    📋 Lihat Stok Negara
+                </button>
+            </div>
+        </div>
+
+        <button id="btnGenerate"
+            onclick="generateToken()"
+            class="w-full py-3.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-xs font-black shadow-lg shadow-red-600/20 transition active:scale-[.98]">
+            🚀 Generate Link Sekarang
+        </button>
+
+        <div id="genLoading" class="hidden text-center py-7">
+            <div class="w-7 h-7 mx-auto border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-[10px] text-red-400 font-bold mt-3">
+                Memproses pembuatan token...
+            </p>
+        </div>
+
+        <div id="resultBoxGen" class="hidden result-card mt-5 rounded-2xl bg-red-500/5 border border-red-500/15 p-4">
+            <div class="text-xs font-black text-red-400 mb-3 flex items-center justify-between gap-3">
+                <span>✓ Berhasil Generate Link</span>
+
+                <div class="flex items-center gap-2">
+                    <span id="resCountryBadge" class="px-2 py-0.5 rounded bg-red-500/20 text-[9px] uppercase"></span>
+
+                    <button onclick="downloadTxt('gen')" class="px-2 py-1 rounded-lg bg-red-600 text-white text-[9px] font-bold hover:bg-red-500 transition">
+                        📥 TXT
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-[10px]">
+                <div>
+                    <span class="text-slate-500 block mb-1">Browser Link</span>
+
+                    <div class="flex gap-2">
+                        <input id="resBrowserLink" type="text" readonly class="input-modern font-mono text-[10px]">
+
+                        <button onclick="copyText('resBrowserLink')" class="shrink-0 px-3 py-2 rounded-xl bg-red-600/20 border border-red-500/30 text-red-300 font-bold hover:bg-red-600/30 transition">
+                            Salin
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="text-slate-500 block mb-1">Mobile Link</span>
+
+                    <div class="flex gap-2">
+                        <input id="resMobileLink" type="text" readonly class="input-modern font-mono text-[10px]">
+
+                        <button onclick="copyText('resMobileLink')" class="shrink-0 px-3 py-2 rounded-xl bg-red-600/20 border border-red-500/30 text-red-300 font-bold hover:bg-red-600/30 transition">
+                            Salin
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-3 border-t border-white/5">
+                    <span class="text-slate-500">Kedaluwarsa</span>
+                    <span id="resExpires" class="text-amber-300 font-bold"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sectionConvert" class="hidden glass rounded-3xl mt-4 p-5 sm:p-6">
+        <div class="flex gap-3 mb-5">
+            <div class="w-11 h-11 shrink-0 rounded-2xl bg-slate-500/10 border border-slate-500/20 flex items-center justify-center text-lg">
+                🍪
+            </div>
+
+            <div>
+                <h2 class="text-sm font-black">Convert Raw Cookies</h2>
+                <p class="text-[10px] text-slate-500 mt-1">
+                    Ubah cookies Netflix mentah (JSON / Netscape) menjadi token aktif.
+                </p>
+            </div>
+        </div>
+
+        <label class="block text-[9px] font-black text-slate-500 tracking-widest mb-2">
+            PASTE COOKIES MENTAH
+        </label>
+
+        <textarea id="cookiesInput"
+            rows="4"
+            placeholder="[{&quot;name&quot;: &quot;NetflixId&quot;, ...}]"
+            class="input-modern font-mono text-[10px] mb-4"></textarea>
+
+        <button id="btnConvert"
+            onclick="convertCookies()"
+            class="w-full py-3.5 rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white text-xs font-black shadow-lg shadow-black/20 transition active:scale-[.98]">
+            🔄 Konversi Cookies
+        </button>
+
+        <div id="convLoading" class="hidden text-center py-7">
+            <div class="w-7 h-7 mx-auto border-2 border-slate-300 border-t-transparent rounded-full animate-spin"></div>
+
+            <p class="text-[10px] text-slate-300 font-bold mt-3">
+                Mengonversi cookies...
+            </p>
+        </div>
+
+        <div id="resultBoxConv" class="hidden result-card mt-5 rounded-2xl bg-slate-500/5 border border-slate-500/15 p-4">
+            <div class="text-xs font-black text-slate-300 mb-3 flex items-center justify-between gap-3">
+                <span>✓ Konversi Berhasil</span>
+
+                <button onclick="downloadTxt('conv')" class="px-2 py-1 rounded-lg bg-slate-700 text-white text-[9px] font-bold hover:bg-slate-600 transition">
+                    📥 TXT
+                </button>
+            </div>
+
+            <div class="space-y-3 text-[10px]">
+                <div>
+                    <span class="text-slate-500 block mb-1">Browser Link</span>
+
+                    <div class="flex gap-2">
+                        <input id="resConvBrowser" type="text" readonly class="input-modern font-mono text-[10px]">
+
+                        <button onclick="copyText('resConvBrowser')" class="shrink-0 px-3 py-2 rounded-xl bg-slate-600/20 border border-slate-500/30 text-slate-300 font-bold hover:bg-slate-600/30 transition">
+                            Salin
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center py-7">
+        <div class="flex flex-wrap items-center justify-center gap-2 text-[9px] text-slate-600 font-bold">
+            <span>© 2026 ReyCode</span>
+            <span>•</span>
+            <span>NETFLIX TOKEN GENERATOR</span>
+            <span>•</span>
+            <span class="text-red-500/70">NFTOOLS</span>
+        </div>
+    </footer>
+</main>
+
+<div id="countryModal" class="modal-backdrop">
+    <div class="modal-box glass p-5">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h3 class="text-xs font-black uppercase tracking-wider text-white">
+                    Stok Negara Tersedia
+                </h3>
+
+                <p class="text-[9px] text-slate-600 mt-1">
+                    Pilih negara untuk mengisi kode otomatis
+                </p>
+            </div>
+
+            <button onclick="closeCountryModal()" class="w-8 h-8 rounded-lg bg-white/[.04] text-slate-400 hover:text-white hover:bg-white/[.08] text-xs transition">
+                ✕
+            </button>
+        </div>
+
+        <div id="countryListContainer" class="max-h-72 overflow-y-auto space-y-2 pr-1">
+            <div class="text-center text-slate-500 text-[10px] py-4">
+                Memuat data...
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="customModal" class="modal-backdrop">
+    <div class="modal-box glass p-5 text-center">
+        <div id="modalIcon" class="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4">
+            !
+        </div>
+
+        <h3 id="modalTitle" class="text-sm font-black uppercase tracking-wider text-white">
+            Pemberitahuan
+        </h3>
+
+        <p id="modalMessage" class="mt-2 text-[11px] text-slate-400 leading-relaxed whitespace-pre-line"></p>
+
+        <button onclick="closeModal()" class="w-full mt-5 py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-black hover:from-red-500 hover:to-red-600 transition">
+            Mengerti
+        </button>
+    </div>
+</div>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(location.search);
+        const username = params.get('user');
+
+        if (username) {
+            document.getElementById('dashboardLink').href = `/dashboard?user=${encodeURIComponent(username)}`;
+        }
+    });
+
+    function showModal(title, message, type = 'error') {
+        const modal = document.getElementById('customModal');
+        const icon = document.getElementById('modalIcon');
+
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalMessage').textContent = message;
+
+        if (type === 'success') {
+            icon.className = 'mx-auto w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300';
+            icon.textContent = '✓';
+        } else {
+            icon.className = 'mx-auto w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4 bg-amber-500/10 border border-amber-500/20 text-amber-300';
+            icon.textContent = '!';
+        }
+
+        modal.classList.add('show');
+        document.body.classList.add('modal-open');
+    }
+
+    function closeModal() {
+        document.getElementById('customModal').classList.remove('show');
+        document.body.classList.remove('modal-open');
+    }
+
+    function closeCountryModal() {
+        document.getElementById('countryModal').classList.remove('show');
+        document.body.classList.remove('modal-open');
+    }
+
+    function switchTab(tab) {
+        const btnGen = document.getElementById('btnTabGenerate');
+        const btnConv = document.getElementById('btnTabConvert');
+        const secGen = document.getElementById('sectionGenerate');
+        const secConv = document.getElementById('sectionConvert');
+
+        if (tab === 'generate') {
+            btnGen.className = 'tab-active rounded-xl py-3 bg-red-600 text-white text-[10px] sm:text-xs font-black transition';
+            btnConv.className = 'rounded-xl py-3 text-slate-400 hover:text-white text-[10px] sm:text-xs font-black transition';
+
+            secGen.classList.remove('hidden');
+            secConv.classList.add('hidden');
+        } else {
+            btnConv.className = 'tab-active rounded-xl py-3 bg-slate-700 text-white text-[10px] sm:text-xs font-black transition';
+            btnGen.className = 'rounded-xl py-3 text-slate-400 hover:text-white text-[10px] sm:text-xs font-black transition';
+
+            secConv.classList.remove('hidden');
+            secGen.classList.add('hidden');
+        }
+    }
+
+    async function copyText(elementId) {
+        const el = document.getElementById(elementId);
+
+        try {
+            await navigator.clipboard.writeText(el.value);
+            showModal('Berhasil', 'Tautan berhasil disalin ke clipboard!', 'success');
+        } catch {
+            el.select();
+            document.execCommand('copy');
+            showModal('Berhasil', 'Tautan berhasil disalin ke clipboard!', 'success');
+        }
+    }
+
+    function downloadTxt(type) {
+        let content = '';
+        let filename = 'netflix-token.txt';
+
+        if (type === 'gen') {
+            const country = document.getElementById('resCountryBadge').textContent;
+            const browser = document.getElementById('resBrowserLink').value;
+            const mobile = document.getElementById('resMobileLink').value;
+            const expires = document.getElementById('resExpires').textContent;
+
+            content = `=== NETFLIX TOKEN (${country}) ===\nBrowser Link: ${browser}\nMobile Link: ${mobile}\nExpires: ${expires}\nGenerated by ReyCode`;
+
+            filename = `netflix-${country.toLowerCase()}-token.txt`;
+        } else {
+            const browser = document.getElementById('resConvBrowser').value;
+
+            content = `=== NETFLIX CONVERTED TOKEN ===\nBrowser Link: ${browser}\nGenerated by ReyCode`;
+
+            filename = 'netflix-converted-token.txt';
+        }
+
+        const blob = new Blob([content], {
+            type: 'text/plain;charset=utf-8'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+
+        a.href = url;
+        a.download = filename;
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url);
+    }
+
+    async function checkUsage() {
+        try {
+            const res = await fetch('/api/netflixtoken?action=usage');
+            const data = await res.json();
+
+            if (data.status) {
+                showModal(
+                    'Status Kuota',
+                    `Batas Harian: ${data.data.dailyLimit}\nTerpakai: ${data.data.usedCount}\nSisa Kuota: ${data.data.remaining}`,
+                    'success'
+                );
+            } else {
+                showModal('Gagal', data.error || 'Gagal mengecek kuota.');
+            }
+        } catch (err) {
+            showModal('Error', err.message);
+        }
+    }
+
+    async function fetchCountries() {
+        const modal = document.getElementById('countryModal');
+        const container = document.getElementById('countryListContainer');
+
+        modal.classList.add('show');
+        document.body.classList.add('modal-open');
+
+        container.innerHTML = '<div class="text-center text-slate-500 text-[10px] py-4">Memuat data negara...</div>';
+
+        try {
+            const res = await fetch('/api/netflixtoken?action=countries');
+            const data = await res.json();
+
+            if (data.status && data.countries) {
+                container.innerHTML = '';
+
+                data.countries.forEach(c => {
+                    const div = document.createElement('div');
+
+                    div.className = 'country-row flex justify-between items-center gap-3 p-3 rounded-xl bg-white/[.025] border border-white/[.05] hover:bg-white/[.06] hover:border-red-500/20 cursor-pointer text-[10px]';
+
+                    div.innerHTML = `
+                        <div class="min-w-0">
+                            <span class="font-bold text-white block truncate">${c.name}</span>
+                            <span class="text-red-400 font-mono text-[9px]">${c.code}</span>
+                        </div>
+                        <span class="shrink-0 px-2 py-1 rounded-lg bg-red-500/10 text-red-300 text-[9px] font-bold">
+                            Stok: ${c.activeCookies}
+                        </span>
+                    `;
+
+                    div.onclick = () => {
+                        document.getElementById('countryInput').value = c.code;
+                        closeCountryModal();
+                    };
+
+                    container.appendChild(div);
+                });
+            } else {
+                container.innerHTML = '<div class="text-center text-red-400 text-[10px] py-4">Gagal memuat daftar negara.</div>';
+            }
+        } catch (err) {
+            container.innerHTML = `<div class="text-center text-red-400 text-[10px] py-4">Error: ${err.message}</div>`;
+        }
+    }
+
+    async function generateToken() {
+        const country = document.getElementById('countryInput').value.trim();
+        const btn = document.getElementById('btnGenerate');
+        const loading = document.getElementById('genLoading');
+        const resultBox = document.getElementById('resultBoxGen');
+
+        if (!country) {
+            showModal('Peringatan', 'Masukkan kode negara terlebih dahulu!');
+            return;
+        }
+
+        btn.disabled = true;
+        loading.classList.remove('hidden');
+        resultBox.classList.add('hidden');
+
+        try {
+            const res = await fetch(`/api/netflixtoken?action=generate&country=${encodeURIComponent(country)}`);
+            const data = await res.json();
+
+            if (data.status && data.data) {
+                document.getElementById('resCountryBadge').textContent = data.data.country;
+                document.getElementById('resBrowserLink').value = data.data.links.browser || '';
+                document.getElementById('resMobileLink').value = data.data.links.mobile || '';
+                document.getElementById('resExpires').textContent = data.data.expiresReadable || '-';
+
+                resultBox.classList.remove('hidden');
+
+                showModal('Berhasil', 'NFToken berhasil dibuat!', 'success');
+            } else {
+                throw new Error(data.error || 'Gagal menghasilkan link.');
+            }
+        } catch (err) {
+            showModal('Gagal', err.message);
+        } finally {
+            btn.disabled = false;
+            loading.classList.add('hidden');
+        }
+    }
+
+    async function convertCookies() {
+        const cookies = document.getElementById('cookiesInput').value.trim();
+        const btn = document.getElementById('btnConvert');
+        const loading = document.getElementById('convLoading');
+        const resultBox = document.getElementById('resultBoxConv');
+
+        if (!cookies) {
+            showModal('Peringatan', 'Masukkan cookies mentah terlebih dahulu!');
+            return;
+        }
+
+        btn.disabled = true;
+        loading.classList.remove('hidden');
+        resultBox.classList.add('hidden');
+
+        try {
+            const res = await fetch('/api/netflixtoken', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'convert',
+                    cookies
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.status && data.data) {
+                document.getElementById('resConvBrowser').value = data.data.links.browser || '';
+
+                resultBox.classList.remove('hidden');
+
+                showModal('Berhasil', 'Cookies berhasil dikonversi!', 'success');
+            } else {
+                throw new Error(data.error || 'Gagal mengonversi cookies.');
+            }
+        } catch (err) {
+            showModal('Gagal', err.message);
+        } finally {
+            btn.disabled = false;
+            loading.classList.add('hidden');
+        }
+    }
+
+    document.getElementById('countryInput').addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            generateToken();
+        }
+    });
+
+    document.getElementById('countryModal').addEventListener('click', event => {
+        if (event.target.id === 'countryModal') {
+            closeCountryModal();
+        }
+    });
+
+    document.getElementById('customModal').addEventListener('click', event => {
+        if (event.target.id === 'customModal') {
+            closeModal();
+        }
+    });
+</script>
+
+</body>
+</html>

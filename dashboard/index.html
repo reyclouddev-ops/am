@@ -1,1012 +1,1040 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ReyCloud - Command Center</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script><style>
+    * {
+        box-sizing: border-box;
+    }
 
-    <style>
-        * {
-            box-sizing: border-box;
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        transition: background-color .25s ease, color .25s ease;
+    }
+
+    button,
+    a {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .glass {
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    .grid-bg {
+        background-image:
+            linear-gradient(rgba(100,116,139,.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(100,116,139,.035) 1px, transparent 1px);
+        background-size: 32px 32px;
+    }
+
+    .robot {
+        position: relative;
+        width: 112px;
+        height: 112px;
+        margin: auto;
+    }
+
+    .robot-head {
+        position: absolute;
+        width: 66px;
+        height: 51px;
+        left: 23px;
+        top: 5px;
+        border-radius: 20px;
+        background: var(--robot-main);
+        border: 2px solid var(--robot-border);
+        box-shadow:
+            0 10px 25px rgba(0,0,0,.16),
+            inset 0 1px 0 rgba(255,255,255,.25);
+    }
+
+    .robot-face {
+        position: absolute;
+        width: 48px;
+        height: 27px;
+        left: 7px;
+        top: 10px;
+        border-radius: 13px;
+        background: var(--robot-screen);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 11px;
+    }
+
+    .robot-eye {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--robot-eye);
+    }
+
+    .robot-neck {
+        position: absolute;
+        width: 24px;
+        height: 8px;
+        left: 44px;
+        top: 55px;
+        background: var(--robot-main);
+        border-left: 2px solid var(--robot-border);
+        border-right: 2px solid var(--robot-border);
+    }
+
+    .robot-body {
+        position: absolute;
+        width: 80px;
+        height: 54px;
+        left: 16px;
+        top: 60px;
+        border-radius: 24px 24px 18px 18px;
+        background: var(--robot-main);
+        border: 2px solid var(--robot-border);
+        box-shadow:
+            0 12px 28px rgba(0,0,0,.16),
+            inset 0 1px 0 rgba(255,255,255,.2);
+    }
+
+    .robot-emblem {
+        position: absolute;
+        width: 25px;
+        height: 25px;
+        left: 25px;
+        top: 14px;
+        background: var(--robot-emblem);
+        clip-path: polygon(50% 0%, 100% 35%, 82% 100%, 18% 100%, 0% 35%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--robot-emblem-icon);
+        font-size: 11px;
+        font-weight: 900;
+    }
+
+    .robot-arm {
+        position: absolute;
+        width: 18px;
+        height: 47px;
+        top: 66px;
+        border-radius: 14px;
+        background: var(--robot-main);
+        border: 2px solid var(--robot-border);
+    }
+
+    .robot-arm.left {
+        left: 0;
+        transform: rotate(13deg);
+    }
+
+    .robot-arm.right {
+        right: 0;
+        transform: rotate(-13deg);
+    }
+
+    .robot-status {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: -15px;
+        white-space: nowrap;
+        font-size: 8px;
+        font-weight: 900;
+        letter-spacing: .14em;
+        color: #10b981;
+    }
+
+    .robot-float {
+        animation: robotFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes robotFloat {
+        0%,100% {
+            transform: translateY(0);
         }
 
-        html {
-            scroll-behavior: smooth;
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+
+    .live-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 10px rgba(16,185,129,.7);
+    }
+
+    .marquee-wrap {
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .marquee {
+        display: inline-block;
+        animation: marquee 24s linear infinite;
+    }
+
+    @keyframes marquee {
+        from {
+            transform: translateX(100%);
         }
 
-        body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            transition: background-color .25s ease, color .25s ease;
+        to {
+            transform: translateX(-100%);
         }
+    }
 
-        button,
-        a {
-            -webkit-tap-highlight-color: transparent;
-        }
+    .menu-panel {
+        z-index: 999;
+        max-height: min(620px, calc(100vh - 120px));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
 
-        .glass {
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-        }
+    .menu-panel::-webkit-scrollbar {
+        width: 4px;
+    }
 
-        .grid-bg {
-            background-image:
-                linear-gradient(rgba(100,116,139,.035) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(100,116,139,.035) 1px, transparent 1px);
-            background-size: 32px 32px;
-        }
+    .menu-panel::-webkit-scrollbar-thumb {
+        background: #64748b;
+        border-radius: 10px;
+    }
 
+    .soft-shadow {
+        box-shadow: 0 10px 35px rgba(0,0,0,.18);
+    }
+
+    .theme-card {
+        transition:
+            background-color .2s ease,
+            border-color .2s ease,
+            color .2s ease,
+            box-shadow .2s ease;
+    }
+
+    .action-btn {
+        transition:
+            transform .2s ease,
+            filter .2s ease,
+            box-shadow .2s ease;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.05);
+    }
+
+    .action-btn:active {
+        transform: scale(.98);
+    }
+
+    @media (max-width: 380px) {
         .robot {
-            position: relative;
-            width: 112px;
-            height: 112px;
-            margin: auto;
+            transform: scale(.9);
         }
 
-        .robot-head {
-            position: absolute;
-            width: 66px;
-            height: 51px;
-            left: 23px;
-            top: 5px;
-            border-radius: 20px;
-            background: var(--robot-main);
-            border: 2px solid var(--robot-border);
-            box-shadow:
-                0 10px 25px rgba(0,0,0,.16),
-                inset 0 1px 0 rgba(255,255,255,.25);
-        }
-
-        .robot-face {
-            position: absolute;
-            width: 48px;
-            height: 27px;
-            left: 7px;
-            top: 10px;
-            border-radius: 13px;
-            background: var(--robot-screen);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 11px;
-        }
-
-        .robot-eye {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--robot-eye);
-        }
-
-        .robot-neck {
-            position: absolute;
-            width: 24px;
-            height: 8px;
-            left: 44px;
-            top: 55px;
-            background: var(--robot-main);
-            border-left: 2px solid var(--robot-border);
-            border-right: 2px solid var(--robot-border);
-        }
-
-        .robot-body {
-            position: absolute;
-            width: 80px;
-            height: 54px;
-            left: 16px;
-            top: 60px;
-            border-radius: 24px 24px 18px 18px;
-            background: var(--robot-main);
-            border: 2px solid var(--robot-border);
-            box-shadow:
-                0 12px 28px rgba(0,0,0,.16),
-                inset 0 1px 0 rgba(255,255,255,.2);
-        }
-
-        .robot-emblem {
-            position: absolute;
-            width: 25px;
-            height: 25px;
-            left: 25px;
-            top: 14px;
-            background: var(--robot-emblem);
-            clip-path: polygon(50% 0%, 100% 35%, 82% 100%, 18% 100%, 0% 35%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--robot-emblem-icon);
-            font-size: 11px;
-            font-weight: 900;
-        }
-
-        .robot-arm {
-            position: absolute;
-            width: 18px;
-            height: 47px;
-            top: 66px;
-            border-radius: 14px;
-            background: var(--robot-main);
-            border: 2px solid var(--robot-border);
-        }
-
-        .robot-arm.left {
-            left: 0;
-            transform: rotate(13deg);
-        }
-
-        .robot-arm.right {
-            right: 0;
-            transform: rotate(-13deg);
-        }
-
-        .robot-status {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            bottom: -15px;
-            white-space: nowrap;
-            font-size: 8px;
-            font-weight: 900;
-            letter-spacing: .14em;
-            color: #10b981;
-        }
-
-        .robot-float {
-            animation: robotFloat 4s ease-in-out infinite;
-        }
-
-        @keyframes robotFloat {
-            0%,100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-5px);
-            }
-        }
-
-        .live-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #10b981;
-            box-shadow: 0 0 10px rgba(16,185,129,.7);
-        }
-
-        .marquee-wrap {
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .marquee {
-            display: inline-block;
-            animation: marquee 24s linear infinite;
-        }
-
-        @keyframes marquee {
-            from {
-                transform: translateX(100%);
-            }
-
-            to {
-                transform: translateX(-100%);
-            }
+        .command-title {
+            font-size: 16px;
         }
 
         .menu-panel {
-            z-index: 999;
-            max-height: min(620px, calc(100vh - 120px));
-            overflow-y: auto;
-            overscroll-behavior: contain;
+            width: 240px !important;
         }
+    }
 
-        .menu-panel::-webkit-scrollbar {
-            width: 4px;
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            scroll-behavior: auto !important;
         }
+    }
+</style>
 
-        .menu-panel::-webkit-scrollbar-thumb {
-            background: #64748b;
-            border-radius: 10px;
-        }
+</head><body id="pageBody" class="min-h-screen grid-bg"><div id="ambient1" class="fixed pointer-events-none rounded-full blur-[100px] w-64 h-64 top-0 left-1/2 -translate-x-1/2"></div>
+<div id="ambient2" class="fixed pointer-events-none rounded-full blur-[120px] w-56 h-56 bottom-10 -right-24"></div>
 
-        .soft-shadow {
-            box-shadow: 0 10px 35px rgba(0,0,0,.18);
-        }
+<main class="w-full max-w-md mx-auto px-3 py-4 sm:px-5 relative z-10">
 
-        .theme-card {
-            transition:
-                background-color .2s ease,
-                border-color .2s ease,
-                color .2s ease,
-                box-shadow .2s ease;
-        }
+    <header id="navHeader" class="theme-card glass rounded-3xl border p-3.5 flex items-center justify-between sticky top-3 z-[100] soft-shadow">
 
-        .action-btn {
-            transition:
-                transform .2s ease,
-                filter .2s ease,
-                box-shadow .2s ease;
-        }
+        <div class="flex items-center gap-3 min-w-0">
 
-        .action-btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.05);
-        }
-
-        .action-btn:active {
-            transform: scale(.98);
-        }
-
-        @media (max-width: 380px) {
-            .robot {
-                transform: scale(.9);
-            }
-
-            .command-title {
-                font-size: 16px;
-            }
-
-            .menu-panel {
-                width: 240px !important;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: .01ms !important;
-                animation-iteration-count: 1 !important;
-                scroll-behavior: auto !important;
-            }
-        }
-    </style>
-</head>
-
-<body id="pageBody" class="min-h-screen grid-bg">
-
-    <div id="ambient1" class="fixed pointer-events-none rounded-full blur-[100px] w-64 h-64 top-0 left-1/2 -translate-x-1/2"></div>
-    <div id="ambient2" class="fixed pointer-events-none rounded-full blur-[120px] w-56 h-56 bottom-10 -right-24"></div>
-
-    <main class="w-full max-w-md mx-auto px-3 py-4 sm:px-5 relative z-10">
-
-        <header id="navHeader" class="theme-card glass rounded-3xl border p-3.5 flex items-center justify-between sticky top-3 z-[100] soft-shadow">
-
-            <div class="flex items-center gap-3 min-w-0">
-
-                <div class="w-11 h-11 rounded-2xl p-[1.5px] bg-gradient-to-br from-indigo-500 via-cyan-400 to-purple-500 shrink-0 shadow-lg shadow-indigo-500/20">
-                    <div id="logoBox" class="w-full h-full rounded-[15px] flex items-center justify-center text-xl">
-                        ⚡
-                    </div>
+            <div class="w-11 h-11 rounded-2xl p-[1.5px] bg-gradient-to-br from-indigo-500 via-cyan-400 to-purple-500 shrink-0 shadow-lg shadow-indigo-500/20">
+                <div id="logoBox" class="w-full h-full rounded-[15px] flex items-center justify-center text-xl">
+                    ⚡
                 </div>
-
-                <div class="min-w-0">
-
-                    <div class="flex items-center gap-1.5">
-
-                        <span id="brandTitle" class="font-black text-[15px] tracking-wide">
-                            REY<span class="text-indigo-500">CLOUD</span><span class="text-cyan-500">X</span>
-                        </span>
-
-                        <span class="text-[8px] font-black tracking-wider px-1.5 py-1 rounded-md border border-indigo-400/40 bg-indigo-500/10 text-indigo-500">
-                            ULTRA
-                        </span>
-
-                    </div>
-
-                    <div id="brandSubtitle" class="text-[8px] font-black tracking-[.18em] uppercase text-slate-400 mt-1">
-                        NEXT-GEN ECOSYSTEM
-                    </div>
-
-                </div>
-
             </div>
 
-            <div class="flex items-center gap-2 relative shrink-0">
+            <div class="min-w-0">
 
-                <button
-                    id="themeToggleBtn"
-                    onclick="toggleTheme()"
-                    class="w-10 h-10 rounded-xl flex items-center justify-center border transition-all active:scale-95"
-                    title="Ganti Tema"
-                >
-                    <span id="themeIcon" class="text-lg">🌙</span>
-                </button>
+                <div class="flex items-center gap-1.5">
 
-                <button
-                    id="menuBtn"
-                    onclick="toggleMenu(event)"
-                    class="w-10 h-10 rounded-xl flex items-center justify-center border transition-all active:scale-95"
-                    aria-label="Menu"
-                >
-                    <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
+                    <span id="brandTitle" class="font-black text-[15px] tracking-wide">
+                        REY<span class="text-indigo-500">CLOUD</span><span class="text-cyan-500">X</span>
+                    </span>
 
-                <div id="navDropdown" class="menu-panel hidden absolute right-0 top-12 w-64 rounded-2xl border p-2 shadow-2xl">
-
-                    <a id="profileMenuLink" href="#" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">👤</span>
-                        <span class="text-[11px] font-bold">Reyz4YouXGod (Admin)</span>
-                    </a>
-
-                    <div class="menu-divider h-px my-1.5"></div>
-
-                    <a href="/docs/panelsmm/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">📱</span>
-                        <span class="text-[11px] font-bold">SMM & RumahOTP Panel</span>
-                    </a>
-
-                    <a href="/docs/reactwa/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">💬</span>
-                        <span class="text-[11px] font-bold">ReactWA & Link Bypass</span>
-                    </a>
-
-                    <a href="/docs/amgen/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🚀</span>
-                        <span class="text-[11px] font-bold">Generator Amgen</span>
-                    </a>
-
-                    <a href="/docs/capcutpro/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">✨</span>
-                        <span class="text-[11px] font-bold">CapCut Pro Trial 7d</span>
-                    </a>
-
-                    <a href="/docs/createfreefire/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🔥</span>
-                        <span class="text-[11px] font-bold">FF Guest Generator</span>
-                    </a>
-
-                    <a href="/docs/ytplay/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🍿</span>
-                        <span class="text-[11px] font-bold">ReyTube Streaming</span>
-                    </a>
-
-                    <a href="/docs/tools/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">✨</span>
-                        <span class="text-[11px] font-bold">AI Upscale Tools</span>
-                    </a>
-
-                    <a href="/docs/nanobanana/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🍌</span>
-                        <span class="text-[11px] font-bold">NanoBanana AI</span>
-                    </a>
-
-                    <a href="/docs/downloader/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">📥</span>
-                        <span class="text-[11px] font-bold">Media Downloader</span>
-                    </a>
-
-                    <a href="/docs/tempmail/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">📧</span>
-                        <span class="text-[11px] font-bold">ReyMail TempMail</span>
-                    </a>
-
-                    <a href="/docs/chatai/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🤖</span>
-                        <span class="text-[11px] font-bold">Rayleigh AI Chat</span>
-                    </a>
-
-                    <a href="/docs/web2apk/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">📱</span>
-                        <span class="text-[11px] font-bold">ReyCode Web2APK Builder</span>
-                    </a>
-
-                    <a href="/docs/safelink/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🔗</span>
-                        <span class="text-[11px] font-bold">ReyCode Safelink Bypasser</span>
-                    </a>
-
-                    <div class="menu-divider h-px my-1.5"></div>
-
-                    <a href="#" onclick="handleDonation(event)" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">💖</span>
-                        <span class="text-[11px] font-bold">Donasi ReyCloud</span>
-                    </a>
-
-                    <a href="https://wa.me/6281260512743?text=Halo%20Admin,%20saya%20ingin%20bertanya%20tentang%20Alight%20Motion%20Premium." target="_blank" rel="noopener noreferrer" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
-                        <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">💬</span>
-                        <span class="text-[11px] font-bold">Kontak WhatsApp</span>
-                    </a>
-
-                </div>
-
-            </div>
-
-        </header>
-
-        <section class="mt-4 px-1">
-
-            <div class="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                <span class="text-indigo-500">●</span>
-                Command Center
-                <span class="text-indigo-500 ml-1">Ultra Dashboard</span>
-            </div>
-
-            <p id="introText" class="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
-                Pusat kendali otomatisasi tools, kreator media, dan server tercanggih.
-            </p>
-
-        </section>
-
-        <section id="commandCenter" class="theme-card mt-4 rounded-3xl border p-4 relative overflow-hidden soft-shadow">
-
-            <div id="commandGlow" class="absolute inset-0 pointer-events-none"></div>
-
-            <div class="relative z-10">
-
-                <div class="flex items-center justify-between mb-1">
-
-                    <div class="flex items-center gap-2">
-
-                        <span class="live-dot"></span>
-
-                        <span class="text-[9px] font-black tracking-[.15em] uppercase text-emerald-500">
-                            REYCLOUD LIVE
-                        </span>
-
-                    </div>
-
-                    <span id="systemStatus" class="text-[8px] font-black tracking-widest px-2.5 py-1.5 rounded-full border">
-                        SYSTEM ONLINE
+                    <span class="text-[8px] font-black tracking-wider px-1.5 py-1 rounded-md border border-indigo-400/40 bg-indigo-500/10 text-indigo-500">
+                        ULTRA
                     </span>
 
                 </div>
 
-                <div class="robot-float mt-2">
-
-                    <div class="robot">
-
-                        <div class="robot-head">
-
-                            <div class="robot-face">
-                                <span class="robot-eye"></span>
-                                <span class="robot-eye"></span>
-                            </div>
-
-                        </div>
-
-                        <div class="robot-neck"></div>
-
-                        <div class="robot-arm left"></div>
-                        <div class="robot-arm right"></div>
-
-                        <div class="robot-body">
-                            <div class="robot-emblem">★</div>
-                        </div>
-
-                        <div class="robot-status">
-                            ● REYBOT ACTIVE
-                        </div>
-
-                    </div>
-
+                <div id="brandSubtitle" class="text-[8px] font-black tracking-[.18em] uppercase text-slate-400 mt-1">
+                    NEXT-GEN ECOSYSTEM
                 </div>
 
-                <div class="grid grid-cols-[1fr_auto] gap-3 items-end mt-5">
-
-                    <div class="min-w-0">
-
-                        <div class="text-[8px] font-black tracking-[.2em] uppercase text-indigo-500">
-                            COMMAND CENTER
-                        </div>
-
-                        <h2 class="command-title text-[17px] font-black mt-1">
-                            ReyCode Ecosystem
-                        </h2>
-
-                        <p class="text-[10px] text-slate-400 mt-1">
-                            Automation • AI • Hosting • Server
-                        </p>
-
-                    </div>
-
-                    <div id="clockBox" class="rounded-2xl border px-3 py-2.5 text-right min-w-[145px]">
-
-                        <div id="liveClock" class="text-[19px] font-black tracking-[.18em] font-mono">
-                            00.00.00
-                        </div>
-
-                        <div id="liveDate" class="text-[8px] font-black tracking-wider text-indigo-500 mt-1 uppercase">
-                            13 SEPTEMBER 2026 • MINGGU
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <section class="mt-3 rounded-3xl overflow-hidden border theme-card bg-black shadow-lg">
-
-            <div class="relative aspect-video">
-
-                <video
-                    autoplay
-                    muted
-                    loop
-                    playsinline
-                    preload="metadata"
-                    class="absolute inset-0 w-full h-full object-cover"
-                >
-                    <source src="https://api.reycode.my.id/r/UocoKf.mp4" type="video/mp4">
-                </video>
-
-                <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
-
-            </div>
-
-        </section>
-
-        <div class="mt-3 rounded-2xl border theme-card px-3 py-2.5 marquee-wrap">
-
-            <div class="marquee text-[10px] font-bold text-indigo-500">
-                🔥 UPDATE: ReyCloud Ecosystem aktif • Automation • AI • Hosting • Server • Security • Developer Tools • ReyCode
             </div>
 
         </div>
 
-        <section class="mt-4 space-y-2.5">
+        <div class="flex items-center gap-2 relative shrink-0">
 
-            <a href="/docs/web2apk/" class="action-btn w-full rounded-2xl px-4 py-4 flex items-center justify-between bg-gradient-to-r from-slate-800 via-slate-700 to-cyan-500 text-white shadow-lg shadow-cyan-500/20">
+            <button
+                id="themeToggleBtn"
+                onclick="toggleTheme()"
+                class="w-10 h-10 rounded-xl flex items-center justify-center border transition-all active:scale-95"
+                title="Ganti Tema"
+            >
+                <span id="themeIcon" class="text-lg">🌙</span>
+            </button>
 
-                <div class="flex items-center gap-3">
+            <button
+                id="menuBtn"
+                onclick="toggleMenu(event)"
+                class="w-10 h-10 rounded-xl flex items-center justify-center border transition-all active:scale-95"
+                aria-label="Menu"
+            >
+                <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
 
-                    <span class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-lg">
-                        📱
-                    </span>
+            <div id="navDropdown" class="menu-panel hidden absolute right-0 top-12 w-64 rounded-2xl border p-2 shadow-2xl">
 
-                    <span class="text-[13px] font-black tracking-wide">
-                        ReyCode Web2APK Builder
-                    </span>
-
-                </div>
-
-                <span class="text-[9px] font-black px-2 py-1.5 rounded-lg bg-black/20 border border-white/15">
-                    BUILD APK
-                </span>
-
-            </a>
-
-            <a href="/docs/safelink/" class="action-btn w-full rounded-2xl px-4 py-4 flex items-center justify-between bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-500 text-white shadow-lg shadow-cyan-500/20">
-
-                <div class="flex items-center gap-3">
-
-                    <span class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-lg">
-                        🔗
-                    </span>
-
-                    <span class="text-[13px] font-black tracking-wide">
-                        ReyCode Safelink Bypasser
-                    </span>
-
-                </div>
-
-                <span class="text-[9px] font-black px-2 py-1.5 rounded-lg bg-black/20 border border-white/15">
-                    BYPASS
-                </span>
-
-            </a>
-
-            <a href="/docs/reactwa/" class="action-btn w-full rounded-2xl px-4 py-4 flex items-center justify-between bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/20">
-
-                <div class="flex items-center gap-3">
-
-                    <span class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-lg">
-                        💬
-                    </span>
-
-                    <span class="text-[13px] font-black tracking-wide">
-                        ReactWA & Link Bypass Engine
-                    </span>
-
-                </div>
-
-                <span class="text-[9px] font-black px-2 py-1.5 rounded-lg bg-black/20 border border-white/15">
-                    NEW 🔥
-                </span>
-
-            </a>
-
-            <a href="/docs/capcutpro/" class="action-btn w-full rounded-2xl px-4 py-3.5 flex items-center justify-center gap-2.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 text-white shadow-lg shadow-indigo-500/20">
-
-                <span>✨</span>
-
-                <span class="text-[12px] font-black">
-                    CapCut Pro Trial 7d Engine
-                </span>
-
-            </a>
-
-            <a href="/docs/panelsmm/" class="action-btn w-full rounded-2xl px-4 py-3.5 flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-400 via-amber-500 to-cyan-400 text-slate-950 shadow-lg shadow-amber-500/15">
-
-                <span>📱</span>
-
-                <span class="text-[12px] font-black">
-                    Buka Panel SMM & RumahOTP
-                </span>
-
-            </a>
-
-            <a href="/docs/amgen/" class="action-btn w-full rounded-2xl px-4 py-3.5 flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-400 via-orange-500 to-orange-600 text-slate-950 shadow-lg shadow-orange-500/15">
-
-                <span>⚡</span>
-
-                <span class="text-[12px] font-black">
-                    Buka Generator Alight Motion
-                </span>
-
-            </a>
-
-            <a href="/docs/tempmail/" class="action-btn w-full rounded-2xl px-4 py-3.5 flex items-center justify-center gap-2.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20">
-
-                <span>📧</span>
-
-                <span class="text-[12px] font-black">
-                    Buka ReyMail TempMail
-                </span>
-
-            </a>
-
-            <div class="grid grid-cols-2 gap-2.5">
-
-                <a href="/docs/ytplay/" class="theme-card rounded-2xl border py-3.5 text-center text-[11px] font-black text-orange-500">
-                    🍿 ReyTube
+                <a id="profileMenuLink" href="#" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">👤</span>
+                    <span class="text-[11px] font-bold">Reyz4YouXGod (Admin)</span>
                 </a>
 
-                <a href="/docs/createfreefire/" class="theme-card rounded-2xl border py-3.5 text-center text-[11px] font-black text-orange-500">
-                    🔥 FF Guest Gen
+                <div class="menu-divider h-px my-1.5"></div>
+
+                <a href="/docs/panelsmm/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">📱</span>
+                    <span class="text-[11px] font-bold">SMM & RumahOTP Panel</span>
                 </a>
 
-            </div>
-
-            <div class="grid grid-cols-3 gap-2.5">
-
-                <a href="/docs/nanobanana/" class="theme-card rounded-2xl border py-3 text-center text-[10px] font-black text-amber-500">
-                    🍌 Nano AI
+                <a href="/docs/reactwa/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">💬</span>
+                    <span class="text-[11px] font-bold">ReactWA & Link Bypass</span>
                 </a>
 
-                <a href="/docs/downloader/" class="theme-card rounded-2xl border py-3 text-center text-[10px] font-black text-pink-500">
-                    📥 Downloader
+                <a href="/docs/amgen/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🚀</span>
+                    <span class="text-[11px] font-bold">Generator Amgen</span>
                 </a>
 
-                <a href="/docs/chatai/" class="theme-card rounded-2xl border py-3 text-center text-[10px] font-black text-cyan-500">
-                    🤖 AI Chat
+                <a href="/docs/capcutpro/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">✨</span>
+                    <span class="text-[11px] font-bold">CapCut Pro Trial 7d</span>
+                </a>
+
+                <a href="/docs/createfreefire/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🔥</span>
+                    <span class="text-[11px] font-bold">FF Guest Generator</span>
+                </a>
+
+                <a href="/docs/ytplay/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🍿</span>
+                    <span class="text-[11px] font-bold">ReyTube Streaming</span>
+                </a>
+
+                <a href="/docs/tools/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">✨</span>
+                    <span class="text-[11px] font-bold">AI Upscale Tools</span>
+                </a>
+
+                <a href="/docs/nanobanana/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🍌</span>
+                    <span class="text-[11px] font-bold">NanoBanana AI</span>
+                </a>
+
+                <a href="/docs/downloader/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">📥</span>
+                    <span class="text-[11px] font-bold">Media Downloader</span>
+                </a>
+
+                <a href="/docs/tempmail/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">📧</span>
+                    <span class="text-[11px] font-bold">ReyMail TempMail</span>
+                </a>
+
+                <a href="/docs/chatai/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🤖</span>
+                    <span class="text-[11px] font-bold">Rayleigh AI Chat</span>
+                </a>
+
+                <a href="/docs/web2apk/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">📱</span>
+                    <span class="text-[11px] font-bold">ReyCode Web2APK Builder</span>
+                </a>
+
+                <a href="/docs/safelink/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🔗</span>
+                    <span class="text-[11px] font-bold">ReyCode Safelink Bypasser</span>
+                </a>
+
+                <a href="/docs/netflix/" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">🎬</span>
+                    <span class="text-[11px] font-bold">Netflix Token Generator</span>
+                </a>
+
+                <div class="menu-divider h-px my-1.5"></div>
+
+                <a href="https://mustikapayment.com/l/donasi-reycode" target="_blank" rel="noopener noreferrer" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">💖</span>
+                    <span class="text-[11px] font-bold">Donasi ReyCloud</span>
+                </a>
+
+                <a href="https://wa.me/6281260512743?text=Halo%20Admin,%20saya%20ingin%20bertanya%20tentang%20Alight%20Motion%20Premium." target="_blank" rel="noopener noreferrer" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl">
+                    <span class="menu-icon w-8 h-8 rounded-lg flex items-center justify-center">💬</span>
+                    <span class="text-[11px] font-bold">Kontak WhatsApp</span>
                 </a>
 
             </div>
 
-            <a href="#" onclick="handleDonation(event)" class="theme-card rounded-2xl border py-3.5 text-center text-[11px] font-black text-pink-500 block">
-                ♡ &nbsp; Dukung & Donasi untuk ReyCloud 💖
-            </a>
+        </div>
 
-        </section>
+    </header>
 
-        <section class="grid grid-cols-3 gap-2.5 mt-4">
+    <section class="mt-4 px-1">
 
-            <div class="theme-card rounded-2xl border p-3.5 text-center">
+        <div class="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+            <span class="text-indigo-500">●</span>
+            Command Center
+            <span class="text-indigo-500 ml-1">Ultra Dashboard</span>
+        </div>
 
-                <span class="text-[8px] font-black tracking-widest text-slate-400 uppercase">
-                    Total Akun
+        <p id="introText" class="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+            Pusat kendali otomatisasi tools, kreator media, dan server tercanggih.
+        </p>
+
+    </section>
+
+    <section id="commandCenter" class="theme-card mt-4 rounded-3xl border p-4 relative overflow-hidden soft-shadow">
+
+        <div id="commandGlow" class="absolute inset-0 pointer-events-none"></div>
+
+        <div class="relative z-10">
+
+            <div class="flex items-center justify-between mb-1">
+
+                <div class="flex items-center gap-2">
+
+                    <span class="live-dot"></span>
+
+                    <span class="text-[9px] font-black tracking-[.15em] uppercase text-emerald-500">
+                        REYCLOUD LIVE
+                    </span>
+
+                </div>
+
+                <span id="systemStatus" class="text-[8px] font-black tracking-widest px-2.5 py-1.5 rounded-full border">
+                    SYSTEM ONLINE
                 </span>
 
-                <div class="text-[15px] font-black text-amber-500 mt-1">
-                    1,842+
+            </div>
+
+            <div class="robot-float mt-2">
+
+                <div class="robot">
+
+                    <div class="robot-head">
+
+                        <div class="robot-face">
+                            <span class="robot-eye"></span>
+                            <span class="robot-eye"></span>
+                        </div>
+
+                    </div>
+
+                    <div class="robot-neck"></div>
+
+                    <div class="robot-arm left"></div>
+                    <div class="robot-arm right"></div>
+
+                    <div class="robot-body">
+                        <div class="robot-emblem">★</div>
+                    </div>
+
+                    <div class="robot-status">
+                        ● REYBOT ACTIVE
+                    </div>
+
                 </div>
 
             </div>
 
-            <div class="theme-card rounded-2xl border p-3.5 text-center">
+            <div class="grid grid-cols-[1fr_auto] gap-3 items-end mt-5">
 
-                <span class="text-[8px] font-black tracking-widest text-slate-400 uppercase">
-                    Tools Active
-                </span>
+                <div class="min-w-0">
 
-                <div class="text-[13px] font-black text-cyan-500 mt-1">
-                    12 Services
+                    <div class="text-[8px] font-black tracking-[.2em] uppercase text-indigo-500">
+                        COMMAND CENTER
+                    </div>
+
+                    <h2 class="command-title text-[17px] font-black mt-1">
+                        ReyCode Ecosystem
+                    </h2>
+
+                    <p class="text-[10px] text-slate-400 mt-1">
+                        Automation • AI • Hosting • Server
+                    </p>
+
+                </div>
+
+                <div id="clockBox" class="rounded-2xl border px-3 py-2.5 text-right min-w-[145px]">
+
+                    <div id="liveClock" class="text-[19px] font-black tracking-[.18em] font-mono">
+                        00.00.00
+                    </div>
+
+                    <div id="liveDate" class="text-[8px] font-black tracking-wider text-indigo-500 mt-1 uppercase">
+                        13 SEPTEMBER 2026 • MINGGU
+                    </div>
+
                 </div>
 
             </div>
 
-            <div class="theme-card rounded-2xl border p-3.5 text-center">
+        </div>
 
-                <span class="text-[8px] font-black tracking-widest text-slate-400 uppercase">
-                    Success Rate
-                </span>
+    </section>
 
-                <div class="text-[15px] font-black text-emerald-500 mt-1">
-                    99.9%
-                </div>
+    <section class="mt-3 rounded-3xl overflow-hidden border theme-card bg-black shadow-lg">
 
-            </div>
+        <div class="relative aspect-video">
 
-        </section>
+            <video
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                class="absolute inset-0 w-full h-full object-cover"
+            >
+                <source src="https://api.reycode.my.id/r/UocoKf.mp4" type="video/mp4">
+            </video>
 
-        <section class="theme-card rounded-3xl border p-5 mt-4">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
+
+        </div>
+
+    </section>
+
+    <div class="mt-3 rounded-2xl border theme-card px-3 py-2.5 marquee-wrap">
+
+        <div class="marquee text-[10px] font-bold text-indigo-500">
+            🔥 UPDATE: ReyCloud Ecosystem aktif • Automation • AI • Hosting • Server • Security • Developer Tools • ReyCode
+        </div>
+
+    </div>
+
+    <section class="mt-4 space-y-2.5">
+
+        <a href="/docs/web2apk/" class="action-btn w-full rounded-2xl px-4 py-4 flex items-center justify-between bg-gradient-to-r from-slate-800 via-slate-700 to-cyan-500 text-white shadow-lg shadow-cyan-500/20">
 
             <div class="flex items-center gap-3">
 
-                <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-lg">
-                    ☁️
-                </div>
+                <span class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-lg">
+                    📱
+                </span>
 
-                <div>
-
-                    <h3 class="text-xs font-black uppercase tracking-wide">
-                        About ReyCode
-                    </h3>
-
-                    <p class="text-[9px] font-bold text-cyan-500 mt-1">
-                        Solusi Hosting & Infrastruktur Web
-                    </p>
-
-                </div>
+                <span class="text-[13px] font-black tracking-wide">
+                    ReyCode Web2APK Builder
+                </span>
 
             </div>
 
-            <p class="text-[10px] text-slate-400 leading-relaxed mt-4">
-                ReyCode adalah platform layanan digital yang menyediakan infrastruktur hosting, VPS, manajemen server Pterodactyl, automation tools, AI utilities, dan berbagai layanan developer untuk kreator serta developer.
-            </p>
+            <span class="text-[9px] font-black px-2 py-1.5 rounded-lg bg-black/20 border border-white/15">
+                BUILD APK
+            </span>
 
-            <div class="grid grid-cols-2 gap-2.5 mt-4 pt-4 border-t theme-divider">
+        </a>
 
-                <div class="theme-card rounded-xl border p-3">
+        <a href="/docs/safelink/" class="action-btn w-full rounded-2xl px-4 py-4 flex items-center justify-between bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-500 text-white shadow-lg shadow-cyan-500/20">
 
-                    <span class="text-[8px] font-black tracking-widest text-slate-400 uppercase">
-                        Layanan
-                    </span>
+            <div class="flex items-center gap-3">
 
-                    <p class="text-[11px] font-black mt-1">
-                        Hosting & Tools
-                    </p>
+                <span class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-lg">
+                    🔗
+                </span>
 
-                </div>
-
-                <div class="theme-card rounded-xl border p-3">
-
-                    <span class="text-[8px] font-black tracking-widest text-slate-400 uppercase">
-                        Status
-                    </span>
-
-                    <p class="text-[10px] font-black text-emerald-500 mt-1 flex items-center gap-1.5">
-                        <span class="live-dot"></span>
-                        Operational
-                    </p>
-
-                </div>
+                <span class="text-[13px] font-black tracking-wide">
+                    ReyCode Safelink Bypasser
+                </span>
 
             </div>
 
-        </section>
+            <span class="text-[9px] font-black px-2 py-1.5 rounded-lg bg-black/20 border border-white/15">
+                BYPASS
+            </span>
 
-        <footer class="text-center py-5">
+        </a>
 
-            <div class="text-[9px] font-semibold text-slate-500 tracking-widest">
-                © 2026 REYCLOUDSHP • ALL RIGHTS RESERVED
+        <a href="/docs/reactwa/" class="action-btn w-full rounded-2xl px-4 py-4 flex items-center justify-between bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/20">
+
+            <div class="flex items-center gap-3">
+
+                <span class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-lg">
+                    💬
+                </span>
+
+                <span class="text-[13px] font-black tracking-wide">
+                    ReactWA & Link Bypass Engine
+                </span>
+
             </div>
 
-        </footer>
+            <span class="text-[9px] font-black px-2 py-1.5 rounded-lg bg-black/20 border border-white/15">
+                NEW 🔥
+            </span>
 
-    </main>
+        </a>
 
-    <script>
-        function handleDonation(event) {
+        <a href="/docs/netflix/" class="action-btn w-full rounded-2xl px-4 py-4 flex items-center justify-between bg-gradient-to-r from-red-700 via-red-600 to-slate-800 text-white shadow-lg shadow-red-600/20">
+
+            <div class="flex items-center gap-3">
+
+                <span class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-lg">
+                    🎬
+                </span>
+
+                <span class="text-[13px] font-black tracking-wide">
+                    Netflix Token Generator
+                </span>
+
+            </div>
+
+            <span class="text-[9px] font-black px-2 py-1.5 rounded-lg bg-black/20 border border-white/15">
+                OPEN
+            </span>
+
+        </a>
+
+        <a href="/docs/capcutpro/" class="action-btn w-full rounded-2xl px-4 py-3.5 flex items-center justify-center gap-2.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 text-white shadow-lg shadow-indigo-500/20">
+
+            <span>✨</span>
+
+            <span class="text-[12px] font-black">
+                CapCut Pro Trial 7d Engine
+            </span>
+
+        </a>
+
+        <a href="/docs/panelsmm/" class="action-btn w-full rounded-2xl px-4 py-3.5 flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-400 via-amber-500 to-cyan-400 text-slate-950 shadow-lg shadow-amber-500/15">
+
+            <span>📱</span>
+
+            <span class="text-[12px] font-black">
+                Buka Panel SMM & RumahOTP
+            </span>
+
+        </a>
+
+        <a href="/docs/amgen/" class="action-btn w-full rounded-2xl px-4 py-3.5 flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-400 via-orange-500 to-orange-600 text-slate-950 shadow-lg shadow-orange-500/15">
+
+            <span>⚡</span>
+
+            <span class="text-[12px] font-black">
+                Buka Generator Alight Motion
+            </span>
+
+        </a>
+
+        <a href="/docs/tempmail/" class="action-btn w-full rounded-2xl px-4 py-3.5 flex items-center justify-center gap-2.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20">
+
+            <span>📧</span>
+
+            <span class="text-[12px] font-black">
+                Buka ReyMail TempMail
+            </span>
+
+        </a>
+
+        <div class="grid grid-cols-2 gap-2.5">
+
+            <a href="/docs/ytplay/" class="theme-card rounded-2xl border py-3.5 text-center text-[11px] font-black text-orange-500">
+                🍿 ReyTube
+            </a>
+
+            <a href="/docs/createfreefire/" class="theme-card rounded-2xl border py-3.5 text-center text-[11px] font-black text-orange-500">
+                🔥 FF Guest Gen
+            </a>
+
+        </div>
+
+        <div class="grid grid-cols-3 gap-2.5">
+
+            <a href="/docs/nanobanana/" class="theme-card rounded-2xl border py-3 text-center text-[10px] font-black text-amber-500">
+                🍌 Nano AI
+            </a>
+
+            <a href="/docs/downloader/" class="theme-card rounded-2xl border py-3 text-center text-[10px] font-black text-pink-500">
+                📥 Downloader
+            </a>
+
+            <a href="/docs/chatai/" class="theme-card rounded-2xl border py-3 text-center text-[10px] font-black text-cyan-500">
+                🤖 AI Chat
+            </a>
+
+        </div>
+
+        <a href="https://mustikapayment.com/l/donasi-reycode" target="_blank" rel="noopener noreferrer" class="theme-card rounded-2xl border py-3.5 text-center text-[11px] font-black text-pink-500 block">
+            ♡ &nbsp; Dukung & Donasi untuk ReyCloud 💖
+        </a>
+
+    </section>
+
+    <section class="grid grid-cols-3 gap-2.5 mt-4">
+
+        <div class="theme-card rounded-2xl border p-3.5 text-center">
+
+            <span class="text-[8px] font-black tracking-widest text-slate-400 uppercase">
+                Total Akun
+            </span>
+
+            <div class="text-[15px] font-black text-amber-500 mt-1">
+                1,842+
+            </div>
+
+        </div>
+
+        <div class="theme-card rounded-2xl border p-3.5 text-center">
+
+            <span class="text-[8px] font-black tracking-widest text-slate-400 uppercase">
+                Tools Active
+            </span>
+
+            <div class="text-[13px] font-black text-cyan-500 mt-1">
+                12 Services
+            </div>
+
+        </div>
+
+        <div class="theme-card rounded-2xl border p-3.5 text-center">
+
+            <span class="text-[8px] font-black tracking-widest text-slate-400 uppercase">
+                Success Rate
+            </span>
+
+            <div class="text-[15px] font-black text-emerald-500 mt-1">
+                99.9%
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="theme-card rounded-3xl border p-5 mt-4">
+
+        <div class="flex items-center gap-3">
+
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-lg">
+                ☁️
+            </div>
+
+            <div>
+
+                <h3 class="text-xs font-black uppercase tracking-wide">
+                    About ReyCode
+                </h3>
+
+                <p class="text-[9px] font-bold text-cyan-500 mt-1">
+                    Solusi Hosting & Infrastruktur Web
+                </p>
+
+            </div>
+
+        </div>
+
+        <p class="text-[10px] text-slate-400 leading-relaxed mt-4">
+            ReyCode adalah platform layanan digital yang menyediakan infrastruktur hosting, VPS, manajemen server Pterodactyl, automation tools, AI utilities, dan berbagai layanan developer untuk kreator serta developer.
+        </p>
+
+        <div class="grid grid-cols-2 gap-2.5 mt-4 pt-4 border-t theme-divider">
+
+            <div class="theme-card rounded-xl border p-3">
+
+                <span class="text-[8px] font-black tracking-widest text-slate-400 uppercase">
+                    Layanan
+                </span>
+
+                <p class="text-[11px] font-black mt-1">
+                    Hosting & Tools
+                </p>
+
+            </div>
+
+            <div class="theme-card rounded-xl border p-3">
+
+                <span class="text-[8px] font-black tracking-widest text-slate-400 uppercase">
+                    Status
+                </span>
+
+                <p class="text-[10px] font-black text-emerald-500 mt-1 flex items-center gap-1.5">
+                    <span class="live-dot"></span>
+                    Operational
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <footer class="text-center py-5">
+
+        <div class="text-[9px] font-semibold text-slate-500 tracking-widest">
+            © 2026 REYCLOUDSHP • ALL RIGHTS RESERVED
+        </div>
+
+    </footer>
+
+</main>
+
+<script>
+    const DONATION_URL = 'https://mustikapayment.com/l/donasi-reycode';
+
+    function handleDonation(event) {
+        if (event) {
             event.preventDefault();
-            sessionStorage.setItem('pending_tx_type', 'donasi');
-            window.open('https://mustikapayment.com/l/donasi-reycoe', '_blank');
-        }
-
-        function toggleMenu(event) {
             event.stopPropagation();
-
-            const menu = document.getElementById('navDropdown');
-
-            menu.classList.toggle('hidden');
         }
 
-        document.addEventListener('click', function(event) {
-            const menu = document.getElementById('navDropdown');
-            const button = document.getElementById('menuBtn');
+        try {
+            sessionStorage.setItem('pending_tx_type', 'donasi');
+        } catch {}
 
-            if (!menu.contains(event.target) && !button.contains(event.target)) {
-                menu.classList.add('hidden');
-            }
-        });
+        window.open(DONATION_URL, '_blank', 'noopener,noreferrer');
+    }
 
-        let currentTheme = localStorage.getItem('reycloud_theme') || 'dark';
+    function toggleMenu(event) {
+        event.stopPropagation();
 
-        function applyTheme(theme) {
+        const menu = document.getElementById('navDropdown');
 
-            const body = document.getElementById('pageBody');
-            const header = document.getElementById('navHeader');
-            const logoBox = document.getElementById('logoBox');
-            const toggle = document.getElementById('themeToggleBtn');
-            const menuBtn = document.getElementById('menuBtn');
-            const menu = document.getElementById('navDropdown');
-            const command = document.getElementById('commandCenter');
-            const commandGlow = document.getElementById('commandGlow');
-            const clockBox = document.getElementById('clockBox');
-            const systemStatus = document.getElementById('systemStatus');
-            const icon = document.getElementById('themeIcon');
+        menu.classList.toggle('hidden');
+    }
 
-            const cards = document.querySelectorAll('.theme-card');
-            const menuItems = document.querySelectorAll('.menu-item');
-            const menuIcons = document.querySelectorAll('.menu-icon');
-            const dividers = document.querySelectorAll('.theme-divider, .menu-divider');
+    document.addEventListener('click', function(event) {
+        const menu = document.getElementById('navDropdown');
+        const button = document.getElementById('menuBtn');
 
-            if (theme === 'light') {
+        if (!menu.contains(event.target) && !button.contains(event.target)) {
+            menu.classList.add('hidden');
+        }
+    });
 
-                body.style.backgroundColor = '#f5f7fb';
-                body.style.color = '#111827';
+    let currentTheme = localStorage.getItem('reycloud_theme') || 'dark';
 
-                document.getElementById('ambient1').style.background = 'rgba(99,102,241,.08)';
-                document.getElementById('ambient2').style.background = 'rgba(6,182,212,.06)';
+    function applyTheme(theme) {
 
-                header.style.backgroundColor = 'rgba(255,255,255,.94)';
-                header.style.borderColor = '#dbe1ea';
+        const body = document.getElementById('pageBody');
+        const header = document.getElementById('navHeader');
+        const logoBox = document.getElementById('logoBox');
+        const toggle = document.getElementById('themeToggleBtn');
+        const menuBtn = document.getElementById('menuBtn');
+        const menu = document.getElementById('navDropdown');
+        const command = document.getElementById('commandCenter');
+        const commandGlow = document.getElementById('commandGlow');
+        const clockBox = document.getElementById('clockBox');
+        const systemStatus = document.getElementById('systemStatus');
+        const icon = document.getElementById('themeIcon');
 
-                logoBox.style.backgroundColor = '#050608';
-                logoBox.style.color = '#facc15';
+        const cards = document.querySelectorAll('.theme-card');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const menuIcons = document.querySelectorAll('.menu-icon');
+        const dividers = document.querySelectorAll('.theme-divider, .menu-divider');
 
-                toggle.style.backgroundColor = '#eef1f6';
-                toggle.style.borderColor = '#d7dce5';
-                toggle.style.color = '#111827';
+        if (theme === 'light') {
 
-                menuBtn.style.backgroundColor = '#eef1f6';
-                menuBtn.style.borderColor = '#d7dce5';
-                menuBtn.style.color = '#334155';
+            body.style.backgroundColor = '#f5f7fb';
+            body.style.color = '#111827';
 
-                menu.style.backgroundColor = '#ffffff';
-                menu.style.borderColor = '#d7dce5';
-                menu.style.boxShadow = '0 20px 50px rgba(15,23,42,.18)';
+            document.getElementById('ambient1').style.background = 'rgba(99,102,241,.08)';
+            document.getElementById('ambient2').style.background = 'rgba(6,182,212,.06)';
 
-                command.style.backgroundColor = '#ffffff';
-                command.style.borderColor = '#dbe1ea';
+            header.style.backgroundColor = 'rgba(255,255,255,.94)';
+            header.style.borderColor = '#dbe1ea';
 
-                commandGlow.style.background = 'radial-gradient(circle at 50% 20%, rgba(99,102,241,.08), transparent 45%)';
+            logoBox.style.backgroundColor = '#050608';
+            logoBox.style.color = '#facc15';
 
-                clockBox.style.backgroundColor = '#f8fafc';
-                clockBox.style.borderColor = '#dbe1ea';
+            toggle.style.backgroundColor = '#eef1f6';
+            toggle.style.borderColor = '#d7dce5';
+            toggle.style.color = '#111827';
 
-                systemStatus.style.backgroundColor = 'rgba(6,182,212,.08)';
-                systemStatus.style.borderColor = 'rgba(6,182,212,.2)';
-                systemStatus.style.color = '#0891b2';
+            menuBtn.style.backgroundColor = '#eef1f6';
+            menuBtn.style.borderColor = '#d7dce5';
+            menuBtn.style.color = '#334155';
 
-                document.documentElement.style.setProperty('--robot-main', '#111827');
-                document.documentElement.style.setProperty('--robot-border', '#374151');
-                document.documentElement.style.setProperty('--robot-screen', '#020617');
-                document.documentElement.style.setProperty('--robot-eye', '#ffffff');
-                document.documentElement.style.setProperty('--robot-emblem', '#374151');
-                document.documentElement.style.setProperty('--robot-emblem-icon', '#ffffff');
+            menu.style.backgroundColor = '#ffffff';
+            menu.style.borderColor = '#d7dce5';
+            menu.style.boxShadow = '0 20px 50px rgba(15,23,42,.18)';
 
-                cards.forEach(card => {
-                    card.style.backgroundColor = '#ffffff';
-                    card.style.borderColor = '#dbe1ea';
-                    card.style.boxShadow = '0 8px 25px rgba(15,23,42,.05)';
-                });
+            command.style.backgroundColor = '#ffffff';
+            command.style.borderColor = '#dbe1ea';
 
-                menuItems.forEach(item => {
-                    item.style.color = '#1e293b';
-                });
+            commandGlow.style.background = 'radial-gradient(circle at 50% 20%, rgba(99,102,241,.08), transparent 45%)';
 
-                menuIcons.forEach(item => {
-                    item.style.backgroundColor = '#f1f5f9';
-                });
+            clockBox.style.backgroundColor = '#f8fafc';
+            clockBox.style.borderColor = '#dbe1ea';
 
-                dividers.forEach(item => {
-                    item.style.backgroundColor = '#e2e8f0';
-                });
+            systemStatus.style.backgroundColor = 'rgba(6,182,212,.08)';
+            systemStatus.style.borderColor = 'rgba(6,182,212,.2)';
+            systemStatus.style.color = '#0891b2';
 
-                icon.textContent = '☀️';
+            document.documentElement.style.setProperty('--robot-main', '#111827');
+            document.documentElement.style.setProperty('--robot-border', '#374151');
+            document.documentElement.style.setProperty('--robot-screen', '#020617');
+            document.documentElement.style.setProperty('--robot-eye', '#ffffff');
+            document.documentElement.style.setProperty('--robot-emblem', '#374151');
+            document.documentElement.style.setProperty('--robot-emblem-icon', '#ffffff');
 
-            } else {
+            cards.forEach(card => {
+                card.style.backgroundColor = '#ffffff';
+                card.style.borderColor = '#dbe1ea';
+                card.style.boxShadow = '0 8px 25px rgba(15,23,42,.05)';
+            });
 
-                body.style.backgroundColor = '#07090d';
-                body.style.color = '#f8fafc';
+            menuItems.forEach(item => {
+                item.style.color = '#1e293b';
+            });
 
-                document.getElementById('ambient1').style.background = 'rgba(99,102,241,.08)';
-                document.getElementById('ambient2').style.background = 'rgba(6,182,212,.05)';
+            menuIcons.forEach(item => {
+                item.style.backgroundColor = '#f1f5f9';
+            });
 
-                header.style.backgroundColor = 'rgba(17,21,29,.94)';
-                header.style.borderColor = '#232936';
+            dividers.forEach(item => {
+                item.style.backgroundColor = '#e2e8f0';
+            });
 
-                logoBox.style.backgroundColor = '#050608';
-                logoBox.style.color = '#facc15';
+            icon.textContent = '☀️';
 
-                toggle.style.backgroundColor = '#151b27';
-                toggle.style.borderColor = '#293244';
-                toggle.style.color = '#facc15';
+        } else {
 
-                menuBtn.style.backgroundColor = '#151b27';
-                menuBtn.style.borderColor = '#293244';
-                menuBtn.style.color = '#cbd5e1';
+            body.style.backgroundColor = '#07090d';
+            body.style.color = '#f8fafc';
 
-                menu.style.backgroundColor = '#11151d';
-                menu.style.borderColor = '#293244';
-                menu.style.boxShadow = '0 20px 50px rgba(0,0,0,.5)';
+            document.getElementById('ambient1').style.background = 'rgba(99,102,241,.08)';
+            document.getElementById('ambient2').style.background = 'rgba(6,182,212,.05)';
 
-                command.style.backgroundColor = '#10141b';
-                command.style.borderColor = '#252d3b';
+            header.style.backgroundColor = 'rgba(17,21,29,.94)';
+            header.style.borderColor = '#232936';
 
-                commandGlow.style.background = 'radial-gradient(circle at 50% 20%, rgba(99,102,241,.10), transparent 45%)';
+            logoBox.style.backgroundColor = '#050608';
+            logoBox.style.color = '#facc15';
 
-                clockBox.style.backgroundColor = '#080b10';
-                clockBox.style.borderColor = '#293244';
+            toggle.style.backgroundColor = '#151b27';
+            toggle.style.borderColor = '#293244';
+            toggle.style.color = '#facc15';
 
-                systemStatus.style.backgroundColor = 'rgba(34,211,238,.07)';
-                systemStatus.style.borderColor = 'rgba(34,211,238,.18)';
-                systemStatus.style.color = '#22d3ee';
+            menuBtn.style.backgroundColor = '#151b27';
+            menuBtn.style.borderColor = '#293244';
+            menuBtn.style.color = '#cbd5e1';
 
-                document.documentElement.style.setProperty('--robot-main', '#f8fafc');
-                document.documentElement.style.setProperty('--robot-border', '#cbd5e1');
-                document.documentElement.style.setProperty('--robot-screen', '#1e293b');
-                document.documentElement.style.setProperty('--robot-eye', '#ffffff');
-                document.documentElement.style.setProperty('--robot-emblem', '#334155');
-                document.documentElement.style.setProperty('--robot-emblem-icon', '#ffffff');
+            menu.style.backgroundColor = '#11151d';
+            menu.style.borderColor = '#293244';
+            menu.style.boxShadow = '0 20px 50px rgba(0,0,0,.5)';
 
-                cards.forEach(card => {
-                    card.style.backgroundColor = '#11151d';
-                    card.style.borderColor = '#252d3b';
-                    card.style.boxShadow = '';
-                });
+            command.style.backgroundColor = '#10141b';
+            command.style.borderColor = '#252d3b';
 
-                menuItems.forEach(item => {
-                    item.style.color = '#e2e8f0';
-                });
+            commandGlow.style.background = 'radial-gradient(circle at 50% 20%, rgba(99,102,241,.10), transparent 45%)';
 
-                menuIcons.forEach(item => {
-                    item.style.backgroundColor = '#1a202b';
-                });
+            clockBox.style.backgroundColor = '#080b10';
+            clockBox.style.borderColor = '#293244';
 
-                dividers.forEach(item => {
-                    item.style.backgroundColor = '#293244';
-                });
+            systemStatus.style.backgroundColor = 'rgba(34,211,238,.07)';
+            systemStatus.style.borderColor = 'rgba(34,211,238,.18)';
+            systemStatus.style.color = '#22d3ee';
 
-                icon.textContent = '🌙';
-            }
+            document.documentElement.style.setProperty('--robot-main', '#f8fafc');
+            document.documentElement.style.setProperty('--robot-border', '#cbd5e1');
+            document.documentElement.style.setProperty('--robot-screen', '#1e293b');
+            document.documentElement.style.setProperty('--robot-eye', '#ffffff');
+            document.documentElement.style.setProperty('--robot-emblem', '#334155');
+            document.documentElement.style.setProperty('--robot-emblem-icon', '#ffffff');
 
-            localStorage.setItem('reycloud_theme', theme);
+            cards.forEach(card => {
+                card.style.backgroundColor = '#11151d';
+                card.style.borderColor = '#252d3b';
+                card.style.boxShadow = '';
+            });
+
+            menuItems.forEach(item => {
+                item.style.color = '#e2e8f0';
+            });
+
+            menuIcons.forEach(item => {
+                item.style.backgroundColor = '#1a202b';
+            });
+
+            dividers.forEach(item => {
+                item.style.backgroundColor = '#293244';
+            });
+
+            icon.textContent = '🌙';
         }
 
-        function toggleTheme() {
-            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            applyTheme(currentTheme);
-        }
+        localStorage.setItem('reycloud_theme', theme);
+    }
 
-        function updateLiveClock() {
-
-            const now = new Date();
-
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-
-            document.getElementById('liveClock').textContent =
-                `${hours}.${minutes}.${seconds}`;
-
-            const date = now.toLocaleDateString('id-ID', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            }).toUpperCase();
-
-            const day = now.toLocaleDateString('id-ID', {
-                weekday: 'long'
-            }).toUpperCase();
-
-            document.getElementById('liveDate').textContent =
-                `${date} • ${day}`;
-        }
-
+    function toggleTheme() {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
         applyTheme(currentTheme);
-        updateLiveClock();
-        setInterval(updateLiveClock, 1000);
-    </script>
+    }
+
+    function updateLiveClock() {
+
+        const now = new Date();
+
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        document.getElementById('liveClock').textContent =
+            `${hours}.${minutes}.${seconds}`;
+
+        const date = now.toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        }).toUpperCase();
+
+        const day = now.toLocaleDateString('id-ID', {
+            weekday: 'long'
+        }).toUpperCase();
+
+        document.getElementById('liveDate').textContent =
+            `${date} • ${day}`;
+    }
+
+    applyTheme(currentTheme);
+    updateLiveClock();
+    setInterval(updateLiveClock, 1000);
+</script>
 
 </body>
 </html>
