@@ -1657,7 +1657,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- AM Engine Routers ---
+// --- AM Engine Routers (Updated Manual Mode) ---
 app.all('/api/amgen', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const action = body.action || '';
@@ -1666,6 +1666,7 @@ app.all('/api/amgen', async (req, res) => {
     const passwordInput = req.headers['x-api-password'] || body.password || body.pass || '';
     const username = body.username || body.user || '';
 
+    // 1. BULK GENERATE
     if (action === 'bulk-generate' || (!action && apiKeyInput)) {
         try {
             await connectDB();
@@ -1722,30 +1723,61 @@ app.all('/api/amgen', async (req, res) => {
         }
     }
 
+    // 2. MANUAL: SEND LINK (Mengirim oobConfirmationCode ke email akunlama)
     if (action === 'send-link') {
         const email = body.email;
         if (!email) {
             return res.status(400).json({ status: false, creator: CREATOR, error: 'Alamat email wajib diisi!' });
         }
         try {
-            return res.status(200).json({ status: true, creator: CREATOR, message: 'Tautan verifikasi berhasil dikirim!' });
+            const resLink = await link(email);
+            if (!resLink.ok) {
+                throw new Error(resLink.why);
+            }
+            return res.status(200).json({ 
+                status: true, 
+                creator: CREATOR, 
+                message: 'Tautan verifikasi berhasil dikirim ke ' + email 
+            });
         } catch (err) {
             return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
         }
     }
 
+    // 3. MANUAL: VERIFY LINK (Memproses magic link / oobCode manual & aktifkan Pro)
     if (action === 'verify-link') {
         const email = body.email;
-        const magicLink = body.magicLink;
+        const magicLink = body.magicLink || body.oobCode;
+
         if (!email || !magicLink) {
-            return res.status(400).json({ status: false, creator: CREATOR, error: 'Data verifikasi tidak lengkap!' });
+            return res.status(400).json({ status: false, creator: CREATOR, error: 'Data email dan magicLink/oobCode wajib diisi!' });
         }
+
         try {
-            const acc = await processSingleAccount(email);
+            // Proses sign-in menggunakan fungsi auth & code parser
+            const authRes = await auth(email, magicLink);
+            if (!authRes.ok) {
+                throw new Error(authRes.why);
+            }
+
+            // Aktivasi Pro menggunakan idToken hasil auth manual
+            const orderId = 'neo-' + crypto.randomBytes(6).toString('hex');
+            const proRes = await pro(authRes.id);
+            if (!proRes.ok) {
+                throw new Error('Gagal aktivasi Pro: ' + proRes.why);
+            }
+
             return res.status(200).json({
                 status: true,
                 creator: CREATOR,
-                data: { orderId: acc.orderId || 'RC-' + Math.floor(Math.random() * 1000000) }
+                message: 'Akun manual berhasil diverifikasi dan diaktifkan!',
+                data: {
+                    email: authRes.email,
+                    uid: authRes.uid,
+                    orderId: orderId,
+                    idToken: authRes.idToken,
+                    refreshToken: authRes.ref
+                }
             });
         } catch (err) {
             return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
