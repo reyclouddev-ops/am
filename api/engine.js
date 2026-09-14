@@ -840,8 +840,9 @@ class CapCut {
   }
 }
 // ==========================================
-// 4. CORE ALIGHT MOTION & AKUNLAMA SCRAPER
+// 4. CORE ALIGHT MOTION & AKUNLAMA SCRAPER (UPDATED)
 // ==========================================
+
 const AM_KEY = process.env.AM_KEY || '';
 const IDT = process.env.IDT || '';
 const VFY = process.env.VFY || '';
@@ -998,6 +999,7 @@ async function waitForVerificationLink(username, timeoutSec = 60) {
     return null;
 }
 
+// Integrasi Fungsi Link, Auth, dan Pro baru
 async function processSingleAccount(customUsername = null) {
     let username, animalName = 'Custom User Input';
     if (customUsername) {
@@ -1009,13 +1011,19 @@ async function processSingleAccount(customUsername = null) {
     }
     const tempEmail = `${username}@${DOMAIN}`;
 
+    // 1. Kirim OOB Confirmation Code (link)
     const linkRes = await apiQueue.add(async () => {
         try {
-            await axios.post(`${IDT}/getOobConfirmationCode?key=${AM_KEY}`, {
-                requestType: 6, email: tempEmail, androidInstallApp: true, canHandleCodeInApp: true,
+            const r = await axios.post(`${IDT}/getOobConfirmationCode?key=${AM_KEY}`, {
+                requestType: 6,
+                email: tempEmail,
+                androidInstallApp: true,
+                canHandleCodeInApp: true,
                 continueUrl: 'https://alightcreative.com?ui_sid=0366624874&ui_sd=0',
-                iosBundleId: 'com.alightcreative.motion', androidPackageName: 'com.alightcreative.motion',
-                androidMinimumVersion: '585', clientType: 'CLIENT_TYPE_ANDROID'
+                iosBundleId: 'com.alightcreative.motion',
+                androidPackageName: 'com.alightcreative.motion',
+                androidMinimumVersion: '585',
+                clientType: 'CLIENT_TYPE_ANDROID'
             }, { headers: sp(h1) });
             return { ok: true };
         } catch (e) { return { ok: false, why: bad(e) }; }
@@ -1023,38 +1031,58 @@ async function processSingleAccount(customUsername = null) {
 
     if (!linkRes.ok) throw new Error('Gagal mengirim oobCode: ' + linkRes.why);
 
+    // 2. Tunggu link verifikasi masuk ke inbox akunlama.com
     const verificationLink = await waitForVerificationLink(username, 60);
     if (!verificationLink) throw new Error('Magic link tidak tertangkap dalam 60 detik.');
 
     const oobCode = extractOobCode(verificationLink);
     if (!oobCode) throw new Error('Gagal mengekstrak oobCode.');
 
+    // 3. Autentikasi / Sign-in (auth)
     const authRes = await apiQueue.add(async () => {
         try {
             const a = await axios.post(`${IDT}/emailLinkSignin?key=${AM_KEY}`, {
-                email: tempEmail, oobCode: oobCode, clientType: 'CLIENT_TYPE_ANDROID'
+                email: tempEmail,
+                oobCode: oobCode,
+                clientType: 'CLIENT_TYPE_ANDROID'
             }, { headers: sp(h1) });
-            return { ok: true, idToken: a.data.idToken, refreshToken: a.data.refreshToken, localId: a.data.localId };
+
+            let u = null;
+            try {
+                const b = await axios.post(`${IDT}/getAccountInfo?key=${AM_KEY}`, { idToken: a.data.idToken }, { headers: sp(h1) });
+                u = b.data?.users?.[0] || null;
+            } catch {}
+
+            return {
+                ok: true,
+                idToken: a.data.idToken,
+                refreshToken: a.data.refreshToken,
+                localId: a.data.localId,
+                user: u
+            };
         } catch (e) { return { ok: false, why: bad(e) }; }
     });
 
     if (!authRes.ok) throw new Error('Gagal sign-in: ' + authRes.why);
 
+    // 4. Aktivasi langganan Pro (pro)
     const orderId = 'reycode-' + crypto.randomBytes(6).toString('hex');
     const proRes = await apiQueue.add(async () => {
         try {
-            const r = await axios.post(VFY, {
+            const b = {
                 data: {
                     productId: 'am.full.sub.annual.19q4',
                     token: 'mmgaobamlahbbeccfplmbkbb.AO-J1OzqG0or_GJJIx-ms8GrTm-jaglCRfhQSRPUZKpl2YspYS-oN7_94uv8RC5vQbvd_Ios2pPDStZ2n7F0hLE3FiOU7HS3R6Fquulv5xLXFECSv4ctElw',
-                    skuType: 'subs', orderId: orderId
+                    skuType: 'subs',
+                    orderId: orderId
                 }
-            }, { 
-                headers: sp({
-                    ...h2, authorization: 'Bearer ' + authRes.idToken,
-                    'firebase-instance-id-token': 'cSDnCyp3T-uwp07z3tL86T:APA91bFkmvvsHw5nnqa1SBFci-99DRsKClLiETdRrVcJjS5yBx1v_FbCb1d8WhBuea_zmwnYBktyTIzcRhN4b6uNOUur9wPc0gKXmJDoZic0LhNq5V2s0xI'
-                })
-            });
+            };
+            const h = {
+                ...h2,
+                authorization: 'Bearer ' + authRes.idToken,
+                'firebase-instance-id-token': 'cSDnCyp3T-uwp07z3tL86T:APA91bFkmvvsHw5nnqa1SBFci-99DRsKClLiETdRrVcJjS5yBx1v_FbCb1d8WhBuea_zmwnYBktyTIzcRhN4b6uNOUur9wPc0gKXmJDoZic0LhNq5V2s0xI'
+            };
+            const r = await axios.post(VFY, b, { headers: sp(h) });
             return { ok: true, data: r.data };
         } catch (e) { return { ok: false, why: bad(e) }; }
     });
@@ -1079,7 +1107,6 @@ async function processSingleAccount(customUsername = null) {
         pro_response: proRes.data
     };
 }
-
 
 // --- Viu Drama Scraper Engine ---
 class Viu {
@@ -1630,134 +1657,52 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- AM Engine ---
+// --- AM Engine Routers ---
 app.all('/api/amgen', async (req, res) => {
     const body = req.method === 'GET' ? req.query : (req.body || {});
     const action = body.action || '';
 
-    const apiKeyInput =
-        req.headers['x-apikey'] ||
-        body.apikey ||
-        '';
-
-    const passwordInput =
-        req.headers['x-api-password'] ||
-        body.password ||
-        body.pass ||
-        '';
-
-    const username =
-        body.username ||
-        body.user ||
-        '';
+    const apiKeyInput = req.headers['x-apikey'] || body.apikey || '';
+    const passwordInput = req.headers['x-api-password'] || body.password || body.pass || '';
+    const username = body.username || body.user || '';
 
     if (action === 'bulk-generate' || (!action && apiKeyInput)) {
         try {
             await connectDB();
 
             if (!apiKeyInput) {
-                return res.status(403).json({
-                    status: false,
-                    creator: CREATOR,
-                    error: 'Akses ditolak! API Key wajib diisi.'
-                });
+                return res.status(403).json({ status: false, creator: CREATOR, error: 'Akses ditolak! API Key wajib diisi.' });
             }
-
             if (!passwordInput) {
-                return res.status(403).json({
-                    status: false,
-                    creator: CREATOR,
-                    error: 'Akses ditolak! Password API Key wajib diisi.'
-                });
+                return res.status(403).json({ status: false, creator: CREATOR, error: 'Akses ditolak! Password API Key wajib diisi.' });
             }
 
-            const keyData = await ApiKey.findOne({
-                apikey: apiKeyInput
-            });
-
+            const keyData = await ApiKey.findOne({ apikey: apiKeyInput });
             if (!keyData) {
-                return res.status(403).json({
-                    status: false,
-                    creator: CREATOR,
-                    error: 'API Key tidak ditemukan.'
-                });
+                return res.status(403).json({ status: false, creator: CREATOR, error: 'API Key tidak ditemukan.' });
             }
-
             if (keyData.status !== 'active') {
-                return res.status(403).json({
-                    status: false,
-                    creator: CREATOR,
-                    error: 'API Key tidak aktif.'
-                });
+                return res.status(403).json({ status: false, creator: CREATOR, error: 'API Key tidak aktif.' });
+            }
+            if (!keyData.expired_at || new Date() > new Date(keyData.expired_at)) {
+                return res.status(403).json({ status: false, creator: CREATOR, error: 'API Key sudah kadaluarsa.' });
             }
 
-            if (
-                !keyData.expired_at ||
-                new Date() > new Date(keyData.expired_at)
-            ) {
-                return res.status(403).json({
-                    status: false,
-                    creator: CREATOR,
-                    error: 'API Key sudah kadaluarsa.'
-                });
-            }
-
-            const passwordValid =
-                await bcrypt.compare(
-                    passwordInput,
-                    keyData.password
-                );
-
+            const passwordValid = await bcrypt.compare(passwordInput, keyData.password);
             if (!passwordValid) {
-                return res.status(403).json({
-                    status: false,
-                    creator: CREATOR,
-                    error: 'Password API Key salah.'
-                });
+                return res.status(403).json({ status: false, creator: CREATOR, error: 'Password API Key salah.' });
             }
 
-            const count =
-                parseInt(
-                    body.count ||
-                    body.jumlah ||
-                    1,
-                    10
-                );
-
-            const maxCount =
-                Math.min(
-                    Math.max(
-                        Number.isNaN(count)
-                            ? 1
-                            : count,
-                        1
-                    ),
-                    10
-                );
-
-            const generateUsername =
-                username ||
-                keyData.name ||
-                keyData.owner;
+            const count = parseInt(body.count || body.jumlah || 1, 10);
+            const maxCount = Math.min(Math.max(Number.isNaN(count) ? 1 : count, 1), 10);
+            const generateUsername = username || keyData.name || keyData.owner;
 
             const results = [];
-
-            for (
-                let i = 0;
-                i < maxCount;
-                i++
-            ) {
+            for (let i = 0; i < maxCount; i++) {
                 try {
-                    results.push(
-                        await processSingleAccount(
-                            generateUsername
-                        )
-                    );
+                    results.push(await processSingleAccount(generateUsername));
                 } catch (err) {
-                    results.push({
-                        success: false,
-                        error: err.message
-                    });
+                    results.push({ success: false, error: err.message });
                 }
             }
 
@@ -1772,144 +1717,74 @@ app.all('/api/amgen', async (req, res) => {
                 total_generated: maxCount,
                 results
             });
-
         } catch (err) {
-            return res.status(500).json({
-                status: false,
-                creator: CREATOR,
-                error: err.message
-            });
+            return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
         }
     }
 
     if (action === 'send-link') {
         const email = body.email;
-
         if (!email) {
-            return res.status(400).json({
-                status: false,
-                creator: CREATOR,
-                error: 'Alamat email wajib diisi!'
-            });
+            return res.status(400).json({ status: false, creator: CREATOR, error: 'Alamat email wajib diisi!' });
         }
-
         try {
-            return res.status(200).json({
-                status: true,
-                creator: CREATOR,
-                message: 'Tautan verifikasi berhasil dikirim!'
-            });
+            return res.status(200).json({ status: true, creator: CREATOR, message: 'Tautan verifikasi berhasil dikirim!' });
         } catch (err) {
-            return res.status(500).json({
-                status: false,
-                creator: CREATOR,
-                error: err.message
-            });
+            return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
         }
     }
 
     if (action === 'verify-link') {
         const email = body.email;
         const magicLink = body.magicLink;
-
         if (!email || !magicLink) {
-            return res.status(400).json({
-                status: false,
-                creator: CREATOR,
-                error: 'Data verifikasi tidak lengkap!'
-            });
+            return res.status(400).json({ status: false, creator: CREATOR, error: 'Data verifikasi tidak lengkap!' });
         }
-
         try {
-            const acc =
-                await processSingleAccount(
-                    email
-                );
-
+            const acc = await processSingleAccount(email);
             return res.status(200).json({
                 status: true,
                 creator: CREATOR,
-                data: {
-                    orderId:
-                        acc.orderId ||
-                        'RC-' +
-                        Math.floor(
-                            Math.random() *
-                            1000000
-                        )
-                }
+                data: { orderId: acc.orderId || 'RC-' + Math.floor(Math.random() * 1000000) }
             });
         } catch (err) {
-            return res.status(500).json({
-                status: false,
-                creator: CREATOR,
-                error: err.message
-            });
+            return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
         }
     }
 
-    return res.status(400).json({
-        status: false,
-        creator: CREATOR,
-        error: 'Aksi atau parameter tidak valid.'
-    });
+    return res.status(400).json({ status: false, creator: CREATOR, error: 'Aksi atau parameter tidak valid.' });
 });
 
 app.all('/api/amgen_auto', async (req, res) => {
-    const body =
-        req.method === 'GET'
-            ? req.query
-            : (req.body || {});
-
+    const body = req.method === 'GET' ? req.query : (req.body || {});
     try {
-        const acc =
-            await processSingleAccount(
-                body.username ||
-                body.user
-            );
-
+        const acc = await processSingleAccount(body.username || body.user);
         return res.status(200).json({
             status: true,
             creator: CREATOR,
             card: {
                 email: acc.email,
                 weblogin: acc.weblogin,
-                selamat_kamu_mendapatkan_animal:
-                    acc.animal,
+                selamat_kamu_mendapatkan_animal: acc.animal,
                 orderId: acc.orderId,
                 validUntil: acc.validUntil,
                 panduan_dan_cara_login: [
                     '1. Buka aplikasi Alight Motion.',
-                    '2. Sign in dengan email: ' +
-                        acc.email
+                    '2. Sign in dengan email: ' + acc.email
                 ]
             }
         });
     } catch (err) {
-        return res.status(500).json({
-            status: false,
-            creator: CREATOR,
-            error: err.message
-        });
+        return res.status(500).json({ status: false, creator: CREATOR, error: err.message });
     }
 });
 
 app.all('/api/bulk-am', async (req, res) => {
-    if (
-        req.method === 'POST' &&
-        req.body &&
-        !req.body.action
-    ) {
-        req.body.action =
-            'bulk-generate';
+    if (req.method === 'POST' && req.body && !req.body.action) {
+        req.body.action = 'bulk-generate';
     }
-
     req.url = '/api/amgen';
-
-    return app._router.handle(
-        req,
-        res
-    );
+    return app._router.handle(req, res);
 });
 
 app.use((req, res) => {
