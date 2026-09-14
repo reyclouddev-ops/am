@@ -1,0 +1,1270 @@
+<!DOCTYPE html><html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050505">
+<meta name="description" content="ReyCode Web2APK Builder">
+<title>ReyCode Web2APK</title>
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}:root {
+--bg: #050505;
+--panel: #0b0b0b;
+--panel-2: #101010;
+--border: #202020;
+--text: #f5f5f5;
+--muted: #8d8d8d;
+--accent: #ffffff;
+--danger: #ff4d4d;
+--success: #4ade80;
+}
+
+body {
+min-height: 100vh;
+background:
+radial-gradient(circle at top right, rgba(255,255,255,.06), transparent 30%),
+radial-gradient(circle at bottom left, rgba(255,255,255,.035), transparent 28%),
+var(--bg);
+color: var(--text);
+font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+font: inherit;
+}
+
+button {
+cursor: pointer;
+}
+
+.app {
+width: min(1120px, calc(100% - 28px));
+margin: auto;
+padding: 24px 0 50px;
+}
+
+.header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 20px;
+margin-bottom: 24px;
+}
+
+.header-left {
+display: flex;
+align-items: center;
+gap: 18px;
+}
+
+.back-dashboard {
+text-decoration: none;
+color: #aaa;
+border: 1px solid var(--border);
+background: rgba(255,255,255,.025);
+padding: 9px 13px;
+border-radius: 10px;
+font-size: 12px;
+transition: .2s ease;
+white-space: nowrap;
+}
+
+.back-dashboard:hover {
+color: #fff;
+background: rgba(255,255,255,.06);
+transform: translateY(-1px);
+}
+
+.brand {
+display: flex;
+align-items: center;
+gap: 13px;
+}
+
+.logo {
+width: 44px;
+height: 44px;
+border-radius: 13px;
+display: grid;
+place-items: center;
+background: #fff;
+color: #000;
+font-size: 20px;
+font-weight: 900;
+box-shadow: 0 10px 35px rgba(255,255,255,.08);
+}
+
+.brand h1 {
+font-size: 19px;
+letter-spacing: -.4px;
+}
+
+.brand p {
+color: var(--muted);
+font-size: 12px;
+margin-top: 2px;
+}
+
+.api-status {
+display: flex;
+align-items: center;
+gap: 8px;
+color: var(--muted);
+font-size: 12px;
+border: 1px solid var(--border);
+background: rgba(255,255,255,.025);
+padding: 9px 12px;
+border-radius: 999px;
+}
+
+.status-dot {
+width: 7px;
+height: 7px;
+border-radius: 50%;
+background: #777;
+}
+
+.status-dot.online {
+background: var(--success);
+box-shadow: 0 0 12px rgba(74,222,128,.65);
+}
+
+.hero {
+border: 1px solid var(--border);
+background:
+linear-gradient(135deg, rgba(255,255,255,.045), transparent 50%),
+var(--panel);
+border-radius: 24px;
+padding: 30px;
+margin-bottom: 18px;
+overflow: hidden;
+position: relative;
+}
+
+.hero:after {
+content: "";
+position: absolute;
+width: 260px;
+height: 260px;
+right: -130px;
+top: -130px;
+border-radius: 50%;
+background: rgba(255,255,255,.025);
+}
+
+.hero h2 {
+font-size: clamp(27px, 5vw, 46px);
+line-height: 1.05;
+letter-spacing: -1.8px;
+max-width: 700px;
+}
+
+.hero h2 span {
+color: #888;
+}
+
+.hero p {
+color: var(--muted);
+max-width: 680px;
+line-height: 1.7;
+font-size: 14px;
+margin-top: 13px;
+}
+
+.builder {
+display: grid;
+grid-template-columns: 1fr 330px;
+gap: 18px;
+}
+
+.panel {
+border: 1px solid var(--border);
+background: rgba(11,11,11,.94);
+border-radius: 20px;
+padding: 20px;
+}
+
+.panel-title {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 18px;
+}
+
+.panel-title h3 {
+font-size: 15px;
+}
+
+.panel-title span {
+color: #666;
+font-size: 11px;
+}
+
+.grid {
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 14px;
+}
+
+.field {
+display: flex;
+flex-direction: column;
+gap: 7px;
+}
+
+.field.full {
+grid-column: 1 / -1;
+}
+
+label {
+color: #b8b8b8;
+font-size: 12px;
+}
+
+input,
+select,
+textarea {
+width: 100%;
+border: 1px solid var(--border);
+background: #080808;
+color: var(--text);
+border-radius: 12px;
+padding: 12px 13px;
+outline: none;
+transition: .2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+border-color: #444;
+background: #0c0c0c;
+}
+
+textarea {
+min-height: 100px;
+resize: vertical;
+}
+
+.source-tabs {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 8px;
+margin-bottom: 14px;
+}
+
+.source-tab {
+border: 1px solid var(--border);
+background: #080808;
+color: #888;
+padding: 11px 8px;
+border-radius: 11px;
+font-size: 12px;
+}
+
+.source-tab.active {
+background: #fff;
+color: #000;
+border-color: #fff;
+}
+
+.source-box {
+display: none;
+}
+
+.source-box.active {
+display: block;
+}
+
+.upload {
+border: 1px dashed #333;
+border-radius: 14px;
+min-height: 125px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+text-align: center;
+padding: 20px;
+cursor: pointer;
+background: rgba(255,255,255,.015);
+}
+
+.upload:hover {
+border-color: #555;
+}
+
+.upload-icon {
+font-size: 25px;
+margin-bottom: 7px;
+}
+
+.upload strong {
+font-size: 13px;
+}
+
+.upload small {
+color: #666;
+margin-top: 5px;
+}
+
+.upload input {
+display: none;
+}
+
+.file-name {
+margin-top: 9px;
+color: var(--success);
+font-size: 11px;
+word-break: break-word;
+}
+
+.permission-grid {
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 8px;
+}
+
+.permission {
+display: flex;
+align-items: center;
+gap: 9px;
+border: 1px solid var(--border);
+background: #080808;
+border-radius: 10px;
+padding: 10px;
+font-size: 11px;
+color: #aaa;
+cursor: pointer;
+}
+
+.permission input {
+width: auto;
+accent-color: white;
+}
+
+.image-row {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 12px;
+}
+
+.image-upload {
+border: 1px dashed #333;
+border-radius: 13px;
+padding: 13px;
+}
+
+.image-upload label {
+display: block;
+margin-bottom: 9px;
+}
+
+.image-upload input {
+padding: 8px;
+font-size: 11px;
+}
+
+.build-card {
+position: sticky;
+top: 18px;
+height: fit-content;
+}
+
+.preview {
+height: 180px;
+border: 1px solid var(--border);
+border-radius: 15px;
+background:
+linear-gradient(145deg, rgba(255,255,255,.05), transparent),
+#060606;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+text-align: center;
+margin-bottom: 16px;
+overflow: hidden;
+}
+
+.preview-icon {
+width: 60px;
+height: 60px;
+border-radius: 16px;
+background: #fff;
+color: #000;
+display: grid;
+place-items: center;
+font-size: 25px;
+font-weight: 900;
+margin-bottom: 10px;
+overflow: hidden;
+}
+
+.preview-icon img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+.preview-name {
+font-weight: 700;
+font-size: 14px;
+}
+
+.preview-package {
+color: #666;
+font-size: 10px;
+margin-top: 3px;
+max-width: 250px;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.summary {
+display: flex;
+flex-direction: column;
+gap: 9px;
+margin-bottom: 17px;
+}
+
+.summary-row {
+display: flex;
+justify-content: space-between;
+gap: 10px;
+font-size: 12px;
+}
+
+.summary-row span:first-child {
+color: #666;
+}
+
+.summary-row span:last-child {
+color: #bbb;
+text-align: right;
+max-width: 180px;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.build-btn {
+width: 100%;
+border: 0;
+background: #fff;
+color: #000;
+padding: 14px;
+border-radius: 12px;
+font-weight: 800;
+transition: .2s ease;
+}
+
+.build-btn:hover {
+transform: translateY(-1px);
+box-shadow: 0 12px 30px rgba(255,255,255,.08);
+}
+
+.build-btn:disabled {
+opacity: .45;
+cursor: not-allowed;
+transform: none;
+}
+
+.progress-card {
+display: none;
+margin-top: 15px;
+border: 1px solid var(--border);
+border-radius: 13px;
+padding: 13px;
+background: #080808;
+}
+
+.progress-card.show {
+display: block;
+}
+
+.progress-head {
+display: flex;
+justify-content: space-between;
+font-size: 11px;
+margin-bottom: 8px;
+}
+
+.progress-head span:first-child {
+color: #999;
+}
+
+.progress-head span:last-child {
+color: #fff;
+}
+
+.progress-track {
+width: 100%;
+height: 6px;
+border-radius: 99px;
+background: #181818;
+overflow: hidden;
+}
+
+.progress-bar {
+height: 100%;
+width: 0%;
+background: #fff;
+border-radius: inherit;
+transition: width .4s ease;
+}
+
+.result {
+display: none;
+margin-top: 15px;
+border: 1px solid rgba(74,222,128,.22);
+background: rgba(74,222,128,.035);
+border-radius: 13px;
+padding: 14px;
+}
+
+.result.show {
+display: block;
+}
+
+.result-title {
+color: var(--success);
+font-size: 12px;
+font-weight: 700;
+margin-bottom: 10px;
+}
+
+.download-btn {
+display: block;
+text-align: center;
+text-decoration: none;
+color: #000;
+background: #fff;
+border-radius: 10px;
+padding: 11px;
+font-size: 12px;
+font-weight: 800;
+}
+
+.error {
+display: none;
+margin-top: 15px;
+padding: 12px;
+border-radius: 12px;
+border: 1px solid rgba(255,77,77,.2);
+background: rgba(255,77,77,.04);
+color: #ff8a8a;
+font-size: 11px;
+line-height: 1.5;
+}
+
+.error.show {
+display: block;
+}
+
+.footer {
+text-align: center;
+color: #555;
+font-size: 11px;
+margin-top: 25px;
+}
+
+@media (max-width: 850px) {
+.builder {
+grid-template-columns: 1fr;
+}
+
+.build-card {
+    position: static;
+}
+
+}
+
+@media (max-width: 650px) {
+.header {
+flex-wrap: wrap;
+}
+
+.header-left {
+    width: 100%;
+    justify-content: space-between;
+}
+
+.api-status {
+    margin-left: auto;
+}
+
+}
+
+@media (max-width: 560px) {
+.app {
+width: min(100% - 18px, 1120px);
+padding-top: 14px;
+}
+
+.header {
+    align-items: flex-start;
+}
+
+.header-left {
+    gap: 10px;
+}
+
+.back-dashboard {
+    padding: 8px 10px;
+    font-size: 11px;
+}
+
+.brand {
+    gap: 9px;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+}
+
+.brand h1 {
+    font-size: 16px;
+}
+
+.brand p {
+    font-size: 10px;
+}
+
+.api-status {
+    display: none;
+}
+
+.hero,
+.panel {
+    border-radius: 17px;
+    padding: 16px;
+}
+
+.hero h2 {
+    font-size: 30px;
+}
+
+.grid,
+.image-row {
+    grid-template-columns: 1fr;
+}
+
+.field.full {
+    grid-column: auto;
+}
+
+.permission-grid {
+    grid-template-columns: 1fr;
+}
+
+.source-tabs {
+    grid-template-columns: 1fr;
+}
+
+}
+</style>
+
+</head>
+<body><div class="app"><header class="header"><div class="header-left">
+
+    <a class="back-dashboard" href="/dashboard">
+        ← Dashboard
+    </a>
+
+    <div class="brand">
+        <div class="logo">R</div>
+        <div>
+            <h1>ReyCode Web2APK</h1>
+            <p>Web application → Android APK</p>
+        </div>
+    </div>
+
+</div>
+
+<div class="api-status">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">Checking API...</span>
+</div>
+
+</header><section class="hero">
+    <h2>Build your website into an <span>Android APK.</span></h2>
+    <p>
+        Masukkan URL website, upload HTML, atau upload ZIP project.
+        Atur identitas aplikasi, permission, icon, lalu build APK langsung
+        melalui ReyCode Web2APK.
+    </p>
+</section><form id="builderForm"><div class="builder"><main><section class="panel">
+    <div class="panel-title">
+        <h3>Application</h3>
+        <span>01</span>
+    </div><div class="grid">
+
+    <div class="field">
+        <label for="appName">App Name</label>
+        <input id="appName" name="appName" type="text" placeholder="ReyCode App" required>
+    </div>
+
+    <div class="field">
+        <label for="packageName">Package Name</label>
+        <input id="packageName" name="packageName" type="text" placeholder="com.reycode.app" required>
+    </div>
+
+    <div class="field">
+        <label for="versionName">Version Name</label>
+        <input id="versionName" name="versionName" type="text" value="1.0.0">
+    </div>
+
+    <div class="field">
+        <label for="versionCode">Version Code</label>
+        <input id="versionCode" name="versionCode" type="number" value="1" min="1">
+    </div>
+
+    <div class="field">
+        <label for="orientation">Orientation</label>
+        <select id="orientation" name="orientation">
+            <option value="auto">Auto</option>
+            <option value="portrait">Portrait</option>
+            <option value="landscape">Landscape</option>
+        </select>
+    </div>
+
+    <div class="field">
+        <label for="minSdk">Minimum Android</label>
+        <select id="minSdk" name="minSdk">
+            <option value="23">Android 6.0+</option>
+            <option value="24">Android 7.0+</option>
+            <option value="26">Android 8.0+</option>
+            <option value="28">Android 9.0+</option>
+        </select>
+    </div>
+
+</div>
+
+</section><section class="panel" style="margin-top:18px">
+    <div class="panel-title">
+        <h3>Website Source</h3>
+        <span>02</span>
+    </div><div class="source-tabs">
+    <button type="button" class="source-tab active" data-source="url">Website URL</button>
+    <button type="button" class="source-tab" data-source="html">HTML</button>
+    <button type="button" class="source-tab" data-source="zip">ZIP Project</button>
+</div>
+
+<div class="source-box active" id="source-url">
+    <div class="field">
+        <label for="websiteUrl">Website URL</label>
+        <input id="websiteUrl" name="url" type="url" placeholder="https://example.com">
+    </div>
+</div>
+
+<div class="source-box" id="source-html">
+    <label class="upload">
+        <span class="upload-icon">⌘</span>
+        <strong>Pilih file HTML</strong>
+        <small>index.html</small>
+        <input id="htmlFile" name="html" type="file" accept=".html,.htm,text/html">
+        <span class="file-name" id="htmlName"></span>
+    </label>
+</div>
+
+<div class="source-box" id="source-zip">
+    <label class="upload">
+        <span class="upload-icon">▣</span>
+        <strong>Pilih ZIP project</strong>
+        <small>HTML, CSS, JS, assets</small>
+        <input id="zipFile" name="zip" type="file" accept=".zip,application/zip">
+        <span class="file-name" id="zipName"></span>
+    </label>
+</div>
+
+<input type="hidden" name="source" id="sourceType" value="url">
+
+</section><section class="panel" style="margin-top:18px">
+    <div class="panel-title">
+        <h3>Branding</h3>
+        <span>03</span>
+    </div><div class="image-row">
+
+    <div class="image-upload">
+        <label>App Icon</label>
+        <input id="iconFile" name="icon" type="file" accept="image/png,image/jpeg,image/webp">
+    </div>
+
+    <div class="image-upload">
+        <label>Splash Image</label>
+        <input id="splashFile" name="splash" type="file" accept="image/png,image/jpeg,image/webp">
+    </div>
+
+</div>
+
+</section><section class="panel" style="margin-top:18px">
+    <div class="panel-title">
+        <h3>Android Permissions</h3>
+        <span>04</span>
+    </div><div class="permission-grid">
+
+    <label class="permission">
+        <input type="checkbox" name="permissions" value="INTERNET" checked>
+        Internet
+    </label>
+
+    <label class="permission">
+        <input type="checkbox" name="permissions" value="ACCESS_NETWORK_STATE">
+        Network State
+    </label>
+
+    <label class="permission">
+        <input type="checkbox" name="permissions" value="ACCESS_WIFI_STATE">
+        Wi-Fi State
+    </label>
+
+    <label class="permission">
+        <input type="checkbox" name="permissions" value="VIBRATE">
+        Vibration
+    </label>
+
+    <label class="permission">
+        <input type="checkbox" name="permissions" value="CAMERA">
+        Camera
+    </label>
+
+    <label class="permission">
+        <input type="checkbox" name="permissions" value="RECORD_AUDIO">
+        Microphone
+    </label>
+
+    <label class="permission">
+        <input type="checkbox" name="permissions" value="ACCESS_FINE_LOCATION">
+        Fine Location
+    </label>
+
+    <label class="permission">
+        <input type="checkbox" name="permissions" value="ACCESS_COARSE_LOCATION">
+        Coarse Location
+    </label>
+
+    <label class="permission">
+        <input type="checkbox" name="permissions" value="POST_NOTIFICATIONS">
+        Notifications
+    </label>
+
+    <label class="permission">
+        <input type="checkbox" name="permissions" value="READ_MEDIA_IMAGES">
+        Media Images
+    </label>
+
+    <label class="permission">
+        <input type="checkbox" name="permissions" value="READ_MEDIA_VIDEO">
+        Media Video
+    </label>
+
+    <label class="permission">
+        <input type="checkbox" name="permissions" value="BLUETOOTH_CONNECT">
+        Bluetooth
+    </label>
+
+</div>
+
+</section></main><aside class="panel build-card"><div class="panel-title">
+    <h3>Build Preview</h3>
+    <span>05</span>
+</div>
+
+<div class="preview">
+    <div class="preview-icon" id="previewIcon">R</div>
+    <div class="preview-name" id="previewName">ReyCode App</div>
+    <div class="preview-package" id="previewPackage">com.reycode.app</div>
+</div>
+
+<div class="summary">
+
+    <div class="summary-row">
+        <span>Version</span>
+        <span id="summaryVersion">1.0.0</span>
+    </div>
+
+    <div class="summary-row">
+        <span>Source</span>
+        <span id="summarySource">Website URL</span>
+    </div>
+
+    <div class="summary-row">
+        <span>Orientation</span>
+        <span id="summaryOrientation">Auto</span>
+    </div>
+
+    <div class="summary-row">
+        <span>Permissions</span>
+        <span id="summaryPermissions">1 selected</span>
+    </div>
+
+</div>
+
+<button class="build-btn" id="buildBtn" type="submit">
+    Build APK
+</button>
+
+<div class="progress-card" id="progressCard">
+    <div class="progress-head">
+        <span id="progressText">Preparing build...</span>
+        <span id="progressPercent">0%</span>
+    </div>
+
+    <div class="progress-track">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+</div>
+
+<div class="result" id="resultBox">
+    <div class="result-title">✓ APK berhasil dibuat</div>
+    <a class="download-btn" id="downloadBtn" href="#" target="_blank" rel="noopener">
+        Download APK
+    </a>
+</div>
+
+<div class="error" id="errorBox"></div>
+
+</aside></div></form><div class="footer">
+    ReyCode Web2APK · Build. Code. Create.
+</div></div><script>
+const API_URL = '/api/web2apk';
+
+const form = document.getElementById('builderForm');
+const buildBtn = document.getElementById('buildBtn');
+const progressCard = document.getElementById('progressCard');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+const progressPercent = document.getElementById('progressPercent');
+const resultBox = document.getElementById('resultBox');
+const errorBox = document.getElementById('errorBox');
+
+const appName = document.getElementById('appName');
+const packageName = document.getElementById('packageName');
+const versionName = document.getElementById('versionName');
+const orientation = document.getElementById('orientation');
+
+const previewName = document.getElementById('previewName');
+const previewPackage = document.getElementById('previewPackage');
+const previewIcon = document.getElementById('previewIcon');
+
+const summaryVersion = document.getElementById('summaryVersion');
+const summarySource = document.getElementById('summarySource');
+const summaryOrientation = document.getElementById('summaryOrientation');
+const summaryPermissions = document.getElementById('summaryPermissions');
+
+const sourceType = document.getElementById('sourceType');
+
+function setProgress(value, text) {
+    const percent = Math.max(0, Math.min(100, value));
+    progressBar.style.width = `${percent}%`;
+    progressPercent.textContent = `${percent}%`;
+    progressText.textContent = text;
+}
+
+function updatePreview() {
+    previewName.textContent = appName.value.trim() || 'ReyCode App';
+    previewPackage.textContent = packageName.value.trim() || 'com.reycode.app';
+    summaryVersion.textContent = versionName.value.trim() || '1.0.0';
+
+    summaryOrientation.textContent =
+        orientation.options[orientation.selectedIndex]?.text || 'Auto';
+
+    const selected = document.querySelectorAll(
+        'input[name="permissions"]:checked'
+    ).length;
+
+    summaryPermissions.textContent =
+        `${selected} selected`;
+}
+
+function updateSource(source) {
+    document.querySelectorAll('.source-tab').forEach(button => {
+        button.classList.toggle(
+            'active',
+            button.dataset.source === source
+        );
+    });
+
+    document.querySelectorAll('.source-box').forEach(box => {
+        box.classList.remove('active');
+    });
+
+    const target = document.getElementById(`source-${source}`);
+
+    if (target) {
+        target.classList.add('active');
+    }
+
+    sourceType.value = source;
+
+    const names = {
+        url: 'Website URL',
+        html: 'HTML File',
+        zip: 'ZIP Project'
+    };
+
+    summarySource.textContent = names[source] || source;
+}
+
+document.querySelectorAll('.source-tab').forEach(button => {
+    button.addEventListener('click', () => {
+        updateSource(button.dataset.source);
+    });
+});
+
+[
+    appName,
+    packageName,
+    versionName,
+    orientation
+].forEach(element => {
+    element.addEventListener('input', updatePreview);
+    element.addEventListener('change', updatePreview);
+});
+
+document.querySelectorAll('input[name="permissions"]').forEach(input => {
+    input.addEventListener('change', updatePreview);
+});
+
+document.getElementById('htmlFile').addEventListener('change', event => {
+    const file = event.target.files[0];
+
+    document.getElementById('htmlName').textContent =
+        file ? file.name : '';
+});
+
+document.getElementById('zipFile').addEventListener('change', event => {
+    const file = event.target.files[0];
+
+    document.getElementById('zipName').textContent =
+        file ? file.name : '';
+});
+
+document.getElementById('iconFile').addEventListener('change', event => {
+    const file = event.target.files[0];
+
+    if (!file) {
+        previewIcon.textContent = 'R';
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        previewIcon.innerHTML =
+            `<img src="${reader.result}" alt="App Icon">`;
+    };
+
+    reader.readAsDataURL(file);
+});
+
+async function checkApi() {
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'GET',
+            cache: 'no-store'
+        });
+
+        const json = await response.json().catch(() => ({}));
+
+        if (response.ok && json) {
+            dot.classList.add('online');
+            text.textContent = 'API Online';
+        } else {
+            dot.classList.remove('online');
+            text.textContent = 'API Ready';
+        }
+    } catch {
+        dot.classList.remove('online');
+        text.textContent = 'API Offline';
+    }
+}
+
+function showError(message) {
+    errorBox.textContent = message;
+    errorBox.classList.add('show');
+}
+
+function hideMessages() {
+    errorBox.classList.remove('show');
+    resultBox.classList.remove('show');
+}
+
+async function buildApk(event) {
+    event.preventDefault();
+
+    hideMessages();
+
+    const selectedSource = sourceType.value;
+
+    if (selectedSource === 'url') {
+        const url = document.getElementById('websiteUrl').value.trim();
+
+        if (!url) {
+            showError('Masukkan URL website terlebih dahulu.');
+            return;
+        }
+    }
+
+    if (selectedSource === 'html') {
+        const file = document.getElementById('htmlFile').files[0];
+
+        if (!file) {
+            showError('Pilih file HTML terlebih dahulu.');
+            return;
+        }
+    }
+
+    if (selectedSource === 'zip') {
+        const file = document.getElementById('zipFile').files[0];
+
+        if (!file) {
+            showError('Pilih file ZIP terlebih dahulu.');
+            return;
+        }
+    }
+
+    const permissions = [
+        ...document.querySelectorAll(
+            'input[name="permissions"]:checked'
+        )
+    ].map(input => input.value);
+
+    const data = new FormData();
+
+    data.append('appName', appName.value.trim());
+    data.append('packageName', packageName.value.trim());
+    data.append('versionName', versionName.value.trim() || '1.0.0');
+
+    data.append(
+        'versionCode',
+        document.getElementById('versionCode').value || '1'
+    );
+
+    data.append('orientation', orientation.value);
+
+    data.append(
+        'minSdk',
+        document.getElementById('minSdk').value
+    );
+
+    data.append('source', selectedSource);
+    data.append('permissions', JSON.stringify(permissions));
+
+    if (selectedSource === 'url') {
+        data.append(
+            'url',
+            document.getElementById('websiteUrl').value.trim()
+        );
+    }
+
+    const html = document.getElementById('htmlFile').files[0];
+    const zip = document.getElementById('zipFile').files[0];
+    const icon = document.getElementById('iconFile').files[0];
+    const splash = document.getElementById('splashFile').files[0];
+
+    if (html) {
+        data.append('html', html);
+    }
+
+    if (zip) {
+        data.append('zip', zip);
+    }
+
+    if (icon) {
+        data.append('icon', icon);
+    }
+
+    if (splash) {
+        data.append('splash', splash);
+    }
+
+    buildBtn.disabled = true;
+    buildBtn.textContent = 'Building...';
+
+    progressCard.classList.add('show');
+
+    setProgress(8, 'Preparing project...');
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: data
+        });
+
+        setProgress(35, 'Uploading project...');
+
+        const json = await response.json().catch(() => ({
+            status: false,
+            message: 'Server mengembalikan response tidak valid.'
+        }));
+
+        if (
+            !response.ok ||
+            json.status === false ||
+            json.success === false
+        ) {
+            throw new Error(
+                json.message ||
+                json.error ||
+                `Build gagal dengan status ${response.status}.`
+            );
+        }
+
+        setProgress(70, 'Building Android APK...');
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        setProgress(100, 'Build selesai.');
+
+        const downloadUrl =
+            json.downloadUrl ||
+            json.url ||
+            json.file ||
+            json.apkUrl;
+
+        if (!downloadUrl) {
+            throw new Error(
+                'APK berhasil diproses tetapi URL download tidak ditemukan.'
+            );
+        }
+
+        document.getElementById('downloadBtn').href =
+            downloadUrl;
+
+        resultBox.classList.add('show');
+
+        buildBtn.textContent = 'Build APK Lagi';
+
+    } catch (error) {
+        progressCard.classList.remove('show');
+
+        showError(
+            error.message ||
+            'Terjadi kesalahan saat build APK.'
+        );
+
+        buildBtn.textContent = 'Build APK';
+
+    } finally {
+        buildBtn.disabled = false;
+    }
+}
+
+form.addEventListener('submit', buildApk);
+
+updatePreview();
+updateSource('url');
+checkApi();
+</script></body>
+</html>

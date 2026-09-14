@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050505">
+<meta name="description" content="ReyCode Universal Safelink Bypasser">
+<title>ReyCode Safelink</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #050505;
+    --panel: #0b0b0b;
+    --panel2: #101010;
+    --border: #202020;
+    --border2: #292929;
+    --text: #f5f5f5;
+    --muted: #858585;
+    --soft: #b5b5b5;
+    --success: #4ade80;
+    --danger: #ff5c5c;
+    --accent: #38bdf8;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    color: var(--text);
+    background:
+        radial-gradient(circle at 10% 0%, rgba(56,189,248,.08), transparent 28%),
+        radial-gradient(circle at 90% 10%, rgba(255,255,255,.045), transparent 25%),
+        var(--bg);
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+}
+
+.app {
+    width: min(1050px, calc(100% - 24px));
+    margin: auto;
+    padding: 18px 0 45px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+}
+
+.back {
+    text-decoration: none;
+    color: #aaa;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,.025);
+    padding: 9px 12px;
+    border-radius: 11px;
+    font-size: 11px;
+    white-space: nowrap;
+    transition: .2s ease;
+}
+
+.back:hover {
+    color: #fff;
+    background: rgba(255,255,255,.06);
+    transform: translateY(-1px);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.logo {
+    width: 41px;
+    height: 41px;
+    border-radius: 13px;
+    background: #fff;
+    color: #000;
+    display: grid;
+    place-items: center;
+    font-size: 19px;
+    font-weight: 900;
+    box-shadow: 0 12px 35px rgba(255,255,255,.07);
+    flex-shrink: 0;
+}
+
+.brand h1 {
+    font-size: 16px;
+    letter-spacing: -.4px;
+}
+
+.brand p {
+    color: var(--muted);
+    font-size: 9px;
+    margin-top: 2px;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,.025);
+    padding: 8px 11px;
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #666;
+}
+
+.status-dot.online {
+    background: var(--success);
+    box-shadow: 0 0 12px rgba(74,222,128,.65);
+}
+
+.hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 28px;
+    background:
+        linear-gradient(135deg, rgba(255,255,255,.045), transparent 55%),
+        var(--panel);
+    margin-bottom: 16px;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    width: 230px;
+    height: 230px;
+    border-radius: 50%;
+    right: -100px;
+    top: -120px;
+    background: rgba(56,189,248,.05);
+    filter: blur(5px);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid rgba(56,189,248,.18);
+    background: rgba(56,189,248,.06);
+    color: var(--accent);
+    border-radius: 999px;
+    padding: 7px 10px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.hero h2 {
+    font-size: clamp(29px, 6vw, 52px);
+    line-height: 1;
+    letter-spacing: -2px;
+    max-width: 750px;
+    margin-top: 14px;
+}
+
+.hero h2 span {
+    color: #666;
+}
+
+.hero p {
+    color: var(--muted);
+    max-width: 690px;
+    font-size: 13px;
+    line-height: 1.7;
+    margin-top: 13px;
+}
+
+.workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 16px;
+}
+
+.panel {
+    border: 1px solid var(--border);
+    background: rgba(11,11,11,.94);
+    border-radius: 20px;
+    padding: 19px;
+}
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.panel-title h3 {
+    font-size: 14px;
+}
+
+.panel-title span {
+    color: #555;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.field label {
+    color: #aaa;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.input-wrap {
+    position: relative;
+}
+
+input {
+    width: 100%;
+    border: 1px solid var(--border2);
+    background: #080808;
+    color: #fff;
+    outline: none;
+    padding: 14px 45px 14px 14px;
+    border-radius: 13px;
+    font-size: 13px;
+    transition: .2s ease;
+}
+
+input::placeholder {
+    color: #4e4e4e;
+}
+
+input:focus {
+    border-color: #3c3c3c;
+    background: #0b0b0b;
+    box-shadow: 0 0 0 3px rgba(56,189,248,.04);
+}
+
+.clear-btn {
+    position: absolute;
+    right: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 8px;
+    background: #171717;
+    color: #777;
+    display: none;
+}
+
+.clear-btn:hover {
+    color: #fff;
+}
+
+.help {
+    color: #555;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.actions {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 9px;
+    margin-top: 14px;
+}
+
+.bypass-btn {
+    border: 0;
+    border-radius: 13px;
+    background: #fff;
+    color: #000;
+    font-size: 12px;
+    font-weight: 900;
+    padding: 13px 15px;
+    transition: .2s ease;
+}
+
+.bypass-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 30px rgba(255,255,255,.08);
+}
+
+.bypass-btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.example-btn {
+    border: 1px solid var(--border2);
+    border-radius: 13px;
+    background: #080808;
+    color: #aaa;
+    padding: 13px 15px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.example-btn:hover {
+    color: #fff;
+    background: #111;
+}
+
+.progress {
+    display: none;
+    margin-top: 15px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: #080808;
+    padding: 13px;
+}
+
+.progress.show {
+    display: block;
+}
+
+.progress-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 9px;
+    font-size: 10px;
+}
+
+.progress-head span:first-child {
+    color: #999;
+}
+
+.progress-head span:last-child {
+    color: #fff;
+    font-weight: 800;
+}
+
+.progress-track {
+    width: 100%;
+    height: 5px;
+    border-radius: 99px;
+    overflow: hidden;
+    background: #191919;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: #fff;
+    transition: width .35s ease;
+}
+
+.result {
+    display: none;
+    margin-top: 15px;
+    border: 1px solid rgba(74,222,128,.2);
+    border-radius: 15px;
+    background: rgba(74,222,128,.035);
+    padding: 15px;
+}
+
+.result.show {
+    display: block;
+}
+
+.result-head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--success);
+    font-size: 12px;
+    font-weight: 900;
+    margin-bottom: 11px;
+}
+
+.result-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: rgba(74,222,128,.1);
+    display: grid;
+    place-items: center;
+}
+
+.result-url {
+    border: 1px solid var(--border);
+    background: #070707;
+    border-radius: 11px;
+    padding: 11px;
+    color: #aaa;
+    font-size: 10px;
+    line-height: 1.5;
+    word-break: break-all;
+    margin-bottom: 10px;
+}
+
+.result-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.result-btn {
+    text-decoration: none;
+    text-align: center;
+    border-radius: 10px;
+    padding: 11px;
+    font-size: 10px;
+    font-weight: 900;
+    border: 1px solid var(--border2);
+    background: #111;
+    color: #ddd;
+}
+
+.result-btn.primary {
+    border-color: #fff;
+    background: #fff;
+    color: #000;
+}
+
+.error {
+    display: none;
+    margin-top: 15px;
+    border: 1px solid rgba(255,92,92,.2);
+    background: rgba(255,92,92,.04);
+    border-radius: 13px;
+    color: #ff9999;
+    padding: 12px;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.error.show {
+    display: block;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+}
+
+.info-card {
+    border: 1px solid var(--border);
+    background: #080808;
+    border-radius: 13px;
+    padding: 12px;
+}
+
+.info-card .icon {
+    font-size: 17px;
+    margin-bottom: 8px;
+}
+
+.info-card strong {
+    display: block;
+    font-size: 11px;
+}
+
+.info-card span {
+    display: block;
+    color: #666;
+    font-size: 9px;
+    line-height: 1.5;
+    margin-top: 3px;
+}
+
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.step {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.step-number {
+    width: 25px;
+    height: 25px;
+    border-radius: 8px;
+    background: #151515;
+    border: 1px solid var(--border2);
+    color: #aaa;
+    display: grid;
+    place-items: center;
+    font-size: 9px;
+    font-weight: 900;
+    flex-shrink: 0;
+}
+
+.step strong {
+    font-size: 10px;
+    display: block;
+}
+
+.step p {
+    color: #666;
+    font-size: 9px;
+    line-height: 1.45;
+    margin-top: 3px;
+}
+
+.footer {
+    text-align: center;
+    color: #444;
+    font-size: 9px;
+    margin-top: 23px;
+}
+
+@media (max-width: 820px) {
+    .workspace {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .app {
+        width: min(100% - 16px, 1050px);
+        padding-top: 12px;
+    }
+
+    .header {
+        align-items: flex-start;
+    }
+
+    .header-left {
+        flex: 1;
+    }
+
+    .status {
+        display: none;
+    }
+
+    .back {
+        padding: 8px 10px;
+    }
+
+    .brand h1 {
+        font-size: 14px;
+    }
+
+    .hero {
+        padding: 19px;
+        border-radius: 19px;
+    }
+
+    .hero h2 {
+        font-size: 32px;
+        letter-spacing: -1.3px;
+    }
+
+    .hero p {
+        font-size: 12px;
+    }
+
+    .panel {
+        padding: 16px;
+        border-radius: 17px;
+    }
+
+    .actions {
+        grid-template-columns: 1fr;
+    }
+
+    .result-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+    <div class="header-left">
+
+        <a href="/dashboard" class="back">
+            ← Dashboard
+        </a>
+
+        <div class="brand">
+
+            <div class="logo">
+                R
+            </div>
+
+            <div>
+                <h1>ReyCode Safelink</h1>
+                <p>Universal Safelink Bypasser</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="status">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Checking API...</span>
+    </div>
+
+</header>
+
+<section class="hero">
+
+    <div class="badge">
+        <span>●</span>
+        ReyCode Tools
+    </div>
+
+    <h2>
+        Skip the safelink.
+        <span>Reach the destination.</span>
+    </h2>
+
+    <p>
+        Masukkan URL safelink yang ingin diproses. ReyCode akan mencoba
+        menyelesaikan redirect, verification flow, dan chain redirect
+        secara otomatis.
+    </p>
+
+</section>
+
+<div class="workspace">
+
+    <main>
+
+        <section class="panel">
+
+            <div class="panel-title">
+                <h3>Safelink URL</h3>
+                <span>01</span>
+            </div>
+
+            <div class="field">
+
+                <label for="url">
+                    URL yang ingin diproses
+                </label>
+
+                <div class="input-wrap">
+
+                    <input
+                        id="url"
+                        type="url"
+                        autocomplete="off"
+                        placeholder="https://example.com/xxxxx"
+                    >
+
+                    <button
+                        type="button"
+                        class="clear-btn"
+                        id="clearBtn"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+                <div class="help">
+                    URL harus berupa alamat HTTP atau HTTPS yang valid.
+                </div>
+
+            </div>
+
+            <div class="actions">
+
+                <button
+                    type="button"
+                    class="bypass-btn"
+                    id="bypassBtn"
+                >
+                    ⚡ Bypass Safelink
+                </button>
+
+                <button
+                    type="button"
+                    class="example-btn"
+                    id="exampleBtn"
+                >
+                    Contoh
+                </button>
+
+            </div>
+
+            <div class="progress" id="progressBox">
+
+                <div class="progress-head">
+                    <span id="progressText">
+                        Connecting...
+                    </span>
+
+                    <span id="progressPercent">
+                        0%
+                    </span>
+                </div>
+
+                <div class="progress-track">
+                    <div
+                        class="progress-bar"
+                        id="progressBar"
+                    ></div>
+                </div>
+
+            </div>
+
+            <div class="result" id="resultBox">
+
+                <div class="result-head">
+
+                    <div class="result-icon">
+                        ✓
+                    </div>
+
+                    <span>
+                        Destination ditemukan
+                    </span>
+
+                </div>
+
+                <div
+                    class="result-url"
+                    id="resultUrl"
+                ></div>
+
+                <div class="result-actions">
+
+                    <a
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="result-btn primary"
+                        id="openBtn"
+                    >
+                        Buka Destination
+                    </a>
+
+                    <button
+                        type="button"
+                        class="result-btn"
+                        id="copyBtn"
+                    >
+                        Copy URL
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="error" id="errorBox"></div>
+
+        </section>
+
+        <section class="panel" style="margin-top:16px">
+
+            <div class="panel-title">
+                <h3>How It Works</h3>
+                <span>02</span>
+            </div>
+
+            <div class="steps">
+
+                <div class="step">
+
+                    <div class="step-number">
+                        1
+                    </div>
+
+                    <div>
+                        <strong>
+                            Masukkan URL
+                        </strong>
+
+                        <p>
+                            Tempel URL safelink yang ingin kamu proses.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">
+                        2
+                    </div>
+
+                    <div>
+                        <strong>
+                            Resolve Redirect
+                        </strong>
+
+                        <p>
+                            Sistem memproses redirect dan flow yang tersedia
+                            pada halaman safelink.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">
+                        3
+                    </div>
+
+                    <div>
+                        <strong>
+                            Destination
+                        </strong>
+
+                        <p>
+                            Jika berhasil, URL tujuan akhir ditampilkan
+                            dan dapat langsung dibuka.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <aside>
+
+        <section class="panel">
+
+            <div class="panel-title">
+                <h3>Features</h3>
+                <span>03</span>
+            </div>
+
+            <div class="info-grid">
+
+                <div class="info-card">
+                    <div class="icon">🔗</div>
+                    <strong>Redirect Chain</strong>
+                    <span>
+                        Mengikuti beberapa redirect secara otomatis.
+                    </span>
+                </div>
+
+                <div class="info-card">
+                    <div class="icon">🍪</div>
+                    <strong>Cookie Session</strong>
+                    <span>
+                        Menjaga cookie selama proses request.
+                    </span>
+                </div>
+
+                <div class="info-card">
+                    <div class="icon">⚡</div>
+                    <strong>Fast Resolve</strong>
+                    <span>
+                        Memproses URL melalui API ReyCode.
+                    </span>
+                </div>
+
+                <div class="info-card">
+                    <div class="icon">🛡️</div>
+                    <strong>Safe Request</strong>
+                    <span>
+                        Request memiliki timeout dan batas redirect.
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="panel" style="margin-top:16px">
+
+            <div class="panel-title">
+                <h3>API Endpoint</h3>
+                <span>04</span>
+            </div>
+
+            <div class="info-card">
+
+                <div class="icon">
+                    ◉
+                </div>
+
+                <strong>
+                    /api/safelink
+                </strong>
+
+                <span>
+                    Universal Safelink Resolver
+                </span>
+
+            </div>
+
+        </section>
+
+    </aside>
+
+</div>
+
+<div class="footer">
+    ReyCode Safelink · Build. Code. Create.
+</div>
+
+</div>
+
+<script>
+const API_URL = '/api/safelink';
+
+const urlInput = document.getElementById('url');
+const clearBtn = document.getElementById('clearBtn');
+const bypassBtn = document.getElementById('bypassBtn');
+const exampleBtn = document.getElementById('exampleBtn');
+
+const progressBox = document.getElementById('progressBox');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+const progressPercent = document.getElementById('progressPercent');
+
+const resultBox = document.getElementById('resultBox');
+const resultUrl = document.getElementById('resultUrl');
+const openBtn = document.getElementById('openBtn');
+const copyBtn = document.getElementById('copyBtn');
+
+const errorBox = document.getElementById('errorBox');
+
+function setProgress(percent, text) {
+    const value = Math.max(
+        0,
+        Math.min(100, percent)
+    );
+
+    progressBar.style.width =
+        `${value}%`;
+
+    progressPercent.textContent =
+        `${value}%`;
+
+    progressText.textContent =
+        text;
+}
+
+function showError(message) {
+    errorBox.textContent =
+        message;
+
+    errorBox.classList.add('show');
+}
+
+function hideMessages() {
+    errorBox.classList.remove('show');
+    resultBox.classList.remove('show');
+}
+
+function updateClearButton() {
+    clearBtn.style.display =
+        urlInput.value.trim()
+            ? 'block'
+            : 'none';
+}
+
+urlInput.addEventListener(
+    'input',
+    updateClearButton
+);
+
+clearBtn.addEventListener(
+    'click',
+    () => {
+        urlInput.value = '';
+        updateClearButton();
+        urlInput.focus();
+    }
+);
+
+exampleBtn.addEventListener(
+    'click',
+    () => {
+        urlInput.value =
+            'https://example.com/your-safelink';
+
+        updateClearButton();
+        urlInput.focus();
+    }
+);
+
+async function checkApi() {
+    const dot =
+        document.getElementById(
+            'statusDot'
+        );
+
+    const text =
+        document.getElementById(
+            'statusText'
+        );
+
+    try {
+        const response =
+            await fetch(
+                API_URL,
+                {
+                    method: 'GET',
+                    cache: 'no-store'
+                }
+            );
+
+        const json =
+            await response
+                .json()
+                .catch(() => null);
+
+        if (
+            response.ok &&
+            json
+        ) {
+            dot.classList.add(
+                'online'
+            );
+
+            text.textContent =
+                'API Online';
+        } else {
+            text.textContent =
+                'API Ready';
+        }
+
+    } catch {
+        text.textContent =
+            'API Offline';
+    }
+}
+
+async function bypass() {
+    const url =
+        urlInput.value.trim();
+
+    hideMessages();
+
+    if (!url) {
+        showError(
+            'Masukkan URL safelink terlebih dahulu.'
+        );
+
+        urlInput.focus();
+        return;
+    }
+
+    try {
+        new URL(url);
+    } catch {
+        showError(
+            'URL tidak valid. Pastikan menggunakan http:// atau https://.'
+        );
+
+        urlInput.focus();
+        return;
+    }
+
+    bypassBtn.disabled = true;
+    bypassBtn.textContent =
+        'Processing...';
+
+    progressBox.classList.add(
+        'show'
+    );
+
+    setProgress(
+        10,
+        'Connecting to safelink...'
+    );
+
+    try {
+        await new Promise(
+            resolve =>
+                setTimeout(
+                    resolve,
+                    300
+                )
+        );
+
+        setProgress(
+            25,
+            'Reading redirect chain...'
+        );
+
+        const response =
+            await fetch(
+                API_URL,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':
+                            'application/json'
+                    },
+                    body: JSON.stringify({
+                        url
+                    })
+                }
+            );
+
+        setProgress(
+            65,
+            'Resolving destination...'
+        );
+
+        const json =
+            await response
+                .json()
+                .catch(() => ({}));
+
+        if (
+            !response.ok ||
+            json.status === false
+        ) {
+            throw new Error(
+                json.message ||
+                `Request gagal dengan status ${response.status}.`
+            );
+        }
+
+        const destination =
+            json.result ||
+            json.url ||
+            json.destination;
+
+        if (!destination) {
+            throw new Error(
+                'Destination URL tidak ditemukan.'
+            );
+        }
+
+        setProgress(
+            100,
+            'Destination resolved.'
+        );
+
+        resultUrl.textContent =
+            destination;
+
+        openBtn.href =
+            destination;
+
+        resultBox.classList.add(
+            'show'
+        );
+
+    } catch (error) {
+
+        progressBox.classList.remove(
+            'show'
+        );
+
+        showError(
+            error.message ||
+            'Gagal memproses safelink.'
+        );
+
+    } finally {
+
+        bypassBtn.disabled =
+            false;
+
+        bypassBtn.textContent =
+            '⚡ Bypass Safelink';
+    }
+}
+
+bypassBtn.addEventListener(
+    'click',
+    bypass
+);
+
+urlInput.addEventListener(
+    'keydown',
+    event => {
+        if (
+            event.key === 'Enter'
+        ) {
+            event.preventDefault();
+            bypass();
+        }
+    }
+);
+
+copyBtn.addEventListener(
+    'click',
+    async () => {
+        const value =
+            resultUrl.textContent.trim();
+
+        if (!value) return;
+
+        try {
+            await navigator.clipboard.writeText(
+                value
+            );
+
+            const oldText =
+                copyBtn.textContent;
+
+            copyBtn.textContent =
+                '✓ Copied';
+
+            setTimeout(() => {
+                copyBtn.textContent =
+                    oldText;
+            }, 1500);
+
+        } catch {
+            const area =
+                document.createElement(
+                    'textarea'
+                );
+
+            area.value =
+                value;
+
+            document.body.appendChild(
+                area
+            );
+
+            area.select();
+
+            document.execCommand(
+                'copy'
+            );
+
+            area.remove();
+
+            copyBtn.textContent =
+                '✓ Copied';
+
+            setTimeout(() => {
+                copyBtn.textContent =
+                    'Copy URL';
+            }, 1500);
+        }
+    }
+);
+
+checkApi();
+updateClearButton();
+</script>
+
+</body>
+</html>

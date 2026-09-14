@@ -1,827 +1,1179 @@
-const http = require('http');
-const https = require('https');
-const tls = require('tls');
-const readline = require('readline');
-const { execSync } = require('child_process');
+const http = require('http')
+const https = require('https')
+const crypto = require('crypto')
 
-let globalRl = null;
+const CREATOR = 'ReyCode'
+const BASE_URL = 'https://react.keyysspanel.web.id'
 
-function getReadline() {
-  if (!globalRl || globalRl.closed) {
-    globalRl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
-  }
-  return globalRl;
+const DEFAULT_TG_BOT_TOKEN =
+process.env.TELEGRAM_BOT_TOKEN || ''
+
+const DEFAULT_TG_CHAT_ID =
+process.env.TELEGRAM_CHAT_ID || ''
+
+const REQUEST_TIMEOUT =
+Number(process.env.REACT_REQUEST_TIMEOUT || 30000)
+
+const MAX_RETRY =
+Math.min(
+3,
+Math.max(
+1,
+Number(process.env.REACT_MAX_RETRY || 2)
+)
+)
+
+function sleep(ms) {
+return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-function askQuestion(query) {
-  const rl = getReadline();
-  return new Promise(resolve => {
-    rl.question(query, answer => {
-      resolve((answer || '').trim());
-    });
-  });
+function createRequestId() {
+return crypto
+.randomBytes(8)
+.toString('hex')
 }
-
-function closeReadline() {
-  if (globalRl && !globalRl.closed) {
-    globalRl.close();
-    globalRl = null;
-  }
-}
-
-const CREATOR = 'ReyCode';
-const BASE_URL = 'https://react.keyysspanel.web.id';
-const DEFAULT_TG_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
-const DEFAULT_TG_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '2027479396';
-const TURNSTILE_FALLBACK_SITEKEY = '0x4AAAAAAErNYkwC4FusFhKz';
-
-const c = {
-  reset: '\x1b[0m',
-  dim: '\x1b[2m',
-  bold: '\x1b[1m',
-  green: '\x1b[32m',
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  cyan: '\x1b[36m',
-  subtle: '\x1b[90m',
-  accent: '\x1b[38;5;208m'
-};
 
 function formatDuration(ms) {
-  return `${(ms / 1000).toFixed(1)}s`;
+return "${(ms / 1000).toFixed(2)}s"
 }
 
-function printProgress(step, label, status = 'pending', duration = null) {
-  const symbol = status === 'success'
-    ? `${c.green}●${c.reset}`
-    : status === 'error'
-    ? `${c.red}✖${c.reset}`
-    : `${c.dim}○${c.reset}`;
+function parseCookies(res) {
+const raw = res?.headers?.['set-cookie']
 
-  const timing = duration ? ` ${c.dim}${duration}${c.reset}` : '';
-  const text = `  ${symbol}  ${label}${timing}`;
-
-  if (status === 'pending') {
-    process.stderr.write(`\r${text.padEnd(70)}`);
-  } else {
-    process.stderr.write(`\r${text.padEnd(70)}\n`);
-  }
+if (!raw) {
+    return []
 }
 
-function parseSetCookies(res) {
-  const raw = res.headers['set-cookie'];
-  if (!raw) return [];
-  return (Array.isArray(raw) ? raw : [raw])
-    .map(line => line.split(';')[0].trim())
-    .filter(Boolean);
-}
+return (Array.isArray(raw) ? raw : [raw])
+    .map(cookie =>
+        cookie
+            .split(';')[0]
+            .trim()
+    )
+    .filter(Boolean)
 
-function request(url, options = {}, postData = null, proxy = null, jar = null) {
-  const timeoutMs = options.timeout || 15000;
-  const maxDurationMs = options.maxDuration || null;
-  return new Promise((outerResolve, outerReject) => {
-    let settled = false;
-    const settle = (fn, v) => { if (!settled) { settled = true; clearTimeout(deadline); fn(v); } };
-
-    const deadline = setTimeout(() => {
-      settle(outerReject, new Error(`Timeout ${maxDurationMs || timeoutMs}ms: ${url}${proxy ? ` (via ${proxy})` : ''}`));
-    }, maxDurationMs || timeoutMs);
-
-    const u = new URL(url);
-    const isHttps = u.protocol === 'https:';
-    const defaultPort = isHttps ? 443 : 80;
-    const targetPort = u.port || defaultPort;
-
-    const headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': '*/*',
-      'Accept-Language': 'en-US,en;q=0.9',
-      Host: u.hostname,
-      ...options.headers
-    };
-
-    if (jar && jar.size > 0) {
-      headers['Cookie'] = [...jar.values()].join('; ');
-    }
-
-    const finish = (response, socketRef) => {
-      let data = '';
-      response.on('data', chunk => data += chunk);
-      response.on('end', () => {
-        settle(outerResolve, {
-          statusCode: response.statusCode,
-          headers: response.headers,
-          body: data
-        });
-      });
-      response.on('error', (e) => settle(outerReject, e));
-      if (socketRef && socketRef.destroy) {}
-    };
-
-    if (proxy) {
-      const [proxyHost, proxyPortStr] = proxy.replace(/^https?:\/\//, '').split(':');
-      const proxyPort = parseInt(proxyPortStr) || 8080;
-
-      const connectReq = http.request({
-        host: proxyHost,
-        port: proxyPort,
-        method: 'CONNECT',
-        path: `${u.hostname}:${targetPort}`,
-        headers: { Host: `${u.hostname}:${targetPort}` }
-      });
-
-      connectReq.on('connect', (res, socket) => {
-        if (settled) { socket.destroy(); return; }
-        if (res.statusCode !== 200) {
-          socket.destroy();
-          return settle(outerReject, new Error(`Proxy CONNECT returned ${res.statusCode}`));
-        }
-
-        const proceedWithSocket = (networkSocket) => {
-          if (settled) { networkSocket.destroy(); return; }
-          const req = (isHttps ? https : http).request({
-            hostname: u.hostname,
-            port: targetPort,
-            path: u.pathname + u.search,
-            method: options.method || 'GET',
-            createConnection: () => networkSocket,
-            headers
-          }, (response) => finish(response));
-
-          req.on('error', (e) => settle(outerReject, e));
-          if (postData) {
-            req.write(postData);
-          }
-          req.end();
-        };
-
-        if (isHttps) {
-          const tlsSocket = tls.connect({
-            socket,
-            servername: u.hostname,
-            rejectUnauthorized: false
-          }, () => proceedWithSocket(tlsSocket));
-          tlsSocket.on('error', (e) => settle(outerReject, e));
-        } else {
-          proceedWithSocket(socket);
-        }
-      });
-
-      connectReq.on('error', (e) => settle(outerReject, e));
-      connectReq.end();
-      return;
-    }
-
-    const client = isHttps ? https : http;
-    const req = client.request({
-      hostname: u.hostname,
-      port: targetPort,
-      path: u.pathname + u.search,
-      method: options.method || 'GET',
-      headers
-    }, (response) => finish(response));
-
-    req.on('error', (e) => settle(outerReject, e));
-    if (postData) {
-      req.write(postData);
-    }
-    req.end();
-  });
 }
 
 function createCookieJar() {
-  return new Map();
+return new Map()
 }
 
 function storeCookies(jar, res) {
-  if (!jar || !res || !res.headers) return;
-  for (const cookie of parseSetCookies(res)) {
-    const eq = cookie.indexOf('=');
-    if (eq > 0) {
-      jar.set(cookie.slice(0, eq), cookie.slice(eq + 1));
+if (!jar || !res) {
+return
+}
+
+for (const cookie of parseCookies(res)) {
+    const index = cookie.indexOf('=')
+
+    if (index <= 0) {
+        continue
     }
-  }
+
+    const name =
+        cookie.slice(0, index).trim()
+
+    const value =
+        cookie.slice(index + 1).trim()
+
+    jar.set(name, value)
 }
 
-async function jsonRequest(url, { method = 'GET', body = null, headers = {}, timeout = 15000, proxy = null, jar = null } = {}) {
-  const payload = body === null ? null : JSON.stringify(body);
-  const res = await request(url, {
-    method,
-    timeout,
-    headers: {
-      Accept: 'application/json',
-      ...(payload !== null ? {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload)
-      } : {}),
-      ...headers
+}
+
+function cookieHeader(jar) {
+if (!jar || jar.size === 0) {
+return ''
+}
+
+return [...jar.entries()]
+    .map(([name, value]) =>
+        `${name}=${value}`
+    )
+    .join('; ')
+
+}
+
+function request(
+url,
+options = {},
+body = null,
+jar = null
+) {
+const timeout =
+Number(options.timeout || REQUEST_TIMEOUT)
+
+return new Promise((resolve, reject) => {
+    let finished = false
+
+    const finish = (callback, value) => {
+        if (finished) {
+            return
+        }
+
+        finished = true
+        clearTimeout(timer)
+        callback(value)
     }
-  }, payload, proxy, jar);
 
-  storeCookies(jar, res);
+    const timer = setTimeout(() => {
+        if (req && !req.destroyed) {
+            req.destroy()
+        }
 
-  try {
-    return { res, json: JSON.parse(res.body) };
-  } catch {
-    return { res, json: null };
-  }
-}
+        finish(
+            reject,
+            new Error(
+                `Request timeout after ${timeout}ms`
+            )
+        )
+    }, timeout)
 
-const PROXYSCRAPE_API_KEY = process.env.PROXYSCRAPE_API_KEY || 'bYUUcDxaPvupyNuMBn6wTJnR5f6PehQ08i6AvyHYwKGSpZDQear1Wb4YJ7gm5Ozz';
+    let parsed
 
-async function fetchProxyScrapeList(options = {}) {
-  const country = options.country || null;
-  const apiKey = options.apiKey !== undefined ? options.apiKey : PROXYSCRAPE_API_KEY;
-
-  let endpoint = 'https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text';
-  if (country && country !== 'all') endpoint += `&country=${encodeURIComponent(country)}`;
-  if (apiKey) endpoint += `&api_key=${encodeURIComponent(apiKey)}`;
-
-  const res = await request(endpoint, { timeout: 20000, maxDuration: 30000 });
-  if (res.statusCode !== 200 || !res.body) {
-    throw new Error(`ProxyScrape API error (${res.statusCode}): ${(res.body || '').slice(0, 120)}`);
-  }
-
-  const list = res.body
-    .trim()
-    .split(/\r?\n/)
-    .map(p => p.trim())
-    .filter(p => /^https?:\/\//i.test(p))
-    .map(p => p.replace(/^https?:\/\//i, ''))
-    .filter(p => /^[^:\s]+:\d{2,5}$/.test(p));
-
-  return [...new Set(list)];
-}
-
-function solveTurnstile(siteKey, proxy = null, targetPageUrl = BASE_URL) {
-  const pageUrl = targetPageUrl || BASE_URL;
-  const proxyArg = proxy ? ` --proxy http://${proxy.replace(/^https?:\/\//, '')}` : '';
-  const cmd = `npx haidarcf turnstile-min --url ${pageUrl} --sitekey ${siteKey}${proxyArg}`;
-  const output = execSync(cmd, {
-    encoding: 'utf8',
-    stdio: ['pipe', 'pipe', 'ignore'],
-    timeout: 90000,
-    killSignal: 'SIGKILL'
-  });
-  const match = output.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('Solver output invalid');
-  const data = JSON.parse(match[0]);
-  if (!data.token) throw new Error('Failed to obtain captcha token');
-  return data.token;
-}
-
-async function findWorkingProxy(quiet = false, country = 'id', want = 5) {
-  const pools = [];
-  if (country && country !== 'all') pools.push(country);
-  pools.push(null);
-
-  const t0 = Date.now();
-  const tested = new Set();
-  const candidates = [];
-  const chunkSize = 25;
-  const maxPerPool = 100;
-
-  const probePool = async (list, label) => {
-    const shuffled = list.filter(p => !tested.has(p)).sort(() => Math.random() - 0.5);
-    const maxToTest = Math.min(shuffled.length, maxPerPool);
-    if (!maxToTest) return;
-
-    for (let i = 0; i < maxToTest && candidates.length < want; i += chunkSize) {
-      const chunk = shuffled.slice(i, i + chunkSize);
-      chunk.forEach(p => tested.add(p));
-      if (!quiet) printProgress(0, `Probing ${label} proxies (${i + 1}-${Math.min(i + chunk.length, maxToTest)}/${maxToTest})`, 'pending');
-
-      const results = await Promise.all(chunk.map(async (proxyAddr) => {
-        try {
-          const { res, json } = await jsonRequest(`${BASE_URL}/api/free/status`, { timeout: 1800, proxy: proxyAddr });
-          if (res.statusCode === 200 && json && typeof json.uid === 'string' && json.uid) {
-            return { proxy: proxyAddr, uid: json.uid, limit: json.limit || 0 };
-          }
-        } catch {}
-        return null;
-      }));
-
-      for (const r of results) {
-        if (r && candidates.length < want) candidates.push(r);
-      }
-    }
-  };
-
-  for (const pool of pools) {
-    if (candidates.length >= want) break;
-    const label = pool ? pool.toUpperCase() : 'GLOBAL';
-    if (!quiet) printProgress(0, `Fetching free proxies from ProxyScrape (pool: ${label})`, 'pending');
-    let list = [];
     try {
-      list = await fetchProxyScrapeList({ country: pool });
-    } catch (e) {
-      if (!quiet) printProgress(0, `Pool ${label} gagal: ${e.message}`, 'pending');
-      continue;
+        parsed = new URL(url)
+    } catch {
+        finish(
+            reject,
+            new Error('Invalid URL')
+        )
+        return
     }
-    if (!quiet) printProgress(0, `Obtained ${list.length} HTTP proxies (pool: ${label})`, 'success', formatDuration(Date.now() - t0));
-    await probePool(list, label);
-  }
 
-  if (!candidates.length) {
-    throw new Error('Tidak ada proxy ProxyScrape yang berhasil terhubung');
-  }
+    const isHttps =
+        parsed.protocol === 'https:'
 
-  candidates.sort((a, b) => b.limit - a.limit);
-  if (!quiet) {
-    printProgress(0, `Found ${candidates.length} alive proxies: ${candidates.map(x => x.proxy).join(', ')}`, 'success');
-  }
-  return { proxy: candidates[0].proxy, uid: candidates[0].uid, candidates };
+    const client =
+        isHttps ? https : http
+
+    const headers = {
+        'User-Agent':
+            'ReyCode-React-API/1.0',
+        Accept:
+            'application/json, text/plain, */*',
+        'Accept-Language':
+            'en-US,en;q=0.9',
+        Host:
+            parsed.host,
+        ...options.headers
+    }
+
+    const cookies =
+        cookieHeader(jar)
+
+    if (cookies) {
+        headers.Cookie = cookies
+    }
+
+    if (body !== null && body !== undefined) {
+        if (
+            typeof body === 'string' ||
+            Buffer.isBuffer(body)
+        ) {
+            if (!headers['Content-Length']) {
+                headers['Content-Length'] =
+                    Buffer.byteLength(body)
+            }
+        }
+    }
+
+    const req = client.request(
+        {
+            protocol: parsed.protocol,
+            hostname: parsed.hostname,
+            port:
+                parsed.port ||
+                (isHttps ? 443 : 80),
+            method:
+                options.method || 'GET',
+            path:
+                `${parsed.pathname}${parsed.search}`,
+            headers
+        },
+        response => {
+            let chunks = []
+
+            response.on(
+                'data',
+                chunk => chunks.push(chunk)
+            )
+
+            response.on(
+                'end',
+                () => {
+                    const buffer =
+                        Buffer.concat(chunks)
+
+                    finish(
+                        resolve,
+                        {
+                            statusCode:
+                                response.statusCode,
+                            headers:
+                                response.headers,
+                            body:
+                                buffer.toString('utf8')
+                        }
+                    )
+                }
+            )
+
+            response.on(
+                'error',
+                error =>
+                    finish(reject, error)
+            )
+        }
+    )
+
+    req.on(
+        'error',
+        error =>
+            finish(reject, error)
+    )
+
+    if (
+        body !== null &&
+        body !== undefined
+    ) {
+        req.write(body)
+    }
+
+    req.end()
+})
+
 }
 
-async function sendTelegramNotification(message, botToken = DEFAULT_TG_BOT_TOKEN, chatId = DEFAULT_TG_CHAT_ID) {
-  if (!botToken || !chatId) return false;
-  try {
-    const payload = JSON.stringify({
-      chat_id: chatId,
-      text: message,
-      parse_mode: 'Markdown'
-    });
-    await request(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload)
-      }
-    }, payload);
-    return true;
-  } catch {
-    return false;
-  }
+async function jsonRequest(
+url,
+{
+method = 'GET',
+body = null,
+headers = {},
+timeout = REQUEST_TIMEOUT,
+jar = null
+} = {}
+) {
+const payload =
+body === null
+? null
+: JSON.stringify(body)
+
+const requestHeaders = {
+    Accept: 'application/json',
+    ...headers
 }
 
-async function getTurnstileStatus(proxy = null) {
-  try {
-    const { json } = await jsonRequest(`${BASE_URL}/api/turnstile/status`, { timeout: 10000, proxy });
-    if (json && json.siteKey) return json;
-  } catch {}
-  return { configured: true, siteKey: TURNSTILE_FALLBACK_SITEKEY };
+if (payload !== null) {
+    requestHeaders[
+        'Content-Type'
+    ] = 'application/json'
+
+    requestHeaders[
+        'Content-Length'
+    ] = Buffer.byteLength(payload)
 }
 
-async function getFreeStatus(proxy = null, jar = null) {
-  const { res, json } = await jsonRequest(`${BASE_URL}/api/free/status`, { timeout: 10000, proxy, jar });
-  return (res.statusCode === 200 && json) ? json : null;
-}
+const response =
+    await request(
+        url,
+        {
+            method,
+            timeout,
+            headers:
+                requestHeaders
+        },
+        payload,
+        jar
+    )
 
-async function getVipSession(vipKey, proxy = null, jar = null) {
-  const { res, json } = await jsonRequest(`${BASE_URL}/api/auth/login`, {
-    method: 'POST',
-    timeout: 12000,
-    proxy,
+storeCookies(
     jar,
-    body: { key: vipKey }
-  });
+    response
+)
 
-  if (res.statusCode === 200 && json && json.success && json.user) {
-    return json.user;
-  }
-  return null;
+let json = null
+
+try {
+    json =
+        JSON.parse(
+            response.body
+        )
+} catch {}
+
+return {
+    res: response,
+    json
+}
+
+}
+
+function getBody(req) {
+if (
+req.body &&
+typeof req.body === 'object'
+) {
+return req.body
+}
+
+return {}
+
+}
+
+function getInput(req) {
+const body =
+getBody(req)
+
+return String(
+    body.link ||
+    body.url ||
+    body.channel ||
+    req.query?.link ||
+    req.query?.url ||
+    req.query?.channel ||
+    ''
+).trim()
+
+}
+
+function getEmoji(req) {
+const body =
+getBody(req)
+
+return String(
+    body.emoji ||
+    body.emojis ||
+    req.query?.emoji ||
+    req.query?.emojis ||
+    '👍'
+).trim()
+
+}
+
+function getTurnstileToken(req) {
+const body =
+getBody(req)
+
+return String(
+    body['cf-turnstile-response'] ||
+    body.turnstileToken ||
+    req.query?.['cf-turnstile-response'] ||
+    req.query?.turnstileToken ||
+    ''
+).trim()
+
+}
+
+function isWhatsAppChannel(url) {
+try {
+const parsed =
+new URL(url)
+
+    if (
+        parsed.protocol !==
+        'https:'
+    ) {
+        return false
+    }
+
+    const hostname =
+        parsed.hostname.toLowerCase()
+
+    if (
+        hostname !==
+            'whatsapp.com' &&
+        hostname !==
+            'www.whatsapp.com'
+    ) {
+        return false
+    }
+
+    return parsed.pathname
+        .toLowerCase()
+        .startsWith('/channel/')
+} catch {
+    return false
+}
+
+}
+
+function normalizeEmoji(value) {
+return value
+.split(',')
+.map(item =>
+item.trim()
+)
+.filter(Boolean)
+.slice(0, 10)
+}
+
+function extractMessage(data) {
+if (!data) {
+return ''
+}
+
+if (
+    typeof data.message ===
+    'string'
+) {
+    return data.message
+}
+
+if (
+    typeof data.error ===
+    'string'
+) {
+    return data.error
+}
+
+if (
+    typeof data.msg ===
+    'string'
+) {
+    return data.msg
+}
+
+return ''
+
+}
+
+function sanitizeMessage(message) {
+return String(
+message || 'Unknown error'
+)
+.replace(/\s+/g, ' ')
+.trim()
+.slice(0, 500)
+}
+
+async function getProviderStatus(
+jar = null
+) {
+const result =
+await jsonRequest(
+"${BASE_URL}/api/free/status",
+{
+timeout: 10000,
+jar
+}
+)
+
+return result
+
+}
+
+async function getTurnstileStatus(
+jar = null
+) {
+const result =
+await jsonRequest(
+"${BASE_URL}/api/turnstile/status",
+{
+timeout: 10000,
+jar
+}
+)
+
+if (
+    result.res.statusCode === 200 &&
+    result.json
+) {
+    return result.json
+}
+
+return null
+
+}
+
+async function getVipSession(
+vipKey,
+jar = null
+) {
+if (!vipKey) {
+return null
+}
+
+const result =
+    await jsonRequest(
+        `${BASE_URL}/api/auth/login`,
+        {
+            method: 'POST',
+            timeout: 12000,
+            jar,
+            body: {
+                key: vipKey
+            }
+        }
+    )
+
+if (
+    result.res.statusCode === 200 &&
+    result.json?.success &&
+    result.json?.user
+) {
+    return result.json.user
+}
+
+return null
+
+}
+
+async function submitReaction({
+channelLink,
+emojis,
+turnstileToken,
+vipKey = null
+}) {
+const jar =
+createCookieJar()
+
+await getProviderStatus(
+    jar
+).catch(() => null)
+
+const payload = {
+    link: channelLink,
+    emoji: emojis,
+    'cf-turnstile-response':
+        turnstileToken
+}
+
+if (vipKey) {
+    const vip =
+        await getVipSession(
+            vipKey,
+            jar
+        )
+
+    if (
+        vip &&
+        vip.key
+    ) {
+        payload.key =
+            vip.key
+    }
+}
+
+const result =
+    await jsonRequest(
+        `${BASE_URL}/api/react`,
+        {
+            method: 'POST',
+            timeout: 30000,
+            jar,
+            headers: {
+                Origin:
+                    BASE_URL,
+                Referer:
+                    `${BASE_URL}/`
+            },
+            body: payload
+        }
+    )
+
+return {
+    ...result,
+    jar
+}
+
+}
+
+function isRetryableStatus(
+status
+) {
+return (
+status === 408 ||
+status === 425 ||
+status === 429 ||
+status >= 500
+)
 }
 
 async function executeReaction({
-  channelLink,
-  emojis = '👍',
-  vipKey = null,
-  notifyTelegram = true,
-  quiet = false,
-  useProxy = false,
-  proxyCountry = 'id',
-  manualProxy = null
+channelLink,
+emojis = '👍',
+turnstileToken,
+vipKey = null,
+notifyTelegram = true
 }) {
-  const startTime = Date.now();
-  let activeProxy = null;
-  let useProxyLocal = useProxy;
+const started =
+Date.now()
 
-  if (!manualProxy && !useProxyLocal && !vipKey) {
+const requestId =
+    createRequestId()
+
+const emojiList =
+    normalizeEmoji(
+        emojis
+    )
+
+if (
+    !channelLink
+) {
+    throw new Error(
+        'WhatsApp Channel link wajib diisi.'
+    )
+}
+
+if (
+    !isWhatsAppChannel(
+        channelLink
+    )
+) {
+    throw new Error(
+        'Link harus berupa WhatsApp Channel yang valid.'
+    )
+}
+
+if (
+    !emojiList.length
+) {
+    throw new Error(
+        'Emoji reaction wajib diisi.'
+    )
+}
+
+if (
+    !turnstileToken
+) {
+    throw new Error(
+        'cf-turnstile-response wajib diisi.'
+    )
+}
+
+let lastError = null
+let providerResult = null
+
+for (
+    let attempt = 1;
+    attempt <= MAX_RETRY;
+    attempt++
+) {
     try {
-      const sData = await getFreeStatus(null);
-      if (sData && (sData.limit <= 0 || sData.ipBlocked)) {
-        if (!quiet) printProgress(0, 'IP limit reached (24h cooldown). Auto-switching to ProxyScrape pool', 'pending');
-        useProxyLocal = true;
-      }
-    } catch {}
-  }
+        providerResult =
+            await submitReaction({
+                channelLink,
+                emojis:
+                    emojiList.join(','),
+                turnstileToken,
+                vipKey
+            })
 
-  if (typeof module.exports.cachedAliveProxies === 'undefined') module.exports.cachedAliveProxies = null;
-  let candidateList = [];
-  if (manualProxy) {
-    activeProxy = manualProxy;
-    candidateList = [{ proxy: manualProxy, uid: null, limit: 0 }];
-    if (!quiet) printProgress(0, `Custom proxy configured: ${manualProxy}`, 'success');
-  } else if (useProxyLocal) {
-    if (module.exports.cachedAliveProxies && module.exports.cachedAliveProxies.length) {
-      candidateList = module.exports.cachedAliveProxies;
-      if (!quiet) printProgress(0, `Reusing ${candidateList.length} cached alive proxies`, 'success');
-    } else {
-      const proxyData = await findWorkingProxy(quiet, proxyCountry);
-      candidateList = proxyData.candidates;
-      module.exports.cachedAliveProxies = candidateList;
-    }
-  }
+        const status =
+            providerResult
+                .res
+                .statusCode
 
-  const t0 = Date.now();
-  let uid = null;
-  let vipUser = null;
-  let jar = null;
-  let isSuccess = false;
-  let messageDetail = '';
-  let lastError = null;
-  let solverCalls = 0;
-
-  for (let ci = 0; ci < candidateList.length; ci++) {
-    activeProxy = candidateList[ci].proxy;
-    jar = createCookieJar();
-    uid = null;
-    vipUser = null;
-
-    try {
-      if (!quiet) printProgress(1, `Establishing session via ${activeProxy} (${ci + 1}/${candidateList.length})`, 'pending');
-
-      try {
-        const free = await getFreeStatus(activeProxy, jar);
-        if (free && free.uid) uid = free.uid;
-      } catch {}
-
-      if (vipKey) {
-        vipUser = await getVipSession(vipKey, activeProxy, jar);
-        if (vipUser && vipUser.key) {
-          uid = vipUser.key;
-          if (!quiet) printProgress(1, `VIP session established (${vipUser.key})`, 'success', formatDuration(Date.now() - t0));
+        if (
+            status >= 200 &&
+            status < 300
+        ) {
+            break
         }
-      }
 
-      if (!uid) {
-        throw new Error('Gagal mendapatkan uid via proxy (api/free/status)');
-      }
-      if (!vipUser && !quiet) {
-        printProgress(1, `Session established (uid: ${uid})`, 'success', formatDuration(Date.now() - t0));
-      }
-
-      if (!quiet) printProgress(2, 'Solving Cloudflare Turnstile verification', 'pending');
-      const t1 = Date.now();
-      const tsStatus = await getTurnstileStatus(activeProxy);
-      const siteKey = tsStatus.siteKey || TURNSTILE_FALLBACK_SITEKEY;
-      let turnstileToken = null;
-      if (solverCalls < 3) {
-        try {
-          solverCalls++;
-          turnstileToken = solveTurnstile(siteKey, activeProxy, `${BASE_URL}/`);
-        } catch (solverErr) {
-          if (solverCalls < 3) {
-            await new Promise(r => setTimeout(r, 1500));
-            try {
-              solverCalls++;
-              turnstileToken = solveTurnstile(siteKey, null, `${BASE_URL}/`);
-            } catch {}
-          }
+        if (
+            !isRetryableStatus(
+                status
+            )
+        ) {
+            break
         }
-      }
-      if (!turnstileToken) {
-        throw new Error('Gagal solve Turnstile (solver API gagal)');
-      }
-      if (!quiet) printProgress(2, 'Cloudflare Turnstile verified', 'success', formatDuration(Date.now() - t1));
 
-      if (!quiet) printProgress(3, 'Dispatching reaction payload', 'pending');
-      const t2 = Date.now();
-      const payload = JSON.stringify({
-        link: channelLink,
-        emoji: emojis,
-        'cf-turnstile-response': turnstileToken
-      });
+        lastError =
+            new Error(
+                `Provider HTTP ${status}`
+            )
 
-      const submitHeaders = {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload),
-        'Origin': BASE_URL,
-        'Referer': `${BASE_URL}/`
-      };
+        if (
+            attempt <
+            MAX_RETRY
+        ) {
+            await sleep(
+                1000 * attempt
+            )
+        }
+    } catch (error) {
+        lastError =
+            error
 
-      const submitRes = await request(`${BASE_URL}/api/react`, {
-        method: 'POST',
-        timeout: 20000,
-        headers: submitHeaders
-      }, payload, activeProxy, jar);
-
-      storeCookies(jar, submitRes);
-
-      let jsonResp = null;
-      try {
-        jsonResp = JSON.parse(submitRes.body);
-      } catch {}
-
-      isSuccess = Boolean(jsonResp && jsonResp.success);
-      messageDetail = (jsonResp && jsonResp.message) ||
-        (submitRes.body || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160) ||
-        'Failed';
-
-      if (isSuccess) {
-        if (!quiet) printProgress(3, `Reaction successfully delivered: ${messageDetail}`, 'success', formatDuration(Date.now() - t2));
-        break;
-      }
-
-      const msgLower = messageDetail.toLowerCase();
-      const retryable = /(cooldown|limit|blacklist|blocked|coba lagi|try again|provider|menolak|gagal memproses)/.test(msgLower);
-      if (retryable && ci < candidateList.length - 1) {
-        await new Promise(r => setTimeout(r, 2500));
-        throw new Error(`Server rejected via ${activeProxy}: ${messageDetail}`);
-      }
-
-      if (!quiet) printProgress(3, `Server rejected: ${messageDetail}`, 'error', formatDuration(Date.now() - t2));
-      break;
-    } catch (err) {
-      lastError = err;
-      if (ci < candidateList.length - 1) {
-        if (!quiet) printProgress(0, `Proxy ${activeProxy} failed (${err.message}) - failing over`, 'pending');
-      }
+        if (
+            attempt <
+            MAX_RETRY
+        ) {
+            await sleep(
+                1000 * attempt
+            )
+        }
     }
-  }
+}
 
-  if (!isSuccess && !messageDetail && lastError) {
-    throw lastError;
-  }
-  if (!isSuccess && !messageDetail) {
-    messageDetail = lastError ? lastError.message : 'Failed';
-  }
+if (
+    !providerResult
+) {
+    throw (
+        lastError ||
+        new Error(
+            'Provider tidak memberikan response.'
+        )
+    )
+}
 
-  const durationMs = Date.now() - startTime;
+const duration =
+    Date.now() -
+    started
 
-  const responseJson = {
-    creator: CREATOR,
-    status: isSuccess ? 'success' : 'error',
-    code: isSuccess ? 200 : 400,
-    message: messageDetail,
+const providerData =
+    providerResult.json
+
+const success =
+    Boolean(
+        providerData?.success
+    )
+
+const message =
+    sanitizeMessage(
+        extractMessage(
+            providerData
+        ) ||
+        providerResult
+            .res
+            .body
+    )
+
+const response = {
+    creator:
+        CREATOR,
+    status:
+        success
+            ? 'success'
+            : 'error',
+    code:
+        success
+            ? 200
+            : providerResult
+                .res
+                .statusCode >= 400
+                ? providerResult
+                    .res
+                    .statusCode
+                : 502,
+    message:
+        message ||
+        (
+            success
+                ? 'Reaction berhasil diproses.'
+                : 'Reaction gagal diproses.'
+        ),
+    requestId,
     data: {
-      target: channelLink,
-      emojis: emojis.split(',').map(e => e.trim()).filter(Boolean),
-      vip: Boolean(vipUser),
-      key: vipUser ? vipUser.key : uid,
-      proxy: activeProxy || null,
-      duration: `${(durationMs / 1000).toFixed(2)}s`
-    }
-  };
-
-  if (notifyTelegram) {
-    const tgText = isSuccess
-      ? `✅ *Reaction Dispatched*\n\n` +
-        `• *Target*: \`${channelLink}\`\n` +
-        `• *Emoji*: ${emojis}\n` +
-        `• *Duration*: ${(durationMs / 1000).toFixed(2)}s\n` +
-        `• *Creator*: ${CREATOR}`
-      : `⚠️ *Reaction Dispatch Failed*\n\n` +
-        `• *Target*: \`${channelLink}\`\n` +
-        `• *Response*: ${responseJson.message}`;
-    await sendTelegramNotification(tgText);
-  }
-
-  return responseJson;
-}
-
-function printHelp() {
-  const options = [
-    ['-e, --emoji <emojis>', 'Reaction emojis separated by comma (default: 👍)'],
-    ['-n, --count <num>', 'Number of automated reaction rounds (default: 1)'],
-    ['-k, --key <vip_key>', 'VIP member key for privileged access'],
-    ['--proxy', 'Rotate free proxies from ProxyScrape (v4 free-proxy-list)'],
-    ['--proxy-country <cc>', 'Country filter for proxy pool (default: id)'],
-    ['--custom-proxy <host:port>', 'Tunnel traffic through a custom HTTP/HTTPS proxy'],
-    ['--proxy-info', 'Display current ProxyScrape account & pool metrics'],
-    ['--no-telegram', 'Suppress automated Telegram notifications'],
-    ['--quiet, -q', 'Output raw JSON only for machine parsing'],
-    ['-h, --help', 'Display this documentation']
-  ];
-
-  process.stdout.write(`
-${c.dim}Usage:${c.reset}
-  node cli.js [whatsapp_channel_url] [options]
-
-${c.dim}Service:${c.reset}
-  ${c.cyan}Keyyss React${c.reset}  WhatsApp Channel Reaction Automation (react.keyysspanel.web.id)
-                Murni HTTP + solver API - tanpa browser.
-
-${c.dim}Options:${c.reset}
-${options.map(([flag, desc]) => `  ${c.cyan}${flag.padEnd(28)}${c.reset}${desc}`).join('\n')}
-
-${c.dim}Examples:${c.reset}
-  # Interactive prompt
-  node cli.js
-
-  # WhatsApp Channel Reaction
-  node cli.js "https://whatsapp.com/channel/0029VbD8Muz9WtBuZR9UMq0x/1020" -e "🔥,❤️" -n 5 --proxy
-
-  # Dengan VIP Key
-  node cli.js "https://whatsapp.com/channel/0029VbD8Muz9WtBuZR9UMq0x/1020" -k "VIP-KEYANDA"
-
-  # Output JSON murni (scripting / API)
-  node cli.js "https://whatsapp.com/channel/0029VbD8Muz9WtBuZR9UMq0x/1020" -e "🔥" --quiet
-
-`);
-}
-
-async function main() {
-  const args = process.argv.slice(2);
-  if (args.includes('--help') || args.includes('-h')) {
-    printHelp();
-    process.exit(0);
-  }
-
-  let channelLink = '';
-  let emojis = null;
-  let count = null;
-  let vipKey = null;
-  let notifyTelegram = true;
-  let quiet = false;
-  let useProxy = false;
-  let manualProxy = null;
-  let proxyCountry = 'id';
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--emoji' || args[i] === '-e') {
-      emojis = args[++i];
-    } else if (args[i] === '--count' || args[i] === '-n' || args[i] === '--amount' || args[i] === '-c') {
-      count = Math.max(1, parseInt(args[++i], 10) || 1);
-    } else if (args[i] === '--key' || args[i] === '-k') {
-      vipKey = args[++i];
-    } else if (args[i] === '--proxy') {
-      useProxy = true;
-    } else if (args[i] === '--proxy-country') {
-      proxyCountry = (args[++i] || 'id').toLowerCase();
-    } else if (args[i] === '--custom-proxy') {
-      manualProxy = args[++i];
-    } else if (args[i] === '--proxy-info') {
-      try {
-        const list = await fetchProxyScrapeList({ country: proxyCountry });
-        console.log(JSON.stringify({
-          creator: CREATOR,
-          status: 'success',
-          code: 200,
-          data: {
-            endpoint: 'proxyscrape v4 free-proxy-list',
-            country: proxyCountry,
-            totalHttpProxies: list.length,
-            sample: list.slice(0, 10)
-          }
-        }, null, 2));
-        process.exit(0);
-      } catch (e) {
-        console.log(JSON.stringify({
-          creator: CREATOR,
-          status: 'error',
-          code: 500,
-          message: e.message
-        }, null, 2));
-        process.exit(1);
-      }
-    } else if (args[i] === '--no-telegram') {
-      notifyTelegram = false;
-    } else if (args[i] === '--quiet' || args[i] === '-q') {
-      quiet = true;
-    } else if (!args[i].startsWith('-') && !channelLink) {
-      channelLink = args[i];
-    }
-  }
-
-  if (!channelLink && !quiet) {
-    const inputUrl = await askQuestion(`  ${c.cyan}?${c.reset} Target WhatsApp Channel Link: `);
-    channelLink = inputUrl;
-  }
-
-  if (!channelLink) {
-    printHelp();
-    process.exit(1);
-  }
-
-  if (!emojis && !quiet) {
-    const inputEmoji = await askQuestion(`  ${c.cyan}?${c.reset} Reaction emojis (misal: 👍,🔥,❤️ - default: 👍): `);
-    emojis = inputEmoji || '👍';
-  } else if (!emojis) {
-    emojis = '👍';
-  }
-
-  if (!count && !quiet) {
-    const inputCount = await askQuestion(`  ${c.cyan}?${c.reset} Total nominal / tembakan reaction (default: 1): `);
-    count = Math.max(1, parseInt(inputCount, 10) || 1);
-  } else if (!count) {
-    count = 1;
-  }
-
-  closeReadline();
-
-  try {
-    const results = [];
-    for (let round = 1; round <= count; round++) {
-      if (count > 1 && !quiet) {
-        process.stderr.write(`\n${c.bold}=== [Reaction Round ${round}/${count}] ===${c.reset}\n`);
-      }
-
-      let roundResult = null;
-
-      for (let retry = 1; retry <= 3; retry++) {
-        try {
-          roundResult = await executeReaction({
+        target:
             channelLink,
-            emojis,
-            vipKey,
-            notifyTelegram,
-            quiet,
-            useProxy,
-            proxyCountry,
-            manualProxy
-          });
-          break;
-        } catch (err) {
-          if (retry < 3) {
-            if (!quiet) printProgress(0, `Round ${round} failed (${err.message}). Retrying with fresh proxy (${retry}/3)...`, 'pending');
-            await new Promise(res => setTimeout(res, 2000));
-          } else {
-            roundResult = {
-              creator: CREATOR,
-              status: 'error',
-              code: 500,
-              message: err.message,
-              data: { target: channelLink }
-            };
-          }
-        }
-      }
-
-      results.push(roundResult);
-
-      if (round < count) {
-        await new Promise(res => setTimeout(res, 1500));
-      }
+        emojis:
+            emojiList,
+        duration:
+            formatDuration(
+                duration
+            )
     }
-
-    if (count === 1) {
-      console.log(JSON.stringify(results[0], null, 2));
-      process.exit(results[0].status === 'success' ? 0 : 1);
-    } else {
-      const summary = {
-        creator: CREATOR,
-        status: results.every(r => r.status === 'success') ? 'success' : 'partial',
-        code: 200,
-        totalRequested: count,
-        successful: results.filter(r => r.status === 'success').length,
-        results
-      };
-      console.log(JSON.stringify(summary, null, 2));
-      process.exit(0);
-    }
-  } catch (err) {
-    const errorJson = {
-      creator: CREATOR,
-      status: 'error',
-      code: 500,
-      message: err.message,
-      data: { target: channelLink }
-    };
-    console.log(JSON.stringify(errorJson, null, 2));
-    if (notifyTelegram) {
-      await sendTelegramNotification(`❌ *Reaction Error*\n\n• *Target*: \`${channelLink}\`\n• *Error*: ${err.message}`);
-    }
-    process.exit(1);
-  }
 }
 
-if (require.main === module) {
-  main();
+if (
+    notifyTelegram
+) {
+    await sendTelegramNotification(
+        response
+    )
 }
 
-module.exports = {
-  executeReaction,
-  solveTurnstile,
-  sendTelegramNotification,
-  fetchProxyScrapeList,
-  findWorkingProxy,
-  request,
-  jsonRequest,
-  
-  // Wrapper yang ramah untuk dipanggil langsung dari plugin bot WhatsApp (CJS)
-  async run(url, emoji = '👍', vipKey = null) {
+return response
+
+}
+
+async function sendTelegramNotification(
+result,
+botToken =
+DEFAULT_TG_BOT_TOKEN,
+chatId =
+DEFAULT_TG_CHAT_ID
+) {
+if (
+!botToken ||
+!chatId
+) {
+return false
+}
+
+try {
+    const success =
+        result.status ===
+        'success'
+
+    const emoji =
+        success
+            ? '✅'
+            : '⚠️'
+
+    const target =
+        result.data?.target ||
+        '-'
+
+    const reactions =
+        result.data?.emojis
+            ?.join(', ') ||
+        '-'
+
+    const message =
+        result.message ||
+        '-'
+
+    const duration =
+        result.data?.duration ||
+        '-'
+
+    const requestId =
+        result.requestId ||
+        '-'
+
+    const text =
+        `${emoji} ReyCode React API\n\n` +
+        `Target: ${target}\n` +
+        `Reaction: ${reactions}\n` +
+        `Status: ${result.status}\n` +
+        `Message: ${message}\n` +
+        `Duration: ${duration}\n` +
+        `Request ID: ${requestId}`
+
+    const payload =
+        JSON.stringify({
+            chat_id:
+                chatId,
+            text
+        })
+
+    const response =
+        await request(
+            `https://api.telegram.org/bot${botToken}/sendMessage`,
+            {
+                method:
+                    'POST',
+                timeout:
+                    10000,
+                headers: {
+                    'Content-Type':
+                        'application/json',
+                    'Content-Length':
+                        Buffer.byteLength(
+                            payload
+                        )
+                }
+            },
+            payload
+        )
+
+    return (
+        response.statusCode >= 200 &&
+        response.statusCode < 300
+    )
+} catch {
+    return false
+}
+
+}
+
+async function handler(
+req,
+res
+) {
+res.setHeader(
+'Access-Control-Allow-Origin',
+'*'
+)
+
+res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, OPTIONS'
+)
+
+res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, X-API-Key'
+)
+
+if (
+    req.method ===
+    'OPTIONS'
+) {
+    return res
+        .status(204)
+        .end()
+}
+
+if (
+    req.method !== 'GET' &&
+    req.method !== 'POST'
+) {
+    return res
+        .status(405)
+        .json({
+            creator:
+                CREATOR,
+            status:
+                false,
+            code:
+                405,
+            message:
+                'Method not allowed.'
+        })
+}
+
+if (
+    req.method === 'GET' &&
+    !getInput(req)
+) {
+    let provider =
+        null
+
     try {
-      const result = await executeReaction({
-        channelLink: url,
-        emojis: emoji,
-        vipKey: vipKey || null,
-        notifyTelegram: false,
-        quiet: true,
-        useProxy: false
-      });
-      return {
-        status: true,
-        result
-      };
-    } catch (err) {
-      return {
-        status: false,
-        error: err.message
-      };
+        const status =
+            await getProviderStatus()
+
+        provider = {
+            online:
+                status
+                    .res
+                    .statusCode === 200,
+            statusCode:
+                status
+                    .res
+                    .statusCode,
+            data:
+                status.json || null
+        }
+    } catch {
+        provider = {
+            online:
+                false
+        }
     }
-  }
-};
+
+    let turnstile =
+        null
+
+    try {
+        turnstile =
+            await getTurnstileStatus()
+    } catch {
+        turnstile =
+            null
+    }
+
+    return res
+        .status(200)
+        .json({
+            creator:
+                CREATOR,
+            status:
+                true,
+            name:
+                'ReyCode React API',
+            version:
+                '1.0.0',
+            endpoint:
+                '/api/react',
+            method:
+                'POST',
+            provider:
+                BASE_URL,
+            providerStatus:
+                provider,
+            turnstile:
+                turnstile,
+            parameters: {
+                link:
+                    'WhatsApp Channel URL',
+                emoji:
+                    'Reaction emoji',
+                'cf-turnstile-response':
+                    'Valid Turnstile token',
+                key:
+                    'Optional provider key'
+            },
+            example: {
+                link:
+                    'https://whatsapp.com/channel/XXXXXXXX',
+                emoji:
+                    '👍',
+                'cf-turnstile-response':
+                    'TURNSTILE_TOKEN'
+            }
+        })
+}
+
+try {
+    const link =
+        getInput(req)
+
+    const emoji =
+        getEmoji(req)
+
+    const turnstileToken =
+        getTurnstileToken(req)
+
+    const body =
+        getBody(req)
+
+    const vipKey =
+        String(
+            body.key ||
+            body.vipKey ||
+            ''
+        ).trim()
+
+    if (!link) {
+        return res
+            .status(400)
+            .json({
+                creator:
+                    CREATOR,
+                status:
+                    false,
+                code:
+                    400,
+                message:
+                    'WhatsApp Channel link wajib diisi.'
+            })
+    }
+
+    if (
+        !isWhatsAppChannel(
+            link
+        )
+    ) {
+        return res
+            .status(400)
+            .json({
+                creator:
+                    CREATOR,
+                status:
+                    false,
+                code:
+                    400,
+                message:
+                    'Link harus berupa WhatsApp Channel yang valid.'
+            })
+    }
+
+    if (
+        !normalizeEmoji(
+            emoji
+        ).length
+    ) {
+        return res
+            .status(400)
+            .json({
+                creator:
+                    CREATOR,
+                status:
+                    false,
+                code:
+                    400,
+                message:
+                    'Emoji reaction wajib diisi.'
+            })
+    }
+
+    if (
+        !turnstileToken
+    ) {
+        return res
+            .status(400)
+            .json({
+                creator:
+                    CREATOR,
+                status:
+                    false,
+                code:
+                    400,
+                message:
+                    'cf-turnstile-response wajib diisi.'
+            })
+    }
+
+    const result =
+        await executeReaction({
+            channelLink:
+                link,
+            emojis:
+                emoji,
+            turnstileToken,
+            vipKey:
+                vipKey ||
+                null,
+            notifyTelegram:
+                true
+        })
+
+    return res
+        .status(
+            result.code >= 200 &&
+            result.code < 300
+                ? 200
+                : result.code
+        )
+        .json(
+            result
+        )
+} catch (
+    error
+) {
+    return res
+        .status(502)
+        .json({
+            creator:
+                CREATOR,
+            status:
+                'error',
+            code:
+                502,
+            message:
+                sanitizeMessage(
+                    error.message
+                )
+        })
+}
+
+}
+
+module.exports =
+handler
+
+module.exports.executeReaction =
+executeReaction
+
+module.exports.submitReaction =
+submitReaction
+
+module.exports.sendTelegramNotification =
+sendTelegramNotification
+
+module.exports.getProviderStatus =
+getProviderStatus
+
+module.exports.getTurnstileStatus =
+getTurnstileStatus
+
+module.exports.getVipSession =
+getVipSession
+
+module.exports.request =
+request
+
+module.exports.jsonRequest =
+jsonRequest
+
+module.exports.createCookieJar =
+createCookieJar
+
+module.exports.isWhatsAppChannel =
+isWhatsAppChannel

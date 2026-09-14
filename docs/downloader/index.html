@@ -1,569 +1,469 @@
-<!DOCTYPE html>
-<html lang="id" class="dark">
+<!DOCTYPE html><html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#08090d">
-    <title>ReyCloudSHP — Media Downloader</title>
+    <title>ReyCloudSHP — Media Downloader</title><script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style>
+    * {
+        box-sizing: border-box;
+    }
 
-    <style>
-        * {
-            box-sizing: border-box;
+    html {
+        background: #08090d;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        color: #f8fafc;
+        background:
+            radial-gradient(circle at 50% -15%, rgba(236,72,153,.14), transparent 35%),
+            radial-gradient(circle at 0% 45%, rgba(6,182,212,.07), transparent 30%),
+            radial-gradient(circle at 100% 70%, rgba(99,102,241,.06), transparent 30%),
+            #08090d;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        overflow-x: hidden;
+    }
+
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: .22;
+        background-image:
+            linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+        background-size: 42px 42px;
+        mask-image: linear-gradient(to bottom, black, transparent 85%);
+    }
+
+    body::after {
+        content: "";
+        position: fixed;
+        width: 360px;
+        height: 360px;
+        left: 50%;
+        top: 35%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        background: rgba(236,72,153,.055);
+        filter: blur(100px);
+        pointer-events: none;
+    }
+
+    .glass {
+        background: rgba(14,17,24,.72);
+        border: 1px solid rgba(255,255,255,.065);
+        box-shadow:
+            0 25px 80px rgba(0,0,0,.35),
+            inset 0 1px 0 rgba(255,255,255,.035);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+    }
+
+    .glass-soft {
+        background: rgba(255,255,255,.025);
+        border: 1px solid rgba(255,255,255,.055);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    .neon-pink {
+        box-shadow:
+            0 0 0 1px rgba(236,72,153,.09),
+            0 0 40px rgba(236,72,153,.07);
+    }
+
+    .neon-cyan {
+        box-shadow:
+            0 0 0 1px rgba(6,182,212,.09),
+            0 0 40px rgba(6,182,212,.07);
+    }
+
+    .neon-indigo {
+        box-shadow:
+            0 0 0 1px rgba(99,102,241,.09),
+            0 0 40px rgba(99,102,241,.07);
+    }
+
+    .hero-orbit {
+        position: absolute;
+        width: 270px;
+        height: 270px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%,-50%);
+        border: 1px solid rgba(236,72,153,.06);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .hero-orbit::before,
+    .hero-orbit::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        border: 1px dashed rgba(6,182,212,.06);
+    }
+
+    .hero-orbit::before {
+        inset: 28px;
+    }
+
+    .hero-orbit::after {
+        inset: 65px;
+        border-style: solid;
+    }
+
+    .float {
+        animation: float 5s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%,100% {
+            transform: translateY(0);
         }
-
-        html {
-            background: #08090d;
+        50% {
+            transform: translateY(-6px);
         }
+    }
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            color: #f8fafc;
-            background:
-                radial-gradient(circle at 50% -15%, rgba(236,72,153,.14), transparent 35%),
-                radial-gradient(circle at 0% 45%, rgba(6,182,212,.07), transparent 30%),
-                #08090d;
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            overflow-x: hidden;
+    .pulse-dot {
+        animation: pulseDot 1.8s infinite;
+    }
+
+    @keyframes pulseDot {
+        0%,100% {
+            box-shadow: 0 0 0 0 rgba(34,197,94,.35);
         }
-
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            opacity: .22;
-            background-image:
-                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-            background-size: 42px 42px;
-            mask-image: linear-gradient(to bottom, black, transparent 85%);
+        50% {
+            box-shadow: 0 0 0 7px rgba(34,197,94,0);
         }
+    }
 
-        body::after {
-            content: "";
-            position: fixed;
-            width: 360px;
-            height: 360px;
-            left: 50%;
-            top: 35%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            background: rgba(236,72,153,.055);
-            filter: blur(100px);
-            pointer-events: none;
+    .scan {
+        animation: scan 2.2s linear infinite;
+    }
+
+    @keyframes scan {
+        0% {
+            transform: translateY(-100%);
+            opacity: 0;
         }
-
-        .glass {
-            background: rgba(14,17,24,.72);
-            border: 1px solid rgba(255,255,255,.065);
-            box-shadow:
-                0 25px 80px rgba(0,0,0,.35),
-                inset 0 1px 0 rgba(255,255,255,.035);
-            backdrop-filter: blur(22px);
-            -webkit-backdrop-filter: blur(22px);
+        20% {
+            opacity: .7;
         }
-
-        .glass-soft {
-            background: rgba(255,255,255,.025);
-            border: 1px solid rgba(255,255,255,.055);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+        80% {
+            opacity: .7;
         }
-
-        .neon-pink {
-            box-shadow:
-                0 0 0 1px rgba(236,72,153,.09),
-                0 0 40px rgba(236,72,153,.07);
+        100% {
+            transform: translateY(100%);
+            opacity: 0;
         }
+    }
 
-        .neon-cyan {
-            box-shadow:
-                0 0 0 1px rgba(6,182,212,.09),
-                0 0 40px rgba(6,182,212,.07);
+    .btn-pink {
+        background: linear-gradient(135deg,#ec4899,#db2777);
+        box-shadow:
+            0 12px 35px rgba(236,72,153,.18),
+            inset 0 1px 0 rgba(255,255,255,.16);
+    }
+
+    .btn-pink:hover {
+        transform: translateY(-1px);
+        box-shadow:
+            0 16px 45px rgba(236,72,153,.25),
+            inset 0 1px 0 rgba(255,255,255,.18);
+    }
+
+    .btn-cyan {
+        background: linear-gradient(135deg,#22d3ee,#06b6d4);
+        box-shadow:
+            0 12px 35px rgba(6,182,212,.15),
+            inset 0 1px 0 rgba(255,255,255,.16);
+    }
+
+    .btn-cyan:hover {
+        transform: translateY(-1px);
+        box-shadow:
+            0 16px 45px rgba(6,182,212,.22),
+            inset 0 1px 0 rgba(255,255,255,.18);
+    }
+
+    .btn-indigo {
+        background: linear-gradient(135deg,#818cf8,#6366f1);
+        box-shadow:
+            0 12px 35px rgba(99,102,241,.15),
+            inset 0 1px 0 rgba(255,255,255,.16);
+    }
+
+    .btn-indigo:hover {
+        transform: translateY(-1px);
+        box-shadow:
+            0 16px 45px rgba(99,102,241,.22),
+            inset 0 1px 0 rgba(255,255,255,.18);
+    }
+
+    .result-in {
+        animation: resultIn .4s ease both;
+    }
+
+    @keyframes resultIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
         }
-
-        .hero-orbit {
-            position: absolute;
-            width: 270px;
-            height: 270px;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%,-50%);
-            border: 1px solid rgba(236,72,153,.06);
-            border-radius: 50%;
-            pointer-events: none;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
+    }
 
-        .hero-orbit::before,
-        .hero-orbit::after {
-            content: "";
-            position: absolute;
-            border-radius: 50%;
-            border: 1px dashed rgba(6,182,212,.06);
-        }
+    .custom-scroll::-webkit-scrollbar {
+        width: 5px;
+    }
 
-        .hero-orbit::before {
-            inset: 28px;
-        }
+    .custom-scroll::-webkit-scrollbar-track {
+        background: transparent;
+    }
 
-        .hero-orbit::after {
-            inset: 65px;
-            border-style: solid;
-        }
+    .custom-scroll::-webkit-scrollbar-thumb {
+        background: rgba(236,72,153,.22);
+        border-radius: 999px;
+    }
 
-        .float {
-            animation: float 5s ease-in-out infinite;
-        }
+    video {
+        background: #000;
+    }
 
-        @keyframes float {
-            0%,100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-6px);
-            }
-        }
+    .tab-button {
+        min-width: 0;
+    }
 
-        .pulse-dot {
-            animation: pulseDot 1.8s infinite;
-        }
+    .tab-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
 
-        @keyframes pulseDot {
-            0%,100% {
-                box-shadow: 0 0 0 0 rgba(34,197,94,.35);
-            }
-            50% {
-                box-shadow: 0 0 0 7px rgba(34,197,94,0);
-            }
-        }
+</head><body><main class="relative z-10 w-full max-w-4xl mx-auto px-3 py-4 sm:px-5 sm:py-7">
 
-        .scan {
-            animation: scan 2.2s linear infinite;
-        }
+    <header class="glass rounded-3xl px-4 py-4 sm:px-5 mb-4">
+        <div class="flex items-center justify-between gap-3">
 
-        @keyframes scan {
-            0% {
-                transform: translateY(-100%);
-                opacity: 0;
-            }
-            20% {
-                opacity: .7;
-            }
-            80% {
-                opacity: .7;
-            }
-            100% {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-        }
+            <div class="flex items-center gap-3 min-w-0">
 
-        .btn-pink {
-            background: linear-gradient(135deg,#ec4899,#db2777);
-            box-shadow:
-                0 12px 35px rgba(236,72,153,.18),
-                inset 0 1px 0 rgba(255,255,255,.16);
-        }
+                <div class="relative w-11 h-11 shrink-0 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center neon-pink">
+                    <span class="text-xl">📥</span>
+                    <span class="absolute right-0 bottom-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0e1118] pulse-dot"></span>
+                </div>
 
-        .btn-pink:hover {
-            transform: translateY(-1px);
-            box-shadow:
-                0 16px 45px rgba(236,72,153,.25),
-                inset 0 1px 0 rgba(255,255,255,.18);
-        }
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-sm sm:text-base font-black tracking-tight text-white">
+                            REYCLOUD<span class="text-pink-400">SHP</span>
+                        </h1>
 
-        .btn-cyan {
-            background: linear-gradient(135deg,#22d3ee,#06b6d4);
-            box-shadow:
-                0 12px 35px rgba(6,182,212,.15),
-                inset 0 1px 0 rgba(255,255,255,.16);
-        }
+                        <span class="hidden sm:inline-flex px-2 py-0.5 rounded-full bg-pink-500/10 border border-pink-500/15 text-[8px] text-pink-300 font-black tracking-widest">
+                            TOOLS
+                        </span>
+                    </div>
 
-        .result-in {
-            animation: resultIn .4s ease both;
-        }
+                    <p class="text-[9px] sm:text-[10px] text-slate-500 tracking-[.18em] uppercase font-bold">
+                        Multi Platform Downloader
+                    </p>
+                </div>
 
-        @keyframes resultIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+            </div>
 
-        .custom-scroll::-webkit-scrollbar {
-            width: 5px;
-        }
+            <a
+                href="/dashboard"
+                class="shrink-0 px-3.5 py-2 rounded-xl glass-soft text-[10px] sm:text-[11px] text-slate-300 hover:text-white transition-all font-semibold"
+            >
+                Dashboard
+            </a>
 
-        .custom-scroll::-webkit-scrollbar-track {
-            background: transparent;
-        }
+        </div>
+    </header>
 
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: rgba(236,72,153,.22);
-            border-radius: 999px;
-        }
+    <section class="glass rounded-[28px] overflow-hidden mb-4 neon-pink">
 
-        video {
-            background: #000;
-        }
-    </style>
-</head>
+        <div class="relative px-5 pt-8 pb-7 sm:px-8 sm:pt-10 sm:pb-9 overflow-hidden">
 
-<body>
+            <div class="hero-orbit"></div>
 
-    <main class="relative z-10 w-full max-w-4xl mx-auto px-3 py-4 sm:px-5 sm:py-7">
+            <div class="relative z-10 text-center">
 
-        <header class="glass rounded-3xl px-4 py-4 sm:px-5 mb-4">
-            <div class="flex items-center justify-between gap-3">
+                <div class="float inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-pink-500/10 border border-pink-500/20 mb-5">
+                    <span class="text-3xl">📥</span>
+                </div>
 
-                <div class="flex items-center gap-3 min-w-0">
+                <div class="flex items-center justify-center gap-2 mb-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-pink-400"></span>
 
-                    <div class="relative w-11 h-11 shrink-0 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center neon-pink">
-                        <span class="text-xl">📥</span>
-                        <span class="absolute right-0 bottom-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0e1118] pulse-dot"></span>
+                    <span class="text-[9px] sm:text-[10px] uppercase tracking-[.28em] font-black text-pink-400">
+                        ReyCloud Media Core
+                    </span>
+
+                    <span class="w-1.5 h-1.5 rounded-full bg-pink-400"></span>
+                </div>
+
+                <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-white">
+                    Media
+                    <span class="text-pink-400">Downloader</span>
+                </h2>
+
+                <p
+                    id="subTitleDesc"
+                    class="max-w-xl mx-auto mt-3 text-[11px] sm:text-xs leading-relaxed text-slate-400"
+                >
+                    Unduh media dari TikTok, Instagram, atau gunakan ALL Downloader untuk mendeteksi platform otomatis.
+                </p>
+
+                <div class="flex flex-wrap justify-center gap-2 mt-5">
+                    <span class="px-2.5 py-1 rounded-full bg-white/[.03] border border-white/[.06] text-[9px] text-slate-400">
+                        ⚡ Fast Engine
+                    </span>
+
+                    <span class="px-2.5 py-1 rounded-full bg-white/[.03] border border-white/[.06] text-[9px] text-slate-400">
+                        🎬 Preview
+                    </span>
+
+                    <span class="px-2.5 py-1 rounded-full bg-white/[.03] border border-white/[.06] text-[9px] text-slate-400">
+                        🌐 Multi Platform
+                    </span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="h-px bg-gradient-to-r from-transparent via-pink-500/20 to-transparent"></div>
+
+        <div class="p-4 sm:p-6">
+
+            <div class="grid grid-cols-3 gap-1.5 glass-soft rounded-2xl p-1.5 mb-4">
+
+                <button
+                    id="btnTabTt"
+                    onclick="switchPlatform('tiktok')"
+                    class="tab-button py-3 rounded-xl text-[9px] sm:text-xs font-black bg-pink-500/10 text-white border border-pink-500/15 shadow transition-all cursor-pointer"
+                >
+                    <span class="tab-label">🎵 TikTok</span>
+                </button>
+
+                <button
+                    id="btnTabIg"
+                    onclick="switchPlatform('instagram')"
+                    class="tab-button py-3 rounded-xl text-[9px] sm:text-xs font-semibold text-slate-500 hover:text-slate-200 transition-all cursor-pointer"
+                >
+                    <span class="tab-label">📷 Instagram</span>
+                </button>
+
+                <button
+                    id="btnTabAll"
+                    onclick="switchPlatform('all')"
+                    class="tab-button py-3 rounded-xl text-[9px] sm:text-xs font-semibold text-slate-500 hover:text-slate-200 transition-all cursor-pointer"
+                >
+                    <span class="tab-label">🌐 ALL Downloader</span>
+                </button>
+
+            </div>
+
+            <div
+                id="sectionTiktok"
+                class="glass-soft rounded-2xl p-4 sm:p-5 neon-pink space-y-4"
+            >
+
+                <div class="flex items-start gap-3.5">
+
+                    <div class="w-11 h-11 rounded-2xl bg-pink-500/10 border border-pink-500/15 flex items-center justify-center text-pink-400 shrink-0">
+                        🎵
                     </div>
 
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
-                            <h1 class="text-sm sm:text-base font-black tracking-tight text-white">
-                                REYCLOUD<span class="text-pink-400">SHP</span>
-                            </h1>
+                            <h2 class="text-sm font-black text-white">
+                                TikTok Downloader
+                            </h2>
 
-                            <span class="hidden sm:inline-flex px-2 py-0.5 rounded-full bg-pink-500/10 border border-pink-500/15 text-[8px] text-pink-300 font-black tracking-widest">
-                                TOOLS
+                            <span class="px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/10 text-[7px] text-emerald-400 font-black">
+                                ONLINE
                             </span>
                         </div>
 
-                        <p class="text-[9px] sm:text-[10px] text-slate-500 tracking-[.18em] uppercase font-bold">
-                            Media Downloader Engine
+                        <p class="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                            Masukkan URL TikTok untuk mengambil informasi, preview video, statistik, dan media.
                         </p>
                     </div>
 
                 </div>
 
-                <a
-                    href="/dashboard"
-                    class="shrink-0 px-3.5 py-2 rounded-xl glass-soft text-[10px] sm:text-[11px] text-slate-300 hover:text-white transition-all font-semibold"
-                >
-                    Dashboard
-                </a>
+                <div class="space-y-2.5">
 
-            </div>
-        </header>
-
-        <section class="glass rounded-[28px] overflow-hidden mb-4 neon-pink">
-
-            <div class="relative px-5 pt-8 pb-7 sm:px-8 sm:pt-10 sm:pb-9 overflow-hidden">
-
-                <div class="hero-orbit"></div>
-
-                <div class="relative z-10 text-center">
-
-                    <div class="float inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-pink-500/10 border border-pink-500/20 mb-5">
-                        <span class="text-3xl">📥</span>
-                    </div>
-
-                    <div class="flex items-center justify-center gap-2 mb-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-pink-400"></span>
-
-                        <span class="text-[9px] sm:text-[10px] uppercase tracking-[.28em] font-black text-pink-400">
-                            ReyCloud Media Core
-                        </span>
-
-                        <span class="w-1.5 h-1.5 rounded-full bg-pink-400"></span>
-                    </div>
-
-                    <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-white">
-                        Media
-                        <span class="text-pink-400">Downloader</span>
-                    </h2>
-
-                    <p
-                        id="subTitleDesc"
-                        class="max-w-xl mx-auto mt-3 text-[11px] sm:text-xs leading-relaxed text-slate-400"
+                    <label
+                        for="tiktokUrlInput"
+                        class="flex items-center justify-between px-1"
                     >
-                        Unduh video TikTok dengan preview, statistik, dan pilihan media dalam satu dashboard.
-                    </p>
-
-                    <div class="flex flex-wrap justify-center gap-2 mt-5">
-                        <span class="px-2.5 py-1 rounded-full bg-white/[.03] border border-white/[.06] text-[9px] text-slate-400">
-                            ⚡ Fast Engine
+                        <span class="text-[9px] text-slate-500 uppercase tracking-[.18em] font-black">
+                            Media URL
                         </span>
 
-                        <span class="px-2.5 py-1 rounded-full bg-white/[.03] border border-white/[.06] text-[9px] text-slate-400">
-                            🎬 Preview
+                        <span class="text-[8px] text-pink-400 font-bold">
+                            TIKTOK
                         </span>
+                    </label>
 
-                        <span class="px-2.5 py-1 rounded-full bg-white/[.03] border border-white/[.06] text-[9px] text-slate-400">
-                            🌐 Multi Platform
-                        </span>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="h-px bg-gradient-to-r from-transparent via-pink-500/20 to-transparent"></div>
-
-            <div class="p-4 sm:p-6">
-
-                <div class="grid grid-cols-2 gap-2 glass-soft rounded-2xl p-1.5 mb-4">
+                    <input
+                        type="text"
+                        id="tiktokUrlInput"
+                        placeholder="https://vt.tiktok.com/..."
+                        autocomplete="off"
+                        class="w-full bg-[#090b0f]/80 border border-white/[.07] rounded-2xl px-4 py-3.5 pr-4 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-pink-500/45 focus:ring-4 focus:ring-pink-500/5 transition-all"
+                    >
 
                     <button
-                        id="btnTabIg"
-                        onclick="switchPlatform('instagram')"
-                        class="py-3 rounded-xl text-[10px] sm:text-xs font-semibold text-slate-500 hover:text-slate-200 transition-all cursor-pointer"
+                        onclick="processTikTok()"
+                        id="btnProcessTiktok"
+                        class="btn-pink w-full text-white font-black py-3.5 rounded-2xl text-[10px] sm:text-xs transition-all cursor-pointer"
                     >
-                        📷 Instagram
-                    </button>
-
-                    <button
-                        id="btnTabTt"
-                        onclick="switchPlatform('tiktok')"
-                        class="py-3 rounded-xl text-[10px] sm:text-xs font-black bg-pink-500/10 text-white border border-pink-500/15 shadow transition-all cursor-pointer"
-                    >
-                        🎵 TikTok
+                        <span class="text-base mr-1">⚡</span>
+                        Analyze & Download
                     </button>
 
                 </div>
 
                 <div
-                    id="sectionTiktok"
-                    class="glass-soft rounded-2xl p-4 sm:p-5 neon-pink space-y-4"
+                    id="tiktokLoading"
+                    class="hidden relative glass-soft rounded-2xl p-5 overflow-hidden"
                 >
 
-                    <div class="flex items-start gap-3.5">
+                    <div class="absolute inset-x-0 top-0 h-px overflow-hidden">
+                        <div class="scan h-full w-full bg-pink-400/60"></div>
+                    </div>
 
-                        <div class="w-11 h-11 rounded-2xl bg-pink-500/10 border border-pink-500/15 flex items-center justify-center text-pink-400 shrink-0">
-                            🎵
+                    <div class="flex items-center gap-4">
+
+                        <div class="relative w-11 h-11 shrink-0">
+                            <div class="absolute inset-0 rounded-full border border-pink-500/10"></div>
+                            <div class="absolute inset-1 rounded-full border-2 border-pink-500 border-t-transparent animate-spin"></div>
+
+                            <div class="absolute inset-3 rounded-full bg-pink-500/10 flex items-center justify-center">
+                                <span class="text-xs">⚡</span>
+                            </div>
                         </div>
 
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2">
-                                <h2 class="text-sm font-black text-white">
-                                    TikTok Downloader
-                                </h2>
-
-                                <span class="px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/10 text-[7px] text-emerald-400 font-black">
-                                    ONLINE
-                                </span>
-                            </div>
-
-                            <p class="text-[10px] text-slate-500 mt-1 leading-relaxed">
-                                Masukkan URL TikTok untuk mengambil informasi, preview video, statistik, dan media.
+                        <div>
+                            <p class="text-[10px] text-pink-300 font-bold animate-pulse">
+                                Analyzing media...
                             </p>
-                        </div>
 
-                    </div>
-
-                    <div class="space-y-2.5">
-
-                        <label
-                            for="tiktokUrlInput"
-                            class="flex items-center justify-between px-1"
-                        >
-                            <span class="text-[9px] text-slate-500 uppercase tracking-[.18em] font-black">
-                                Media URL
-                            </span>
-
-                            <span class="text-[8px] text-pink-400 font-bold">
-                                TIKTOK
-                            </span>
-                        </label>
-
-                        <div class="relative">
-
-                            <input
-                                type="text"
-                                id="tiktokUrlInput"
-                                placeholder="https://vt.tiktok.com/..."
-                                autocomplete="off"
-                                class="w-full bg-[#090b0f]/80 border border-white/[.07] rounded-2xl px-4 py-3.5 pr-4 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-pink-500/45 focus:ring-4 focus:ring-pink-500/5 transition-all"
-                            >
-
-                        </div>
-
-                        <button
-                            onclick="processTikTok()"
-                            id="btnProcessTiktok"
-                            class="btn-pink w-full text-white font-black py-3.5 rounded-2xl text-[10px] sm:text-xs transition-all cursor-pointer"
-                        >
-                            <span class="text-base mr-1">⚡</span>
-                            Analyze & Download
-                        </button>
-
-                    </div>
-
-                    <div
-                        id="tiktokLoading"
-                        class="hidden relative glass-soft rounded-2xl p-5 overflow-hidden"
-                    >
-
-                        <div class="absolute inset-x-0 top-0 h-px overflow-hidden">
-                            <div class="scan h-full w-full bg-pink-400/60"></div>
-                        </div>
-
-                        <div class="flex items-center gap-4">
-
-                            <div class="relative w-11 h-11 shrink-0">
-                                <div class="absolute inset-0 rounded-full border border-pink-500/10"></div>
-                                <div class="absolute inset-1 rounded-full border-2 border-pink-500 border-t-transparent animate-spin"></div>
-
-                                <div class="absolute inset-3 rounded-full bg-pink-500/10 flex items-center justify-center">
-                                    <span class="text-xs">⚡</span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <p class="text-[10px] text-pink-300 font-bold animate-pulse">
-                                    Analyzing media...
-                                </p>
-
-                                <p class="text-[8px] text-slate-600 mt-1">
-                                    Mengambil metadata & preview video
-                                </p>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div
-                        id="tiktokResultBox"
-                        class="hidden result-in space-y-4"
-                    >
-
-                        <div class="h-px bg-gradient-to-r from-transparent via-white/[.07] to-transparent"></div>
-
-                        <div class="flex items-center gap-3">
-
-                            <img
-                                id="authorAvatar"
-                                src=""
-                                alt=""
-                                class="w-11 h-11 rounded-2xl object-cover border border-pink-500/20 bg-black"
-                            >
-
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center gap-2">
-                                    <h4
-                                        id="authorName"
-                                        class="text-xs font-black text-white truncate"
-                                    >
-                                        TikTok User
-                                    </h4>
-
-                                    <span class="text-[8px] text-pink-400">
-                                        CREATOR
-                                    </span>
-                                </div>
-
-                                <p
-                                    id="videoDesc"
-                                    class="text-[9px] text-slate-500 line-clamp-2 mt-1"
-                                >
-                                    Caption video...
-                                </p>
-                            </div>
-
-                        </div>
-
-                        <div class="relative rounded-2xl overflow-hidden border border-white/[.07] bg-black aspect-video">
-
-                            <video
-                                id="videoPreview"
-                                controls
-                                playsinline
-                                preload="metadata"
-                                class="w-full h-full object-contain"
-                            ></video>
-
-                            <div class="absolute top-2 left-2 px-2 py-1 rounded-lg bg-black/60 border border-white/[.08] backdrop-blur-md text-[7px] text-white/60 font-bold uppercase tracking-wider">
-                                Preview
-                            </div>
-
-                        </div>
-
-                        <div class="grid grid-cols-4 gap-1.5">
-
-                            <div class="glass-soft rounded-xl p-2.5 text-center">
-                                <span class="block text-[8px] text-slate-600 uppercase">
-                                    Likes
-                                </span>
-                                <span
-                                    id="statLikes"
-                                    class="block text-[10px] sm:text-[11px] text-white font-black font-mono mt-1"
-                                >
-                                    0
-                                </span>
-                            </div>
-
-                            <div class="glass-soft rounded-xl p-2.5 text-center">
-                                <span class="block text-[8px] text-slate-600 uppercase">
-                                    Comments
-                                </span>
-                                <span
-                                    id="statComments"
-                                    class="block text-[10px] sm:text-[11px] text-white font-black font-mono mt-1"
-                                >
-                                    0
-                                </span>
-                            </div>
-
-                            <div class="glass-soft rounded-xl p-2.5 text-center">
-                                <span class="block text-[8px] text-slate-600 uppercase">
-                                    Shares
-                                </span>
-                                <span
-                                    id="statShares"
-                                    class="block text-[10px] sm:text-[11px] text-white font-black font-mono mt-1"
-                                >
-                                    0
-                                </span>
-                            </div>
-
-                            <div class="glass-soft rounded-xl p-2.5 text-center">
-                                <span class="block text-[8px] text-slate-600 uppercase">
-                                    Views
-                                </span>
-                                <span
-                                    id="statViews"
-                                    class="block text-[10px] sm:text-[11px] text-white font-black font-mono mt-1"
-                                >
-                                    0
-                                </span>
-                            </div>
-
-                        </div>
-
-                        <div class="space-y-2">
-
-                            <a
-                                id="downloadHdBtn"
-                                href=""
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="btn-pink block w-full text-center text-white font-black py-3.5 rounded-2xl text-[10px] transition-all"
-                            >
-                                📥 Download Video
-                            </a>
-
-                            <a
-                                id="downloadAudioBtn"
-                                href=""
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="block w-full text-center glass-soft hover:border-pink-500/20 text-slate-300 hover:text-white font-bold py-3 rounded-2xl text-[10px] transition-all"
-                            >
-                                🎵 Download Audio
-                            </a>
-
+                            <p class="text-[8px] text-slate-600 mt-1">
+                                Mengambil metadata & preview video
+                            </p>
                         </div>
 
                     </div>
@@ -571,65 +471,138 @@
                 </div>
 
                 <div
-                    id="sectionInstagram"
-                    class="hidden glass-soft rounded-2xl p-4 sm:p-5 neon-cyan space-y-4"
+                    id="tiktokResultBox"
+                    class="hidden result-in space-y-4"
                 >
 
-                    <div class="flex items-start gap-3.5">
+                    <div class="h-px bg-gradient-to-r from-transparent via-white/[.07] to-transparent"></div>
 
-                        <div class="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/15 flex items-center justify-center text-cyan-400 shrink-0">
-                            📷
-                        </div>
+                    <div class="flex items-center gap-3">
 
-                        <div class="min-w-0">
+                        <img
+                            id="authorAvatar"
+                            src=""
+                            alt=""
+                            class="w-11 h-11 rounded-2xl object-cover border border-pink-500/20 bg-black"
+                        >
+
+                        <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
-                                <h2 class="text-sm font-black text-white">
-                                    Instagram Downloader
-                                </h2>
+                                <h4
+                                    id="authorName"
+                                    class="text-xs font-black text-white truncate"
+                                >
+                                    TikTok User
+                                </h4>
 
-                                <span class="px-1.5 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/10 text-[7px] text-cyan-400 font-black">
-                                    MEDIA
+                                <span class="text-[8px] text-pink-400">
+                                    CREATOR
                                 </span>
                             </div>
 
-                            <p class="text-[10px] text-slate-500 mt-1 leading-relaxed">
-                                Unduh media Instagram dengan interface yang lebih cepat dan modern.
+                            <p
+                                id="videoDesc"
+                                class="text-[9px] text-slate-500 line-clamp-2 mt-1"
+                            >
+                                Caption video...
                             </p>
                         </div>
 
                     </div>
 
-                    <div class="space-y-2.5">
+                    <div class="relative rounded-2xl overflow-hidden border border-white/[.07] bg-black aspect-video">
 
-                        <label
-                            for="igUrlInput"
-                            class="flex items-center justify-between px-1"
-                        >
-                            <span class="text-[9px] text-slate-500 uppercase tracking-[.18em] font-black">
-                                Media URL
+                        <video
+                            id="videoPreview"
+                            controls
+                            playsinline
+                            preload="metadata"
+                            class="w-full h-full object-contain"
+                        ></video>
+
+                        <div class="absolute top-2 left-2 px-2 py-1 rounded-lg bg-black/60 border border-white/[.08] backdrop-blur-md text-[7px] text-white/60 font-bold uppercase tracking-wider">
+                            Preview
+                        </div>
+
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-1.5">
+
+                        <div class="glass-soft rounded-xl p-2.5 text-center">
+                            <span class="block text-[8px] text-slate-600 uppercase">
+                                Likes
                             </span>
 
-                            <span class="text-[8px] text-cyan-400 font-bold">
-                                INSTAGRAM
+                            <span
+                                id="statLikes"
+                                class="block text-[10px] sm:text-[11px] text-white font-black font-mono mt-1"
+                            >
+                                0
                             </span>
-                        </label>
+                        </div>
 
-                        <input
-                            type="text"
-                            id="igUrlInput"
-                            placeholder="https://www.instagram.com/reel/..."
-                            autocomplete="off"
-                            class="w-full bg-[#090b0f]/80 border border-white/[.07] rounded-2xl px-4 py-3.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/45 focus:ring-4 focus:ring-cyan-500/5 transition-all"
-                        >
+                        <div class="glass-soft rounded-xl p-2.5 text-center">
+                            <span class="block text-[8px] text-slate-600 uppercase">
+                                Comments
+                            </span>
 
-                        <button
-                            onclick="processInstagram()"
-                            id="btnProcessIg"
-                            class="btn-cyan w-full text-slate-950 font-black py-3.5 rounded-2xl text-[10px] sm:text-xs transition-all cursor-pointer"
+                            <span
+                                id="statComments"
+                                class="block text-[10px] sm:text-[11px] text-white font-black font-mono mt-1"
+                            >
+                                0
+                            </span>
+                        </div>
+
+                        <div class="glass-soft rounded-xl p-2.5 text-center">
+                            <span class="block text-[8px] text-slate-600 uppercase">
+                                Shares
+                            </span>
+
+                            <span
+                                id="statShares"
+                                class="block text-[10px] sm:text-[11px] text-white font-black font-mono mt-1"
+                            >
+                                0
+                            </span>
+                        </div>
+
+                        <div class="glass-soft rounded-xl p-2.5 text-center">
+                            <span class="block text-[8px] text-slate-600 uppercase">
+                                Views
+                            </span>
+
+                            <span
+                                id="statViews"
+                                class="block text-[10px] sm:text-[11px] text-white font-black font-mono mt-1"
+                            >
+                                0
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div class="space-y-2">
+
+                        <a
+                            id="downloadHdBtn"
+                            href=""
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn-pink block w-full text-center text-white font-black py-3.5 rounded-2xl text-[10px] transition-all"
                         >
-                            <span class="text-base mr-1">⚡</span>
-                            Download Instagram
-                        </button>
+                            📥 Download Video
+                        </a>
+
+                        <a
+                            id="downloadAudioBtn"
+                            href=""
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="block w-full text-center glass-soft hover:border-pink-500/20 text-slate-300 hover:text-white font-bold py-3 rounded-2xl text-[10px] transition-all"
+                        >
+                            🎵 Download Audio
+                        </a>
 
                     </div>
 
@@ -637,243 +610,1373 @@
 
             </div>
 
-        </section>
+            <div
+                id="sectionInstagram"
+                class="hidden glass-soft rounded-2xl p-4 sm:p-5 neon-cyan space-y-4"
+            >
 
-        <section class="grid grid-cols-3 gap-2 mb-4">
+                <div class="flex items-start gap-3.5">
 
-            <div class="glass-soft rounded-2xl p-3 text-center">
-                <div class="text-sm mb-1">⚡</div>
-                <p class="text-[8px] text-slate-600 uppercase tracking-wider">
-                    Engine
-                </p>
-                <p class="text-[9px] text-white font-black mt-0.5">
-                    FAST
-                </p>
+                    <div class="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/15 flex items-center justify-center text-cyan-400 shrink-0">
+                        📷
+                    </div>
+
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm font-black text-white">
+                                Instagram Downloader
+                            </h2>
+
+                            <span class="px-1.5 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/10 text-[7px] text-cyan-400 font-black">
+                                MULTI ENGINE
+                            </span>
+                        </div>
+
+                        <p class="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                            Unduh Reel, video, foto, dan media Instagram menggunakan multi-platform engine.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="space-y-2.5">
+
+                    <label
+                        for="igUrlInput"
+                        class="flex items-center justify-between px-1"
+                    >
+                        <span class="text-[9px] text-slate-500 uppercase tracking-[.18em] font-black">
+                            Media URL
+                        </span>
+
+                        <span class="text-[8px] text-cyan-400 font-bold">
+                            INSTAGRAM
+                        </span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="igUrlInput"
+                        placeholder="https://www.instagram.com/reel/..."
+                        autocomplete="off"
+                        class="w-full bg-[#090b0f]/80 border border-white/[.07] rounded-2xl px-4 py-3.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/45 focus:ring-4 focus:ring-cyan-500/5 transition-all"
+                    >
+
+                    <button
+                        onclick="processInstagram()"
+                        id="btnProcessIg"
+                        class="btn-cyan w-full text-slate-950 font-black py-3.5 rounded-2xl text-[10px] sm:text-xs transition-all cursor-pointer"
+                    >
+                        <span class="text-base mr-1">⚡</span>
+                        Download Instagram
+                    </button>
+
+                </div>
+
+                <div
+                    id="instagramLoading"
+                    class="hidden relative glass-soft rounded-2xl p-5 overflow-hidden"
+                >
+
+                    <div class="absolute inset-x-0 top-0 h-px overflow-hidden">
+                        <div class="scan h-full w-full bg-cyan-400/60"></div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+
+                        <div class="relative w-11 h-11 shrink-0">
+                            <div class="absolute inset-0 rounded-full border border-cyan-500/10"></div>
+
+                            <div class="absolute inset-1 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin"></div>
+
+                            <div class="absolute inset-3 rounded-full bg-cyan-500/10 flex items-center justify-center">
+                                <span class="text-xs">📷</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="text-[10px] text-cyan-300 font-bold animate-pulse">
+                                Processing Instagram...
+                            </p>
+
+                            <p class="text-[8px] text-slate-600 mt-1">
+                                Mencari media dan link download
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div
+                    id="instagramResultBox"
+                    class="hidden result-in space-y-3"
+                >
+
+                    <div class="h-px bg-gradient-to-r from-transparent via-white/[.07] to-transparent"></div>
+
+                    <div class="flex items-center justify-between gap-3">
+
+                        <div>
+                            <p class="text-xs font-black text-white">
+                                Instagram Media
+                            </p>
+
+                            <p
+                                id="instagramMediaCount"
+                                class="text-[9px] text-slate-500 mt-1"
+                            >
+                                Media ditemukan
+                            </p>
+                        </div>
+
+                        <span class="px-2 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/10 text-[8px] text-cyan-400 font-black">
+                            READY
+                        </span>
+
+                    </div>
+
+                    <div
+                        id="instagramMediaList"
+                        class="space-y-2 max-h-[420px] overflow-y-auto custom-scroll"
+                    ></div>
+
+                </div>
+
             </div>
 
-            <div class="glass-soft rounded-2xl p-3 text-center">
-                <div class="text-sm mb-1">🌐</div>
-                <p class="text-[8px] text-slate-600 uppercase tracking-wider">
-                    Platform
-                </p>
-                <p class="text-[9px] text-white font-black mt-0.5">
-                    MULTI
-                </p>
+            <div
+                id="sectionAll"
+                class="hidden glass-soft rounded-2xl p-4 sm:p-5 neon-indigo space-y-4"
+            >
+
+                <div class="flex items-start gap-3.5">
+
+                    <div class="w-11 h-11 rounded-2xl bg-indigo-500/10 border border-indigo-500/15 flex items-center justify-center text-indigo-400 shrink-0">
+                        🌐
+                    </div>
+
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm font-black text-white">
+                                ALL Downloader
+                            </h2>
+
+                            <span class="px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/10 text-[7px] text-indigo-300 font-black">
+                                AUTO DETECT
+                            </span>
+                        </div>
+
+                        <p class="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                            Masukkan URL media dan engine akan meminta endpoint ALL untuk menentukan hasil download.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="space-y-2.5">
+
+                    <label
+                        for="allUrlInput"
+                        class="flex items-center justify-between px-1"
+                    >
+                        <span class="text-[9px] text-slate-500 uppercase tracking-[.18em] font-black">
+                            Media URL
+                        </span>
+
+                        <span class="text-[8px] text-indigo-400 font-bold">
+                            AUTO
+                        </span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="allUrlInput"
+                        placeholder="https://..."
+                        autocomplete="off"
+                        class="w-full bg-[#090b0f]/80 border border-white/[.07] rounded-2xl px-4 py-3.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/45 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                    >
+
+                    <button
+                        onclick="processAll()"
+                        id="btnProcessAll"
+                        class="btn-indigo w-full text-white font-black py-3.5 rounded-2xl text-[10px] sm:text-xs transition-all cursor-pointer"
+                    >
+                        <span class="text-base mr-1">🌐</span>
+                        Detect & Download
+                    </button>
+
+                </div>
+
+                <div
+                    id="allLoading"
+                    class="hidden relative glass-soft rounded-2xl p-5 overflow-hidden"
+                >
+
+                    <div class="absolute inset-x-0 top-0 h-px overflow-hidden">
+                        <div class="scan h-full w-full bg-indigo-400/60"></div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+
+                        <div class="relative w-11 h-11 shrink-0">
+                            <div class="absolute inset-0 rounded-full border border-indigo-500/10"></div>
+
+                            <div class="absolute inset-1 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin"></div>
+
+                            <div class="absolute inset-3 rounded-full bg-indigo-500/10 flex items-center justify-center">
+                                <span class="text-xs">🌐</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="text-[10px] text-indigo-300 font-bold animate-pulse">
+                                Detecting platform...
+                            </p>
+
+                            <p class="text-[8px] text-slate-600 mt-1">
+                                Memproses URL melalui ALL Downloader
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div
+                    id="allResultBox"
+                    class="hidden result-in space-y-3"
+                >
+
+                    <div class="h-px bg-gradient-to-r from-transparent via-white/[.07] to-transparent"></div>
+
+                    <div class="flex items-center justify-between gap-3">
+
+                        <div class="min-w-0">
+                            <p class="text-xs font-black text-white">
+                                Download Result
+                            </p>
+
+                            <p
+                                id="allPlatform"
+                                class="text-[9px] text-indigo-300 mt-1"
+                            >
+                                Platform detected
+                            </p>
+                        </div>
+
+                        <span class="px-2 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/10 text-[8px] text-indigo-300 font-black">
+                            READY
+                        </span>
+
+                    </div>
+
+                    <div
+                        id="allMediaList"
+                        class="space-y-2 max-h-[460px] overflow-y-auto custom-scroll"
+                    ></div>
+
+                </div>
+
             </div>
 
-            <div class="glass-soft rounded-2xl p-3 text-center">
-                <div class="text-sm mb-1">🟢</div>
-                <p class="text-[8px] text-slate-600 uppercase tracking-wider">
-                    Status
-                </p>
-                <p class="text-[9px] text-emerald-400 font-black mt-0.5">
-                    ONLINE
-                </p>
-            </div>
+        </div>
 
-        </section>
+    </section>
 
-        <footer class="text-center py-3">
-            <p class="text-[9px] text-slate-600 tracking-wide">
-                REYCLOUDSHP
-                <span class="mx-1 text-slate-800">•</span>
-                MEDIA DOWNLOADER ENGINE
+    <section class="grid grid-cols-3 gap-2 mb-4">
+
+        <div class="glass-soft rounded-2xl p-3 text-center">
+            <div class="text-sm mb-1">⚡</div>
+
+            <p class="text-[8px] text-slate-600 uppercase tracking-wider">
+                Engine
             </p>
-        </footer>
 
-    </main>
+            <p class="text-[9px] text-white font-black mt-0.5">
+                FAST
+            </p>
+        </div>
 
-    <script>
-        function switchPlatform(platform) {
-            const btnIg = document.getElementById("btnTabIg");
-            const btnTt = document.getElementById("btnTabTt");
-            const secIg = document.getElementById("sectionInstagram");
-            const secTt = document.getElementById("sectionTiktok");
-            const subTitle = document.getElementById("subTitleDesc");
+        <div class="glass-soft rounded-2xl p-3 text-center">
+            <div class="text-sm mb-1">🌐</div>
 
-            if (platform === "instagram") {
-                btnIg.className =
-                    "py-3 rounded-xl text-[10px] sm:text-xs font-black bg-cyan-500/10 text-white border border-cyan-500/15 shadow transition-all cursor-pointer";
+            <p class="text-[8px] text-slate-600 uppercase tracking-wider">
+                Platform
+            </p>
 
-                btnTt.className =
-                    "py-3 rounded-xl text-[10px] sm:text-xs font-semibold text-slate-500 hover:text-slate-200 transition-all cursor-pointer";
+            <p class="text-[9px] text-white font-black mt-0.5">
+                ALL
+            </p>
+        </div>
 
-                secIg.classList.remove("hidden");
-                secTt.classList.add("hidden");
+        <div class="glass-soft rounded-2xl p-3 text-center">
+            <div class="text-sm mb-1">🟢</div>
 
-                subTitle.textContent =
-                    "Unduh media Instagram dengan interface modern dan proses yang simpel.";
-            } else {
-                btnTt.className =
-                    "py-3 rounded-xl text-[10px] sm:text-xs font-black bg-pink-500/10 text-white border border-pink-500/15 shadow transition-all cursor-pointer";
+            <p class="text-[8px] text-slate-600 uppercase tracking-wider">
+                Status
+            </p>
 
-                btnIg.className =
-                    "py-3 rounded-xl text-[10px] sm:text-xs font-semibold text-slate-500 hover:text-slate-200 transition-all cursor-pointer";
+            <p class="text-[9px] text-emerald-400 font-black mt-0.5">
+                ONLINE
+            </p>
+        </div>
 
-                secTt.classList.remove("hidden");
-                secIg.classList.add("hidden");
+    </section>
 
-                subTitle.textContent =
-                    "Unduh video TikTok dengan preview, statistik, dan pilihan media dalam satu dashboard.";
-            }
+    <footer class="text-center py-3">
+        <p class="text-[9px] text-slate-600 tracking-wide">
+            REYCLOUDSHP
+            <span class="mx-1 text-slate-800">•</span>
+            MULTI PLATFORM MEDIA ENGINE
+        </p>
+    </footer>
+
+</main>
+
+<script>
+    const MULTI_PLATFORM_ENDPOINT = "/api/multiflatfrom";
+
+    function switchPlatform(platform) {
+        const tabs = {
+            tiktok: document.getElementById("btnTabTt"),
+            instagram: document.getElementById("btnTabIg"),
+            all: document.getElementById("btnTabAll")
+        };
+
+        const sections = {
+            tiktok: document.getElementById("sectionTiktok"),
+            instagram: document.getElementById("sectionInstagram"),
+            all: document.getElementById("sectionAll")
+        };
+
+        const subTitle =
+            document.getElementById("subTitleDesc");
+
+        Object.keys(sections).forEach(key => {
+            sections[key].classList.toggle(
+                "hidden",
+                key !== platform
+            );
+
+            tabs[key].className =
+                key === platform
+                    ? getActiveTabClass(key)
+                    : "tab-button py-3 rounded-xl text-[9px] sm:text-xs font-semibold text-slate-500 hover:text-slate-200 transition-all cursor-pointer";
+        });
+
+        if (platform === "tiktok") {
+            subTitle.textContent =
+                "Unduh video TikTok dengan preview, statistik, dan pilihan media dalam satu dashboard.";
         }
 
-        async function processTikTok() {
-            const urlInput =
-                document.getElementById("tiktokUrlInput").value.trim();
-
-            const btnProcess =
-                document.getElementById("btnProcessTiktok");
-
-            const loading =
-                document.getElementById("tiktokLoading");
-
-            const resultBox =
-                document.getElementById("tiktokResultBox");
-
-            if (!urlInput) {
-                alert("Masukkan URL TikTok terlebih dahulu!");
-                return;
-            }
-
-            btnProcess.classList.add("hidden");
-            loading.classList.remove("hidden");
-            resultBox.classList.add("hidden");
-
-            try {
-                const res = await fetch(
-                    `/api/tiktok?url=${encodeURIComponent(urlInput)}`
-                );
-
-                const json = await res.json();
-
-                if (!json.status) {
-                    throw new Error(
-                        json.error ||
-                        "Gagal mengambil data video TikTok."
-                    );
-                }
-
-                const data = json;
-
-                const avatar =
-                    data.author?.avatar ||
-                    "https://via.placeholder.com/150";
-
-                document.getElementById("authorAvatar").src = avatar;
-
-                document.getElementById("authorName").textContent =
-                    data.author?.nickname ||
-                    data.author?.fullname ||
-                    "TikTok User";
-
-                document.getElementById("videoDesc").textContent =
-                    data.title ||
-                    "Tanpa keterangan";
-
-                const hdObj =
-                    data.data?.find(
-                        item => item.type === "nowatermark_hd"
-                    ) ||
-                    data.data?.find(
-                        item => item.type === "nowatermark"
-                    );
-
-                const videoUrl = hdObj?.url || "";
-
-                const video =
-                    document.getElementById("videoPreview");
-
-                video.src = videoUrl;
-                video.load();
-
-                document.getElementById("statLikes").textContent =
-                    formatNumber(data.stats?.likes || 0);
-
-                document.getElementById("statComments").textContent =
-                    formatNumber(data.stats?.comment || 0);
-
-                document.getElementById("statShares").textContent =
-                    formatNumber(data.stats?.share || 0);
-
-                document.getElementById("statViews").textContent =
-                    formatNumber(data.stats?.views || 0);
-
-                document.getElementById("downloadHdBtn").href =
-                    videoUrl || "#";
-
-                document.getElementById("downloadAudioBtn").href =
-                    data.music_info?.url || "#";
-
-                loading.classList.add("hidden");
-                btnProcess.classList.remove("hidden");
-                resultBox.classList.remove("hidden");
-
-                resultBox.scrollIntoView({
-                    behavior: "smooth",
-                    block: "nearest"
-                });
-
-            } catch (err) {
-                loading.classList.add("hidden");
-                btnProcess.classList.remove("hidden");
-
-                alert("Error: " + err.message);
-            }
+        if (platform === "instagram") {
+            subTitle.textContent =
+                "Unduh media Instagram dengan multi-platform engine yang cepat dan simpel.";
         }
 
-        function processInstagram() {
-            const igUrl =
-                document.getElementById("igUrlInput").value.trim();
+        if (platform === "all") {
+            subTitle.textContent =
+                "Masukkan URL apa saja yang didukung engine untuk diproses melalui ALL Downloader.";
+        }
+    }
 
-            if (!igUrl) {
-                alert("Masukkan URL Instagram terlebih dahulu!");
-                return;
+    function getActiveTabClass(platform) {
+        if (platform === "tiktok") {
+            return "tab-button py-3 rounded-xl text-[9px] sm:text-xs font-black bg-pink-500/10 text-white border border-pink-500/15 shadow transition-all cursor-pointer";
+        }
+
+        if (platform === "instagram") {
+            return "tab-button py-3 rounded-xl text-[9px] sm:text-xs font-black bg-cyan-500/10 text-white border border-cyan-500/15 shadow transition-all cursor-pointer";
+        }
+
+        return "tab-button py-3 rounded-xl text-[9px] sm:text-xs font-black bg-indigo-500/10 text-white border border-indigo-500/15 shadow transition-all cursor-pointer";
+    }
+
+    async function requestMultiPlatform(platform, url) {
+        const endpoint =
+            `${MULTI_PLATFORM_ENDPOINT}?platform=${encodeURIComponent(platform)}&url=${encodeURIComponent(url)}`;
+
+        const response = await fetch(endpoint, {
+            method: "GET",
+            headers: {
+                Accept: "application/json"
             }
+        });
 
-            alert(
-                "Fitur Instagram Downloader siap dihubungkan ke endpoint API kamu."
+        const contentType =
+            response.headers.get("content-type") || "";
+
+        if (!contentType.includes("application/json")) {
+            const text = await response.text();
+
+            throw new Error(
+                text ||
+                `Server mengembalikan HTTP ${response.status}.`
             );
         }
 
-        function formatNumber(num) {
-            const n = parseInt(num, 10);
+        const json = await response.json();
 
-            if (isNaN(n)) {
-                return num;
-            }
-
-            if (n >= 1000000000) {
-                return (n / 1000000000).toFixed(1) + "B";
-            }
-
-            if (n >= 1000000) {
-                return (n / 1000000).toFixed(1) + "M";
-            }
-
-            if (n >= 1000) {
-                return (n / 1000).toFixed(1) + "K";
-            }
-
-            return n;
+        if (!response.ok) {
+            throw new Error(
+                json.message ||
+                json.msg ||
+                json.error ||
+                `Request gagal HTTP ${response.status}.`
+            );
         }
 
-        document
-            .getElementById("tiktokUrlInput")
-            .addEventListener("keydown", event => {
-                if (event.key === "Enter") {
-                    processTikTok();
-                }
+        if (json.status === false) {
+            throw new Error(
+                json.message ||
+                json.msg ||
+                json.error ||
+                "Media tidak ditemukan."
+            );
+        }
+
+        return json;
+    }
+
+    function unwrapResponse(data) {
+        if (
+            data?.result &&
+            typeof data.result === "object"
+        ) {
+            return data.result;
+        }
+
+        if (
+            data?.data &&
+            typeof data.data === "object" &&
+            !Array.isArray(data.data)
+        ) {
+            return data.data;
+        }
+
+        return data;
+    }
+
+    function getTikTokMedia(data) {
+        const root = unwrapResponse(data);
+
+        if (Array.isArray(root?.data)) {
+            return root.data;
+        }
+
+        if (Array.isArray(data?.data)) {
+            return data.data;
+        }
+
+        if (Array.isArray(root?.medias)) {
+            return root.medias;
+        }
+
+        if (Array.isArray(root?.media)) {
+            return root.media;
+        }
+
+        return [];
+    }
+
+    function getTikTokVideo(data) {
+        const media =
+            getTikTokMedia(data);
+
+        const hd =
+            media.find(
+                item =>
+                    item?.type === "nowatermark_hd"
+            ) ||
+            media.find(
+                item =>
+                    item?.type === "nowatermark"
+            ) ||
+            media.find(
+                item =>
+                    item?.type === "video"
+            );
+
+        if (hd?.url) {
+            return hd.url;
+        }
+
+        const root =
+            unwrapResponse(data);
+
+        return (
+            root?.video ||
+            root?.video_url ||
+            root?.play ||
+            root?.hdplay ||
+            root?.mp4_hd ||
+            root?.mp4 ||
+            root?.url ||
+            ""
+        );
+    }
+
+    function getTikTokAudio(data) {
+        const root =
+            unwrapResponse(data);
+
+        return (
+            root?.music_info?.url ||
+            root?.music_info?.play ||
+            root?.music ||
+            root?.music_url ||
+            root?.mp3 ||
+            ""
+        );
+    }
+
+    function getTikTokAuthor(data) {
+        const root =
+            unwrapResponse(data);
+
+        return (
+            root?.author ||
+            data?.author ||
+            {}
+        );
+    }
+
+    function getTikTokStats(data) {
+        const root =
+            unwrapResponse(data);
+
+        return (
+            root?.stats ||
+            data?.stats ||
+            {}
+        );
+    }
+
+    async function processTikTok() {
+        const urlInput =
+            document
+                .getElementById("tiktokUrlInput")
+                .value
+                .trim();
+
+        const btnProcess =
+            document.getElementById(
+                "btnProcessTiktok"
+            );
+
+        const loading =
+            document.getElementById(
+                "tiktokLoading"
+            );
+
+        const resultBox =
+            document.getElementById(
+                "tiktokResultBox"
+            );
+
+        if (!urlInput) {
+            alert(
+                "Masukkan URL TikTok terlebih dahulu!"
+            );
+            return;
+        }
+
+        btnProcess.classList.add("hidden");
+        loading.classList.remove("hidden");
+        resultBox.classList.add("hidden");
+
+        try {
+            const data =
+                await requestMultiPlatform(
+                    "tiktok",
+                    urlInput
+                );
+
+            const root =
+                unwrapResponse(data);
+
+            const author =
+                getTikTokAuthor(data);
+
+            const stats =
+                getTikTokStats(data);
+
+            document.getElementById(
+                "authorAvatar"
+            ).src =
+                author?.avatar ||
+                "https://via.placeholder.com/150";
+
+            document.getElementById(
+                "authorName"
+            ).textContent =
+                author?.nickname ||
+                author?.unique_id ||
+                author?.fullname ||
+                "TikTok User";
+
+            document.getElementById(
+                "videoDesc"
+            ).textContent =
+                root?.title ||
+                root?.description ||
+                "Tanpa keterangan";
+
+            const videoUrl =
+                getTikTokVideo(data);
+
+            const audioUrl =
+                getTikTokAudio(data);
+
+            if (!videoUrl) {
+                throw new Error(
+                    "Link video TikTok tidak ditemukan."
+                );
+            }
+
+            const video =
+                document.getElementById(
+                    "videoPreview"
+                );
+
+            video.src = videoUrl;
+            video.load();
+
+            document.getElementById(
+                "statLikes"
+            ).textContent =
+                formatNumber(
+                    stats?.likes ||
+                    root?.digg_count ||
+                    0
+                );
+
+            document.getElementById(
+                "statComments"
+            ).textContent =
+                formatNumber(
+                    stats?.comment ||
+                    stats?.comments ||
+                    root?.comment_count ||
+                    0
+                );
+
+            document.getElementById(
+                "statShares"
+            ).textContent =
+                formatNumber(
+                    stats?.share ||
+                    stats?.shares ||
+                    root?.share_count ||
+                    0
+                );
+
+            document.getElementById(
+                "statViews"
+            ).textContent =
+                formatNumber(
+                    stats?.views ||
+                    root?.play_count ||
+                    0
+                );
+
+            document.getElementById(
+                "downloadHdBtn"
+            ).href = videoUrl;
+
+            const audioBtn =
+                document.getElementById(
+                    "downloadAudioBtn"
+                );
+
+            if (audioUrl) {
+                audioBtn.href =
+                    audioUrl;
+
+                audioBtn.classList.remove(
+                    "opacity-50",
+                    "pointer-events-none"
+                );
+            } else {
+                audioBtn.href = "#";
+
+                audioBtn.classList.add(
+                    "opacity-50",
+                    "pointer-events-none"
+                );
+            }
+
+            loading.classList.add("hidden");
+            btnProcess.classList.remove("hidden");
+            resultBox.classList.remove("hidden");
+
+            resultBox.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest"
             });
 
-        document
-            .getElementById("igUrlInput")
-            .addEventListener("keydown", event => {
-                if (event.key === "Enter") {
+        } catch (err) {
+            loading.classList.add("hidden");
+            btnProcess.classList.remove("hidden");
+
+            alert(
+                "Error: " +
+                (
+                    err?.message ||
+                    "Gagal mengambil data TikTok."
+                )
+            );
+        }
+    }
+
+    function extractInstagramUrls(data) {
+        const urls = [];
+
+        function addUrl(url) {
+            if (
+                typeof url !== "string" ||
+                !url
+            ) {
+                return;
+            }
+
+            if (
+                /^https?:\/\//i.test(url)
+            ) {
+                urls.push(url);
+            }
+        }
+
+        function scan(value, depth = 0) {
+            if (
+                depth > 7 ||
+                value === null ||
+                value === undefined
+            ) {
+                return;
+            }
+
+            if (
+                typeof value === "string"
+            ) {
+                addUrl(value);
+                return;
+            }
+
+            if (
+                Array.isArray(value)
+            ) {
+                value.forEach(item =>
+                    scan(
+                        item,
+                        depth + 1
+                    )
+                );
+
+                return;
+            }
+
+            if (
+                typeof value === "object"
+            ) {
+                Object.entries(value)
+                    .forEach(([key, value]) => {
+                        const lower =
+                            key.toLowerCase();
+
+                        if (
+                            [
+                                "url",
+                                "downloadurl",
+                                "download_url",
+                                "mediaurl",
+                                "media_url",
+                                "video",
+                                "video_url",
+                                "src",
+                                "href",
+                                "mp4",
+                                "mp4_hd"
+                            ].includes(lower)
+                        ) {
+                            if (
+                                typeof value === "string"
+                            ) {
+                                addUrl(value);
+                            }
+                        }
+
+                        scan(
+                            value,
+                            depth + 1
+                        );
+                    });
+            }
+        }
+
+        scan(data);
+
+        return [
+            ...new Set(urls)
+        ];
+    }
+
+    function getInstagramUrls(data) {
+        const root =
+            unwrapResponse(data);
+
+        const direct =
+            root?.result?.downloadUrl ||
+            root?.downloadUrl ||
+            root?.download_url ||
+            data?.downloadUrl ||
+            [];
+
+        if (
+            Array.isArray(direct) &&
+            direct.length
+        ) {
+            return [
+                ...new Set(
+                    direct.filter(
+                        url =>
+                            typeof url === "string" &&
+                            /^https?:\/\//i.test(url)
+                    )
+                )
+            ];
+        }
+
+        return extractInstagramUrls(
+            data
+        );
+    }
+
+    function createDownloadItem(
+        url,
+        index,
+        accent = "cyan"
+    ) {
+        const wrapper =
+            document.createElement("div");
+
+        wrapper.className =
+            "glass-soft rounded-2xl p-3 flex items-center gap-3";
+
+        const icon =
+            document.createElement("div");
+
+        icon.className =
+            accent === "indigo"
+                ? "w-10 h-10 shrink-0 rounded-xl bg-indigo-500/10 border border-indigo-500/10 flex items-center justify-center text-indigo-400"
+                : "w-10 h-10 shrink-0 rounded-xl bg-cyan-500/10 border border-cyan-500/10 flex items-center justify-center text-cyan-400";
+
+        icon.textContent =
+            "📥";
+
+        const info =
+            document.createElement("div");
+
+        info.className =
+            "min-w-0 flex-1";
+
+        const title =
+            document.createElement("p");
+
+        title.className =
+            "text-[10px] font-black text-white";
+
+        title.textContent =
+            `Media ${index + 1}`;
+
+        const link =
+            document.createElement("p");
+
+        link.className =
+            "text-[8px] text-slate-600 truncate mt-1";
+
+        link.textContent =
+            url;
+
+        const button =
+            document.createElement("a");
+
+        button.href =
+            url;
+
+        button.target =
+            "_blank";
+
+        button.rel =
+            "noopener noreferrer";
+
+        button.className =
+            accent === "indigo"
+                ? "shrink-0 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/10 text-[9px] text-indigo-300 font-black hover:bg-indigo-500/15 transition-all"
+                : "shrink-0 px-3 py-2 rounded-xl bg-cyan-500/10 border border-cyan-500/10 text-[9px] text-cyan-300 font-black hover:bg-cyan-500/15 transition-all";
+
+        button.textContent =
+            "DOWNLOAD";
+
+        info.appendChild(title);
+        info.appendChild(link);
+
+        wrapper.appendChild(icon);
+        wrapper.appendChild(info);
+        wrapper.appendChild(button);
+
+        return wrapper;
+    }
+
+    async function processInstagram() {
+        const igUrl =
+            document
+                .getElementById("igUrlInput")
+                .value
+                .trim();
+
+        const btn =
+            document.getElementById(
+                "btnProcessIg"
+            );
+
+        const loading =
+            document.getElementById(
+                "instagramLoading"
+            );
+
+        const resultBox =
+            document.getElementById(
+                "instagramResultBox"
+            );
+
+        const list =
+            document.getElementById(
+                "instagramMediaList"
+            );
+
+        if (!igUrl) {
+            alert(
+                "Masukkan URL Instagram terlebih dahulu!"
+            );
+            return;
+        }
+
+        btn.classList.add("hidden");
+        loading.classList.remove("hidden");
+        resultBox.classList.add("hidden");
+        list.innerHTML = "";
+
+        try {
+            const data =
+                await requestMultiPlatform(
+                    "instagram",
+                    igUrl
+                );
+
+            const urls =
+                getInstagramUrls(data);
+
+            if (!urls.length) {
+                throw new Error(
+                    "Media Instagram tidak ditemukan."
+                );
+            }
+
+            urls.forEach(
+                (url, index) => {
+                    list.appendChild(
+                        createDownloadItem(
+                            url,
+                            index,
+                            "cyan"
+                        )
+                    );
+                }
+            );
+
+            document.getElementById(
+                "instagramMediaCount"
+            ).textContent =
+                `${urls.length} media ditemukan`;
+
+            loading.classList.add("hidden");
+            btn.classList.remove("hidden");
+            resultBox.classList.remove("hidden");
+
+            resultBox.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest"
+            });
+
+        } catch (err) {
+            loading.classList.add("hidden");
+            btn.classList.remove("hidden");
+
+            alert(
+                "Error: " +
+                (
+                    err?.message ||
+                    "Gagal mengambil media Instagram."
+                )
+            );
+        }
+    }
+
+    function extractAllMedia(data) {
+        const urls = [];
+
+        function add(value) {
+            if (
+                typeof value !== "string"
+            ) {
+                return;
+            }
+
+            if (
+                /^https?:\/\//i.test(value)
+            ) {
+                urls.push(value);
+            }
+        }
+
+        function walk(value, depth = 0) {
+            if (
+                depth > 8 ||
+                value === null ||
+                value === undefined
+            ) {
+                return;
+            }
+
+            if (
+                typeof value === "string"
+            ) {
+                add(value);
+                return;
+            }
+
+            if (
+                Array.isArray(value)
+            ) {
+                value.forEach(item =>
+                    walk(
+                        item,
+                        depth + 1
+                    )
+                );
+
+                return;
+            }
+
+            if (
+                typeof value === "object"
+            ) {
+                Object.entries(value)
+                    .forEach(([key, value]) => {
+                        const lower =
+                            key.toLowerCase();
+
+                        if (
+                            [
+                                "url",
+                                "downloadurl",
+                                "download_url",
+                                "mediaurl",
+                                "media_url",
+                                "video",
+                                "video_url",
+                                "src",
+                                "href",
+                                "mp4",
+                                "mp4_hd",
+                                "nowatermark",
+                                "nowatermark_hd",
+                                "play",
+                                "hdplay",
+                                "music",
+                                "music_url",
+                                "mp3"
+                            ].includes(lower)
+                        ) {
+                            add(value);
+                        }
+
+                        walk(
+                            value,
+                            depth + 1
+                        );
+                    });
+            }
+        }
+
+        walk(data);
+
+        return [
+            ...new Set(urls)
+        ];
+    }
+
+    function detectPlatformFromUrl(url) {
+        const value =
+            url.toLowerCase();
+
+        if (
+            value.includes("tiktok.com") ||
+            value.includes("vt.tiktok") ||
+            value.includes("vm.tiktok")
+        ) {
+            return "TikTok";
+        }
+
+        if (
+            value.includes("instagram.com") ||
+            value.includes("instagr.am")
+        ) {
+            return "Instagram";
+        }
+
+        if (
+            value.includes("youtube.com") ||
+            value.includes("youtu.be")
+        ) {
+            return "YouTube";
+        }
+
+        if (
+            value.includes("facebook.com") ||
+            value.includes("fb.watch")
+        ) {
+            return "Facebook";
+        }
+
+        if (
+            value.includes("twitter.com") ||
+            value.includes("x.com")
+        ) {
+            return "Twitter / X";
+        }
+
+        return "Unknown";
+    }
+
+    async function processAll() {
+        const url =
+            document
+                .getElementById("allUrlInput")
+                .value
+                .trim();
+
+        const btn =
+            document.getElementById(
+                "btnProcessAll"
+            );
+
+        const loading =
+            document.getElementById(
+                "allLoading"
+            );
+
+        const resultBox =
+            document.getElementById(
+                "allResultBox"
+            );
+
+        const list =
+            document.getElementById(
+                "allMediaList"
+            );
+
+        if (!url) {
+            alert(
+                "Masukkan URL media terlebih dahulu!"
+            );
+            return;
+        }
+
+        btn.classList.add("hidden");
+        loading.classList.remove("hidden");
+        resultBox.classList.add("hidden");
+        list.innerHTML = "";
+
+        try {
+            const detected =
+                detectPlatformFromUrl(
+                    url
+                );
+
+            const data =
+                await requestMultiPlatform(
+                    "all",
+                    url
+                );
+
+            const root =
+                unwrapResponse(data);
+
+            const media =
+                extractAllMedia(data);
+
+            if (!media.length) {
+                throw new Error(
+                    "Link media tidak ditemukan dari ALL Downloader."
+                );
+            }
+
+            document.getElementById(
+                "allPlatform"
+            ).textContent =
+                `${detected} • ${media.length} media ditemukan`;
+
+            media.forEach(
+                (mediaUrl, index) => {
+                    list.appendChild(
+                        createDownloadItem(
+                            mediaUrl,
+                            index,
+                            "indigo"
+                        )
+                    );
+                }
+            );
+
+            if (
+                root?.title ||
+                root?.name
+            ) {
+                const title =
+                    document.createElement("div");
+
+                title.className =
+                    "glass-soft rounded-2xl px-3 py-2.5 text-[9px] text-slate-400";
+
+                title.innerHTML =
+                    `<span class="text-white font-bold">Title:</span> ${escapeHtml(root.title || root.name)}`;
+
+                list.prepend(title);
+            }
+
+            loading.classList.add("hidden");
+            btn.classList.remove("hidden");
+            resultBox.classList.remove("hidden");
+
+            resultBox.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest"
+            });
+
+        } catch (err) {
+            loading.classList.add("hidden");
+            btn.classList.remove("hidden");
+
+            alert(
+                "Error: " +
+                (
+                    err?.message ||
+                    "Gagal memproses ALL Downloader."
+                )
+            );
+        }
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+    }
+
+    function formatNumber(num) {
+        const n =
+            parseInt(
+                String(num)
+                    .replace(/\./g, "")
+                    .replace(/,/g, ""),
+                10
+            );
+
+        if (isNaN(n)) {
+            return num || 0;
+        }
+
+        if (n >= 1000000000) {
+            return (
+                n / 1000000000
+            ).toFixed(1) + "B";
+        }
+
+        if (n >= 1000000) {
+            return (
+                n / 1000000
+            ).toFixed(1) + "M";
+        }
+
+        if (n >= 1000) {
+            return (
+                n / 1000
+            ).toFixed(1) + "K";
+        }
+
+        return n;
+    }
+
+    document
+        .getElementById("tiktokUrlInput")
+        .addEventListener(
+            "keydown",
+            event => {
+                if (
+                    event.key === "Enter"
+                ) {
+                    processTikTok();
+                }
+            }
+        );
+
+    document
+        .getElementById("igUrlInput")
+        .addEventListener(
+            "keydown",
+            event => {
+                if (
+                    event.key === "Enter"
+                ) {
                     processInstagram();
                 }
-            });
-    </script>
+            }
+        );
+
+    document
+        .getElementById("allUrlInput")
+        .addEventListener(
+            "keydown",
+            event => {
+                if (
+                    event.key === "Enter"
+                ) {
+                    processAll();
+                }
+            }
+        );
+</script>
 
 </body>
 </html>

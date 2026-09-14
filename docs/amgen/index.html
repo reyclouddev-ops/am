@@ -761,13 +761,12 @@
             document.getElementById('form-step-loading').classList.remove('hidden');
 
             try {
-                const res = await fetch('/api/amgen', {
+                const res = await fetch('/api/alightmotion?action=send-link', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        action: 'send-link',
                         email
                     })
                 });
@@ -807,13 +806,12 @@
             btn.textContent = 'Memproses...';
 
             try {
-                const res = await fetch('/api/amgen', {
+                const res = await fetch('/api/alightmotion?action=verify-link', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        action: 'verify-link',
                         email: currentEmail,
                         magicLink
                     })
@@ -866,13 +864,12 @@
             result.classList.add('hidden');
 
             try {
-                const res = await fetch('/api/amgen_auto', {
+                const res = await fetch('/api/alightmotion?action=auto', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        action: 'auto-activate',
                         username
                     })
                 });
@@ -960,13 +957,14 @@
             btn.textContent = '🔐 Memverifikasi...';
 
             try {
-                const res = await fetch('/api/amgen', {
+                const res = await fetch('/api/alightmotion?action=bulk', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'x-apikey': apiKey,
+                        'x-api-password': password
                     },
                     body: JSON.stringify({
-                        action: 'bulk-generate',
                         apikey: apiKey,
                         password,
                         count: 1
@@ -1087,13 +1085,14 @@
             result.classList.add('hidden');
 
             try {
-                const res = await fetch('/api/amgen', {
+                const res = await fetch('/api/alightmotion?action=bulk', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'x-apikey': apiKey,
+                        'x-api-password': password
                     },
                     body: JSON.stringify({
-                        action: 'bulk-generate',
                         apikey: apiKey,
                         password,
                         username,

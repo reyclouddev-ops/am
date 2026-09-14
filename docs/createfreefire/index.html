@@ -1,824 +1,692 @@
-<!DOCTYPE html>
-<html lang="id" class="dark">
+<!DOCTYPE html><html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#08090c">
-    <title>ReyCloudSHP — Free Fire Guest Generator</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>ReyCloudSHP — Maintenance</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script><style>
+    * {
+        box-sizing: border-box;
+    }
 
-    <style>
-        * {
-            box-sizing: border-box;
+    html {
+        background: #07090d;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        color: #f8fafc;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        overflow-x: hidden;
+        background:
+            radial-gradient(circle at 50% -15%, rgba(249,115,22,.14), transparent 34%),
+            radial-gradient(circle at 100% 55%, rgba(234,88,12,.08), transparent 28%),
+            radial-gradient(circle at 0% 75%, rgba(14,165,233,.045), transparent 25%),
+            #07090d;
+    }
+
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: .22;
+        background-image:
+            linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+        background-size: 38px 38px;
+        mask-image: linear-gradient(to bottom, black, transparent 90%);
+    }
+
+    body::after {
+        content: "";
+        position: fixed;
+        width: 360px;
+        height: 360px;
+        left: 50%;
+        top: 42%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        background: rgba(249,115,22,.055);
+        filter: blur(100px);
+        pointer-events: none;
+    }
+
+    .glass {
+        background: rgba(15,18,24,.76);
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow:
+            0 25px 80px rgba(0,0,0,.38),
+            inset 0 1px 0 rgba(255,255,255,.035);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+    }
+
+    .glass-soft {
+        background: rgba(255,255,255,.025);
+        border: 1px solid rgba(255,255,255,.055);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    .top-line {
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(249,115,22,.8),
+            rgba(251,191,36,.9),
+            rgba(249,115,22,.8),
+            transparent
+        );
+        background-size: 200% 100%;
+        animation: lineMove 2.4s linear infinite;
+    }
+
+    @keyframes lineMove {
+        from {
+            background-position: 100% 0;
         }
 
-        html {
-            background: #08090c;
+        to {
+            background-position: -100% 0;
+        }
+    }
+
+    .maintenance-icon {
+        animation: floatIcon 4s ease-in-out infinite;
+    }
+
+    @keyframes floatIcon {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
         }
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            background:
-                radial-gradient(circle at 50% -10%, rgba(255, 102, 0, .14), transparent 35%),
-                radial-gradient(circle at 0% 50%, rgba(255, 68, 0, .06), transparent 30%),
-                #08090c;
-            color: #f8fafc;
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            overflow-x: hidden;
+        50% {
+            transform: translateY(-8px) rotate(2deg);
+        }
+    }
+
+    .icon-ring {
+        position: absolute;
+        inset: -15px;
+        border-radius: 34px;
+        border: 1px solid rgba(249,115,22,.12);
+        animation: ringPulse 2.8s ease-in-out infinite;
+    }
+
+    .icon-ring::before {
+        content: "";
+        position: absolute;
+        inset: 10px;
+        border-radius: 28px;
+        border: 1px dashed rgba(249,115,22,.12);
+    }
+
+    @keyframes ringPulse {
+        0%, 100% {
+            transform: scale(.96);
+            opacity: .45;
         }
 
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            opacity: .25;
-            background-image:
-                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-            background-size: 42px 42px;
-            mask-image: linear-gradient(to bottom, black, transparent 85%);
+        50% {
+            transform: scale(1.04);
+            opacity: 1;
+        }
+    }
+
+    .gear {
+        animation: gearSpin 8s linear infinite;
+    }
+
+    .gear-reverse {
+        animation: gearSpinReverse 6s linear infinite;
+    }
+
+    @keyframes gearSpin {
+        from {
+            transform: rotate(0deg);
         }
 
-        body::after {
-            content: "";
-            position: fixed;
-            width: 320px;
-            height: 320px;
-            left: 50%;
-            top: 30%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            background: rgba(255, 94, 0, .07);
-            filter: blur(90px);
-            pointer-events: none;
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes gearSpinReverse {
+        from {
+            transform: rotate(360deg);
         }
 
-        .glass {
-            background: rgba(15, 18, 24, .72);
-            border: 1px solid rgba(255,255,255,.07);
-            box-shadow:
-                0 25px 80px rgba(0,0,0,.35),
-                inset 0 1px 0 rgba(255,255,255,.035);
-            backdrop-filter: blur(22px);
-            -webkit-backdrop-filter: blur(22px);
+        to {
+            transform: rotate(0deg);
+        }
+    }
+
+    .pulse {
+        animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(249,115,22,.35);
         }
 
-        .glass-soft {
-            background: rgba(255,255,255,.025);
-            border: 1px solid rgba(255,255,255,.055);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+        50% {
+            box-shadow: 0 0 0 8px rgba(249,115,22,0);
+        }
+    }
+
+    .status-pulse {
+        animation: statusPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes statusPulse {
+        0%, 100% {
+            opacity: .55;
         }
 
-        .orange-glow {
-            box-shadow:
-                0 0 0 1px rgba(255,106,0,.12),
-                0 0 35px rgba(255,106,0,.09);
+        50% {
+            opacity: 1;
+        }
+    }
+
+    .scan {
+        animation: scan 2.2s linear infinite;
+    }
+
+    @keyframes scan {
+        0% {
+            transform: translateY(-120%);
+            opacity: 0;
         }
 
-        .hero-ring {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            border: 1px solid rgba(255,106,0,.07);
-            border-radius: 50%;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
+        20% {
+            opacity: .7;
         }
 
-        .hero-ring::before,
-        .hero-ring::after {
-            content: "";
-            position: absolute;
-            inset: 25px;
-            border: 1px dashed rgba(255,106,0,.06);
-            border-radius: 50%;
+        80% {
+            opacity: .7;
         }
 
-        .hero-ring::after {
-            inset: 65px;
-            border-style: solid;
+        100% {
+            transform: translateY(120%);
+            opacity: 0;
+        }
+    }
+
+    .progress {
+        background: linear-gradient(
+            90deg,
+            #ea580c,
+            #f97316,
+            #fbbf24,
+            #f97316,
+            #ea580c
+        );
+        background-size: 220% 100%;
+        animation: progressMove 1.8s linear infinite;
+    }
+
+    @keyframes progressMove {
+        from {
+            background-position: 100% 0;
         }
 
-        .pulse-dot {
-            animation: pulseDot 1.8s infinite;
+        to {
+            background-position: -100% 0;
+        }
+    }
+
+    .dot {
+        animation: dotBlink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes dotBlink {
+        0%, 100% {
+            opacity: .35;
         }
 
-        @keyframes pulseDot {
-            0%, 100% {
-                box-shadow: 0 0 0 0 rgba(34,197,94,.35);
-            }
-            50% {
-                box-shadow: 0 0 0 7px rgba(34,197,94,0);
-            }
+        50% {
+            opacity: 1;
+        }
+    }
+
+    .fade-up {
+        animation: fadeUp .65s ease both;
+    }
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
         }
 
-        .float {
-            animation: float 5s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-7px);
-            }
-        }
-
-        .scan {
-            animation: scan 2s linear infinite;
-        }
-
-        @keyframes scan {
-            0% {
-                transform: translateY(-100%);
-                opacity: 0;
-            }
-            20% {
-                opacity: .7;
-            }
-            80% {
-                opacity: .7;
-            }
-            100% {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-        }
-
-        .progress-shine {
-            background: linear-gradient(
-                90deg,
-                rgba(255,106,0,.85),
-                rgba(255,180,80,1),
-                rgba(255,106,0,.85)
-            );
-            background-size: 200% 100%;
-            animation: shine 1.4s linear infinite;
-        }
-
-        @keyframes shine {
-            from {
-                background-position: 100% 0;
-            }
-            to {
-                background-position: -100% 0;
-            }
-        }
-
-        .result-card {
-            animation: resultIn .35s ease both;
-        }
-
-        @keyframes resultIn {
-            from {
-                opacity: 0;
-                transform: translateY(8px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .btn-main {
-            background: linear-gradient(135deg, #ff7a18, #ff5a00);
-            box-shadow:
-                0 10px 35px rgba(255,91,0,.18),
-                inset 0 1px 0 rgba(255,255,255,.16);
-        }
-
-        .btn-main:hover {
-            transform: translateY(-1px);
-            box-shadow:
-                0 14px 42px rgba(255,91,0,.26),
-                inset 0 1px 0 rgba(255,255,255,.18);
-        }
-
-        .btn-main:active {
+        to {
+            opacity: 1;
             transform: translateY(0);
         }
+    }
 
-        .custom-scroll::-webkit-scrollbar {
-            width: 5px;
+    .delay-1 {
+        animation-delay: .08s;
+    }
+
+    .delay-2 {
+        animation-delay: .16s;
+    }
+
+    .delay-3 {
+        animation-delay: .24s;
+    }
+
+    .delay-4 {
+        animation-delay: .32s;
+    }
+
+    .back-btn {
+        transition:
+            transform .2s ease,
+            border-color .2s ease,
+            background-color .2s ease;
+    }
+
+    .back-btn:hover {
+        transform: translateY(-2px);
+        border-color: rgba(249,115,22,.3);
+        background: rgba(249,115,22,.07);
+    }
+
+    .back-btn:active {
+        transform: scale(.98);
+    }
+
+    .mini-card {
+        transition:
+            transform .2s ease,
+            border-color .2s ease;
+    }
+
+    .mini-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255,255,255,.1);
+    }
+
+    @media (max-width: 420px) {
+        .hero-title {
+            font-size: 27px;
         }
+    }
 
-        .custom-scroll::-webkit-scrollbar-track {
-            background: transparent;
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
         }
+    }
+</style>
 
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255,106,0,.25);
-            border-radius: 999px;
-        }
+</head><body><main class="relative z-10 w-full max-w-2xl mx-auto px-3 py-4 sm:px-5 sm:py-7">
 
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            opacity: .4;
-        }
+    <header class="glass rounded-3xl overflow-hidden mb-4 fade-up">
 
-        @media (max-width: 640px) {
-            .hero-ring {
-                width: 250px;
-                height: 250px;
-            }
-        }
-    </style>
-</head>
+        <div class="h-[2px] top-line"></div>
 
-<body class="min-h-screen">
+        <div class="px-4 py-4 sm:px-5">
 
-    <main class="relative z-10 w-full max-w-4xl mx-auto px-3 py-4 sm:px-5 sm:py-7">
-
-        <header class="glass rounded-3xl px-4 py-4 sm:px-5 sm:py-4 mb-4">
             <div class="flex items-center justify-between gap-3">
 
                 <div class="flex items-center gap-3 min-w-0">
-                    <div class="relative w-11 h-11 shrink-0 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center orange-glow">
-                        <span class="text-xl">🔥</span>
-                        <span class="absolute -right-0.5 -bottom-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0f1218] pulse-dot"></span>
+
+                    <div class="relative w-11 h-11 shrink-0 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                        <span class="text-xl">🛠️</span>
+                        <span class="absolute -right-0.5 -bottom-0.5 w-2.5 h-2.5 rounded-full bg-orange-400 border-2 border-[#0f1218] pulse"></span>
                     </div>
 
                     <div class="min-w-0">
+
                         <div class="flex items-center gap-2">
+
                             <h1 class="text-sm sm:text-base font-black tracking-tight text-white truncate">
                                 REYCLOUD<span class="text-orange-400">SHP</span>
                             </h1>
 
                             <span class="hidden sm:inline-flex text-[8px] px-2 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-300 font-bold tracking-widest">
-                                SYSTEM
+                                MAINTENANCE
                             </span>
+
                         </div>
 
-                        <p class="text-[9px] sm:text-[10px] text-slate-500 tracking-[.18em] uppercase font-bold">
+                        <p class="text-[9px] sm:text-[10px] text-slate-500 tracking-[.18em] uppercase font-bold mt-0.5">
                             Free Fire Guest Engine
                         </p>
+
                     </div>
+
                 </div>
 
                 <a
                     href="/dashboard"
-                    class="shrink-0 px-3.5 py-2 rounded-xl glass-soft text-[10px] sm:text-[11px] text-slate-300 hover:text-white hover:border-orange-500/20 transition-all font-semibold"
+                    class="back-btn shrink-0 px-3.5 py-2 rounded-xl glass-soft text-[10px] sm:text-[11px] text-slate-300 font-semibold"
                 >
-                    Dashboard
+                    ← Dashboard
                 </a>
+
             </div>
-        </header>
 
-        <section class="glass rounded-[28px] overflow-hidden mb-4 orange-glow">
+        </div>
 
-            <div class="relative px-5 pt-8 pb-7 sm:px-8 sm:pt-10 sm:pb-9 overflow-hidden">
+    </header>
 
-                <div class="hero-ring"></div>
+    <section class="glass rounded-[30px] overflow-hidden relative fade-up delay-1">
 
-                <div class="relative z-10 text-center">
+        <div class="absolute inset-x-0 top-0 h-[2px] top-line"></div>
 
-                    <div class="float inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-orange-500/10 border border-orange-500/20 mb-5">
-                        <span class="text-3xl">🔥</span>
-                    </div>
+        <div class="relative px-5 pt-9 pb-8 sm:px-10 sm:pt-12 sm:pb-10 overflow-hidden">
 
-                    <div class="flex items-center justify-center gap-2 mb-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
-                        <span class="text-[9px] sm:text-[10px] uppercase tracking-[.28em] font-black text-orange-400">
-                            Garena Connect
+            <div class="absolute inset-0 pointer-events-none">
+                <div class="absolute w-56 h-56 rounded-full border border-orange-500/[.045] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+                <div class="absolute w-80 h-80 rounded-full border border-orange-500/[.025] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+            </div>
+
+            <div class="relative z-10 text-center">
+
+                <div class="maintenance-icon relative inline-flex mb-7">
+
+                    <div class="icon-ring"></div>
+
+                    <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-[30px] bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shadow-[0_0_55px_rgba(249,115,22,.1)]">
+
+                        <span class="gear absolute -top-3 -right-3 text-3xl opacity-80">
+                            ⚙️
                         </span>
-                        <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+
+                        <span class="gear-reverse absolute -bottom-3 -left-3 text-2xl opacity-60">
+                            ⚙️
+                        </span>
+
+                        <span class="text-5xl sm:text-6xl">
+                            🔧
+                        </span>
+
                     </div>
 
-                    <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-white">
-                        Guest Account
-                        <span class="text-orange-400">Generator</span>
-                    </h2>
+                </div>
 
-                    <p class="max-w-xl mx-auto mt-3 text-[11px] sm:text-xs leading-relaxed text-slate-400">
-                        Generate akun guest Free Fire melalui engine otomatis ReyCloudSHP.
-                        Cepat, simpel, dan terintegrasi langsung dengan sistem generator.
+                <div class="flex items-center justify-center gap-2 mb-3">
+
+                    <span class="w-1.5 h-1.5 rounded-full bg-orange-400 dot"></span>
+
+                    <span class="text-[9px] sm:text-[10px] uppercase tracking-[.3em] font-black text-orange-400">
+                        System Maintenance
+                    </span>
+
+                    <span class="w-1.5 h-1.5 rounded-full bg-orange-400 dot"></span>
+
+                </div>
+
+                <h2 class="hero-title text-3xl sm:text-5xl font-black tracking-tight leading-tight text-white">
+                    Lagi <span class="text-orange-400">Diperbaiki</span>
+                </h2>
+
+                <p class="max-w-lg mx-auto mt-4 text-[11px] sm:text-xs leading-relaxed text-slate-400">
+                    Free Fire Guest Generator sedang dalam proses perbaikan dan peningkatan sistem.
+                    Tim ReyCloudSHP sedang melakukan maintenance agar layanan dapat kembali berjalan dengan lebih stabil.
+                </p>
+
+                <div class="inline-flex items-center gap-2 mt-6 px-3.5 py-2 rounded-full bg-orange-500/[.07] border border-orange-500/10">
+
+                    <span class="w-1.5 h-1.5 rounded-full bg-orange-400 status-pulse"></span>
+
+                    <span class="text-[9px] text-orange-300 font-bold">
+                        ENGINE TEMPORARILY UNAVAILABLE
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent"></div>
+
+        <div class="p-4 sm:p-6">
+
+            <div class="glass-soft rounded-2xl p-4 relative overflow-hidden">
+
+                <div class="absolute inset-x-0 top-0 h-px overflow-hidden">
+                    <div class="scan h-full w-full bg-orange-400/60"></div>
+                </div>
+
+                <div class="flex items-center justify-between gap-3 mb-3">
+
+                    <div class="flex items-center gap-2">
+
+                        <div class="w-8 h-8 rounded-xl bg-orange-500/10 border border-orange-500/10 flex items-center justify-center">
+                            🛠️
+                        </div>
+
+                        <div>
+                            <p class="text-[10px] font-black text-white">
+                                Maintenance Progress
+                            </p>
+
+                            <p class="text-[8px] text-slate-600 mt-0.5">
+                                System optimization in progress
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <span class="text-[9px] text-orange-400 font-mono font-bold">
+                        ACTIVE
+                    </span>
+
+                </div>
+
+                <div class="h-2 rounded-full bg-white/[.04] overflow-hidden">
+
+                    <div class="progress h-full rounded-full w-[72%]"></div>
+
+                </div>
+
+                <div class="flex justify-between mt-2">
+
+                    <span class="text-[8px] text-slate-600">
+                        Repairing services
+                    </span>
+
+                    <span class="text-[8px] text-slate-500 font-mono">
+                        72%
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5 mt-3">
+
+                <div class="mini-card glass-soft rounded-2xl p-3 text-center">
+
+                    <div class="text-sm mb-1">
+                        🔧
+                    </div>
+
+                    <p class="text-[8px] text-slate-600 uppercase tracking-wider">
+                        Status
                     </p>
 
-                    <div class="flex flex-wrap justify-center gap-2 mt-5">
-                        <span class="px-2.5 py-1 rounded-full bg-white/[.03] border border-white/[.06] text-[9px] text-slate-400">
-                            ⚡ Auto Generate
-                        </span>
-                        <span class="px-2.5 py-1 rounded-full bg-white/[.03] border border-white/[.06] text-[9px] text-slate-400">
-                            🛡️ Engine Protected
-                        </span>
-                        <span class="px-2.5 py-1 rounded-full bg-white/[.03] border border-white/[.06] text-[9px] text-slate-400">
-                            📦 TXT Export
-                        </span>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent"></div>
-
-            <div class="p-4 sm:p-6">
-
-                <div class="grid sm:grid-cols-[1fr_auto] gap-3">
-
-                    <div class="glass-soft rounded-2xl p-3.5">
-                        <label
-                            for="countInput"
-                            class="flex items-center justify-between mb-2"
-                        >
-                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-[.18em]">
-                                Account Quantity
-                            </span>
-
-                            <span class="text-[9px] text-orange-400 font-bold">
-                                MAX 5
-                            </span>
-                        </label>
-
-                        <div class="relative">
-                            <input
-                                type="number"
-                                id="countInput"
-                                value="3"
-                                min="1"
-                                max="5"
-                                inputmode="numeric"
-                                class="w-full bg-[#090b0f]/80 border border-white/[.07] rounded-xl px-4 py-3.5 text-sm text-white font-mono font-bold focus:outline-none focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/5 transition-all"
-                            >
-
-                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] text-slate-600 font-bold uppercase">
-                                accounts
-                            </span>
-                        </div>
-                    </div>
-
-                    <button
-                        onclick="runGenFreeFire()"
-                        id="btnRun"
-                        class="btn-main min-h-[74px] sm:min-h-0 sm:min-w-[220px] rounded-2xl px-6 py-3.5 text-[11px] text-white font-black tracking-wide transition-all cursor-pointer"
-                    >
-                        <span class="block text-lg mb-0.5">🔥</span>
-                        Generate Guest
-                    </button>
+                    <p class="text-[9px] text-orange-400 font-black mt-1">
+                        REPAIRING
+                    </p>
 
                 </div>
 
-                <div class="mt-3 flex items-center gap-2 px-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span>
-                    <span class="text-[9px] text-slate-500">
-                        Generator engine ready
-                    </span>
-                    <span class="ml-auto text-[9px] text-slate-600 font-mono">
-                        REY-GEN / ONLINE
-                    </span>
+                <div class="mini-card glass-soft rounded-2xl p-3 text-center">
+
+                    <div class="text-sm mb-1">
+                        🛡️
+                    </div>
+
+                    <p class="text-[8px] text-slate-600 uppercase tracking-wider">
+                        System
+                    </p>
+
+                    <p class="text-[9px] text-emerald-400 font-black mt-1">
+                        PROTECTED
+                    </p>
+
                 </div>
 
-                <div id="loadingBox" class="hidden mt-5 glass-soft rounded-2xl p-5 overflow-hidden relative">
+                <div class="mini-card glass-soft rounded-2xl p-3 text-center">
 
-                    <div class="absolute inset-x-0 top-0 h-px overflow-hidden">
-                        <div class="scan h-full w-full bg-orange-400/60"></div>
+                    <div class="text-sm mb-1">
+                        ⚡
                     </div>
 
-                    <div class="flex items-center gap-4">
+                    <p class="text-[8px] text-slate-600 uppercase tracking-wider">
+                        Service
+                    </p>
 
-                        <div class="relative w-11 h-11 shrink-0">
-                            <div class="absolute inset-0 rounded-full border border-orange-500/10"></div>
-                            <div class="absolute inset-1 rounded-full border-2 border-orange-500 border-t-transparent animate-spin"></div>
-                            <div class="absolute inset-3 rounded-full bg-orange-500/10 flex items-center justify-center">
-                                <span class="text-xs">⚡</span>
-                            </div>
-                        </div>
-
-                        <div class="min-w-0 flex-1">
-                            <div class="flex justify-between items-center mb-1.5">
-                                <p id="loadingText" class="text-[10px] sm:text-[11px] text-orange-300 font-bold">
-                                    Initializing generator...
-                                </p>
-
-                                <span id="loadingPercent" class="text-[9px] text-slate-500 font-mono">
-                                    0%
-                                </span>
-                            </div>
-
-                            <div class="h-1.5 rounded-full bg-white/[.04] overflow-hidden">
-                                <div
-                                    id="loadingProgress"
-                                    class="h-full w-0 rounded-full progress-shine transition-all duration-300"
-                                ></div>
-                            </div>
-
-                            <p class="mt-2 text-[9px] text-slate-600">
-                                Connecting to ReyCloud guest generation engine
-                            </p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div id="resultBox" class="hidden mt-5">
-
-                    <div class="flex items-center justify-between gap-3 mb-3">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                                <h3 class="text-xs font-black text-white">
-                                    Generation Complete
-                                </h3>
-                            </div>
-
-                            <p class="text-[9px] text-slate-500 mt-1">
-                                Guest account credentials generated successfully
-                            </p>
-                        </div>
-
-                        <button
-                            onclick="downloadResults()"
-                            class="shrink-0 px-3.5 py-2 rounded-xl glass-soft hover:border-orange-500/25 text-orange-300 hover:text-orange-200 text-[9px] font-black transition-all cursor-pointer"
-                        >
-                            ↓ TXT
-                        </button>
-                    </div>
-
-                    <div
-                        id="resultsList"
-                        class="space-y-2.5 max-h-[430px] overflow-y-auto custom-scroll pr-1"
-                    ></div>
+                    <p class="text-[9px] text-cyan-400 font-black mt-1">
+                        STANDBY
+                    </p>
 
                 </div>
 
             </div>
-        </section>
 
-        <section class="grid grid-cols-3 gap-2 mb-4">
+        </div>
 
-            <div class="glass-soft rounded-2xl p-3 text-center">
-                <div class="text-sm mb-1">⚡</div>
-                <p class="text-[8px] sm:text-[9px] text-slate-500 uppercase tracking-wider">
-                    Engine
-                </p>
-                <p class="text-[9px] sm:text-[10px] text-white font-bold mt-0.5">
-                    AUTO
-                </p>
+    </section>
+
+    <section class="grid sm:grid-cols-2 gap-3 mt-4">
+
+        <div class="glass-soft rounded-2xl p-4 fade-up delay-2">
+
+            <div class="flex items-center gap-3">
+
+                <div class="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/10 flex items-center justify-center">
+                    ⚙️
+                </div>
+
+                <div>
+
+                    <p class="text-[9px] text-slate-500 uppercase tracking-widest font-bold">
+                        What's happening?
+                    </p>
+
+                    <p class="text-[11px] text-white font-bold mt-1">
+                        System Optimization
+                    </p>
+
+                </div>
+
             </div>
 
-            <div class="glass-soft rounded-2xl p-3 text-center">
-                <div class="text-sm mb-1">🔐</div>
-                <p class="text-[8px] sm:text-[9px] text-slate-500 uppercase tracking-wider">
-                    Status
-                </p>
-                <p class="text-[9px] sm:text-[10px] text-emerald-400 font-bold mt-0.5">
-                    ONLINE
-                </p>
-            </div>
-
-            <div class="glass-soft rounded-2xl p-3 text-center">
-                <div class="text-sm mb-1">📦</div>
-                <p class="text-[8px] sm:text-[9px] text-slate-500 uppercase tracking-wider">
-                    Export
-                </p>
-                <p class="text-[9px] sm:text-[10px] text-white font-bold mt-0.5">
-                    TXT
-                </p>
-            </div>
-
-        </section>
-
-        <footer class="text-center py-3">
-            <p class="text-[9px] text-slate-600 tracking-wide">
-                REYCLOUDSHP
-                <span class="mx-1 text-slate-800">•</span>
-                FREE FIRE GUEST ENGINE
+            <p class="text-[9px] text-slate-600 leading-relaxed mt-3">
+                Engine sedang diperiksa, dioptimalkan, dan diperbaiki untuk meningkatkan stabilitas layanan.
             </p>
-        </footer>
-
-    </main>
-
-    <script>
-        let generatedResults = [];
-        let progressTimer = null;
-
-        function escapeHtml(value) {
-            return String(value ?? "")
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
 
-        function setProgress(percent, text) {
-            const progress = Math.max(0, Math.min(100, percent));
-
-            document.getElementById("loadingProgress").style.width = progress + "%";
-            document.getElementById("loadingPercent").textContent = progress + "%";
+        </div>
 
-            if (text) {
-                document.getElementById("loadingText").textContent = text;
-            }
-        }
+        <div class="glass-soft rounded-2xl p-4 fade-up delay-3">
 
-        function startProgress() {
-            let progress = 0;
+            <div class="flex items-center gap-3">
 
-            setProgress(5, "Initializing generator...");
+                <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/10 flex items-center justify-center">
+                    🔄
+                </div>
 
-            clearInterval(progressTimer);
-
-            progressTimer = setInterval(() => {
-                if (progress < 85) {
-                    progress += Math.floor(Math.random() * 8) + 2;
-
-                    if (progress > 85) {
-                        progress = 85;
-                    }
-
-                    let text = "Processing request...";
-
-                    if (progress > 25) {
-                        text = "Connecting to generation engine...";
-                    }
-
-                    if (progress > 50) {
-                        text = "Generating guest credentials...";
-                    }
-
-                    if (progress > 72) {
-                        text = "Finalizing account data...";
-                    }
-
-                    setProgress(progress, text);
-                }
-            }, 420);
-        }
-
-        function stopProgress(success = true) {
-            clearInterval(progressTimer);
-
-            if (success) {
-                setProgress(100, "Generation completed.");
-            } else {
-                setProgress(100, "Generation stopped.");
-            }
-        }
-
-        async function runGenFreeFire() {
-            const input = document.getElementById("countInput");
-            const countVal = parseInt(input.value.trim() || "1", 10);
-            const count = Math.min(Math.max(countVal, 1), 5);
-
-            input.value = count;
-
-            const btnRun = document.getElementById("btnRun");
-            const loadingBox = document.getElementById("loadingBox");
-            const resultBox = document.getElementById("resultBox");
-            const resultsList = document.getElementById("resultsList");
-
-            btnRun.disabled = true;
-            btnRun.classList.add("opacity-60", "cursor-not-allowed");
-            btnRun.innerHTML = `
-                <span class="block text-lg mb-0.5">⏳</span>
-                Processing...
-            `;
-
-            loadingBox.classList.remove("hidden");
-            resultBox.classList.add("hidden");
-            resultsList.innerHTML = "";
-
-            startProgress();
-
-            try {
-                const res = await fetch("/api/genfreefiree", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        count
-                    })
-                });
-
-                const data = await res.json();
-
-                if (data.status && data.results) {
-                    generatedResults = data.results;
-
-                    stopProgress(true);
-
-                    setTimeout(() => {
-                        loadingBox.classList.add("hidden");
-                        resultBox.classList.remove("hidden");
-                    }, 350);
-
-                    resultsList.innerHTML = "";
-
-                    data.results.forEach((acc, index) => {
-                        const itemDiv = document.createElement("div");
-
-                        itemDiv.className =
-                            "result-card glass-soft rounded-2xl p-3.5 sm:p-4";
-
-                        if (acc.success) {
-                            itemDiv.innerHTML = `
-                                <div class="flex items-start justify-between gap-3 mb-3">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-xs">
-                                            ✓
-                                        </div>
-
-                                        <div class="min-w-0">
-                                            <p class="text-[10px] text-white font-black">
-                                                Guest Account #${index + 1}
-                                            </p>
-                                            <p class="text-[8px] text-emerald-400 font-bold uppercase tracking-wider mt-0.5">
-                                                Generated Successfully
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <span class="shrink-0 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/10 text-[8px] text-emerald-400 font-black">
-                                        SUCCESS
-                                    </span>
-                                </div>
-
-                                <div class="grid gap-1.5">
-
-                                    <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 border border-white/[.035] px-3 py-2">
-                                        <span class="text-[8px] text-slate-500 uppercase tracking-wider">
-                                            UID
-                                        </span>
-                                        <span class="text-[9px] sm:text-[10px] text-white font-mono font-bold select-all truncate">
-                                            ${escapeHtml(acc.uid)}
-                                        </span>
-                                    </div>
-
-                                    <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 border border-white/[.035] px-3 py-2">
-                                        <span class="text-[8px] text-slate-500 uppercase tracking-wider">
-                                            Password
-                                        </span>
-                                        <span class="text-[9px] sm:text-[10px] text-orange-300 font-mono font-bold select-all truncate">
-                                            ${escapeHtml(acc.password)}
-                                        </span>
-                                    </div>
-
-                                    <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 border border-white/[.035] px-3 py-2">
-                                        <span class="text-[8px] text-slate-500 uppercase tracking-wider">
-                                            Open ID
-                                        </span>
-                                        <span class="text-[9px] sm:text-[10px] text-cyan-300 font-mono select-all truncate max-w-[70%]">
-                                            ${escapeHtml(acc.open_id)}
-                                        </span>
-                                    </div>
-
-                                    <div class="rounded-xl bg-black/20 border border-white/[.035] px-3 py-2">
-                                        <div class="flex items-center justify-between gap-2 mb-1">
-                                            <span class="text-[8px] text-slate-500 uppercase tracking-wider">
-                                                Access Token
-                                            </span>
-                                            <span class="text-[7px] text-slate-700 uppercase">
-                                                Sensitive
-                                            </span>
-                                        </div>
-
-                                        <div class="text-[8px] sm:text-[9px] text-slate-500 font-mono select-all break-all leading-relaxed">
-                                            ${escapeHtml(acc.access_token)}
-                                        </div>
-                                    </div>
-
-                                </div>
-                            `;
-                        } else {
-                            itemDiv.innerHTML = `
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/15 flex items-center justify-center text-xs">
-                                            !
-                                        </div>
-
-                                        <div>
-                                            <p class="text-[10px] text-white font-black">
-                                                Guest Account #${index + 1}
-                                            </p>
-                                            <p class="text-[8px] text-rose-400 font-bold uppercase tracking-wider mt-0.5">
-                                                Generation Failed
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <span class="px-2 py-1 rounded-lg bg-rose-500/10 border border-rose-500/10 text-[8px] text-rose-400 font-black">
-                                        FAILED
-                                    </span>
-                                </div>
-
-                                <div class="mt-3 rounded-xl bg-rose-500/[.04] border border-rose-500/10 px-3 py-2.5">
-                                    <p class="text-[9px] text-rose-300 break-words">
-                                        ${escapeHtml(acc.error || "Unknown error")}
-                                    </p>
-                                </div>
-                            `;
-                        }
-
-                        resultsList.appendChild(itemDiv);
-                    });
-
-                    setTimeout(() => {
-                        resultBox.scrollIntoView({
-                            behavior: "smooth",
-                            block: "nearest"
-                        });
-                    }, 450);
-
-                } else {
-                    stopProgress(false);
-
-                    setTimeout(() => {
-                        loadingBox.classList.add("hidden");
-                    }, 250);
-
-                    alert("Gagal: " + (data.error || "Terjadi kesalahan sistem."));
-                }
-
-            } catch (err) {
-                stopProgress(false);
-
-                setTimeout(() => {
-                    loadingBox.classList.add("hidden");
-                }, 250);
-
-                alert("Kesalahan koneksi: " + err.message);
-
-            } finally {
-                setTimeout(() => {
-                    btnRun.disabled = false;
-                    btnRun.classList.remove("opacity-60", "cursor-not-allowed");
-
-                    btnRun.innerHTML = `
-                        <span class="block text-lg mb-0.5">🔥</span>
-                        Generate Guest
-                    `;
-                }, 400);
-            }
-        }
-
-        function downloadResults() {
-            if (!generatedResults.length) {
-                alert("Belum ada data akun!");
-                return;
-            }
-
-            let textContent =
-                "=== REYCLOUDSHP FREE FIRE GUEST ACCOUNTS ===\n";
-
-            textContent +=
-                "Generated at: " +
-                new Date().toLocaleString("id-ID") +
-                "\n\n";
-
-            generatedResults.forEach((acc, index) => {
-                textContent += `[Akun ke-${index + 1}]\n`;
-
-                if (acc.success) {
-                    textContent += `UID: ${acc.uid || "-"}\n`;
-                    textContent += `Password: ${acc.password || "-"}\n`;
-                    textContent += `Open ID: ${acc.open_id || "-"}\n`;
-                    textContent += `Token: ${acc.access_token || "-"}\n`;
-                    textContent += "Status: SUCCESS\n";
-                } else {
-                    textContent += `Status: FAILED\n`;
-                    textContent += `Error: ${acc.error || "-"}\n`;
-                }
-
-                textContent += "-----------------------------------\n";
-            });
-
-            const blob = new Blob(
-                [textContent],
-                {
-                    type: "text/plain;charset=utf-8"
-                }
-            );
-
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-
-            a.href = url;
-            a.download = "reycloud_ff_guest_accounts.txt";
-
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            URL.revokeObjectURL(url);
-        }
-
-        document.getElementById("countInput").addEventListener("input", function () {
-            let value = parseInt(this.value || "1", 10);
-
-            if (value < 1) value = 1;
-            if (value > 5) value = 5;
-
-            this.value = value;
-        });
-    </script>
+                <div>
+
+                    <p class="text-[9px] text-slate-500 uppercase tracking-widest font-bold">
+                        What to do?
+                    </p>
+
+                    <p class="text-[11px] text-white font-bold mt-1">
+                        Coba Lagi Nanti
+                    </p>
+
+                </div>
+
+            </div>
+
+            <p class="text-[9px] text-slate-600 leading-relaxed mt-3">
+                Silakan kembali beberapa saat lagi. Generator akan tersedia kembali setelah maintenance selesai.
+            </p>
+
+        </div>
+
+    </section>
+
+    <section class="glass-soft rounded-2xl p-4 mt-3 fade-up delay-4">
+
+        <div class="flex items-center justify-between gap-3">
+
+            <div class="flex items-center gap-2">
+
+                <span class="w-2 h-2 rounded-full bg-orange-400 pulse"></span>
+
+                <span class="text-[9px] font-black tracking-[.16em] uppercase text-slate-400">
+                    ReyCloud System
+                </span>
+
+            </div>
+
+            <span id="clock" class="text-[9px] font-mono text-slate-600">
+                00:00:00
+            </span>
+
+        </div>
+
+        <div class="mt-3 pt-3 border-t border-white/[.05] flex items-center justify-between gap-3">
+
+            <p class="text-[9px] text-slate-600">
+                Thank you for your patience.
+            </p>
+
+            <span class="text-[9px] text-orange-400 font-bold">
+                REYCODE
+            </span>
+
+        </div>
+
+    </section>
+
+    <footer class="text-center py-5">
+
+        <p class="text-[9px] text-slate-600 tracking-[.16em]">
+            REYCLOUDSHP
+            <span class="mx-1 text-slate-800">•</span>
+            FREE FIRE GUEST ENGINE
+        </p>
+
+        <p class="text-[8px] text-slate-700 mt-1">
+            © 2026 ReyCloudSHP. All systems protected.
+        </p>
+
+    </footer>
+
+</main>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+
+        const h = String(now.getHours()).padStart(2, "0");
+        const m = String(now.getMinutes()).padStart(2, "0");
+        const s = String(now.getSeconds()).padStart(2, "0");
+
+        document.getElementById("clock").textContent =
+            `${h}:${m}:${s}`;
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+</script>
 
 </body>
 </html>
