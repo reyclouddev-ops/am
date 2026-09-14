@@ -414,13 +414,13 @@ async function handler(req, res) {
             })
         }
 
-        if (action === 'bulk-generate' || action === 'bulk') {
+                if (action === 'bulk-generate' || action === 'bulk') {
             const apiKeyInput = req.headers['x-apikey'] || data.apikey || ''
             const passwordInput = req.headers['x-api-password'] || data.password || data.pass || ''
-            const username = data.username || data.user || ''
+            const rawUsername = data.username || data.user || ''
 
             if (mongoose.connection.readyState !== 1) {
-                await mongoose.connect(process.env.MONGO_URI || '')
+                await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/reycloud')
             }
 
             if (!apiKeyInput) {
@@ -443,17 +443,24 @@ async function handler(req, res) {
 
             const passwordValid = await bcrypt.compare(passwordInput, keyData.password)
             if (!passwordValid) {
-                return res.status(403).json({ status: false, error: 'Password API Key salah.' })
+                return res.status(403).json({ status: false, error: 'Password APIKey salah.' })
             }
 
             const count = parseInt(data.count || data.jumlah || 1, 10)
             const maxCount = Math.min(Math.max(Number.isNaN(count) ? 1 : count, 1), 10)
-            const generateUsername = username || keyData.name || keyData.owner
+            
+            // Bersihkan format username dari simbol/spasi agar aman jadi email temp
+            let cleanCustomUser = null;
+            if (rawUsername) {
+                cleanCustomUser = rawUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
+            }
 
             const results = []
             for (let i = 0; i < maxCount; i++) {
                 try {
-                    results.push(await processSingleAccount(generateUsername))
+                    // Kalau input user bersih, gunakan itu + nomor urut, kalau kosong biarkan random generator bekerja
+                    const targetUser = cleanCustomUser ? `${cleanCustomUser}-${i + 1}` : null;
+                    results.push(await processSingleAccount(targetUser))
                     if (i < maxCount - 1) {
                         await new Promise(r => setTimeout(r, 2000))
                     }
@@ -474,6 +481,7 @@ async function handler(req, res) {
                 results
             })
         }
+
 
         if (action === 'auto-activate' || action === 'auto' || req.path?.includes('amgen_auto')) {
             const acc = await processSingleAccount(data.username || data.user)
