@@ -1,6 +1,6 @@
 // ==========================================
 // API ROUTER: /api/alightmotion.js
-// Lengkap dengan Auto, Bulk, dan Manual
+// Sinkronisasi Sempurna untuk Auto, Bulk, & Manual
 // ==========================================
 const http = require('node:http')
 const https = require('node:https')
@@ -257,9 +257,8 @@ function generateRandomName() {
     return { username: `${adj}-${animal}-${num}`, animalName: `${adj} ${animal}` }
 }
 
-// Fungsi Mengirim Link OOB (Manual step 1)
 async function sendLink(email) {
-    const cleanEmail = getEmail(email)
+    const cleanEmail = email.includes('@') ? email : getEmail(email)
     const oobRes = await request(`${IDT}/getOobConfirmationCode?key=${AM_KEY}`, {
         method: 'POST',
         timeout: REQUEST_TIMEOUT,
@@ -283,9 +282,8 @@ async function sendLink(email) {
     return { ok: true, email: cleanEmail }
 }
 
-// Fungsi Verifikasi Link & Aktivasi Pro (Manual step 2)
 async function verifyAndActivate(email, rawLink) {
-    const cleanEmail = getEmail(email)
+    const cleanEmail = email.includes('@') ? email : getEmail(email)
     const c = code(rawLink)
     if (!c) throw new Error('OobCode / Magic Link tidak valid!')
 
@@ -313,7 +311,6 @@ async function verifyAndActivate(email, rawLink) {
 
     const idToken = signData.idToken
     const localId = signData.localId
-    const refreshToken = signData.refreshToken
 
     const orderId = 'reycode-' + crypto.randomBytes(6).toString('hex')
     const proRes = await request(VFY, {
@@ -338,13 +335,19 @@ async function verifyAndActivate(email, rawLink) {
         throw new Error('Gagal aktivasi Pro: ' + proRes.body)
     }
 
+    const expiryDate = new Date()
+    expiryDate.setFullYear(expiryDate.getFullYear() + 1)
+    const dynamicValidUntil = expiryDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()
+
     return {
         success: true,
         email: cleanEmail,
+        weblogin: `https://${DOMAIN}`,
         uid: localId,
         orderId: orderId,
+        validUntil: dynamicValidUntil,
         idToken,
-        refreshToken
+        refreshToken: signData.refreshToken
     }
 }
 
@@ -365,10 +368,6 @@ async function processSingleAccount(customUsername = null) {
 
     const resAct = await verifyAndActivate(tempEmail, verificationLink)
 
-    const expiryDate = new Date()
-    expiryDate.setFullYear(expiryDate.getFullYear() + 1)
-    const dynamicValidUntil = expiryDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()
-
     return {
         success: true,
         email: tempEmail,
@@ -376,76 +375,78 @@ async function processSingleAccount(customUsername = null) {
         animal: animalName,
         uid: resAct.uid,
         orderId: resAct.orderId,
-        validUntil: dynamicValidUntil,
+        validUntil: resAct.validUntil,
         idToken: resAct.idToken,
         refreshToken: resAct.refreshToken
     }
 }
 
-function getQuery(req) {
-    if (req && req.query) return req.query
-    const url = req && req.url ? new URL(req.url, 'http://localhost') : null
-    return url ? Object.fromEntries(url.searchParams.entries()) : {}
+function getBodyAndQuery(req) {
+    const query = req && req.query ? req.query : {}
+    const body = req && req.body ? req.body : {}
+    return { ...query, ...body }
 }
 
 async function handler(req, res) {
-    const query = getQuery(req)
-    const action = String(query.action || '').toLowerCase()
+    const data = getBodyAndQuery(req)
+    const action = String(data.action || '').toLowerCase()
 
     try {
-        if (action === 'auto') {
-            const data = await processSingleAccount(query.username || query.mailbox || query.user)
+        if (action === 'send-link') {
+            const email = data.email || data.username || data.mailbox
+            if (!email) {
+                return res.status(400).json({ status: false, error: 'Parameter email wajib diisi!' })
+            }
+            await sendLink(email)
+            return res.status(200).json({ status: true, message: 'Tautan verifikasi berhasil dikirim!' })
+        }
+
+        if (action === 'verify-link') {
+            const email = data.email || data.username || data.mailbox
+            const magicLink = data.magicLink || data.oobCode || data.link
+            if (!email || !magicLink) {
+                return res.status(400).json({ status: false, error: 'Parameter email dan magicLink wajib diisi!' })
+            }
+            const result = await verifyAndActivate(email, magicLink)
             return res.status(200).json({
                 status: true,
-                creator: CREATOR,
-                provider: DOMAIN,
-                card: {
-                    email: data.email,
-                    weblogin: data.weblogin,
-                    selamat_kamu_mendapatkan_animal: data.animal,
-                    orderId: data.orderId,
-                    validUntil: data.validUntil,
-                    panduan_dan_cara_login: [
-                        '1. Buka aplikasi Alight Motion.',
-                        '2. Sign in dengan email: ' + data.email
-                    ]
-                }
+                data: { orderId: result.orderId }
             })
         }
 
-        if (action === 'bulk') {
-            const apiKeyInput = req.headers['x-apikey'] || query.apikey || ''
-            const passwordInput = req.headers['x-api-password'] || query.password || query.pass || ''
-            const username = query.username || query.user || ''
+        if (action === 'bulk-generate' || action === 'bulk') {
+            const apiKeyInput = req.headers['x-apikey'] || data.apikey || ''
+            const passwordInput = req.headers['x-api-password'] || data.password || data.pass || ''
+            const username = data.username || data.user || ''
 
             if (mongoose.connection.readyState !== 1) {
-                await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/reycloud')
+                await mongoose.connect(process.env.MONGODB_URI || '')
             }
 
             if (!apiKeyInput) {
-                return res.status(403).json({ status: false, creator: CREATOR, error: 'Akses ditolak! API Key wajib diisi.' })
+                return res.status(403).json({ status: false, error: 'Akses ditolak! API Key wajib diisi.' })
             }
             if (!passwordInput) {
-                return res.status(403).json({ status: false, creator: CREATOR, error: 'Akses ditolak! Password API Key wajib diisi.' })
+                return res.status(403).json({ status: false, error: 'Akses ditolak! Password API Key wajib diisi.' })
             }
 
             const keyData = await ApiKey.findOne({ apikey: apiKeyInput })
             if (!keyData) {
-                return res.status(403).json({ status: false, creator: CREATOR, error: 'API Key tidak ditemukan.' })
+                return res.status(403).json({ status: false, error: 'API Key tidak ditemukan.' })
             }
             if (keyData.status !== 'active') {
-                return res.status(403).json({ status: false, creator: CREATOR, error: 'API Key tidak aktif.' })
+                return res.status(403).json({ status: false, error: 'API Key tidak aktif.' })
             }
             if (!keyData.expired_at || new Date() > new Date(keyData.expired_at)) {
-                return res.status(403).json({ status: false, creator: CREATOR, error: 'API Key sudah kadaluarsa.' })
+                return res.status(403).json({ status: false, error: 'API Key sudah kadaluarsa.' })
             }
 
             const passwordValid = await bcrypt.compare(passwordInput, keyData.password)
             if (!passwordValid) {
-                return res.status(403).json({ status: false, creator: CREATOR, error: 'Password API Key salah.' })
+                return res.status(403).json({ status: false, error: 'Password API Key salah.' })
             }
 
-            const count = parseInt(query.count || query.jumlah || 1, 10)
+            const count = parseInt(data.count || data.jumlah || 1, 10)
             const maxCount = Math.min(Math.max(Number.isNaN(count) ? 1 : count, 1), 10)
             const generateUsername = username || keyData.name || keyData.owner
 
@@ -474,33 +475,22 @@ async function handler(req, res) {
             })
         }
 
-        if (action === 'send-link') {
-            const email = query.email || query.username
-            if (!email) {
-                return res.status(400).json({ status: false, creator: CREATOR, error: 'Parameter email wajib diisi!' })
-            }
-            const result = await sendLink(email)
+        if (action === 'auto-activate' || action === 'auto' || req.path?.includes('amgen_auto')) {
+            const acc = await processSingleAccount(data.username || data.user)
             return res.status(200).json({
                 status: true,
                 creator: CREATOR,
-                provider: DOMAIN,
-                message: `Tautan verifikasi berhasil dikirim ke ${result.email}`
-            })
-        }
-
-        if (action === 'verify-link') {
-            const email = query.email || query.username
-            const magicLink = query.magicLink || query.oobCode || query.link
-            if (!email || !magicLink) {
-                return res.status(400).json({ status: false, creator: CREATOR, error: 'Parameter email dan magicLink/oobCode wajib diisi!' })
-            }
-            const result = await verifyAndActivate(email, magicLink)
-            return res.status(200).json({
-                status: true,
-                creator: CREATOR,
-                provider: DOMAIN,
-                message: 'Akun manual berhasil diverifikasi dan diaktifkan!',
-                data: result
+                card: {
+                    email: acc.email,
+                    weblogin: acc.weblogin,
+                    selamat_kamu_mendapatkan_animal: acc.animal,
+                    orderId: acc.orderId,
+                    validUntil: acc.validUntil,
+                    panduan_dan_cara_login: [
+                        '1. Buka aplikasi Alight Motion.',
+                        '2. Sign in dengan email: ' + acc.email
+                    ]
+                }
             })
         }
 
@@ -508,26 +498,16 @@ async function handler(req, res) {
             status: true,
             creator: CREATOR,
             provider: DOMAIN,
-            message: 'Alight Motion API Engine aktif.',
-            endpoints: {
-                auto: '?action=auto&username=USERNAME',
-                bulk: '?action=bulk&jumlah=5&apikey=APIKEY&password=PASSWORD',
-                send_link: '?action=send-link&email=EMAIL',
-                verify_link: '?action=verify-link&email=EMAIL&magicLink=LINK'
-            }
+            message: 'Alight Motion API Engine aktif.'
         })
     } catch (error) {
-        console.error('[ALIGHT MOTION API]', error)
+        console.error('[ALIGHT MOTION API ERROR]', error)
         return res.status(500).json({
             status: false,
-            creator: CREATOR,
-            provider: DOMAIN,
-            message: error?.message || 'Terjadi kesalahan pada server.'
+            error: error?.message || 'Terjadi kesalahan pada server.'
         })
     }
 }
 
 handler.processSingleAccount = processSingleAccount
-handler.sendLink = sendLink
-handler.verifyAndActivate = verifyAndActivate
 module.exports = handler
